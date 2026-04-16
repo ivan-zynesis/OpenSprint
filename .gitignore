@@ -142,8 +142,8 @@ vite.config.ts.timestamp-*
 
 
 # Claude
-.claude/
-CLAUDE.md
+# .claude/
+# CLAUDE.md
 .DS_Store
 
 # Pnpm
@@ -151,11 +151,11 @@ CLAUDE.md
 result
 
 # OpenCode
-.opencode/
-opencode.json
+# .opencode/
+# opencode.json
 
 # Codex
-.codex/
+# .codex/
 
 # Bob
 .bob/
