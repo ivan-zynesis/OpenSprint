@@ -40,11 +40,13 @@ import {
   getOpspApplySkillTemplate,
   getOpspArchiveSkillTemplate,
   getOpspReviewSkillTemplate,
+  getOpspReexploreSkillTemplate,
   getOpspExploreCommandTemplate,
   getOpspProposeCommandTemplate,
   getOpspApplyCommandTemplate,
   getOpspArchiveCommandTemplate,
   getOpspReviewCommandTemplate,
+  getOpspReexploreCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -146,7 +148,7 @@ export const OPSP_WORKFLOW_IDS = [
   // Utility commands
   'driver', 'decide', 'tree', 'rebuild-assess',
   // Lifecycle commands
-  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review',
+  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
 ] as const;
 
 /**
@@ -165,6 +167,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspApplySkillTemplate(), dirName: 'opensprint-apply', workflowId: 'opsp-apply' },
     { template: getOpspArchiveSkillTemplate(), dirName: 'opensprint-archive', workflowId: 'opsp-archive' },
     { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
+    { template: getOpspReexploreSkillTemplate(), dirName: 'opensprint-reexplore', workflowId: 'opsp-reexplore' },
   ];
 }
 
@@ -184,6 +187,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspApplyCommandTemplate(), id: 'opsp-apply' },
     { template: getOpspArchiveCommandTemplate(), id: 'opsp-archive' },
     { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
+    { template: getOpspReexploreCommandTemplate(), id: 'opsp-reexplore' },
   ];
 }
 

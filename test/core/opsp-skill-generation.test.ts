@@ -30,12 +30,12 @@ vi.mock('../../src/prompts/searchable-multi-select.js', () => ({
 
 describe('OPSP skill generation', () => {
   describe('template functions', () => {
-    it('should return 9 OPSP skill templates (4 utility + 5 lifecycle)', () => {
+    it('should return 10 OPSP skill templates (4 utility + 6 lifecycle)', () => {
       const templates = getOpspSkillTemplates();
-      expect(templates).toHaveLength(9);
+      expect(templates).toHaveLength(10);
       expect(templates.map(t => t.workflowId)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
       ]);
     });
 
@@ -46,19 +46,19 @@ describe('OPSP skill generation', () => {
       }
     });
 
-    it('should return 9 OPSP command contents', () => {
+    it('should return 10 OPSP command contents', () => {
       const contents = getOpspCommandContents();
-      expect(contents).toHaveLength(9);
+      expect(contents).toHaveLength(10);
       expect(contents.map(c => c.id)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
       ]);
     });
 
-    it('should have correct OPSP workflow IDs (9 total)', () => {
+    it('should have correct OPSP workflow IDs (10 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
       ]);
     });
 
@@ -73,10 +73,10 @@ describe('OPSP skill generation', () => {
     it('should have lifecycle skill templates with correct names', () => {
       const templates = getOpspSkillTemplates();
       const lifecycleNames = templates
-        .filter(t => ['opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review'].includes(t.workflowId))
+        .filter(t => ['opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore'].includes(t.workflowId))
         .map(t => t.template.name);
       expect(lifecycleNames).toEqual([
-        'opensprint-explore', 'opensprint-propose', 'opensprint-apply', 'opensprint-archive', 'opensprint-review',
+        'opensprint-explore', 'opensprint-propose', 'opensprint-apply', 'opensprint-archive', 'opensprint-review', 'opensprint-reexplore',
       ]);
     });
 
@@ -119,6 +119,25 @@ describe('OPSP skill generation', () => {
       // References to existing opsx workflows
       expect(apply!.template.instructions).toContain('/opsx:propose');
       expect(apply!.template.instructions).toContain('/opsx:explore');
+    });
+
+    it('should have opsp-reexplore skill template with initiative-scoped instructions', () => {
+      const templates = getOpspSkillTemplates();
+      const reexplore = templates.find(t => t.workflowId === 'opsp-reexplore');
+      expect(reexplore).toBeDefined();
+      expect(reexplore!.template.name).toBe('opensprint-reexplore');
+      expect(reexplore!.dirName).toBe('opensprint-reexplore');
+      // Initiative context loading
+      expect(reexplore!.template.instructions).toContain('opensprint/initiatives/');
+      expect(reexplore!.template.instructions).toContain('Completed');
+      expect(reexplore!.template.instructions).toContain('Pending');
+      // Plan revision mechanics
+      expect(reexplore!.template.instructions).toContain('/opsx:propose');
+      expect(reexplore!.template.instructions).toContain('/opsx:explore');
+      expect(reexplore!.template.instructions).toContain('corrective');
+      expect(reexplore!.template.instructions).toContain('superseded');
+      // Guardrails
+      expect(reexplore!.template.instructions).toContain('Stop at propose');
     });
   });
 
@@ -167,6 +186,7 @@ describe('OPSP skill generation', () => {
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-apply', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-archive', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-review', 'SKILL.md'))).toBe(true);
+      expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-reexplore', 'SKILL.md'))).toBe(true);
     });
 
     it('should always generate OPSP slash commands (no schema flag needed)', async () => {
