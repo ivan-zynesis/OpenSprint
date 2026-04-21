@@ -1,4 +1,5 @@
 export const OPENSPEC_DIR_NAME = 'openspec';
+export const OPENSPRINT_DIR_NAME = 'opensprint';
 
 export const OPENSPEC_MARKERS = {
   start: '<!-- OPENSPEC:START -->',

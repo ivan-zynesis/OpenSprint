@@ -141,6 +141,27 @@ export function loadTemplate(
   const templatePathOnDisk = path.join(schemaDir, 'templates', templatePath);
 
   if (!fs.existsSync(templatePathOnDisk)) {
+    // If not found in child schema, try parent schema (extends fallback)
+    const schema = resolveSchema(schemaName, projectRoot);
+    if (schema.extends) {
+      const parentSchemaDir = getSchemaDir(schema.extends, projectRoot);
+      if (parentSchemaDir) {
+        const parentTemplatePath = path.join(parentSchemaDir, 'templates', templatePath);
+        if (fs.existsSync(parentTemplatePath)) {
+          const fullPath = FileSystemUtils.canonicalizeExistingPath(parentTemplatePath);
+          try {
+            return fs.readFileSync(fullPath, 'utf-8');
+          } catch (err) {
+            const ioError = err instanceof Error ? err : new Error(String(err));
+            throw new TemplateLoadError(
+              `Failed to read template: ${ioError.message}`,
+              fullPath
+            );
+          }
+        }
+      }
+    }
+
     throw new TemplateLoadError(
       `Template not found: ${templatePathOnDisk}`,
       templatePathOnDisk

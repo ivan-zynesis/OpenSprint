@@ -27,6 +27,24 @@ import {
   getOpsxVerifyCommandTemplate,
   getOpsxOnboardCommandTemplate,
   getOpsxProposeCommandTemplate,
+  getDriverSkillTemplate,
+  getDecideSkillTemplate,
+  getTreeSkillTemplate,
+  getRebuildAssessSkillTemplate,
+  getOpspDriverCommandTemplate,
+  getOpspDecideCommandTemplate,
+  getOpspTreeCommandTemplate,
+  getOpspRebuildAssessCommandTemplate,
+  getOpspExploreSkillTemplate,
+  getOpspProposeSkillTemplate,
+  getOpspApplySkillTemplate,
+  getOpspArchiveSkillTemplate,
+  getOpspReviewSkillTemplate,
+  getOpspExploreCommandTemplate,
+  getOpspProposeCommandTemplate,
+  getOpspApplyCommandTemplate,
+  getOpspArchiveCommandTemplate,
+  getOpspReviewCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -107,6 +125,73 @@ export function getCommandTemplates(workflowFilter?: readonly string[]): Command
  */
 export function getCommandContents(workflowFilter?: readonly string[]): CommandContent[] {
   const commandTemplates = getCommandTemplates(workflowFilter);
+  return commandTemplates.map(({ template, id }) => ({
+    id,
+    name: template.name,
+    description: template.description,
+    category: template.category,
+    tags: template.tags,
+    body: template.content,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPSP (sprint-driven) skill and command templates
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * OPSP workflow IDs for the sprint-driven schema.
+ */
+export const OPSP_WORKFLOW_IDS = [
+  // Utility commands
+  'driver', 'decide', 'tree', 'rebuild-assess',
+  // Lifecycle commands
+  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review',
+] as const;
+
+/**
+ * Gets OPSP skill templates (sprint-driven schema only).
+ */
+export function getOpspSkillTemplates(): SkillTemplateEntry[] {
+  return [
+    // Utility skills
+    { template: getDriverSkillTemplate(), dirName: 'opensprint-driver', workflowId: 'driver' },
+    { template: getDecideSkillTemplate(), dirName: 'opensprint-decide', workflowId: 'decide' },
+    { template: getTreeSkillTemplate(), dirName: 'opensprint-tree', workflowId: 'tree' },
+    { template: getRebuildAssessSkillTemplate(), dirName: 'opensprint-rebuild-assess', workflowId: 'rebuild-assess' },
+    // Lifecycle skills
+    { template: getOpspExploreSkillTemplate(), dirName: 'opensprint-explore', workflowId: 'opsp-explore' },
+    { template: getOpspProposeSkillTemplate(), dirName: 'opensprint-propose', workflowId: 'opsp-propose' },
+    { template: getOpspApplySkillTemplate(), dirName: 'opensprint-apply', workflowId: 'opsp-apply' },
+    { template: getOpspArchiveSkillTemplate(), dirName: 'opensprint-archive', workflowId: 'opsp-archive' },
+    { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
+  ];
+}
+
+/**
+ * Gets OPSP command templates (sprint-driven schema only).
+ */
+export function getOpspCommandTemplates(): CommandTemplateEntry[] {
+  return [
+    // Utility commands
+    { template: getOpspDriverCommandTemplate(), id: 'driver' },
+    { template: getOpspDecideCommandTemplate(), id: 'decide' },
+    { template: getOpspTreeCommandTemplate(), id: 'tree' },
+    { template: getOpspRebuildAssessCommandTemplate(), id: 'rebuild-assess' },
+    // Lifecycle commands
+    { template: getOpspExploreCommandTemplate(), id: 'opsp-explore' },
+    { template: getOpspProposeCommandTemplate(), id: 'opsp-propose' },
+    { template: getOpspApplyCommandTemplate(), id: 'opsp-apply' },
+    { template: getOpspArchiveCommandTemplate(), id: 'opsp-archive' },
+    { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
+  ];
+}
+
+/**
+ * Converts OPSP command templates to CommandContent array (sprint-driven schema only).
+ */
+export function getOpspCommandContents(): CommandContent[] {
+  const commandTemplates = getOpspCommandTemplates();
   return commandTemplates.map(({ template, id }) => ({
     id,
     name: template.name,

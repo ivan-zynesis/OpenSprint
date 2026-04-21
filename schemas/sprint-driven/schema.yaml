@@ -1,0 +1,133 @@
+name: sprint-driven
+version: 1
+extends: spec-driven
+description: Decision-sourced engineering orchestration — driver specs, decision records, and decision tree on top of spec-driven workflow
+
+artifacts:
+  - id: driver-spec
+    generates: "driver-specs/*.md"
+    description: Operator-authored external truth — product, legal, compliance, reliability, architecture, or business constraints
+    template: driver-spec.md
+    instruction: |
+      Create a driver spec that captures an external constraint or requirement.
+
+      Driver specs are the immutable WHY — facts about the world that the AI agent
+      does not inherently know. They come from product requirements, legal mandates,
+      compliance rules, reliability targets, or business constraints.
+
+      IMPORTANT: Only create a driver spec when the operator explicitly instructs you to.
+      You are a scribe for driver specs — faithfully record what the operator dictates.
+
+      YAML frontmatter fields:
+      - id: DS-<KEBAB-NAME> (e.g., DS-PRICING, DS-COMPLIANCE-SOC2)
+      - type: one of product, legal, compliance, reliability, architecture, business
+      - status: active (default for new specs)
+      - created: today's date in YYYY-MM-DD format
+
+      The body should contain the driver spec content in the operator's own words.
+      Do not embellish or interpret — capture the intent as stated.
+    requires: []
+
+  - id: decision-record
+    generates: "ADRs/DEC-*.md"
+    description: Operator judgment recorded when agent encounters ambiguity it cannot resolve autonomously
+    template: decision-record.md
+    instruction: |
+      Create a decision record (ADR) that captures an operator's judgment on an ambiguous question.
+
+      Decision records are created ONLY when the agent encounters genuine ambiguity —
+      a choice where multiple options are valid and the right answer depends on operator
+      judgment or organizational context. If you can resolve it from driver specs,
+      best practices, or existing decisions, do NOT create an ADR.
+
+      YAML frontmatter fields:
+      - id: DEC-NNN (sequential, e.g., DEC-001, DEC-002)
+      - status: accepted (default for new decisions)
+      - depends-on: array of driver spec IDs and/or decision IDs this traces to
+      - created: today's date in YYYY-MM-DD format
+      - depth: integer (0 if depends only on driver specs, max(parent depths) + 1 otherwise)
+
+      Required sections:
+      - Question: the ambiguity you raised, in your own words
+      - Operator Decision: the operator's chosen direction
+      - Consideration Factors: table with columns Factor, Weight (HIGH/MED/LOW), and one column per option
+      - Rationale: reasoning linking the decision to the driver specs it depends on
+      - Invalidation Trigger: conditions under which this decision should be re-evaluated
+
+      After creating a decision record, regenerate DECISION-MAP.md.
+    requires:
+      - driver-spec
+
+  - id: decision-map
+    generates: "DECISION-MAP.md"
+    description: Agent-maintained decision tree visualization with dependency tracking and blast radius
+    template: decision-map.md
+    instruction: |
+      Regenerate DECISION-MAP.md by reading all decision records and driver specs.
+
+      This file is fully agent-generated — never ask the operator to write it.
+      It is a computed projection of the ADRs directory.
+
+      Sections:
+      - Decision Tree: ASCII tree showing driver specs as roots and decisions as nodes
+        with depth and blast radius annotations
+      - Impact Summary: markdown table with columns Decision ID, Depth, Depends On,
+        Downstream, Blast Radius — sorted by depth ascending then ID ascending
+        Only include active/accepted decisions.
+
+      Blast radius = count of downstream decisions (transitive) that would be
+      invalidated if this decision changed. Exclude superseded/deprecated decisions.
+    requires:
+      - decision-record
+
+  - id: initiative
+    generates: "initiatives/*.md"
+    description: Initiative descriptor linking driver-specs, ADRs, and milestone plan for a coordinated effort
+    template: initiative.md
+    instruction: |
+      Create an initiative descriptor that captures the scope and plan for a coordinated effort.
+
+      An initiative is created by /opsp:propose after an explore session. It links the
+      driver-specs and ADRs that motivate the work, and defines milestones that each
+      become an opsx change cycle.
+
+      YAML frontmatter fields:
+      - id: kebab-case initiative name
+      - status: active (default) or completed
+      - created: today's date in YYYY-MM-DD format
+
+      Sections:
+      - Description: what the initiative aims to achieve
+      - Driver Specs: list of DS-* IDs referenced
+      - ADRs: list of DEC-* IDs referenced
+      - Milestones: checkbox list of planned opsx changes with brief descriptions
+    requires:
+      - driver-spec
+
+  - id: architecture
+    generates: "architecture.md"
+    description: Compiled single-file document capturing the complete current architectural state
+    template: architecture.md
+    instruction: |
+      Compile architecture.md by synthesizing all active driver-specs, ADRs, and the
+      decision tree into a single document that captures the complete architectural state.
+
+      This file is rewritten on each /opsp:archive — ADRs preserve the version history.
+
+      Sections:
+      - System Overview: what the system is and does (derived from driver-specs)
+      - Driver Specs: compiled narrative of active specs (synthesized, not copy-pasted)
+      - Architectural Decisions: current decision tree in narrative form, each linking to its ADR
+      - System Structure: high-level component description derived from decisions
+      - Constraints & Non-Negotiables: compliance, performance, legal from driver-specs
+    requires:
+      - decision-map
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Read context files, work through pending tasks, mark complete as you go.
+    Pause if you hit blockers or need clarification.
+    When encountering ambiguity you cannot resolve from driver specs or existing
+    decisions, ask the operator and record the answer as a decision record.

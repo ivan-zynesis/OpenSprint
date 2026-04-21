@@ -133,8 +133,9 @@ export function resolveSchema(name: string, projectRoot?: string): SchemaYaml {
     );
   }
 
+  let schema: SchemaYaml;
   try {
-    return parseSchema(content);
+    schema = parseSchema(content);
   } catch (err) {
     if (err instanceof SchemaValidationError) {
       throw new SchemaLoadError(
@@ -150,6 +151,57 @@ export function resolveSchema(name: string, projectRoot?: string): SchemaYaml {
       parseError
     );
   }
+
+  // If schema extends a parent, merge parent artifacts into child
+  if (schema.extends) {
+    schema = resolveSchemaExtends(schema, projectRoot);
+  }
+
+  return schema;
+}
+
+/**
+ * Resolves a schema's `extends` field by loading the parent schema
+ * and merging parent artifacts into the child schema.
+ *
+ * Parent artifacts are prepended so child artifacts can declare `requires`
+ * on parent artifact IDs. Child artifacts are not modified. If the child
+ * has an artifact with the same ID as the parent, the child's version wins.
+ *
+ * Only single-level extends is supported (no deep inheritance chains).
+ *
+ * @param childSchema - The child schema with an `extends` field
+ * @param projectRoot - Optional project root for schema resolution
+ * @returns A merged schema with parent + child artifacts
+ */
+function resolveSchemaExtends(childSchema: SchemaYaml, projectRoot?: string): SchemaYaml {
+  const parentName = childSchema.extends!;
+
+  // Load parent schema (which itself must not extend — single-level only)
+  const parentSchema = resolveSchema(parentName, projectRoot);
+  if (parentSchema.extends) {
+    throw new SchemaLoadError(
+      `Schema '${childSchema.name}' extends '${parentName}' which itself extends '${parentSchema.extends}'. Only single-level extends is supported.`,
+      parentName
+    );
+  }
+
+  // Merge: parent artifacts first, then child artifacts (child wins on ID collision)
+  const childIds = new Set(childSchema.artifacts.map(a => a.id));
+  const parentArtifacts = parentSchema.artifacts.filter(a => !childIds.has(a.id));
+  const mergedArtifacts = [...parentArtifacts, ...childSchema.artifacts];
+
+  // Child's apply phase takes precedence; fall back to parent's
+  const apply = childSchema.apply ?? parentSchema.apply;
+
+  return {
+    name: childSchema.name,
+    version: childSchema.version,
+    description: childSchema.description,
+    extends: childSchema.extends,
+    artifacts: mergedArtifacts,
+    apply,
+  };
 }
 
 /**

@@ -27,4 +27,8 @@ export {
   getCommandTemplates,
   getCommandContents,
   generateSkillContent,
+  OPSP_WORKFLOW_IDS,
+  getOpspSkillTemplates,
+  getOpspCommandTemplates,
+  getOpspCommandContents,
 } from './skill-generation.js';

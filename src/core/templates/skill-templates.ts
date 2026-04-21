@@ -18,3 +18,16 @@ export { getVerifyChangeSkillTemplate, getOpsxVerifyCommandTemplate } from './wo
 export { getOnboardSkillTemplate, getOpsxOnboardCommandTemplate } from './workflows/onboard.js';
 export { getOpsxProposeSkillTemplate, getOpsxProposeCommandTemplate } from './workflows/propose.js';
 export { getFeedbackSkillTemplate } from './workflows/feedback.js';
+
+// OPSP workflow templates (sprint-driven schema)
+export { getDriverSkillTemplate, getOpspDriverCommandTemplate } from './workflows/driver.js';
+export { getDecideSkillTemplate, getOpspDecideCommandTemplate } from './workflows/decide.js';
+export { getTreeSkillTemplate, getOpspTreeCommandTemplate } from './workflows/tree.js';
+export { getRebuildAssessSkillTemplate, getOpspRebuildAssessCommandTemplate } from './workflows/rebuild-assess.js';
+
+// OPSP lifecycle workflow templates (sprint-driven schema)
+export { getOpspExploreSkillTemplate, getOpspExploreCommandTemplate } from './workflows/opsp-explore.js';
+export { getOpspProposeSkillTemplate, getOpspProposeCommandTemplate } from './workflows/opsp-propose.js';
+export { getOpspApplySkillTemplate, getOpspApplyCommandTemplate } from './workflows/opsp-apply.js';
+export { getOpspArchiveSkillTemplate, getOpspArchiveCommandTemplate } from './workflows/opsp-archive.js';
+export { getOpspReviewSkillTemplate, getOpspReviewCommandTemplate } from './workflows/opsp-review.js';

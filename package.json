@@ -1,6 +1,6 @@
 {
-  "name": "@ivan-zynesis/opensprint",
-  "version": "1.3.0",
+  "name": "@ivan-lee/opensprint",
+  "version": "0.0.5",
   "description": "AI-native engineering harness for sprint and milestone orchestration",
   "keywords": [
     "opensprint",
@@ -80,5 +80,6 @@
     "posthog-node": "^5.20.0",
     "yaml": "^2.8.2",
     "zod": "^4.0.17"
-  }
+  },
+  "packageManager": "pnpm@8.15.0+sha512.ea45517d5285d123eac02c3793505fa1fd6da90a2fc60d1e8d9e0c1e9292886ecfaff513f062b9d1cc8021bb8615033b1ac5bea3b2ee3fc165a6d7034bbe6b03"
 }

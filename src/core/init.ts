@@ -15,6 +15,7 @@ import { transformToHyphenCommands } from '../utils/command-references.js';
 import {
   AI_TOOLS,
   OPENSPEC_DIR_NAME,
+  OPENSPRINT_DIR_NAME,
   AIToolOption,
 } from './config.js';
 import { PALETTE } from './styles/palette.js';
@@ -39,6 +40,8 @@ import {
   getSkillTemplates,
   getCommandContents,
   generateSkillContent,
+  getOpspSkillTemplates,
+  getOpspCommandContents,
   type ToolSkillStatus,
 } from './shared/index.js';
 import { getGlobalConfig, type Delivery, type Profile } from './global-config.js';
@@ -72,6 +75,18 @@ const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'verify': 'openspec-verify-change',
   'onboard': 'openspec-onboard',
   'propose': 'openspec-propose',
+};
+
+const OPSP_WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
+  'driver': 'opensprint-driver',
+  'decide': 'opensprint-decide',
+  'tree': 'opensprint-tree',
+  'rebuild-assess': 'opensprint-rebuild-assess',
+  'opsp-explore': 'opensprint-explore',
+  'opsp-propose': 'opensprint-propose',
+  'opsp-apply': 'opensprint-apply',
+  'opsp-archive': 'opensprint-archive',
+  'opsp-review': 'opensprint-review',
 };
 
 // -----------------------------------------------------------------------------
@@ -141,14 +156,14 @@ export class InitCommand {
     // Validate selected tools
     const validatedTools = this.validateTools(selectedToolIds, toolStates);
 
-    // Create directory structure and config
-    await this.createDirectoryStructure(openspecPath, extendMode);
-
-    // Generate skills and commands for each tool
-    const results = await this.generateSkillsAndCommands(projectPath, validatedTools);
+    // Create both directory structures (openspec/ + opensprint/)
+    await this.createDirectoryStructure(projectPath, openspecPath, extendMode);
 
     // Create config.yaml if needed
     const configStatus = await this.createConfig(openspecPath, extendMode);
+
+    // Generate skills and commands for each tool (both OPSX + OPSP)
+    const results = await this.generateSkillsAndCommands(projectPath, validatedTools);
 
     // Display success message
     this.displaySuccessMessage(projectPath, validatedTools, results, configStatus);
@@ -452,39 +467,92 @@ export class InitCommand {
   // DIRECTORY STRUCTURE
   // ═══════════════════════════════════════════════════════════
 
-  private async createDirectoryStructure(openspecPath: string, extendMode: boolean): Promise<void> {
-    if (extendMode) {
-      // In extend mode, just ensure directories exist without spinner
-      const directories = [
-        openspecPath,
-        path.join(openspecPath, 'specs'),
-        path.join(openspecPath, 'changes'),
-        path.join(openspecPath, 'changes', 'archive'),
-      ];
+  private async createDirectoryStructure(projectPath: string, openspecPath: string, extendMode: boolean): Promise<void> {
+    const opensprintPath = path.join(projectPath, OPENSPRINT_DIR_NAME);
 
-      for (const dir of directories) {
-        await FileSystemUtils.createDirectory(dir);
-      }
-      return;
-    }
-
-    const spinner = this.startSpinner('Creating OpenSpec structure...');
-
-    const directories = [
+    // OpenSpec directories (OPSX layer)
+    const openspecDirs = [
       openspecPath,
       path.join(openspecPath, 'specs'),
       path.join(openspecPath, 'changes'),
       path.join(openspecPath, 'changes', 'archive'),
     ];
 
-    for (const dir of directories) {
-      await FileSystemUtils.createDirectory(dir);
+    // OpenSprint directories (OPSP layer — always created)
+    const opensprintDirs = [
+      opensprintPath,
+      path.join(opensprintPath, 'driver-specs'),
+      path.join(opensprintPath, 'ADRs'),
+      path.join(opensprintPath, 'initiatives'),
+    ];
+
+    const allDirs = [...openspecDirs, ...opensprintDirs];
+
+    if (extendMode) {
+      for (const dir of allDirs) {
+        await FileSystemUtils.createDirectory(dir);
+      }
+    } else {
+      const spinner = this.startSpinner('Creating OpenSprint structure...');
+
+      for (const dir of allDirs) {
+        await FileSystemUtils.createDirectory(dir);
+      }
+
+      spinner.stopAndPersist({
+        symbol: PALETTE.white('▌'),
+        text: PALETTE.white('OpenSprint structure created'),
+      });
     }
 
-    spinner.stopAndPersist({
-      symbol: PALETTE.white('▌'),
-      text: PALETTE.white('OpenSpec structure created'),
-    });
+    // Initialize DECISION-MAP.md with empty template if it doesn't exist
+    const decisionMapPath = path.join(opensprintPath, 'DECISION-MAP.md');
+    if (!fs.existsSync(decisionMapPath)) {
+      const emptyMap = `# Decision Map
+
+## Decision Tree
+
+<!-- Auto-generated. No decisions recorded yet. -->
+
+\`\`\`
+(empty)
+\`\`\`
+
+## Impact Summary
+
+| Decision | Depth | Depends On | Downstream | Blast |
+|----------|-------|------------|------------|-------|
+`;
+      await FileSystemUtils.writeFile(decisionMapPath, emptyMap);
+    }
+
+    // Initialize architecture.md with section header placeholders if it doesn't exist
+    const architecturePath = path.join(opensprintPath, 'architecture.md');
+    if (!fs.existsSync(architecturePath)) {
+      const emptyArchitecture = `# Architecture
+
+## System Overview
+
+<!-- What this system is and does, derived from driver specs -->
+
+## Driver Specs
+
+<!-- Compiled narrative of all active driver specs -->
+
+## Architectural Decisions
+
+<!-- Current decision tree in narrative form, each decision linking to its ADR -->
+
+## System Structure
+
+<!-- High-level component/service description derived from architectural decisions -->
+
+## Constraints & Non-Negotiables
+
+<!-- Compliance, performance, legal requirements extracted from driver specs -->
+`;
+      await FileSystemUtils.writeFile(architecturePath, emptyArchitecture);
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -521,6 +589,10 @@ export class InitCommand {
     const skillTemplates = shouldGenerateSkills ? getSkillTemplates(workflows) : [];
     const commandContents = shouldGenerateCommands ? getCommandContents(workflows) : [];
 
+    // OPSP skills and commands are always generated (opensprint = both layers active)
+    const opspSkillTemplates = shouldGenerateSkills ? getOpspSkillTemplates() : [];
+    const opspCommandContents = shouldGenerateCommands ? getOpspCommandContents() : [];
+
     // Process each tool
     for (const tool of tools) {
       const spinner = ora(`Setting up ${tool.name}...`).start();
@@ -544,6 +616,15 @@ export class InitCommand {
             // Write the skill file
             await FileSystemUtils.writeFile(skillFile, skillContent);
           }
+
+          // Generate OPSP skills if sprint-driven schema is active
+          for (const { template, dirName } of opspSkillTemplates) {
+            const skillDir = path.join(skillsDir, dirName);
+            const skillFile = path.join(skillDir, 'SKILL.md');
+            const transformer = (tool.value === 'opencode' || tool.value === 'pi') ? transformToHyphenCommands : undefined;
+            const skillContent = generateSkillContent(template, OPENSPEC_VERSION, transformer);
+            await FileSystemUtils.writeFile(skillFile, skillContent);
+          }
         }
         if (!shouldGenerateSkills) {
           const skillsDir = path.join(projectPath, tool.skillsDir, 'skills');
@@ -559,6 +640,17 @@ export class InitCommand {
             for (const cmd of generatedCommands) {
               const commandFile = path.isAbsolute(cmd.path) ? cmd.path : path.join(projectPath, cmd.path);
               await FileSystemUtils.writeFile(commandFile, cmd.fileContent);
+            }
+
+            // Generate OPSP commands (always — opensprint = both layers)
+            if (opspCommandContents.length > 0) {
+              const opspCommands = generateCommands(opspCommandContents, adapter);
+              for (const cmd of opspCommands) {
+                // Replace 'opsx' with 'opsp' in the path for OPSP commands
+                const opspPath = cmd.path.replace(/opsx/g, 'opsp');
+                const commandFile = path.isAbsolute(opspPath) ? opspPath : path.join(projectPath, opspPath);
+                await FileSystemUtils.writeFile(commandFile, cmd.fileContent);
+              }
             }
           } else {
             commandsSkipped.push(tool.value);
