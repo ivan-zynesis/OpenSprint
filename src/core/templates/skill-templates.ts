@@ -32,3 +32,4 @@ export { getOpspApplySkillTemplate, getOpspApplyCommandTemplate } from './workfl
 export { getOpspArchiveSkillTemplate, getOpspArchiveCommandTemplate } from './workflows/opsp-archive.js';
 export { getOpspReviewSkillTemplate, getOpspReviewCommandTemplate } from './workflows/opsp-review.js';
 export { getOpspReexploreSkillTemplate, getOpspReexploreCommandTemplate } from './workflows/opsp-reexplore.js';
+export { getOpspKnockdownSkillTemplate, getOpspKnockdownCommandTemplate } from './workflows/opsp-knockdown.js';

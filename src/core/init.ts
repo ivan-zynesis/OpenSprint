@@ -88,6 +88,7 @@ const OPSP_WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'opsp-archive': 'opensprint-archive',
   'opsp-review': 'opensprint-review',
   'opsp-reexplore': 'opensprint-reexplore',
+  'opsp-knockdown': 'opensprint-knockdown',
 };
 
 // -----------------------------------------------------------------------------

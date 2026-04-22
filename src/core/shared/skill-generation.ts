@@ -41,12 +41,14 @@ import {
   getOpspArchiveSkillTemplate,
   getOpspReviewSkillTemplate,
   getOpspReexploreSkillTemplate,
+  getOpspKnockdownSkillTemplate,
   getOpspExploreCommandTemplate,
   getOpspProposeCommandTemplate,
   getOpspApplyCommandTemplate,
   getOpspArchiveCommandTemplate,
   getOpspReviewCommandTemplate,
   getOpspReexploreCommandTemplate,
+  getOpspKnockdownCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -148,7 +150,7 @@ export const OPSP_WORKFLOW_IDS = [
   // Utility commands
   'driver', 'decide', 'tree', 'rebuild-assess',
   // Lifecycle commands
-  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
+  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
 ] as const;
 
 /**
@@ -168,6 +170,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspArchiveSkillTemplate(), dirName: 'opensprint-archive', workflowId: 'opsp-archive' },
     { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
     { template: getOpspReexploreSkillTemplate(), dirName: 'opensprint-reexplore', workflowId: 'opsp-reexplore' },
+    { template: getOpspKnockdownSkillTemplate(), dirName: 'opensprint-knockdown', workflowId: 'opsp-knockdown' },
   ];
 }
 
@@ -188,6 +191,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspArchiveCommandTemplate(), id: 'opsp-archive' },
     { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
     { template: getOpspReexploreCommandTemplate(), id: 'opsp-reexplore' },
+    { template: getOpspKnockdownCommandTemplate(), id: 'opsp-knockdown' },
   ];
 }
 

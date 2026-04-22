@@ -30,12 +30,12 @@ vi.mock('../../src/prompts/searchable-multi-select.js', () => ({
 
 describe('OPSP skill generation', () => {
   describe('template functions', () => {
-    it('should return 10 OPSP skill templates (4 utility + 6 lifecycle)', () => {
+    it('should return 11 OPSP skill templates (4 utility + 7 lifecycle)', () => {
       const templates = getOpspSkillTemplates();
-      expect(templates).toHaveLength(10);
+      expect(templates).toHaveLength(11);
       expect(templates.map(t => t.workflowId)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
       ]);
     });
 
@@ -46,19 +46,19 @@ describe('OPSP skill generation', () => {
       }
     });
 
-    it('should return 10 OPSP command contents', () => {
+    it('should return 11 OPSP command contents', () => {
       const contents = getOpspCommandContents();
-      expect(contents).toHaveLength(10);
+      expect(contents).toHaveLength(11);
       expect(contents.map(c => c.id)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
       ]);
     });
 
-    it('should have correct OPSP workflow IDs (10 total)', () => {
+    it('should have correct OPSP workflow IDs (11 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
       ]);
     });
 
@@ -73,10 +73,10 @@ describe('OPSP skill generation', () => {
     it('should have lifecycle skill templates with correct names', () => {
       const templates = getOpspSkillTemplates();
       const lifecycleNames = templates
-        .filter(t => ['opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore'].includes(t.workflowId))
+        .filter(t => ['opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown'].includes(t.workflowId))
         .map(t => t.template.name);
       expect(lifecycleNames).toEqual([
-        'opensprint-explore', 'opensprint-propose', 'opensprint-apply', 'opensprint-archive', 'opensprint-review', 'opensprint-reexplore',
+        'opensprint-explore', 'opensprint-propose', 'opensprint-apply', 'opensprint-archive', 'opensprint-review', 'opensprint-reexplore', 'opensprint-knockdown',
       ]);
     });
 
@@ -139,6 +139,31 @@ describe('OPSP skill generation', () => {
       // Guardrails
       expect(reexplore!.template.instructions).toContain('Stop at propose');
     });
+
+    it('should have opsp-knockdown skill template with progressive compaction instructions', () => {
+      const templates = getOpspSkillTemplates();
+      const knockdown = templates.find(t => t.workflowId === 'opsp-knockdown');
+      expect(knockdown).toBeDefined();
+      expect(knockdown!.template.name).toBe('opensprint-knockdown');
+      expect(knockdown!.dirName).toBe('opensprint-knockdown');
+      // Key concepts
+      expect(knockdown!.template.instructions).toContain('toc.yaml');
+      expect(knockdown!.template.instructions).toContain('three-question classifier');
+      expect(knockdown!.template.instructions).toContain('compaction');
+      expect(knockdown!.template.instructions).toContain('reverse system design');
+      // Architecture template
+      expect(knockdown!.template.instructions).toContain('System Identity');
+      expect(knockdown!.template.instructions).toContain('Component Map');
+      expect(knockdown!.template.instructions).toContain('Infrastructure Topology');
+      // Probe checklist
+      expect(knockdown!.template.instructions).toContain('Compute Model');
+      expect(knockdown!.template.instructions).toContain('Scaling Strategy');
+      expect(knockdown!.template.instructions).toContain('Security Model');
+      // Pause/resume
+      expect(knockdown!.template.instructions).toContain('Resuming a Previous Session');
+      // Model warning
+      expect(knockdown!.template.instructions).toContain('MODEL REQUIREMENTS');
+    });
   });
 
   describe('init with sprint-driven schema', () => {
@@ -187,6 +212,7 @@ describe('OPSP skill generation', () => {
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-archive', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-review', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-reexplore', 'SKILL.md'))).toBe(true);
+      expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-knockdown', 'SKILL.md'))).toBe(true);
     });
 
     it('should always generate OPSP slash commands (no schema flag needed)', async () => {
