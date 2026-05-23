@@ -23,7 +23,7 @@ Implement two new opsp-level skills that allow parallel initiative universes (gi
 
 ## Milestones
 
-- [ ] define-reconciliation-schemas: Define conflict manifest schema, citizen taxonomy, and migration-manifest.md format as OpenSpec specs
-- [ ] opsp-rebase-skill: Implement `/opsp:rebase` skill and command — planning phase, DFS traversal, conflict resolution loop, surrogate merge
-- [ ] opsp-abandon-skill: Implement `/opsp:abandon` skill and command — planning phase, DFS traversal, migration manifest, abandoned archive, worktree removal
-- [ ] opsp-rebase-abandon-tests: Integration tests covering clean merge, conflict escalation, and abandoned archive output
+- [x] define-reconciliation-schemas: Define conflict manifest schema, citizen taxonomy, and migration-manifest.md format as OpenSpec specs
+- [x] opsp-rebase-skill: Implement `/opsp:rebase` skill and command — planning phase, DFS traversal, conflict resolution loop, surrogate merge
+- [x] opsp-abandon-skill: Implement `/opsp:abandon` skill and command — planning phase, DFS traversal, migration manifest, abandoned archive, worktree removal
+- [x] opsp-rebase-abandon-tests: Integration tests covering clean merge, conflict escalation, and abandoned archive output

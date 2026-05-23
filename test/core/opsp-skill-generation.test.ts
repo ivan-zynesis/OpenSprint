@@ -30,12 +30,13 @@ vi.mock('../../src/prompts/searchable-multi-select.js', () => ({
 
 describe('OPSP skill generation', () => {
   describe('template functions', () => {
-    it('should return 11 OPSP skill templates (4 utility + 7 lifecycle)', () => {
+    it('should return 13 OPSP skill templates (4 utility + 7 lifecycle + 2 reconciliation)', () => {
       const templates = getOpspSkillTemplates();
-      expect(templates).toHaveLength(11);
+      expect(templates).toHaveLength(13);
       expect(templates.map(t => t.workflowId)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
         'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+        'opsp-rebase', 'opsp-abandon',
       ]);
     });
 
@@ -46,19 +47,21 @@ describe('OPSP skill generation', () => {
       }
     });
 
-    it('should return 11 OPSP command contents', () => {
+    it('should return 13 OPSP command contents (4 utility + 7 lifecycle + 2 reconciliation)', () => {
       const contents = getOpspCommandContents();
-      expect(contents).toHaveLength(11);
+      expect(contents).toHaveLength(13);
       expect(contents.map(c => c.id)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
         'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+        'opsp-rebase', 'opsp-abandon',
       ]);
     });
 
-    it('should have correct OPSP workflow IDs (11 total)', () => {
+    it('should have correct OPSP workflow IDs (13 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
         'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+        'opsp-rebase', 'opsp-abandon',
       ]);
     });
 

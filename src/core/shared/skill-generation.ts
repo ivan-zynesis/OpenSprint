@@ -49,6 +49,10 @@ import {
   getOpspReviewCommandTemplate,
   getOpspReexploreCommandTemplate,
   getOpspKnockdownCommandTemplate,
+  getOpspRebaseSkillTemplate,
+  getOpspRebaseCommandTemplate,
+  getOpspAbandonSkillTemplate,
+  getOpspAbandonCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -151,6 +155,8 @@ export const OPSP_WORKFLOW_IDS = [
   'driver', 'decide', 'tree', 'rebuild-assess',
   // Lifecycle commands
   'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+  // Universe reconciliation commands
+  'opsp-rebase', 'opsp-abandon',
 ] as const;
 
 /**
@@ -171,6 +177,9 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
     { template: getOpspReexploreSkillTemplate(), dirName: 'opensprint-reexplore', workflowId: 'opsp-reexplore' },
     { template: getOpspKnockdownSkillTemplate(), dirName: 'opensprint-knockdown', workflowId: 'opsp-knockdown' },
+    // Universe reconciliation skills
+    { template: getOpspRebaseSkillTemplate(), dirName: 'opensprint-rebase', workflowId: 'opsp-rebase' },
+    { template: getOpspAbandonSkillTemplate(), dirName: 'opensprint-abandon', workflowId: 'opsp-abandon' },
   ];
 }
 
@@ -192,6 +201,9 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
     { template: getOpspReexploreCommandTemplate(), id: 'opsp-reexplore' },
     { template: getOpspKnockdownCommandTemplate(), id: 'opsp-knockdown' },
+    // Universe reconciliation commands
+    { template: getOpspRebaseCommandTemplate(), id: 'opsp-rebase' },
+    { template: getOpspAbandonCommandTemplate(), id: 'opsp-abandon' },
   ];
 }
 
