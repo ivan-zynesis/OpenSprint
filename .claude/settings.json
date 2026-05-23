@@ -35,7 +35,12 @@
       "Read(//Users/ivanlee/Documents/git/dorje/OpenSprint-opsx-parallel-universe-reconciliation-opsp-rebase-abandon-tests/**)",
       "Bash(pnpm install *)",
       "Bash(pnpm test *)",
-      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint-opsp-parallel-universe-reconciliation worktree remove ../OpenSprint-opsx-parallel-universe-reconciliation-opsp-rebase-abandon-tests)"
+      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint-opsp-parallel-universe-reconciliation worktree remove ../OpenSprint-opsx-parallel-universe-reconciliation-opsp-rebase-abandon-tests)",
+      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint log main..opsp/parallel-universe-reconciliation --oneline)",
+      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint diff main..opsp/parallel-universe-reconciliation --stat)",
+      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint-opsp-parallel-universe-reconciliation status --short)",
+      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint worktree remove ../OpenSprint-opsp-parallel-universe-reconciliation)",
+      "Bash(git -C /Users/ivanlee/Documents/git/dorje/OpenSprint worktree prune)"
     ],
     "additionalDirectories": [
       "/Users/ivanlee/Documents/git/dorje/OpenSprint-opsp-parallel-universe-reconciliation/openspec/changes/define-reconciliation-schemas",

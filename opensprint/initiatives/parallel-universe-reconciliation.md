@@ -1,7 +1,8 @@
 ---
 id: parallel-universe-reconciliation
-status: active
+status: completed
 created: 2026-05-22
+completed: 2026-05-22
 ---
 
 ## Description
