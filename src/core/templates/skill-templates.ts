@@ -33,3 +33,5 @@ export { getOpspArchiveSkillTemplate, getOpspArchiveCommandTemplate } from './wo
 export { getOpspReviewSkillTemplate, getOpspReviewCommandTemplate } from './workflows/opsp-review.js';
 export { getOpspReexploreSkillTemplate, getOpspReexploreCommandTemplate } from './workflows/opsp-reexplore.js';
 export { getOpspKnockdownSkillTemplate, getOpspKnockdownCommandTemplate } from './workflows/opsp-knockdown.js';
+export { getOpspRebaseSkillTemplate, getOpspRebaseCommandTemplate } from './workflows/opsp-rebase.js';
+export { getOpspAbandonSkillTemplate, getOpspAbandonCommandTemplate } from './workflows/opsp-abandon.js';
