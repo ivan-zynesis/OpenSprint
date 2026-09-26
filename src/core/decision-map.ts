@@ -49,7 +49,7 @@ export interface TreeNode {
  * Parses YAML frontmatter from a markdown file.
  * Returns null if no valid frontmatter is found.
  */
-function parseFrontmatter(content: string): Record<string, unknown> | null {
+export function parseFrontmatter(content: string): Record<string, unknown> | null {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
   try {
