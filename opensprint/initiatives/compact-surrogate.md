@@ -42,7 +42,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 
 - [x] hat-registry: Define the hat taxonomy and per-project registry, add the primary-hat field to the record schema, and backfill existing driver-specs and ADRs with owner confirmation batched by area.
 - [x] compact-engine: Compile hat views and architecture.md from the record with inline citations, write the provenance manifest, and implement `--check`.
-- [ ] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
+- [x] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
 - [ ] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 
 ## Progress
@@ -100,7 +100,30 @@ exactly what DEC-015 defers the loading switch until we can answer.
 stale; hand-editing `dev.md` moved every `dev` section to tampered with the `/opsp:explore`
 guidance; restoring both returned `check` to exit zero.
 
+### rule-harvesting — complete (2026-09-27)
+
+**OPSX change:** `2026-09-26-rule-harvesting` (archived)
+
+Harvests record citations from rule files and derives five kinds of open loop from the index and
+the decision graph. Rule globs are configurable as `ruleGlobs` — not `rules`, which already means
+per-artifact authoring guidance.
+
+**Measured on cashier's 81 records:** 15 open loops, of which 14 are unguarded decisions — so 50
+of 64 are cited, reproducing exactly the manual count `DEC-013` was decided on. The transitive
+coverage rule paid for itself: 16 of 17 driver-specs come back asserted, where requiring direct
+citation would have reported 13 gaps that are not gaps.
+
+**On this repository:** 10 loops — 7 unguarded decisions, `DS-LOOP-CLOSURE` and
+`DS-SELF-USE-SCOPE` unasserted, and `DS-BACKWARD-COMPAT` with no decision at all.
+
 ### Open loops
+
+- **`open-loops` sections never go stale.** The section has no record inputs by design, so its
+  input hash is constant. Deleting a rule file does not restage it, and the view would keep
+  reporting a decision as guarded after its only guard was removed. Fixing it means hashing the
+  rule index into that section, which `check` cannot do without scanning the source tree — the
+  cost `check` is deliberately kept clear of. **A real gap in loop closure, inside the machinery
+  built to close loops.** Needs an operator decision.
 
 - **`zsh-installer.test.ts` isolation defect (18 failures).** Not environmental noise. The
   suite builds a `testHomeDir` under `os.tmpdir()`, but the code path still consults the real
