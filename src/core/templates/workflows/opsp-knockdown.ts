@@ -261,7 +261,17 @@ Write confirmed driver-specs to \`opensprint/driver-specs/\`.
 
 From confirmed ADRs, generate \`opensprint/DECISION-MAP.md\` showing how decisions relate to each other.
 
-### Step 5: Final Summary
+### Step 5: Compile the Surrogate
+
+The records now exist. Compile the derived artifacts by invoking the compact workflow (\`/opsp:compact\`) rather than writing them here (DEC-014).
+
+The architecture.md drafted in Step 1 was scaffolding for the interview — it let you show the operator a shape to react to. What ships is compiled from the confirmed records, so that every claim in it traces to an ADR or driver-spec the operator actually approved.
+
+\`\`\`bash
+opensprint compact check
+\`\`\`
+
+### Step 6: Final Summary
 
 Display:
 \`\`\`

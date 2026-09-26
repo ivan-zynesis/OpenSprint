@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "hat": "product",
+      "section": "charter",
+      "inputs": {
+        "DS-HIGH-IMPACT-OPS": "fd00e3de1a480747a465a69dc57dca901dd03074a862d9a3b04ca00bc7616bb2",
+        "DS-LOOP-CLOSURE": "522997dba520bed7447e58a5fabdc5e0d121a3f69f4bfc034dd11daac66e7508",
+        "DS-PARALLEL-EXEC": "52de0339e13c0612d30651579de828f9ec0837b11f14d1a8243f41a7527bc94f",
+        "DS-SELF-USE-SCOPE": "76ce7d641f54250fa5b0810ff17039a6763d35d95b5ba9d2ffc5141663edc603",
+        "DS-SME-OWNERSHIP": "36afd110e18cb9196b4086144b69940cccd2ed4ad270ac7ff4cff7515644cb18",
+        "DS-SQUAD-HATS": "556eb7c6b0821d06a13ef49fe8d7fd7e4aa7016f8275b3ffb7e09818aba1b560",
+        "DS-SURROGATE-BUDGET": "a11e0b2628597439a229a3254f92cb4f285e4caf031b45a7fb4bb1f9695a0a75"
+      },
+      "inputHash": "d37793f248be58714e6de9d5ca9a230ab7e2fa110e81690ea395246a65333387",
+      "outputHash": "96d9185749d9733b0db6037f88420bcb169ca63ac1bd0e28ad98557b911f0f94"
+    },
+    {
+      "hat": "product",
+      "section": "constraints",
+      "inputs": {
+        "DS-HIGH-IMPACT-OPS": "fd00e3de1a480747a465a69dc57dca901dd03074a862d9a3b04ca00bc7616bb2",
+        "DS-LOOP-CLOSURE": "522997dba520bed7447e58a5fabdc5e0d121a3f69f4bfc034dd11daac66e7508",
+        "DS-PARALLEL-EXEC": "52de0339e13c0612d30651579de828f9ec0837b11f14d1a8243f41a7527bc94f",
+        "DS-SELF-USE-SCOPE": "76ce7d641f54250fa5b0810ff17039a6763d35d95b5ba9d2ffc5141663edc603",
+        "DS-SME-OWNERSHIP": "36afd110e18cb9196b4086144b69940cccd2ed4ad270ac7ff4cff7515644cb18",
+        "DS-SQUAD-HATS": "556eb7c6b0821d06a13ef49fe8d7fd7e4aa7016f8275b3ffb7e09818aba1b560",
+        "DS-SURROGATE-BUDGET": "a11e0b2628597439a229a3254f92cb4f285e4caf031b45a7fb4bb1f9695a0a75"
+      },
+      "inputHash": "d37793f248be58714e6de9d5ca9a230ab7e2fa110e81690ea395246a65333387",
+      "outputHash": "96d9185749d9733b0db6037f88420bcb169ca63ac1bd0e28ad98557b911f0f94"
+    },
+    {
+      "hat": "product",
+      "section": "decisions",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "96d9185749d9733b0db6037f88420bcb169ca63ac1bd0e28ad98557b911f0f94"
+    },
+    {
+      "hat": "product",
+      "section": "open-loops",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "96d9185749d9733b0db6037f88420bcb169ca63ac1bd0e28ad98557b911f0f94"
+    },
+    {
+      "hat": "maintainer",
+      "section": "charter",
+      "inputs": {
+        "DS-BACKWARD-COMPAT": "dd03af1f5114f20adc4903b0103368b259e2d9b3277bddc4d9d10ecb55f827b8"
+      },
+      "inputHash": "28ea47d267844bb3921a93664223a73f5434cd4cc8f42ac3df014a49bb7e1175",
+      "outputHash": "7ccf0babb11928c921fd77ed1b3e6699185a3bf6ae4fd627ad1f8ce382db45b0"
+    },
+    {
+      "hat": "maintainer",
+      "section": "constraints",
+      "inputs": {
+        "DS-BACKWARD-COMPAT": "dd03af1f5114f20adc4903b0103368b259e2d9b3277bddc4d9d10ecb55f827b8"
+      },
+      "inputHash": "28ea47d267844bb3921a93664223a73f5434cd4cc8f42ac3df014a49bb7e1175",
+      "outputHash": "7ccf0babb11928c921fd77ed1b3e6699185a3bf6ae4fd627ad1f8ce382db45b0"
+    },
+    {
+      "hat": "maintainer",
+      "section": "decisions",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "7ccf0babb11928c921fd77ed1b3e6699185a3bf6ae4fd627ad1f8ce382db45b0"
+    },
+    {
+      "hat": "maintainer",
+      "section": "open-loops",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "7ccf0babb11928c921fd77ed1b3e6699185a3bf6ae4fd627ad1f8ce382db45b0"
+    },
+    {
+      "hat": "dev",
+      "section": "charter",
+      "inputs": {
+        "DEC-001": "3eb443afb9b929842bbef797437807b5a0ae824d5b485501c2356f68aaa09eaf",
+        "DEC-002": "a479864bd3424877d88034a2f51e6266521e83a3fbb4358d5de398d42970623d",
+        "DEC-003": "b15f20dfa852596f2c48f4612b73a5c71b9c3ad8c4f2f4dbfaaa303b17363a65",
+        "DEC-004": "883ef286cdff477972aabf564b1df90f83d752da973274a35cf81e4f87d593cd",
+        "DEC-005": "46d4ee83181f6c975919687056be1f4190e48a9eb2e524f0b88b7491e201e7f1",
+        "DEC-006": "bab8dd8ba80d89b8a01bed19bcfd108b31682cd9c1d4c070ebad3303af27e3fb",
+        "DEC-007": "80239ae60ddabcb0ee182f8c8f47e25fe044976462fe64ab76e4b1a7f4013eea",
+        "DEC-008": "ceccf002c6729410ac8f802fc6c1dde4fcf69d6212b8c7ff37a85068d365f186",
+        "DEC-009": "7bced2c621c1c662f15b99544bcb6b36d0a22cd0879983e1752f638f461d34f8",
+        "DEC-010": "33f5a19e37d81d881c4c5fb8d0e6b0e3c6066820e66b5a522fd60d33f69e87cb",
+        "DEC-011": "06cc8b752d5d979c85b34bd5ed8bfa18e79a13870ad3b8af5c52977589b985ae",
+        "DEC-013": "2711df355edd295f445c05abfe940f614ac105344ffe5584a3e3ac51ebf76f6a",
+        "DEC-014": "9f5a2cc5ec56dbb85b482cd463bec7c050c21d3a795673270a7c79007db06e72",
+        "DEC-015": "37b130063433230319adc8688743acd2b75f407751d5356d8f491cf236d72c6a",
+        "DEC-016": "0405d7721f5020a442ac4b1f920159bae3fab81c5e7030621814d983e9e7fb3d",
+        "DEC-017": "fe0a91cee01ed48eba00d2d3985b87842d0b72a8b4f7500e1c6aae29cfbc9a2f"
+      },
+      "inputHash": "3f51d517ac6dee5a12d6410435aa7eae572bb8e71204e94c856869a8e9d429ba",
+      "outputHash": "a9c793d3ceb7cda49eb4cf7cbe6bd4c06f8b172f5754fadac380031ca7c22fda"
+    },
+    {
+      "hat": "dev",
+      "section": "constraints",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "a9c793d3ceb7cda49eb4cf7cbe6bd4c06f8b172f5754fadac380031ca7c22fda"
+    },
+    {
+      "hat": "dev",
+      "section": "decisions",
+      "inputs": {
+        "DEC-001": "3eb443afb9b929842bbef797437807b5a0ae824d5b485501c2356f68aaa09eaf",
+        "DEC-002": "a479864bd3424877d88034a2f51e6266521e83a3fbb4358d5de398d42970623d",
+        "DEC-003": "b15f20dfa852596f2c48f4612b73a5c71b9c3ad8c4f2f4dbfaaa303b17363a65",
+        "DEC-004": "883ef286cdff477972aabf564b1df90f83d752da973274a35cf81e4f87d593cd",
+        "DEC-005": "46d4ee83181f6c975919687056be1f4190e48a9eb2e524f0b88b7491e201e7f1",
+        "DEC-006": "bab8dd8ba80d89b8a01bed19bcfd108b31682cd9c1d4c070ebad3303af27e3fb",
+        "DEC-007": "80239ae60ddabcb0ee182f8c8f47e25fe044976462fe64ab76e4b1a7f4013eea",
+        "DEC-008": "ceccf002c6729410ac8f802fc6c1dde4fcf69d6212b8c7ff37a85068d365f186",
+        "DEC-009": "7bced2c621c1c662f15b99544bcb6b36d0a22cd0879983e1752f638f461d34f8",
+        "DEC-010": "33f5a19e37d81d881c4c5fb8d0e6b0e3c6066820e66b5a522fd60d33f69e87cb",
+        "DEC-011": "06cc8b752d5d979c85b34bd5ed8bfa18e79a13870ad3b8af5c52977589b985ae",
+        "DEC-013": "2711df355edd295f445c05abfe940f614ac105344ffe5584a3e3ac51ebf76f6a",
+        "DEC-014": "9f5a2cc5ec56dbb85b482cd463bec7c050c21d3a795673270a7c79007db06e72",
+        "DEC-015": "37b130063433230319adc8688743acd2b75f407751d5356d8f491cf236d72c6a",
+        "DEC-016": "0405d7721f5020a442ac4b1f920159bae3fab81c5e7030621814d983e9e7fb3d",
+        "DEC-017": "fe0a91cee01ed48eba00d2d3985b87842d0b72a8b4f7500e1c6aae29cfbc9a2f"
+      },
+      "inputHash": "3f51d517ac6dee5a12d6410435aa7eae572bb8e71204e94c856869a8e9d429ba",
+      "outputHash": "a9c793d3ceb7cda49eb4cf7cbe6bd4c06f8b172f5754fadac380031ca7c22fda"
+    },
+    {
+      "hat": "dev",
+      "section": "open-loops",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "a9c793d3ceb7cda49eb4cf7cbe6bd4c06f8b172f5754fadac380031ca7c22fda"
+    },
+    {
+      "hat": "devops",
+      "section": "charter",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "866b8c07dfadbebde7590f7f131a531c1e6a2d6845cfe28a2e9f1e8a1a5e2066"
+    },
+    {
+      "hat": "devops",
+      "section": "constraints",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "866b8c07dfadbebde7590f7f131a531c1e6a2d6845cfe28a2e9f1e8a1a5e2066"
+    },
+    {
+      "hat": "devops",
+      "section": "decisions",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "866b8c07dfadbebde7590f7f131a531c1e6a2d6845cfe28a2e9f1e8a1a5e2066"
+    },
+    {
+      "hat": "devops",
+      "section": "open-loops",
+      "inputs": {},
+      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputHash": "866b8c07dfadbebde7590f7f131a531c1e6a2d6845cfe28a2e9f1e8a1a5e2066"
+    }
+  ]
+}

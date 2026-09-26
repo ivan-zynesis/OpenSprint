@@ -35,3 +35,4 @@ export { getOpspReexploreSkillTemplate, getOpspReexploreCommandTemplate } from '
 export { getOpspKnockdownSkillTemplate, getOpspKnockdownCommandTemplate } from './workflows/opsp-knockdown.js';
 export { getOpspRebaseSkillTemplate, getOpspRebaseCommandTemplate } from './workflows/opsp-rebase.js';
 export { getOpspAbandonSkillTemplate, getOpspAbandonCommandTemplate } from './workflows/opsp-abandon.js';
+export { getOpspCompactSkillTemplate, getOpspCompactCommandTemplate } from './workflows/opsp-compact.js';

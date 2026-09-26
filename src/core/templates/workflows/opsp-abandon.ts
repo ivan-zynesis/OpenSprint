@@ -129,6 +129,18 @@ If loser has uncommitted code changes beyond surrogate: warn and do NOT remove a
 
 ---
 
+## Recompile the Derived Views
+
+Reconciliation changes the record. The compiled artifacts — \`opensprint/architecture.md\` and \`opensprint/squad/*.md\` — derive from it and are now stale.
+
+Compiled output is **regenerated, never merged** (DEC-014). Do not attempt to reconcile two universes' views against each other: they are projections, and merging projections produces a document that matches neither record set.
+
+Once the surrogate is settled, invoke the compact workflow (\`/opsp:compact\`), then confirm:
+
+\`\`\`bash
+opensprint compact check
+\`\`\`
+
 ## Guardrails
 
 - **Snapshot before migration** — write verbatim snapshot BEFORE migrating any citizens

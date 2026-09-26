@@ -1,128 +1,152 @@
 # Architecture
 
+Compiled from `opensprint/driver-specs/` and `opensprint/ADRs/` by `/opsp:compact`.
+**Derived — do not edit.** The records are the source of truth; `DECISION-MAP.md` holds the
+dependency tree. The per-hat views in `opensprint/squad/` are peers of this document, compiled
+from the same records in the same pass (`DEC-014`).
+
 ## System Overview
 
-OpenSprint is an AI-native engineering harness for sprint and milestone orchestration. Its core premise is that AI agents should be able to execute multi-milestone software initiatives autonomously, guided by a persistent "surrogate" — a set of driver-specs, architectural decisions, and architectural state that accumulates knowledge about the system over time and answers agent questions without requiring operator involvement at every step.
+OpenSprint is an AI-native engineering harness for sprint and milestone orchestration. Its premise
+is that agents can execute multi-milestone initiatives autonomously when guided by a persistent
+**surrogate** — driver-specs, decision records and compiled architectural state that accumulate
+knowledge and answer agent questions without an operator at every step.
 
-A key capability introduced by the `parallel-universe-reconciliation` initiative is the ability to run multiple initiatives concurrently. Each initiative operates in its own git worktree, which carries its own independent copy of the surrogate. When two parallel initiatives need to converge — or when one wins and the other must be abandoned — the `/opsp:rebase` and `/opsp:abandon` skills orchestrate the reconciliation.
+It is a **self-use tool released as open source, deliberately not competing** with provider
+tooling (`DS-SELF-USE-SCOPE`). It optimises for speed of evolution and clarity of record rather
+than feature parity, which is why its surface is the CLI plus the agent skill and command files it
+generates, with no GUI and no CI/CD product of its own (`DEC-017`).
+
+Two capabilities define the current system. **Parallel universes** let initiatives run
+concurrently in independent git worktrees, each carrying its own surrogate, reconciled by
+`/opsp:rebase` or `/opsp:abandon` when they converge or one wins (`DS-PARALLEL-EXEC`). **Surrogate
+compaction** condenses the record into per-hat views so that orientation costs a fraction of
+loading the full record set (`DS-SURROGATE-BUDGET`).
 
 ## Driver Specs
 
-### DS-PARALLEL-EXEC: Parallel Initiative Execution
+### Functional — what it must do
 
-OpenSprint must support concurrent initiative execution across independent git worktrees. Serial execution is insufficient for teams running independent workstreams simultaneously. A redesign initiative and a maintenance initiative should not block each other.
+**Engineering accountability partitions into four hats** — product, maintainer, dev, devops — and
+the accountabilities do not move regardless of team size (`DS-SQUAD-HATS`). A hat is a context
+boundary an agent must be told it is wearing. QA is redistributed rather than absent: engineers
+write the tests, but *what* must be tested is answered upstream by the driver-specs, so that
+bridging work lands on product and maintainer. Designer is product-dependent, so the hat set is a
+per-project registry.
 
-Each initiative branch/worktree is a fully self-contained universe: the codebase and the surrogate (`opensprint/`) co-evolve together. Parallel universes diverge in ADRs, driver-specs, and architecture.md over time. Reconciliation (via rebase or abandon) is required when universes need to converge or when one wins outright.
+**Each hat needs one human owner** — reviewer, escalation target, triage owner (`DS-SME-OWNERSHIP`).
+Ownership is of the system's behaviour in that domain, not of a document describing it.
 
-### DS-HIGH-IMPACT-OPS: High-Impact Operation Safety
+**The loop must close mechanically**: driver-spec → ADR → implementation → rule, and back to the
+constraint when a rule fails (`DS-LOOP-CLOSURE`). Facilitation is the part that can be encoded.
+Without the last arrow a process produces documents; with it, drift becomes a build failure.
 
-Universe reconciliation operations are high-impact and difficult to reverse. A corrupted surrogate degrades every downstream agent operation that depends on it — the blast radius is unbounded. As a result, reconciliation operations must be exclusively operator-invocable; no automated pipeline, sub-agent, or other skill may invoke them programmatically. The most capable available model with extended thinking is recommended, and a mandatory planning phase with operator confirmation gates every execution.
+**Initiatives run concurrently across independent worktrees**, with no shared mutable state during
+execution, diverging in their surrogates until reconciled (`DS-PARALLEL-EXEC`).
+
+### Non-functional — what must be true of it
+
+**Loading the surrogate must not consume the session budget** (`DS-SURROGATE-BUDGET`). Measured at
+93–157K tokens across projects in production use, of which ADRs are 61–74%. Progressive discovery
+must extend one layer further so an agent works from the compacted surrogate, while still reading
+a decision's full record before acting on it.
+
+**Reconciliation is operator-invocable only** (`DS-HIGH-IMPACT-OPS`). A corrupted surrogate
+degrades every downstream agent operation; the blast radius is unbounded, so human confirmation at
+each ambiguous step is non-negotiable and a planning phase must precede all execution.
+
+**Backward compatibility is best-effort** (`DS-BACKWARD-COMPAT`). Semver is the practice, npm the
+marketplace, and a published package is static — so the only breakable surface is a new release
+meeting a project written by an older one. New record fields are therefore optional, and removing
+or renaming one is a breaking change.
 
 ## Architectural Decisions
 
-### Universes as Git Worktrees (DEC-001)
+### Universes are worktrees
 
-The central decision is that a "universe" is simply a git worktree. The `opensprint/` surrogate directory lives in its branch as-is, travels with the code, and diverges naturally as commits accumulate. No special universe registry, storage layer, or synchronization daemon is introduced.
+A universe **is** a git worktree; `opensprint/` lives in its branch and travels with the code, with
+no registry or synchronisation daemon (`DEC-001`). Reconciliation traverses depth-first with the
+initiative as the unit of commitment (`DEC-003`), behind a mandatory read-only planning phase that
+produces a conflict manifest and waits for explicit confirmation (`DEC-004`). The agent reasons but
+auto-accepts only purely additive or identical content; everything else escalates (`DEC-002`). An
+abandoned universe is archived with a verbatim pre-migration snapshot and a full traversal manifest
+before its worktree is removed (`DEC-005`).
 
-This exploits git's existing worktree isolation model: `git worktree add` produces a fully independent directory tree, and `git diff`, `git log`, and merge tooling apply to surrogate files just as they do to source files. The surrogate is versioned, branched, and merged through git — no new abstraction is needed.
+### The compacted surrogate
 
-### Conflict Resolution: Agent Reasons, Operator Confirms (DEC-002)
+Views are **compiled and never hand-edited** — if a view is wrong, the system is wrong, and the fix
+path is `/opsp:explore` into `/opsp:propose` (`DEC-006`). Open loops detected during compaction are
+the backlog that feeds that triage (`DEC-007`). The charter compiles too, from governance records,
+so changing what a hat owns means recording a decision (`DEC-008`).
 
-When two universes diverge in their surrogates, the agent reasons through conflicts but auto-accepts only under two narrow conditions: the change is purely additive (one universe has content the other lacks, with no semantic overlap), or the content is identical on both sides (trivially redundant). Everything else escalates to the operator.
+Every compiled claim carries its record ids inline, because a claim built from a record that a
+later record partly superseded is otherwise silently wrong (`DEC-009`). A provenance manifest
+records per-section input and output hashes, and `compact check` fails CI on anything stale or
+tampered (`DEC-010`). Stale sections re-render from their full inputs, never from the previous
+rendering (`DEC-011`).
 
-This asymmetry is intentional. A false escalation costs one operator confirmation prompt. A false auto-accept risks a corrupted surrogate. Two ADRs can differ by a single sentence but represent fundamentally incompatible worldviews — semantic conflicts cannot be resolved by line-diffing alone.
-
-### DFS Traversal: Initiative → ADRs → Active Changes (DEC-003)
-
-Citizens (surrogate artifacts eligible for reconciliation: driver-specs, ADRs, initiative descriptors, active opsx changes) are evaluated depth-first. For each initiative in the source universe, all ADRs referenced by or created during that initiative are evaluated first, then all active opsx changes belonging to that initiative. The initiative is the unit of commitment: if any inner node produces an unresolved conflict, the entire initiative pauses for operator judgment before the DFS advances to the next initiative.
-
-This ordering ensures dependency coherence (changes evaluated after the ADRs they depend on), atomic commitment (no partial initiative migrations), and manageable operator cognitive load (prompts grouped at initiative boundaries, not scattered across individual inner nodes).
-
-Each citizen is classified as one of four states:
-
-| Class | Meaning |
-|---|---|
-| MIGRATE | Compatible, adds value to target — auto-migrate at HIGH confidence, escalate at LOW |
-| CONFLICT | Contradicts target decisions — always escalate |
-| REDUNDANT | Target already has equivalent — skip |
-| SUPERSEDED | Target resolved this differently — drop, record in manifest |
-
-### Mandatory Planning Phase (DEC-004)
-
-Both `/opsp:rebase` and `/opsp:abandon` open with a read-only planning pass before touching any files. The agent loads both surrogates, classifies all citizens per the DEC-003 taxonomy, and produces a conflict manifest showing counts by category and detail on any CONFLICT or LOW-confidence citizens. The planning phase also warns on model requirements and surfaces a wrong-command recommendation if the ADR conflict rate is high (suggesting the operator chose rebase when abandon is more appropriate). Execution begins only after explicit operator confirmation.
-
-### Abandoned Universe Archive Structure (DEC-005)
-
-When `/opsp:abandon` completes, the loser universe is preserved at `opensprint/abandoned/{name}/`. The archive contains two things: a verbatim snapshot of the loser's `opensprint/` directory captured *before* any migrations occurred, and a `migration-manifest.md` recording the complete traversal — every citizen evaluated, its classification, operator decisions at each escalation point, and recovery notes. The loser's worktree and branch are removed only after the operator confirms the manifest is correct.
+Records declare one or more hats against a per-project registry (`DEC-016`, superseding `DEC-012`);
+the rules that guard them are harvested from code rather than declared in the records
+(`DEC-013`). compact is the single compile engine, with `architecture.md` as a sibling output
+rather than an input (`DEC-014`). Switching what explore and apply load is deliberately deferred
+until the views are proven (`DEC-015`).
 
 ## System Structure
 
-The parallel universe reconciliation system consists of:
-
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    OPERATOR INVOKES                          │
-│                                                             │
-│   /opsp:rebase <source>          /opsp:abandon <loser>      │
-│        │                               │                    │
-│        ▼                               ▼                    │
-│  ┌──────────────┐             ┌──────────────────┐          │
-│  │ opensprint-  │             │  opensprint-     │          │
-│  │   rebase     │             │    abandon       │          │
-│  │   SKILL.md   │             │    SKILL.md      │          │
-│  └──────┬───────┘             └────────┬─────────┘          │
-│         │                              │                    │
-│         └──────────┬───────────────────┘                    │
-│                    ▼                                        │
-│           ┌─────────────────┐                              │
-│           │  Planning Phase │  (read-only, no writes)      │
-│           │  Conflict       │                              │
-│           │  Manifest       │                              │
-│           └────────┬────────┘                              │
-│                    │ operator confirms                      │
-│                    ▼                                        │
-│           ┌─────────────────┐                              │
-│           │  DFS Execution  │  (DEC-003 traversal)         │
-│           │  initiative     │                              │
-│           │   → ADRs        │  HIGH confidence → auto      │
-│           │   → changes     │  LOW/CONFLICT → escalate     │
-│           └────────┬────────┘                              │
-│                    │                                        │
-│          ┌─────────┴──────────┐                            │
-│          ▼                    ▼                            │
-│   ┌─────────────┐    ┌──────────────────┐                  │
-│   │  Surrogate  │    │ opensprint/      │                  │
-│   │  Merged     │    │ abandoned/{name}/│                  │
-│   │  (rebase)   │    │  snapshot/       │                  │
-│   └─────────────┘    │  manifest.md     │                  │
-│                      └──────────────────┘                  │
-└─────────────────────────────────────────────────────────────┘
+opensprint/                      the record — source of truth
+  driver-specs/*.md              constraints (product, maintainer)
+  ADRs/DEC-*.md                  decisions (dev)
+  DECISION-MAP.md                dependency tree + blast radius (generated)
+  initiatives/*.md               initiative descriptors
+        │
+        │  /opsp:compact  ── one engine (DEC-014)
+        ▼
+  architecture.md                architectural state  ─┐
+  squad/                                                │ peers, both one hop
+    index.md                     router                 │ from the record
+    product.md maintainer.md                            │
+    dev.md     devops.md         per-hat views         ─┘
+    .manifest.json               provenance (DEC-010)
+
+src/core/
+  compact/       sections · records · manifest · status
+  hats.ts        registry, validation, inference
+  decision-map.ts  tree, blast radius
+  templates/workflows/   14 OPSP skill templates
+src/commands/compact.ts  plan · seal · check
 ```
 
-**Skills and commands:**
-- `.claude/skills/opensprint-rebase/SKILL.md` — full rebase workflow instructions
-- `.claude/skills/opensprint-abandon/SKILL.md` — full abandon workflow instructions
-- `.claude/commands/opsp/opsp-rebase.md` — `/opsp:rebase` command entry point
-- `.claude/commands/opsp/opsp-abandon.md` — `/opsp:abandon` command entry point
+**Workflows.** Fourteen OPSP workflows generate per tool at `opensprint init`. The lifecycle is
+explore → propose → apply → archive, with compact called by archive, knockdown, rebase and abandon
+for their compile step (`DEC-014`).
 
-**Source templates** (compiled into skills at `opensprint init` time):
-- `src/core/templates/workflows/opsp-rebase.ts`
-- `src/core/templates/workflows/opsp-abandon.ts`
-- Both registered in `OPSP_WORKFLOW_IDS` (total: 13 workflows)
-
-**Reconciliation specs** (shared vocabulary for both skills):
-- `openspec/specs/reconciliation-citizen-taxonomy/spec.md` — citizen classification rules
-- `openspec/specs/reconciliation-conflict-manifest/spec.md` — planning phase display format
-- `openspec/specs/reconciliation-migration-manifest/spec.md` — abandoned archive file format
+**The CLI/skill split.** Deterministic work — grouping, hashing, staleness, gating — lives in code
+so it can be verified without a model. Synthesis lives in skills. `compact plan` reports what is
+stale, the skill renders, `compact seal` records, `compact check` gates.
 
 ## Constraints & Non-Negotiables
 
-**Operator-only invocation** (DS-HIGH-IMPACT-OPS): `/opsp:rebase` and `/opsp:abandon` must never be invoked by sub-agents, automated pipelines, or other skills. This is an absolute constraint, not a preference. The surrogate is the agent's source of truth; a corrupted surrogate silently degrades all future agent decisions.
+**Operator-only reconciliation** (`DS-HIGH-IMPACT-OPS`). `/opsp:rebase` and `/opsp:abandon` must
+never be invoked by a sub-agent, pipeline or other skill. Absolute, not a preference.
 
-**Planning phase is mandatory** (DEC-004): No reconciliation operation may begin writing files without first completing a read-only planning pass and receiving explicit operator confirmation. There is no fast-path that skips this gate.
+**Planning before execution** (`DEC-004`). No reconciliation writes a file before a read-only pass
+and explicit confirmation. No fast path.
 
-**Bias toward escalation** (DEC-002): The default conflict resolution stance is conservative. Only purely additive, HIGH-confidence changes are auto-accepted. All ambiguity escalates. If the escalation rate proves too high in practice, a confidence-scoring rubric may be introduced — but the default must remain conservative.
+**Bias toward escalation** (`DEC-002`). Only additive, high-confidence changes auto-accept.
 
-**Snapshot before migration** (DEC-005): During `/opsp:abandon`, the loser's full `opensprint/` must be captured verbatim before any migrations occur. The snapshot is the recovery path if the wrong universe was abandoned.
+**Snapshot before migration, manifest before removal** (`DEC-005`).
 
-**Manifest confirmed before worktree removal** (DEC-005): The loser worktree and branch are not removed until the operator has reviewed and confirmed the migration manifest. Removal is the last step, not an intermediate one.
+**The record is the source of truth** (`DEC-006`). Compact never writes a driver-spec, an ADR or
+the decision map. A derived artifact that disagrees with the record is wrong by definition.
+
+**Cited claims only** (`DEC-009`). A compiled claim without its record ids cannot be checked.
+
+**One hop from the record** (`DEC-011`, `DEC-014`). No derived artifact is compiled from another
+derived artifact.
+
+**Optional new fields** (`DS-BACKWARD-COMPAT`). A record written by an older release must still
+parse.
+
+**Cross-platform paths.** Every path via `path.join`; hashes sorted and line-ending normalised so
+they do not differ across macOS, Linux and Windows (`DEC-010`).
