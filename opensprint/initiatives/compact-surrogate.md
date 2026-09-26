@@ -41,7 +41,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 ## Milestones
 
 - [x] hat-registry: Define the hat taxonomy and per-project registry, add the primary-hat field to the record schema, and backfill existing driver-specs and ADRs with owner confirmation batched by area.
-- [ ] compact-engine: Compile hat views and architecture.md from the record with inline citations, write the provenance manifest, and implement `--check`.
+- [x] compact-engine: Compile hat views and architecture.md from the record with inline citations, write the provenance manifest, and implement `--check`.
 - [ ] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
 - [ ] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 
@@ -74,6 +74,31 @@ called by anything.
 parallel-universe-reconciliation shipped without a `## Requirements` section. Promoted their
 normative prose into 13 Requirement/Scenario blocks, preserving `## Purpose` verbatim and
 restoring the `DEC-004` citation. No behaviour change. `source-specs-normalization` passes.
+
+### compact-engine — complete (2026-09-26)
+
+**OPSX changes:** `2026-09-26-compact-engine-core`, `2026-09-26-compact-skill` (both archived)
+
+Split in two so the CI gate could be tested without a model in the loop.
+
+**The engine** (`src/core/compact/`, `opensprint compact plan|seal|check`) groups records by hat,
+resolves four sections with distinct input sets, hashes them order- and line-ending independently,
+and classifies each as fresh, stale, tampered or unsealed. `unsealed` is separated from `stale`
+deliberately — every project is unsealed before its first seal, and calling that drift would
+report a change that never happened. Only `seal` writes.
+
+**The skill** (`/opsp:compact`) drives the engine rather than reimplementing it, and DEC-014 is
+settled: archive, knockdown, rebase and abandon all call it now, and archive's own architecture.md
+section list is gone.
+
+**Measured compaction: 15,347 tokens of record → 5,328 tokens of views, 2.9x.** Below the 4–5x
+estimated during explore. This repository's records are terse relative to cashier's, so there is
+less redundancy to squeeze. The ratio on a mature surrogate is the open question, and it is
+exactly what DEC-015 defers the loading switch until we can answer.
+
+**The gate was exercised, not only unit-tested.** Editing `DEC-009` moved two `dev` sections to
+stale; hand-editing `dev.md` moved every `dev` section to tampered with the `/opsp:explore`
+guidance; restoring both returned `check` to exit zero.
 
 ### Open loops
 
