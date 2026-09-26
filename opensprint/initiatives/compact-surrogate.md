@@ -43,7 +43,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] hat-registry: Define the hat taxonomy and per-project registry, add the primary-hat field to the record schema, and backfill existing driver-specs and ADRs with owner confirmation batched by area.
 - [x] compact-engine: Compile hat views and architecture.md from the record with inline citations, write the provenance manifest, and implement `--check`.
 - [x] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
-- [ ] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
+- [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 
 ## Progress
 
@@ -115,6 +115,27 @@ citation would have reported 13 gaps that are not gaps.
 
 **On this repository:** 10 loops — 7 unguarded decisions, `DS-LOOP-CLOSURE` and
 `DS-SELF-USE-SCOPE` unasserted, and `DS-BACKWARD-COMPAT` with no decision at all.
+
+### backlog-seam — complete (2026-09-27)
+
+**OPSX change:** `2026-09-26-backlog-seam` (archived)
+
+Explore loads open loops as part of its surrogate entry and presents them grouped by accountable
+hat; propose records what an initiative set out to close; the loops output names where triage
+happens. No new workflow (`DEC-007`) and no loop state — a gap exists while the harvest reports
+it, so the backlog cannot drift from reality.
+
+The archive and knockdown half of this milestone had already landed with `DEC-014`.
+
+**The loop closed itself during this milestone.** A test in `backlog-seam` named `DEC-007`, which
+closed that decision's `decision-unguarded` loop and, transitively, `DS-LOOP-CLOSURE`'s
+`constraint-unasserted` one. Nobody marked anything resolved; the count went from 10 to 8 because
+the harvest stopped reporting them.
+
+**And the known gap demonstrated itself in the same breath.** The rendered views kept claiming
+seven unguarded decisions, and `compact check` kept reporting all sections fresh, because the
+`open-loops` section has no record inputs and its hash never changes. Corrected by hand, which is
+exactly what the gap makes necessary.
 
 ### Open loops
 
