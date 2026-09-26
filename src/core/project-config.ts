@@ -46,6 +46,14 @@ export const ProjectConfigSchema = z.object({
     .array(z.string())
     .optional()
     .describe('Hat registry for this project (defaults to DEFAULT_HATS)'),
+
+  // Optional: globs identifying rule files for DEC-013 citation harvesting.
+  // Named ruleGlobs rather than rules because `rules` above already means
+  // per-artifact authoring guidance — a different thing entirely.
+  ruleGlobs: z
+    .array(z.string())
+    .optional()
+    .describe('Globs identifying rule files (defaults to DEFAULT_RULE_GLOBS)'),
 });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -169,6 +177,19 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
       } else {
         console.warn(
           `Invalid 'hats' field in config (must be a non-empty array of non-empty strings), using the default hat set`
+        );
+      }
+    }
+
+    // Parse ruleGlobs field using Zod
+    if (raw.ruleGlobs !== undefined) {
+      const globsResult = z.array(z.string().min(1)).min(1).safeParse(raw.ruleGlobs);
+
+      if (globsResult.success) {
+        config.ruleGlobs = globsResult.data;
+      } else {
+        console.warn(
+          `Invalid 'ruleGlobs' field in config (must be a non-empty array of non-empty strings), using the default rule globs`
         );
       }
     }

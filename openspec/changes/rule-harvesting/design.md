@@ -18,7 +18,7 @@ The engine groups records by hat and reports staleness. It knows nothing about t
 
 ## Decisions
 
-**Rule globs are configured, with an explicit default list.** Surveying four projects in production use gives five distinct suffixes — `.test.`, `.i9n.`, `.unit.`, `.e2e.`, `.spec.` — and one of them, ai-gateway, uses *only* `.unit.ts`. A default of `*.test.*` would silently find nothing there and report every decision unguarded. The default therefore covers all five, and `openspec/config.yaml` can override.
+**Rule globs are configured as `ruleGlobs`, with an explicit default list.** Surveying four projects in production use gives five distinct suffixes — `.test.`, `.i9n.`, `.unit.`, `.e2e.`, `.spec.` — and one of them, ai-gateway, uses *only* `.unit.ts`. A default of `*.test.*` would silently find nothing there and report every decision unguarded. The default therefore covers all five, and `openspec/config.yaml` can override via `ruleGlobs`. The key is not called `rules`: that name is already taken by per-artifact authoring guidance, which is a different thing keyed by artifact id.
 
 **The surrogate is excluded from the scan.** `opensprint/` and `openspec/` are skipped. Without that, every ADR cites its own id and its `depends-on` ancestors, and every record would appear fully guarded by itself.
 

@@ -35,6 +35,7 @@ import {
   compactPlanCommand,
   compactSealCommand,
   compactCheckCommand,
+  compactLoopsCommand,
   type CompactOptions,
 } from '../commands/compact.js';
 
@@ -503,6 +504,20 @@ compactCmd
   .action(async (options: CompactOptions) => {
     try {
       await compactCheckCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+compactCmd
+  .command('loops')
+  .description('Report open loops — constraints, decisions and rules that do not line up')
+  .option('--json', 'Output as JSON')
+  .action(async (options: CompactOptions) => {
+    try {
+      await compactLoopsCommand(options);
     } catch (error) {
       console.log();
       ora().fail(`Error: ${(error as Error).message}`);

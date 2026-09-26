@@ -39,6 +39,8 @@ import {
   allFresh,
   type SectionStatus,
 } from '../core/compact/status.js';
+import { buildRuleIndex, resolveRuleGlobs } from '../core/compact/rules.js';
+import { deriveOpenLoops, groupLoopsByHat, type OpenLoop } from '../core/compact/loops.js';
 
 export interface CompactOptions {
   json?: boolean;
@@ -55,6 +57,8 @@ interface Scan {
   unassigned: string[];
   unknownHats: Array<[string, string]>;
   grouped: ReturnType<typeof groupRecordsByHat>;
+  driverSpecs: ReturnType<typeof readSourcedDriverSpecs>;
+  decisions: ReturnType<typeof readSourcedDecisions>;
 }
 
 function scan(projectRoot: string): Scan {
@@ -65,11 +69,9 @@ function scan(projectRoot: string): Scan {
     );
   }
   const registry = resolveHatRegistry(projectRoot);
-  const grouped = groupRecordsByHat(
-    readSourcedDriverSpecs(opensprintDir),
-    readSourcedDecisions(opensprintDir),
-    registry
-  );
+  const driverSpecs = readSourcedDriverSpecs(opensprintDir);
+  const decisions = readSourcedDecisions(opensprintDir);
+  const grouped = groupRecordsByHat(driverSpecs, decisions, registry);
   const manifest = readManifest(opensprintDir);
   return {
     opensprintDir,
@@ -78,7 +80,41 @@ function scan(projectRoot: string): Scan {
     unassigned: grouped.unassigned,
     unknownHats: grouped.unknownHats,
     grouped,
+    driverSpecs,
+    decisions,
   };
+}
+
+/**
+ * Harvests rule citations and derives open loops.
+ *
+ * Kept out of `scan()` because it walks the project's source tree — the most
+ * expensive thing compact does. `check` is a gate and must stay cheap, so it
+ * never calls this.
+ */
+function openLoopsFor(projectRoot: string, s: Scan): OpenLoop[] {
+  const ids = [...s.driverSpecs.map((r) => r.id), ...s.decisions.map((r) => r.id)];
+  const index = buildRuleIndex(projectRoot, ids, resolveRuleGlobs(projectRoot));
+  return deriveOpenLoops(s.driverSpecs, s.decisions, index);
+}
+
+function printLoops(loops: readonly OpenLoop[], registry: readonly string[]): void {
+  if (loops.length === 0) {
+    console.log(chalk.green('No open loops.'));
+    return;
+  }
+  const grouped = groupLoopsByHat(loops, registry);
+  console.log(chalk.bold(`\n${loops.length} open loop(s)\n`));
+  for (const [hat, items] of grouped) {
+    if (items.length === 0) continue;
+    console.log(chalk.cyan(`  ${hat ?? '(unassigned)'}`));
+    for (const l of items) {
+      console.log(`    ${chalk.yellow(l.kind)}  ${l.record}`);
+      console.log(chalk.dim(`      ${l.detail}`));
+      if (l.rule) console.log(chalk.dim(`      rule: ${l.rule}`));
+    }
+    console.log();
+  }
 }
 
 function relative(projectRoot: string, p: string): string {
@@ -91,8 +127,10 @@ function relative(projectRoot: string, p: string): string {
 
 export async function compactPlanCommand(options: CompactOptions = {}): Promise<void> {
   const projectRoot = process.cwd();
-  const { statuses, unassigned, unknownHats } = scan(projectRoot);
-  const pending = statuses.filter((s) => s.state !== 'fresh');
+  const s = scan(projectRoot);
+  const { statuses, unassigned, unknownHats, registry } = s;
+  const pending = statuses.filter((st) => st.state !== 'fresh');
+  const loops = openLoopsFor(projectRoot, s);
 
   if (options.json) {
     console.log(
@@ -112,6 +150,7 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
           })),
           unassigned,
           unknownHats: unknownHats.map(([id, hat]) => ({ record: id, hat })),
+          openLoops: loops,
         },
         null,
         2
@@ -137,6 +176,7 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
   }
 
   reportUnrouted(unassigned, unknownHats);
+  printLoops(loops, registry);
 }
 
 function reportUnrouted(
@@ -246,4 +286,20 @@ export async function compactCheckCommand(options: CompactOptions = {}): Promise
   }
 
   if (offending.length > 0) process.exit(1);
+}
+
+// -----------------------------------------------------------------------------
+// loops — the backlog. Never writes, never fails.
+// -----------------------------------------------------------------------------
+
+export async function compactLoopsCommand(options: CompactOptions = {}): Promise<void> {
+  const projectRoot = process.cwd();
+  const s = scan(projectRoot);
+  const loops = openLoopsFor(projectRoot, s);
+
+  if (options.json) {
+    console.log(JSON.stringify({ openLoops: loops }, null, 2));
+    return;
+  }
+  printLoops(loops, s.registry);
 }

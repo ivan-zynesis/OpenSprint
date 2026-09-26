@@ -156,3 +156,73 @@ describe('opensprint compact (e2e)', () => {
     }
   });
 });
+
+describe('opensprint compact loops (e2e)', () => {
+  let projectRoot: string;
+
+  beforeEach(() => {
+    projectRoot = path.join(os.tmpdir(), `openspec-loops-e2e-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    fs.mkdirSync(path.join(projectRoot, 'openspec'), { recursive: true });
+    fs.mkdirSync(path.join(projectRoot, 'opensprint', 'driver-specs'), { recursive: true });
+    fs.mkdirSync(path.join(projectRoot, 'opensprint', 'ADRs'), { recursive: true });
+    fs.mkdirSync(path.join(projectRoot, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
+    fs.writeFileSync(
+      path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\n---\n\nA constraint.\n'
+    );
+    fs.writeFileSync(
+      path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
+      '---\nid: DEC-001\nstatus: accepted\ndepends-on:\n  - DS-A\ncreated: 2026-01-01\ndepth: 0\nhats: [dev]\n---\n\n## Question\n\nQ\n'
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(projectRoot, { recursive: true, force: true });
+  });
+
+  it('reports an unguarded decision and exits zero', async () => {
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('decision-unguarded');
+    expect(r.stdout).toContain('DEC-001');
+  });
+
+  it('exits zero when there are no loops', async () => {
+    fs.writeFileSync(path.join(projectRoot, 'src', 'a.test.ts'), '// guards DEC-001\n');
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('No open loops');
+  });
+
+  it('--json carries the loops', async () => {
+    const r = await runCLI(['compact', 'loops', '--json'], { cwd: projectRoot });
+    expect(r.exitCode).toBe(0);
+    const parsed = JSON.parse(r.stdout);
+    expect(parsed.openLoops.some((l: { kind: string }) => l.kind === 'decision-unguarded')).toBe(true);
+  });
+
+  it('plan --json carries the loops for the renderer', async () => {
+    const r = await runCLI(['compact', 'plan', '--json'], { cwd: projectRoot });
+    const parsed = JSON.parse(r.stdout);
+    expect(Array.isArray(parsed.openLoops)).toBe(true);
+    expect(parsed.openLoops.length).toBeGreaterThan(0);
+  });
+
+  it('check ignores open loops and exits zero once views are sealed', async () => {
+    const squad = path.join(projectRoot, 'opensprint', 'squad');
+    fs.mkdirSync(squad, { recursive: true });
+    for (const hat of ['product', 'maintainer', 'dev', 'devops']) {
+      fs.writeFileSync(path.join(squad, `${hat}.md`), `# ${hat}\n`);
+    }
+    await runCLI(['compact', 'seal'], { cwd: projectRoot });
+
+    // an unguarded decision is still outstanding
+    const loops = await runCLI(['compact', 'loops', '--json'], { cwd: projectRoot });
+    expect(JSON.parse(loops.stdout).openLoops.length).toBeGreaterThan(0);
+
+    // ...and check does not care: a gap is backlog, not a contradiction
+    const check = await runCLI(['compact', 'check'], { cwd: projectRoot });
+    expect(check.exitCode).toBe(0);
+  });
+});

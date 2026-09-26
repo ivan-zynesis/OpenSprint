@@ -13,7 +13,7 @@ Two defects found during this initiative had the same shape — a guard that did
 - A new `opsp-rule-harvesting` capability: how rule files are located, how citations are extracted, and what constitutes an open loop
 - `src/core/compact/rules.ts` — scan configured globs for record ids, build the record→rule index
 - `src/core/compact/loops.ts` — derive the five open-loop kinds from the index and the decision graph
-- `rules` globs in `openspec/config.yaml`, defaulting to an explicit list covering the suffixes real projects use
+- `ruleGlobs` in `openspec/config.yaml`, defaulting to an explicit list covering the suffixes real projects use
 - `opensprint compact plan` reports open loops per hat; `--json` carries them for the renderer
 - A new `opensprint compact loops` for reading them directly
 
@@ -27,6 +27,6 @@ Two defects found during this initiative had the same shape — a guard that did
 ## Impact
 
 - **New**: `src/core/compact/rules.ts`, `src/core/compact/loops.ts`
-- **Modified**: `src/core/project-config.ts` (`rules` globs), `src/commands/compact.ts` (`loops`, and open loops in `plan`)
+- **Modified**: `src/core/project-config.ts` (`ruleGlobs`), `src/commands/compact.ts` (`loops`, and open loops in `plan`)
 - **Reads**: the project's source tree, excluding `opensprint/`, `openspec/` and the usual build output
 - **Writes**: nothing new. The manifest is unchanged.

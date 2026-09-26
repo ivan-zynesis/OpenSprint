@@ -126,9 +126,17 @@ None assigned to this hat. Every recorded decision belongs to `dev` — see
 
 ## Open Loops
 
+**Harvested** (`DEC-013`):
+
+- `constraint-unasserted` **DS-LOOP-CLOSURE** — answered by `DEC-007`, `DEC-010`, `DEC-013`, but
+  no rule cites any of them. The constraint that says the loop must close mechanically is itself
+  the least mechanically guarded thing here.
+- `constraint-unasserted` **DS-SELF-USE-SCOPE** — answered by `DEC-017`, which no rule cites.
+
+**Structural:**
+
 - **No charter record.** The charter above is assembled from `DS-SQUAD-HATS` and
-  `DS-SME-OWNERSHIP`, which describe the model in general rather than this hat's own boundary in
-  this project. Nothing records what product specifically may not trade away here.
-- **Seven constraints, no decisions.** Every ADR routes to `dev`. That is expected for a tool
-  whose product surface *is* its implementation, but it means this hat's constraints are answered
-  in another hat's view.
+  `DS-SME-OWNERSHIP`, which describe the model in general rather than this hat's boundary in this
+  project. Nothing records what product specifically may not trade away here.
+- **Seven constraints, no decisions.** Every ADR routes to `dev`, so this hat's constraints are
+  answered in another hat's view.

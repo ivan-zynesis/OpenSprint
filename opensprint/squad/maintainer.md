@@ -38,7 +38,13 @@ constraint but no recorded decision says how it is *met* — see Open Loops.
 
 ## Open Loops
 
+**Harvested** (`DEC-013`):
+
+- `constraint-unanswered` **DS-BACKWARD-COMPAT** — no active decision answers this constraint.
+  Every mechanism it implies — optional fields, forward migrations, semver discipline — is
+  convention rather than a recorded decision. This is the only constraint in the project with no
+  decision behind it.
+
+**Structural:**
+
 - **No charter record.** Nothing states what this hat may not trade away or when it escalates.
-- **No decisions.** `DS-BACKWARD-COMPAT` is a constraint with no ADR answering it. Every
-  mechanism it implies — optional fields, forward migrations, semver discipline — is currently
-  convention rather than a recorded decision.

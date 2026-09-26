@@ -9,14 +9,14 @@ The system SHALL locate rule files using a configurable glob list, with an expli
 - **AND** SHALL also match files named `*_test.*`
 
 #### Scenario: Project declares its own rule globs
-- **WHEN** `openspec/config.yaml` contains a non-empty `rules` array of strings
+- **WHEN** `openspec/config.yaml` contains a non-empty `ruleGlobs` array of strings
 - **THEN** the system SHALL use exactly those globs
 - **AND** SHALL NOT merge them with the default list
 
 #### Scenario: Malformed rule globs
-- **WHEN** the `rules` key is present but is not a non-empty array of non-empty strings
+- **WHEN** the `ruleGlobs` key is present but is not a non-empty array of non-empty strings
 - **THEN** the system SHALL fall back to the default list
-- **AND** SHALL surface a warning naming the `rules` key
+- **AND** SHALL surface a warning naming the `ruleGlobs` key
 - **AND** SHALL NOT fail the command
 
 #### Scenario: A project whose only suffix is uncommon
