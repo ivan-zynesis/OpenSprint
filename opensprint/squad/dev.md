@@ -136,12 +136,11 @@ None assigned to this hat. The constraints these decisions answer live in
 
 ## Open Loops
 
-**Harvested** (`DEC-013`): seven of sixteen active decisions have no rule citing them.
+**Harvested** (`DEC-013`): six of sixteen active decisions have no rule citing them.
 
 | Decision | About |
 |---|---|
 | `DEC-005` | abandoned universe archive structure |
-| `DEC-007` | open loops are the backlog |
 | `DEC-008` | the charter compiles from governance records |
 | `DEC-010` | provenance manifest and `--check` |
 | `DEC-013` | rule links harvested from code |
@@ -151,6 +150,9 @@ None assigned to this hat. The constraints these decisions answer live in
 `DEC-010` and `DEC-013` are worth noticing: the two decisions that build the loop-closure
 machinery are themselves unguarded by it. Their implementations are tested, but no rule names
 them, so the harvest cannot see the link.
+
+`DEC-007` was on this list until a test in `backlog-seam` named it, which closed the loop with no
+bookkeeping — and, transitively, closed `DS-LOOP-CLOSURE`'s in [product.md](product.md).
 
 **Structural:**
 

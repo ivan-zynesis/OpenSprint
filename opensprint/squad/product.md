@@ -128,10 +128,10 @@ None assigned to this hat. Every recorded decision belongs to `dev` — see
 
 **Harvested** (`DEC-013`):
 
-- `constraint-unasserted` **DS-LOOP-CLOSURE** — answered by `DEC-007`, `DEC-010`, `DEC-013`, but
-  no rule cites any of them. The constraint that says the loop must close mechanically is itself
-  the least mechanically guarded thing here.
 - `constraint-unasserted` **DS-SELF-USE-SCOPE** — answered by `DEC-017`, which no rule cites.
+
+`DS-LOOP-CLOSURE` was on this list until a test named `DEC-007`, one of its three answering
+decisions. Transitive coverage closed it with nothing marking it resolved (`DEC-013`).
 
 **Structural:**
 
