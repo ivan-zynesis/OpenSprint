@@ -195,6 +195,20 @@ describe('opensprint compact loops (e2e)', () => {
     expect(r.stdout).toContain('No open loops');
   });
 
+  it('names both triage workflows when loops exist', async () => {
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.stdout).toContain('/opsp:explore');
+    expect(r.stdout).toContain('/opsp:propose');
+    expect(r.stdout).toMatch(/no separate[\s\S]*remediation workflow/);
+  });
+
+  it('does not print the triage line when there are no loops', async () => {
+    fs.writeFileSync(path.join(projectRoot, 'src', 'a.test.ts'), '// guards DEC-001\n');
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.stdout).toContain('No open loops');
+    expect(r.stdout).not.toContain('/opsp:propose');
+  });
+
   it('--json carries the loops', async () => {
     const r = await runCLI(['compact', 'loops', '--json'], { cwd: projectRoot });
     expect(r.exitCode).toBe(0);

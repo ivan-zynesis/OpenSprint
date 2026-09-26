@@ -115,6 +115,9 @@ function printLoops(loops: readonly OpenLoop[], registry: readonly string[]): vo
     }
     console.log();
   }
+  console.log(
+    chalk.dim('Triage these through /opsp:explore, then /opsp:propose. There is no separate\nremediation workflow — deciding which gap is worth work is a judgement call.')
+  );
 }
 
 function relative(projectRoot: string, p: string): string {
