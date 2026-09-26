@@ -66,10 +66,20 @@ called by anything.
 
 **Verification:** tsc, eslint and `validate --strict` clean; 1486 tests pass.
 
-### Queued
+### fix-reconciliation-specs — complete (2026-09-26)
 
-- `fix-reconciliation-specs` — `main` has been red since 35a3a21. Two source specs shipped by
-  the parallel-universe-reconciliation initiative lack `## Requirements`, so
-  `source-specs-normalization` has been failing for an entire initiative. Operator chose to fix
-  it as its own change rather than folding it into hat-registry. This is the loop's last arrow
-  in practice: the rule fired and nobody acted on it.
+**OPSX change:** `2026-09-26-fix-reconciliation-specs` (archived)
+
+`main` had been red since 35a3a21 — an entire initiative — because two source specs from
+parallel-universe-reconciliation shipped without a `## Requirements` section. Promoted their
+normative prose into 13 Requirement/Scenario blocks, preserving `## Purpose` verbatim and
+restoring the `DEC-004` citation. No behaviour change. `source-specs-normalization` passes.
+
+### Open loops
+
+- **`zsh-installer.test.ts` isolation defect (18 failures).** Not environmental noise. The
+  suite builds a `testHomeDir` under `os.tmpdir()`, but the code path still consults the real
+  `os.homedir()`, so `isOhMyZshInstalled` sees the developer's own `~/.oh-my-zsh` and returns
+  true where the test expects false. These pass in CI, where Oh My Zsh is absent, and fail for
+  any developer who has it. Same shape as the defect above: a guard that does not guard what
+  it claims to. Awaiting triage via `/opsp:explore`.
