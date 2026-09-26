@@ -3,11 +3,9 @@
 ## Purpose
 
 Define the structure, lifecycle, and access control for driver spec artifacts that capture external constraints provided by the operator.
-
 ## Requirements
-
 ### Requirement: Driver spec artifact structure
-The system SHALL store driver specs as individual markdown files in `opensprint/driver-specs/` at the project root, each with YAML frontmatter containing `id`, `type`, `status`, and `created` fields.
+The system SHALL store driver specs as individual markdown files in `opensprint/driver-specs/` at the project root, each with YAML frontmatter containing `id`, `type`, `status`, and `created` fields, and optionally a `hats` field.
 
 #### Scenario: Creating a new driver spec
 - **WHEN** operator instructs the agent to create a driver spec
@@ -17,6 +15,7 @@ The system SHALL store driver specs as individual markdown files in `opensprint/
   - `type`: one of `product`, `legal`, `compliance`, `reliability`, `architecture`, `business`
   - `status`: one of `active`, `superseded`, `deprecated`
   - `created`: ISO 8601 date
+- **AND** the frontmatter MAY contain `hats`, naming the hat or hats accountable for the spec
 - **AND** the file body SHALL contain the driver spec content in operator's own words
 
 #### Scenario: Driver spec file on Windows
@@ -39,12 +38,16 @@ The system SHALL create or modify driver spec files only when the operator expli
 - **AND** the agent SHALL act as a scribe, faithfully recording operator intent without embellishment
 
 ### Requirement: Driver spec types
-The system SHALL support categorized driver spec types to distinguish the source and nature of external constraints.
+The system SHALL support categorized driver spec types to distinguish the source and nature of external constraints, validated mechanically rather than by instruction alone.
 
 #### Scenario: Listing driver spec types
 - **WHEN** the system validates a driver spec type field
 - **THEN** it SHALL accept exactly the following values by explicit list lookup: `product`, `legal`, `compliance`, `reliability`, `architecture`, `business`
 - **AND** reject any value not in this list
+
+#### Scenario: Type validation is enforced in code
+- **WHEN** a driver spec declares a `type` outside the accepted list
+- **THEN** validation SHALL fail rather than relying on agent instructions to prevent the value
 
 ### Requirement: Driver spec lifecycle
 The system SHALL support driver spec status transitions to track how external truth evolves over time.
@@ -69,3 +72,16 @@ The system SHALL provide a way to list all active driver specs for agent and ope
 - **THEN** the system SHALL read all files in `opensprint/driver-specs/`
 - **AND** return specs with `status: active`
 - **AND** include the `id`, `type`, and first line of body content as summary
+
+### Requirement: Driver spec hat assignment
+The system SHALL allow a driver spec to declare the single hat accountable for it.
+
+#### Scenario: Driver spec declares hats
+- **WHEN** a driver spec's frontmatter contains `hats`
+- **THEN** every declared value SHALL be validated against the resolved hat registry
+- **AND** one or more hats MAY be declared
+
+#### Scenario: Driver spec omits hats
+- **WHEN** a driver spec's frontmatter has no `hats` key
+- **THEN** the spec SHALL be reported as unassigned rather than rejected
+
