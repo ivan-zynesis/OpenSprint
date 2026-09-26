@@ -23,6 +23,10 @@ artifacts:
       - type: one of product, legal, compliance, reliability, architecture, business
       - status: active (default for new specs)
       - created: today's date in YYYY-MM-DD format
+      - hats: optional — the hat or hats accountable for this spec, drawn from
+        product, maintainer, dev, devops (or the project's own registry in
+        openspec/config.yaml). A bare string or a list; a record that crosses
+        hats declares each of them.
 
       The body should contain the driver spec content in the operator's own words.
       Do not embellish or interpret — capture the intent as stated.
@@ -46,6 +50,10 @@ artifacts:
       - depends-on: array of driver spec IDs and/or decision IDs this traces to
       - created: today's date in YYYY-MM-DD format
       - depth: integer (0 if depends only on driver specs, max(parent depths) + 1 otherwise)
+      - hats: optional — the hat or hats accountable for this decision, drawn
+        from product, maintainer, dev, devops (or the project's own registry in
+        openspec/config.yaml). A bare string or a list; a record that crosses
+        hats declares each of them.
 
       Required sections:
       - Question: the ambiguity you raised, in your own words

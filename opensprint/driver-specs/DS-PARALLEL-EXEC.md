@@ -3,6 +3,7 @@ id: DS-PARALLEL-EXEC
 type: architecture
 status: active
 created: 2026-05-22
+hats: [product]
 ---
 
 # DS-PARALLEL-EXEC: Parallel Initiative Execution

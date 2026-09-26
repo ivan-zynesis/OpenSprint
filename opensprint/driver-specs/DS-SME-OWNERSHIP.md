@@ -3,6 +3,7 @@ id: DS-SME-OWNERSHIP
 type: business
 status: active
 created: 2026-09-26
+hats: [product]
 ---
 
 # DS-SME-OWNERSHIP: Every Hat Needs One Human Owner

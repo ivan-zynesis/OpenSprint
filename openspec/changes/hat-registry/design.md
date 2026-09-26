@@ -7,16 +7,16 @@ Per-project configuration already exists: `openspec/config.yaml`, parsed by `Pro
 ## Goals / Non-Goals
 
 **Goals:**
-- One explicit, validated `hat` per record (`DEC-012`)
+- Explicit, validated `hats` on each record — one or more (`DEC-016`)
 - A per-project hat registry, because the hat set is a property of the product (`DS-SQUAD-HATS`)
-- Mechanical validation of both `hat` and driver-spec `type`
+- Mechanical validation of both `hats` and driver-spec `type`
 - Backfill inference good enough that owner confirmation is a review, not data entry
 
 **Non-Goals:**
 - Rendering anything. No view, no manifest, no `--check` — that is milestone 2.
-- Reading `hat` at runtime in any existing command.
+- Reading `hats` at runtime in any existing command.
 - A `compact` CLI command or skill.
-- Multi-hat records. `DEC-012` settles this: one hat per record, because a record with two owners has none.
+- Inferring more than one hat. Inference proposes at most one; a record that genuinely crosses hats is assigned by its owner.
 
 ## Decisions
 
@@ -26,7 +26,11 @@ Per-project configuration already exists: `openspec/config.yaml`, parsed by `Pro
 
 **Validation is `Set.has` against the resolved registry.** Explicit list lookup, per the project rule preferring lookups over pattern matching. The same module validates driver-spec `type` against `DRIVER_SPEC_TYPES`, closing the gap that let `type: driver-spec` through.
 
-**`hat` is optional; absent means unassigned.** Required would break every existing project on upgrade. Unassigned is a state `/opsp:compact` reports as an open loop (`DEC-007`), which is the honest behaviour `DEC-006` asks for: the view shows the current state, and an unrouted record *is* the current state.
+**`hats` is optional; absent means unassigned.** Required would break every existing project on upgrade, which `DS-BACKWARD-COMPAT` forbids. Unassigned is a state `/opsp:compact` reports as an open loop (`DEC-007`), which is the honest behaviour `DEC-006` asks for: the view shows the current state, and an unrouted record *is* the current state.
+
+**`hats` accepts a string or a list, normalised to a list.** One field name rather than a singular and a plural spelling, and a forgiving input shape: `hats: product` and `hats: [product, maintainer]` both parse. Duplicates are removed, order preserved. An empty list is malformed rather than empty-but-valid — declaring the key must say something.
+
+**The default set has four hats, not five.** `DEC-016` superseded `DEC-012` while this change was being implemented. The single-hat rule had required an `agreements` hat for cross-cutting constraints; six of this repository's twenty-one records routed there, none of which had an owner, which is what `DS-SME-OWNERSHIP` requires a hat to have. Multi-hat expresses the same thing without inventing a fifth accountability that maps to nobody.
 
 **Default-hat inference has two rules and one honest gap.**
 
@@ -47,7 +51,7 @@ The gap: **nothing infers `devops`**. No driver-spec type maps to it, and an inf
 
 ## Risks / Trade-offs
 
-**Inference will be wrong for devops records.** Accepted, and visible: of this repo's own 15 ADRs, the ones about worktrees and reconciliation will infer `dev` and need correcting to `agreements` or `devops` by hand. The alternative — keyword heuristics — is worse and harder to unpick later.
+**Inference will be wrong for devops records.** Accepted, and visible. For this repository it costs nothing, because `DS-SELF-USE-SCOPE` and `DEC-017` establish that there is no CI/CD surface and the `devops` hat is legitimately empty. On a project that has one, the records will need assigning by hand. The alternative — keyword heuristics — is worse and harder to unpick later.
 
 **Adding `hats` to `ProjectConfigSchema` touches a file every command reads.** Mitigated by the field being optional with a constant default, and by `readProjectConfig` already parsing field-by-field, so a malformed `hats` degrades to the default rather than failing the command.
 

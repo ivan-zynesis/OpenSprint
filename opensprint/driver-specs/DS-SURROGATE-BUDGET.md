@@ -3,6 +3,7 @@ id: DS-SURROGATE-BUDGET
 type: reliability
 status: active
 created: 2026-09-26
+hats: [product]
 ---
 
 # DS-SURROGATE-BUDGET: Surrogate Loading Must Not Consume the Session Budget

@@ -3,6 +3,7 @@ id: DS-SQUAD-HATS
 type: architecture
 status: active
 created: 2026-09-26
+hats: [product]
 ---
 
 # DS-SQUAD-HATS: Engineering Accountability Partitions Into Four Hats

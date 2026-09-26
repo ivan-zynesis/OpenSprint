@@ -38,6 +38,14 @@ export const ProjectConfigSchema = z.object({
     )
     .optional()
     .describe('Per-artifact rules, keyed by artifact ID'),
+
+  // Optional: per-project hat registry (DS-SQUAD-HATS).
+  // The hat set is a property of the product, not of the tool, so a project
+  // may declare its own. Absent or malformed falls back to DEFAULT_HATS.
+  hats: z
+    .array(z.string())
+    .optional()
+    .describe('Hat registry for this project (defaults to DEFAULT_HATS)'),
 });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -149,6 +157,19 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
         }
       } else {
         console.warn(`Invalid 'rules' field in config (must be object)`);
+      }
+    }
+
+    // Parse hats field using Zod
+    if (raw.hats !== undefined) {
+      const hatsResult = z.array(z.string().min(1)).min(1).safeParse(raw.hats);
+
+      if (hatsResult.success) {
+        config.hats = hatsResult.data;
+      } else {
+        console.warn(
+          `Invalid 'hats' field in config (must be a non-empty array of non-empty strings), using the default hat set`
+        );
       }
     }
 

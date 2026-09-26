@@ -3,6 +3,7 @@ id: DS-LOOP-CLOSURE
 type: architecture
 status: active
 created: 2026-09-26
+hats: [product]
 ---
 
 # DS-LOOP-CLOSURE: The Loop Must Close Mechanically
