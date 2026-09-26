@@ -1,6 +1,6 @@
 ---
 id: DS-HIGH-IMPACT-OPS
-type: driver-spec
+type: reliability
 status: active
 created: 2026-05-22
 ---

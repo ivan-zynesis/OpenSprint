@@ -1,6 +1,6 @@
 ---
 id: DS-PARALLEL-EXEC
-type: driver-spec
+type: architecture
 status: active
 created: 2026-05-22
 ---
