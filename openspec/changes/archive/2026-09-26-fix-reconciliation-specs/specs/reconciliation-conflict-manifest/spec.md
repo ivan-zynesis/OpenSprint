@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Conflict manifest is produced during the mandatory planning phase
-The system SHALL produce a conflict manifest during the read-only planning phase of `/opsp:rebase` and `/opsp:abandon`, before any file is written, and SHALL NOT persist it to disk.
+The system SHALL produce a conflict manifest during the read-only planning phase mandated by `DEC-004`, before any file is written, and SHALL NOT persist it to disk. The phase applies to both `/opsp:rebase` and `/opsp:abandon`.
 
 #### Scenario: Producing the manifest
 - **WHEN** a reconciliation operation begins
