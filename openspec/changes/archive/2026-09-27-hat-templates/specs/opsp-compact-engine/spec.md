@@ -36,6 +36,8 @@ The system SHALL define a view's sections per hat, each section declaring which 
 - **THEN** a kebab-case name SHALL title-case into the heading
 - **AND** `open-loops` SHALL render as `Open Loops`
 
+## ADDED Requirements
+
 ### Requirement: Default sections
 The system SHALL default a hat's sections according to the hat, because the four accountabilities produce different kinds of knowledge rather than the same kind about different subjects.
 
