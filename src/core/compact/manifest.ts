@@ -21,7 +21,9 @@ export interface ManifestEntry {
   section: string;
   /** Contributing record ids to their content hashes. */
   inputs: Record<string, string>;
-  /** Combined hash over the sorted inputs. */
+  /** Observed files by project-relative path, to their content hashes. */
+  observed: Record<string, string>;
+  /** Combined hash over the sorted record inputs and observations. */
   inputHash: string;
   /** Hash of the rendered view file, or null when nothing was rendered. */
   outputHash: string | null;
@@ -43,16 +45,28 @@ export function hashContent(text: string): string {
 }
 
 /**
- * Combines a section's record hashes into one.
+ * Combines a section's record hashes and observations into one.
  *
- * Inputs are sorted by record id first, so that `readdir` order — which
- * differs across platforms — cannot change the result.
+ * Both are sorted by key first, so that `readdir` and glob order — which
+ * differ across platforms — cannot change the result. Observations join the
+ * same hash rather than getting their own: a section is stale when what it
+ * was compiled from has moved, and whether that was a record or a file is the
+ * renderer's concern, not the gate's.
  */
-export function sectionInputHash(records: readonly RecordRef[]): string {
-  const pairs = records
+export function sectionInputHash(
+  records: readonly RecordRef[],
+  observed: Readonly<Record<string, string>> = {}
+): string {
+  const recordPairs = records
     .map((r) => [r.id, hashContent(r.content)] as const)
     .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
-  const combined = pairs.map(([id, hash]) => `${id}:${hash}`).join('\n');
+  const observedPairs = Object.entries(observed).sort((a, b) =>
+    a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
+  );
+  const combined = [
+    ...recordPairs.map(([id, hash]) => `${id}:${hash}`),
+    ...observedPairs.map(([file, hash]) => `file:${file}:${hash}`),
+  ].join('\n');
   return createHash('sha256').update(combined, 'utf8').digest('hex');
 }
 

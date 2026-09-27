@@ -26,10 +26,28 @@ export const SECTION_INPUT_KINDS = [
 
 export type SectionInputKind = (typeof SECTION_INPUT_KINDS)[number];
 
-/** A section of a hat's view: a name, and what feeds it. */
+/**
+ * The named set meaning "the project's rule files".
+ *
+ * A named set rather than a repeated glob list: `open-loops` derives from the
+ * rule index, and the globs are already project configuration. Repeating them
+ * would let the two drift, so a project changing `ruleGlobs` would silently
+ * stop restaging its open loops.
+ */
+export const OBSERVES_RULES = 'rules' as const;
+
+/**
+ * A section of a hat's view: a name, what records feed it, and what it
+ * observes of the system.
+ *
+ * `observes` is independent of `inputs` because code is orthogonal to record
+ * kind — a tech-stack section may want a hat's decisions *and* the manifest
+ * files that show what is actually installed.
+ */
 export interface SectionDef {
   name: string;
   inputs: SectionInputKind;
+  observes?: typeof OBSERVES_RULES | string[];
 }
 
 /**
@@ -45,7 +63,10 @@ export const DEFAULT_SECTIONS: readonly SectionDef[] = [
   { name: 'charter', inputs: 'all' },
   { name: 'constraints', inputs: 'driver-specs' },
   { name: 'decisions', inputs: 'decisions' },
-  { name: 'open-loops', inputs: 'none' },
+  // Observes the rules: a deleted guard must restage the section that reports
+  // what is guarded, or the view keeps claiming a decision is covered after
+  // its only test was removed.
+  { name: 'open-loops', inputs: 'none', observes: OBSERVES_RULES },
 ];
 
 /**

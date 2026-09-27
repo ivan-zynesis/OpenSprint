@@ -52,7 +52,11 @@ export const ProjectConfigSchema = z.object({
         z.string(),
         z.object({
           sections: z
-            .array(z.object({ name: z.string().min(1), inputs: z.string().min(1) }))
+            .array(z.object({
+              name: z.string().min(1),
+              inputs: z.string().min(1),
+              observes: z.union([z.string().min(1), z.array(z.string().min(1))]).optional(),
+            }))
             .optional(),
         })
       ),
@@ -190,7 +194,11 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
           z.string().min(1),
           z.object({
             sections: z
-              .array(z.object({ name: z.string().min(1), inputs: z.string().min(1) }))
+              .array(z.object({
+              name: z.string().min(1),
+              inputs: z.string().min(1),
+              observes: z.union([z.string().min(1), z.array(z.string().min(1))]).optional(),
+            }))
               .min(1)
               .optional(),
           })

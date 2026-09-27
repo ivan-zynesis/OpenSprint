@@ -109,6 +109,40 @@ Citations also make the drill-down affordable. A reader orients on the view and 
 
 ---
 
+## The record and the system are different things
+
+A view describes **the system**, citing records where they explain it. Those are two sources with
+very different authority, and a reader has to be able to tell them apart:
+
+- **a decision is binding** — someone chose it, and departing from it is a defect
+- **an observation is a fact** — it is what the code does today, and it may be an accident
+
+So the citation says which:
+
+\`\`\`
+FROM A RECORD:       The ledger is append-only and entries balance in the
+                     functional currency (\`DEC-047\`).
+
+FROM AN OBSERVATION: The API runs on Node 22 and Fastify
+                     (\`apps/api/package.json\`).
+\`\`\`
+
+Three rules follow.
+
+**An observation no record explains still stands.** Write it, cite its path, and do not invent a
+rationale. Something being undocumented means it was never made explicit — that is reportable, not
+wrong.
+
+**Never present an observation as though a record established it.** A claim citing a file is a
+claim about what is; a claim citing a record is a claim about what was decided. Blurring them is
+how a view starts asserting authority nobody granted.
+
+**If an observation appears to contradict a record, surface the disagreement.** Do not choose
+between them and do not quietly prefer either. Resolving it is a rule's job, not compaction's —
+a failing rule is how an implementation and a decision disagreeing becomes visible.
+
+---
+
 ## View structure
 
 Each hat view has four sections. The engine tracks them separately, so a new ADR restages \`Decisions\` and leaves \`Constraints\` alone.

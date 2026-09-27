@@ -214,7 +214,16 @@ describe('compact', () => {
     it('round-trips', () => {
       const m: Manifest = {
         version: 1,
-        entries: [{ hat: 'dev', section: 'decisions', inputs: { 'DEC-1': 'abc' }, inputHash: 'h', outputHash: 'o' }],
+        entries: [
+          {
+            hat: 'dev',
+            section: 'decisions',
+            inputs: { 'DEC-1': 'abc' },
+            observed: {},
+            inputHash: 'h',
+            outputHash: 'o',
+          },
+        ],
       };
       writeManifest(tempDir, m);
       expect(readManifest(tempDir)).toEqual(m);

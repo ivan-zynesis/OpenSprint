@@ -38,7 +38,7 @@ import {
   allFresh,
   type SectionStatus,
 } from '../core/compact/status.js';
-import { buildRuleIndex, resolveRuleGlobs } from '../core/compact/rules.js';
+import { buildRuleIndex, resolveRuleGlobs, resolveObservedFiles } from '../core/compact/rules.js';
 import { deriveOpenLoops, groupLoopsByHat, type OpenLoop } from '../core/compact/loops.js';
 
 export interface CompactOptions {
@@ -75,8 +75,13 @@ function scan(projectRoot: string): Scan {
   return {
     opensprintDir,
     registry,
-    statuses: classifyAll(opensprintDir, manifest, registry, grouped, (hat) =>
-      resolveHatSections(projectRoot, hat)
+    statuses: classifyAll(
+      opensprintDir,
+      manifest,
+      registry,
+      grouped,
+      (hat) => resolveHatSections(projectRoot, hat),
+      (section) => resolveObservedFiles(projectRoot, section)
     ),
     unassigned: grouped.unassigned,
     unknownHats: grouped.unknownHats,
@@ -147,10 +152,14 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
             added: s.added,
             removed: s.removed,
             modified: s.modified,
+            observedAdded: s.observedAdded,
+            observedRemoved: s.observedRemoved,
+            observedModified: s.observedModified,
             inputs: s.inputs.map((r) => ({
               id: r.id,
               path: relative(projectRoot, r.path),
             })),
+            observes: Object.keys(s.observed).sort(),
           })),
           unassigned,
           unknownHats: unknownHats.map(([id, hat]) => ({ record: id, hat })),
@@ -172,8 +181,15 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
       if (s.added.length) console.log(`    added:    ${s.added.join(', ')}`);
       if (s.removed.length) console.log(`    removed:  ${s.removed.join(', ')}`);
       if (s.modified.length) console.log(`    modified: ${s.modified.join(', ')}`);
+      if (s.observedAdded.length) console.log(`    observed +: ${s.observedAdded.join(', ')}`);
+      if (s.observedRemoved.length) console.log(`    observed -: ${s.observedRemoved.join(', ')}`);
+      if (s.observedModified.length) console.log(`    observed ~: ${s.observedModified.join(', ')}`);
       for (const input of s.inputs) {
         console.log(chalk.dim(`    ← ${relative(projectRoot, input.path)}`));
+      }
+      const observedCount = Object.keys(s.observed).length;
+      if (observedCount > 0) {
+        console.log(chalk.dim(`    ← observes ${observedCount} file(s)`));
       }
       console.log();
     }
@@ -220,11 +236,13 @@ export async function compactSealCommand(): Promise<void> {
 
     for (const section of resolveHatSections(projectRoot, hat)) {
       const inputs = resolveSectionInputs(hat, section, grouped);
+      const observed = resolveObservedFiles(projectRoot, section);
       entries.push({
         hat,
         section: section.name,
         inputs: inputMap(inputs),
-        inputHash: sectionInputHash(inputs),
+        observed,
+        inputHash: sectionInputHash(inputs, observed),
         outputHash: rendered,
       });
     }

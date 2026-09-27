@@ -16,6 +16,7 @@
 import { readProjectConfig } from './project-config.js';
 import {
   DEFAULT_SECTIONS,
+  OBSERVES_RULES,
   SECTION_INPUT_KINDS,
   type SectionDef,
   type SectionInputKind,
@@ -137,7 +138,31 @@ export function resolveHatSections(
     return DEFAULT_SECTIONS;
   }
 
-  return sections.map((s) => ({ name: s.name, inputs: s.inputs as SectionInputKind }));
+  // `observes` is either the named rules set or a non-empty list of globs.
+  // Anything else would mean guessing what the section is compiled from,
+  // which is exactly the guess that puts unexplained content in a view.
+  const badObserves = sections.filter(
+    (s) =>
+      s.observes !== undefined &&
+      s.observes !== OBSERVES_RULES &&
+      !(Array.isArray(s.observes) && s.observes.length > 0)
+  );
+  if (badObserves.length > 0) {
+    console.warn(
+      `Hat '${hat}' declares section(s) with an invalid 'observes' value: ` +
+        `${badObserves.map((s) => `${s.name}=${JSON.stringify(s.observes)}`).join(', ')}. ` +
+        `Accepted: '${OBSERVES_RULES}' or a non-empty array of globs. Using the default sections.`
+    );
+    return DEFAULT_SECTIONS;
+  }
+
+  return sections.map((s) => ({
+    name: s.name,
+    inputs: s.inputs as SectionInputKind,
+    ...(s.observes === undefined
+      ? {}
+      : { observes: s.observes as typeof OBSERVES_RULES | string[] }),
+  }));
 }
 
 /**

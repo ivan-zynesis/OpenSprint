@@ -38,6 +38,14 @@ export interface SectionStatus {
   removed: string[];
   /** Record ids whose content changed since the manifest was written. */
   modified: string[];
+  /** Observed files feeding this section, path to content hash. */
+  observed: Record<string, string>;
+  /** Observed paths added since the manifest was written. */
+  observedAdded: string[];
+  /** Observed paths removed since the manifest was written. */
+  observedRemoved: string[];
+  /** Observed paths whose content changed since the manifest was written. */
+  observedModified: string[];
 }
 
 /**
@@ -52,7 +60,8 @@ export function classifySection(
   manifest: Manifest,
   hat: string,
   section: SectionDef,
-  grouped: GroupedRecords
+  grouped: GroupedRecords,
+  observed: Readonly<Record<string, string>> = {}
 ): SectionStatus {
   const inputs = resolveSectionInputs(hat, section, grouped);
   const entry = findEntry(manifest, hat, section.name);
@@ -63,6 +72,10 @@ export function classifySection(
     added: [],
     removed: [],
     modified: [],
+    observed: { ...observed },
+    observedAdded: [],
+    observedRemoved: [],
+    observedModified: [],
   };
 
   if (!entry) {
@@ -77,8 +90,24 @@ export function classifySection(
     .filter((id) => id in recorded && recorded[id] !== current[id])
     .sort();
 
-  if (sectionInputHash(inputs) !== entry.inputHash) {
-    return { ...base, state: 'stale', added, removed, modified };
+  const recordedObs = entry.observed ?? {};
+  const observedAdded = Object.keys(observed).filter((f) => !(f in recordedObs)).sort();
+  const observedRemoved = Object.keys(recordedObs).filter((f) => !(f in observed)).sort();
+  const observedModified = Object.keys(observed)
+    .filter((f) => f in recordedObs && recordedObs[f] !== observed[f])
+    .sort();
+
+  if (sectionInputHash(inputs, observed) !== entry.inputHash) {
+    return {
+      ...base,
+      state: 'stale',
+      added,
+      removed,
+      modified,
+      observedAdded,
+      observedRemoved,
+      observedModified,
+    };
   }
 
   // Inputs match. The only remaining question is whether the view still says
@@ -109,12 +138,15 @@ export function classifyAll(
   manifest: Manifest,
   registry: readonly string[],
   grouped: GroupedRecords,
-  sectionsFor: (hat: string) => readonly SectionDef[]
+  sectionsFor: (hat: string) => readonly SectionDef[],
+  observedFor: (section: SectionDef) => Record<string, string> = () => ({})
 ): SectionStatus[] {
   const out: SectionStatus[] = [];
   for (const hat of registry) {
     for (const section of sectionsFor(hat)) {
-      out.push(classifySection(opensprintDir, manifest, hat, section, grouped));
+      out.push(
+        classifySection(opensprintDir, manifest, hat, section, grouped, observedFor(section))
+      );
     }
   }
   return out;

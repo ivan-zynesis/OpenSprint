@@ -14,6 +14,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import fg from 'fast-glob';
 import { readProjectConfig } from '../project-config.js';
+import { hashContent } from './manifest.js';
+import { OBSERVES_RULES, type SectionDef } from './sections.js';
 
 /**
  * Default rule-file patterns.
@@ -139,4 +141,37 @@ export function buildRuleIndex(
   }
 
   return { byRecord, byRule, unresolved, scanned };
+}
+
+
+/**
+ * Resolves the files a section observes, with their content hashes.
+ *
+ * `rules` resolves through the project's rule globs rather than repeating
+ * them, so the two cannot drift. Explicit globs resolve directly, under the
+ * same exclusions — a section observing the surrogate would make the view
+ * depend on itself.
+ *
+ * Paths are project-relative with separators normalised to `/`, so a manifest
+ * written on Windows matches one written on macOS.
+ */
+export function resolveObservedFiles(
+  projectRoot: string,
+  section: SectionDef
+): Record<string, string> {
+  const declared = section.observes;
+  if (!declared) return {};
+
+  const globs = declared === OBSERVES_RULES ? resolveRuleGlobs(projectRoot) : declared;
+  const out: Record<string, string> = {};
+
+  for (const rel of findRuleFiles(projectRoot, globs)) {
+    const key = rel.split(path.sep).join('/');
+    try {
+      out[key] = hashContent(fs.readFileSync(path.join(projectRoot, rel), 'utf-8'));
+    } catch {
+      // A file that vanished mid-scan contributes nothing rather than failing.
+    }
+  }
+  return out;
 }
