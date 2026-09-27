@@ -7,7 +7,6 @@ Define the hat taxonomy that compiled surrogate views are grouped by, the per-pr
 A hat is a context boundary. It names the accountability for a record, and therefore the single human who reviews it, receives its escalations, and triages its backlog. A record declares one or more hats; a constraint that crosses hats appears in each view that needs it.
 
 This capability also carries the first mechanical validation of record frontmatter, covering both the declared hats and the driver-spec `type` values that were previously enforced by instruction alone.
-
 ## Requirements
 ### Requirement: Default hat set
 The system SHALL define the default hat set as an explicit constant, not as an inline literal at each use site.
@@ -23,22 +22,33 @@ The system SHALL define the default hat set as an explicit constant, not as an i
 - **AND** a constraint crossing hats SHALL declare each hat it crosses rather than being assigned to a shared bucket
 
 ### Requirement: Per-project hat registry
-The system SHALL allow a project to declare its own hat set in `openspec/config.yaml`, because the hat set is a property of the product rather than of the tool.
+The system SHALL allow a project to declare its own hat set in `openspec/config.yaml`, and optionally the sections each hat renders.
 
-#### Scenario: Project declares a custom hat set
-- **WHEN** `openspec/config.yaml` contains a `hats` key whose value is a non-empty array of strings
-- **THEN** the system SHALL resolve the registry to that array
-- **AND** SHALL NOT merge it with `DEFAULT_HATS`
+#### Scenario: Project declares hats as a list of names
+- **WHEN** `hats` is a non-empty array of strings
+- **THEN** the system SHALL resolve the registry to those names
+- **AND** each SHALL resolve to `DEFAULT_SECTIONS`
+
+#### Scenario: Project declares hats as a map
+- **WHEN** `hats` is a non-empty map from hat name to configuration
+- **THEN** the system SHALL resolve the registry to those names
+- **AND** a hat whose configuration declares `sections` SHALL resolve to exactly those sections
+- **AND** a hat whose configuration declares no `sections` SHALL resolve to `DEFAULT_SECTIONS`
 
 #### Scenario: Project declares no hat set
 - **WHEN** `openspec/config.yaml` has no `hats` key
-- **THEN** the system SHALL resolve the registry to `DEFAULT_HATS`
+- **THEN** the system SHALL resolve the registry to `DEFAULT_HATS`, each with `DEFAULT_SECTIONS`
 
 #### Scenario: Project declares a malformed hat set
-- **WHEN** the `hats` key is present but is not an array of strings, or is an empty array
+- **WHEN** the `hats` key is neither a non-empty array of strings nor a non-empty map of valid hat configurations
 - **THEN** the system SHALL resolve the registry to `DEFAULT_HATS`
 - **AND** SHALL surface a warning naming the `hats` key
 - **AND** SHALL NOT fail the command
+
+#### Scenario: A section declares an unknown input kind
+- **WHEN** a declared section's `inputs` is not one of the accepted kinds
+- **THEN** the hat's sections SHALL degrade to `DEFAULT_SECTIONS`
+- **AND** SHALL surface a warning naming the hat and the offending value
 
 #### Scenario: Reading config on Windows
 - **WHEN** the hat registry is resolved on Windows
