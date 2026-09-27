@@ -136,23 +136,23 @@ None assigned to this hat. The constraints these decisions answer live in
 
 ## Open Loops
 
-**Harvested** (`DEC-013`): six of sixteen active decisions have no rule citing them.
+**Harvested** (`DEC-013`): five of sixteen active decisions have no rule citing them.
 
 | Decision | About |
 |---|---|
 | `DEC-005` | abandoned universe archive structure |
 | `DEC-008` | the charter compiles from governance records |
-| `DEC-010` | provenance manifest and `--check` |
 | `DEC-013` | rule links harvested from code |
 | `DEC-015` | v1 defers the loading switch |
 | `DEC-017` | CLI plus generated files, no GUI |
 
-`DEC-010` and `DEC-013` are worth noticing: the two decisions that build the loop-closure
-machinery are themselves unguarded by it. Their implementations are tested, but no rule names
-them, so the harvest cannot see the link.
+`DEC-013` is worth noticing: the decision that harvests rule links is not itself named by one.
+Its implementation is tested, but no rule cites it, so the harvest cannot see the link.
 
-`DEC-007` was on this list until a test in `backlog-seam` named it, which closed the loop with no
-bookkeeping — and, transitively, closed `DS-LOOP-CLOSURE`'s in [product.md](product.md).
+Two loops have closed here without any bookkeeping. `DEC-007` went when a test in `backlog-seam`
+named it — which transitively closed `DS-LOOP-CLOSURE`'s in [product.md](product.md). `DEC-010`
+went when the tests for `system-as-source` named it. In both cases the harvest simply stopped
+reporting them (`DEC-013`).
 
 **Structural:**
 

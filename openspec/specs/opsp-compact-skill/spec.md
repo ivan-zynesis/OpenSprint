@@ -7,7 +7,6 @@ Define the rendering contract for `/opsp:compact`: how the skill drives the dete
 The division is deliberate. Deciding which sections are stale is mechanical and lives in code, where it can gate a build without a model in the loop. Writing the condensed prose is synthesis and lives here. Neither half computes the other's answer, so the gate and the renderer cannot disagree about what is fresh.
 
 Everything the skill produces is derived from the records. It never writes one.
-
 ## Requirements
 ### Requirement: The compact skill is registered as an OPSP workflow
 The system SHALL provide `/opsp:compact` as a skill and command alongside the other OPSP workflows.
@@ -115,4 +114,28 @@ The skill SHALL render `architecture.md` from the records, alongside the hat vie
 - **WHEN** `/opsp:compact` renders
 - **THEN** it SHALL produce `opensprint/architecture.md` from the driver-specs and decision records
 - **AND** SHALL NOT produce it from the hat views, which are peers rather than inputs
+
+### Requirement: The record and the system are distinguishable in a view
+The skill SHALL make visible which claims come from a decision and which come from observing the system, because the two carry different authority: a decision is binding, an observation is a fact that may be an accident.
+
+#### Scenario: Citing a claim from a record
+- **WHEN** a claim is compiled from a driver-spec or decision record
+- **THEN** it SHALL cite the record ids inline, as already required
+
+#### Scenario: Citing a claim from an observation
+- **WHEN** a claim is compiled from an observed file
+- **THEN** it SHALL cite the project-relative path it was observed at
+- **AND** SHALL NOT present it as though a record established it
+
+#### Scenario: An observation no record explains
+- **WHEN** a section observes something that no record accounts for
+- **THEN** the claim SHALL stand, citing its path
+- **AND** the absence of a record SHALL NOT be treated as an error
+- **AND** the view SHALL NOT invent a rationale for it
+
+#### Scenario: A record and the system disagree
+- **WHEN** an observation appears to contradict a record
+- **THEN** the skill SHALL surface the disagreement rather than choosing between them
+- **AND** SHALL NOT silently prefer either
+- **AND** resolving it is a rule's job, not compaction's
 

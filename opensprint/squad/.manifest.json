@@ -84,7 +84,8 @@
         "test/core/commands/change-command.list.test.ts": "fb10c072c307d7f0869aab1d3de4e6d4ea65b614f2066b1b6b6c5393777cfdad",
         "test/core/commands/change-command.show-validate.test.ts": "20f169023ce399cc2e34c3468f81fb088f1e21105f49238205fb520c65d25266",
         "test/core/compact-loops.test.ts": "1b877d438c4893487461048ad7cb51cf55ec78ccd821b33f19484cd8ea32dee5",
-        "test/core/compact.test.ts": "3a8f153e052bf9faf5edfd4cd0b4f509360f39da4fe6f9a1d66cc4d8d65c1bf7",
+        "test/core/compact-observes.test.ts": "f5b7840a2efe302bae7163f21c14e028f13378c1b35897c85a149b33a0ca8441",
+        "test/core/compact.test.ts": "ad1c4d0d25fa0b3def6ad00c07de6bf4b5e24a623cec4b94ad2e11d93e19c75f",
         "test/core/completions/completion-provider.test.ts": "ea21722423a43c78b5091010ad4433fd20ddce104233a3f9fdfd78a8de3995c0",
         "test/core/completions/generators/bash-generator.test.ts": "5f91b22a27a40e5bb09a7c02023c06628cc0b3c2fae1a92c8e6ae032f1749c3d",
         "test/core/completions/generators/fish-generator.test.ts": "4095f9d23dd50a50c1c546993575c4e474978cde4ca0b49c2aacca0ffeaeab16",
@@ -132,7 +133,7 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "9a39d096efebbbfaefd2014711c167ac2e6db3d629c34435ce2f63e09dbdccb1",
+      "inputHash": "9054aa07c28a10b8de5c33858cb081c0ca5028f8a5bb1b1b79d99e7d45d3a95a",
       "outputHash": "222bcca289befb1fd8170f97e8c56049e65b4a6534d06adaf91faedfe18be1f8"
     },
     {
@@ -202,7 +203,8 @@
         "test/core/commands/change-command.list.test.ts": "fb10c072c307d7f0869aab1d3de4e6d4ea65b614f2066b1b6b6c5393777cfdad",
         "test/core/commands/change-command.show-validate.test.ts": "20f169023ce399cc2e34c3468f81fb088f1e21105f49238205fb520c65d25266",
         "test/core/compact-loops.test.ts": "1b877d438c4893487461048ad7cb51cf55ec78ccd821b33f19484cd8ea32dee5",
-        "test/core/compact.test.ts": "3a8f153e052bf9faf5edfd4cd0b4f509360f39da4fe6f9a1d66cc4d8d65c1bf7",
+        "test/core/compact-observes.test.ts": "f5b7840a2efe302bae7163f21c14e028f13378c1b35897c85a149b33a0ca8441",
+        "test/core/compact.test.ts": "ad1c4d0d25fa0b3def6ad00c07de6bf4b5e24a623cec4b94ad2e11d93e19c75f",
         "test/core/completions/completion-provider.test.ts": "ea21722423a43c78b5091010ad4433fd20ddce104233a3f9fdfd78a8de3995c0",
         "test/core/completions/generators/bash-generator.test.ts": "5f91b22a27a40e5bb09a7c02023c06628cc0b3c2fae1a92c8e6ae032f1749c3d",
         "test/core/completions/generators/fish-generator.test.ts": "4095f9d23dd50a50c1c546993575c4e474978cde4ca0b49c2aacca0ffeaeab16",
@@ -250,7 +252,7 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "9a39d096efebbbfaefd2014711c167ac2e6db3d629c34435ce2f63e09dbdccb1",
+      "inputHash": "9054aa07c28a10b8de5c33858cb081c0ca5028f8a5bb1b1b79d99e7d45d3a95a",
       "outputHash": "323d0ca217bf83c386b9620efb643179af15f264373a0368231d8ae61bf68b23"
     },
     {
@@ -276,7 +278,7 @@
       },
       "observed": {},
       "inputHash": "3f51d517ac6dee5a12d6410435aa7eae572bb8e71204e94c856869a8e9d429ba",
-      "outputHash": "0007d0752133cc1347529b165816b2eb94dfd5dc369d8686a942addad9700b2b"
+      "outputHash": "8c0ec4b31144cd285791e6ec1b28632bd20207985837da584c8bc79ab7e2f48e"
     },
     {
       "hat": "dev",
@@ -284,7 +286,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "0007d0752133cc1347529b165816b2eb94dfd5dc369d8686a942addad9700b2b"
+      "outputHash": "8c0ec4b31144cd285791e6ec1b28632bd20207985837da584c8bc79ab7e2f48e"
     },
     {
       "hat": "dev",
@@ -309,7 +311,7 @@
       },
       "observed": {},
       "inputHash": "3f51d517ac6dee5a12d6410435aa7eae572bb8e71204e94c856869a8e9d429ba",
-      "outputHash": "0007d0752133cc1347529b165816b2eb94dfd5dc369d8686a942addad9700b2b"
+      "outputHash": "8c0ec4b31144cd285791e6ec1b28632bd20207985837da584c8bc79ab7e2f48e"
     },
     {
       "hat": "dev",
@@ -350,7 +352,8 @@
         "test/core/commands/change-command.list.test.ts": "fb10c072c307d7f0869aab1d3de4e6d4ea65b614f2066b1b6b6c5393777cfdad",
         "test/core/commands/change-command.show-validate.test.ts": "20f169023ce399cc2e34c3468f81fb088f1e21105f49238205fb520c65d25266",
         "test/core/compact-loops.test.ts": "1b877d438c4893487461048ad7cb51cf55ec78ccd821b33f19484cd8ea32dee5",
-        "test/core/compact.test.ts": "3a8f153e052bf9faf5edfd4cd0b4f509360f39da4fe6f9a1d66cc4d8d65c1bf7",
+        "test/core/compact-observes.test.ts": "f5b7840a2efe302bae7163f21c14e028f13378c1b35897c85a149b33a0ca8441",
+        "test/core/compact.test.ts": "ad1c4d0d25fa0b3def6ad00c07de6bf4b5e24a623cec4b94ad2e11d93e19c75f",
         "test/core/completions/completion-provider.test.ts": "ea21722423a43c78b5091010ad4433fd20ddce104233a3f9fdfd78a8de3995c0",
         "test/core/completions/generators/bash-generator.test.ts": "5f91b22a27a40e5bb09a7c02023c06628cc0b3c2fae1a92c8e6ae032f1749c3d",
         "test/core/completions/generators/fish-generator.test.ts": "4095f9d23dd50a50c1c546993575c4e474978cde4ca0b49c2aacca0ffeaeab16",
@@ -398,8 +401,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "9a39d096efebbbfaefd2014711c167ac2e6db3d629c34435ce2f63e09dbdccb1",
-      "outputHash": "0007d0752133cc1347529b165816b2eb94dfd5dc369d8686a942addad9700b2b"
+      "inputHash": "9054aa07c28a10b8de5c33858cb081c0ca5028f8a5bb1b1b79d99e7d45d3a95a",
+      "outputHash": "8c0ec4b31144cd285791e6ec1b28632bd20207985837da584c8bc79ab7e2f48e"
     },
     {
       "hat": "devops",
@@ -464,7 +467,8 @@
         "test/core/commands/change-command.list.test.ts": "fb10c072c307d7f0869aab1d3de4e6d4ea65b614f2066b1b6b6c5393777cfdad",
         "test/core/commands/change-command.show-validate.test.ts": "20f169023ce399cc2e34c3468f81fb088f1e21105f49238205fb520c65d25266",
         "test/core/compact-loops.test.ts": "1b877d438c4893487461048ad7cb51cf55ec78ccd821b33f19484cd8ea32dee5",
-        "test/core/compact.test.ts": "3a8f153e052bf9faf5edfd4cd0b4f509360f39da4fe6f9a1d66cc4d8d65c1bf7",
+        "test/core/compact-observes.test.ts": "f5b7840a2efe302bae7163f21c14e028f13378c1b35897c85a149b33a0ca8441",
+        "test/core/compact.test.ts": "ad1c4d0d25fa0b3def6ad00c07de6bf4b5e24a623cec4b94ad2e11d93e19c75f",
         "test/core/completions/completion-provider.test.ts": "ea21722423a43c78b5091010ad4433fd20ddce104233a3f9fdfd78a8de3995c0",
         "test/core/completions/generators/bash-generator.test.ts": "5f91b22a27a40e5bb09a7c02023c06628cc0b3c2fae1a92c8e6ae032f1749c3d",
         "test/core/completions/generators/fish-generator.test.ts": "4095f9d23dd50a50c1c546993575c4e474978cde4ca0b49c2aacca0ffeaeab16",
@@ -512,7 +516,7 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "9a39d096efebbbfaefd2014711c167ac2e6db3d629c34435ce2f63e09dbdccb1",
+      "inputHash": "9054aa07c28a10b8de5c33858cb081c0ca5028f8a5bb1b1b79d99e7d45d3a95a",
       "outputHash": "866b8c07dfadbebde7590f7f131a531c1e6a2d6845cfe28a2e9f1e8a1a5e2066"
     }
   ]
