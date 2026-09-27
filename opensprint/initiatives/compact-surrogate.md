@@ -46,7 +46,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
 - [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 - [x] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
-- [ ] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
+- [x] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
 - [ ] per-hat-classification: Classify records within their hat, and give the driver-spec layer the dependency edges it has never had. Product first, with OGSM — `objective | goal | strategy` as node kinds and `measure` as a section of a goal rather than a node of its own. Backfilled with operator confirmation batched by area, defaulting driver-specs to objective or goal. Uses the `depends-on` the ADR layer already has, and the `revises` / `refines` / `supersedes` vocabulary that emerged organically in overheard and cashier, so "reinforce" and "change" need nothing new. The mechanism is per-hat, not product-specific: maintainer will want a bar dimension, devops a pipeline or environment.
 - [ ] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
   - `product` — OGSM: objective · goal · strategy · measure. No charter, no constraints; the objective or goal covers what a constraint would have said, or the strategy says how it is worked around. Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable.
@@ -62,6 +62,33 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
     it is run.
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
+
+### system-as-source — complete (2026-09-27)
+
+**OPSX change:** `2026-09-27-system-as-source` (archived)
+
+A view now describes the system, citing records where they explain it. A section may declare
+`observes: 'rules' | string[]` alongside the records it takes — independent of `inputs`, because
+code is orthogonal to record kind. Observations join the same input hash with paths kept separate
+from record ids, so a stale report names which moved.
+
+The skill gains the boundary rule: a claim from a record cites the record, a claim from an
+observation cites its path. A decision binds; an observation is a fact that may be an accident.
+
+**The milestone-3 gap is closed, and the cost objection was wrong.** That gap was recorded as a
+trade-off between a cheap gate and a complete one. Measured on cashier: 31 ms to glob and 3 ms to
+hash 103 rule files, because `fast-glob` prunes ignored directories during traversal rather than
+filtering afterwards. `compact check` runs in ~174 ms on cashier against ~147 ms here, most of
+both being node startup. There was no trade to make.
+
+**Demonstrated rather than asserted.** Deleting the only test citing `DEC-007` staled all four
+`open-loops` sections, named the removed path, reported the decision unguarded again, and flipped
+`check` to exit 1. Restoring it returned everything to fresh.
+
+**And the gap got one last demonstration on the way out.** `DEC-010`'s guard appeared in
+`hat-sections.test.ts` during the *previous* milestone, but the view went on reporting the
+decision unguarded because `open-loops` had no observed inputs to restage on. Giving the section
+its rule files surfaced a correction that had been owed for a milestone.
 
 ### per-hat-sections — complete (2026-09-27)
 
