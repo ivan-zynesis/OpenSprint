@@ -4,7 +4,8 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import { resolveHatRegistry, resolveHatSections, DEFAULT_HATS } from '../../src/core/hats.js';
 import {
-  DEFAULT_SECTIONS,
+  DEFAULT_SECTIONS_BY_HAT,
+  GENERIC_SECTIONS,
   resolveSectionInputs,
   groupRecordsByHat,
 } from '../../src/core/compact/sections.js';
@@ -59,18 +60,18 @@ describe('per-hat sections', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('backward compatibility (DS-BACKWARD-COMPAT)', () => {
-    it('no hats key resolves to the default hats with default sections', () => {
+    it('no hats key resolves to the default hats, each with its own shape', () => {
       expect(resolveHatRegistry(root)).toEqual(DEFAULT_HATS);
       for (const hat of DEFAULT_HATS) {
-        expect(resolveHatSections(root, hat)).toEqual(DEFAULT_SECTIONS);
+        expect(resolveHatSections(root, hat)).toEqual(DEFAULT_SECTIONS_BY_HAT[hat]);
       }
     });
 
     it('the list form keeps working and keeps its meaning', () => {
       config('hats:\n  - product\n  - dev\n');
       expect(resolveHatRegistry(root)).toEqual(['product', 'dev']);
-      expect(resolveHatSections(root, 'dev')).toEqual(DEFAULT_SECTIONS);
-      expect(resolveHatSections(root, 'product')).toEqual(DEFAULT_SECTIONS);
+      expect(resolveHatSections(root, 'dev')).toEqual(DEFAULT_SECTIONS_BY_HAT.dev);
+      expect(resolveHatSections(root, 'product')).toEqual(DEFAULT_SECTIONS_BY_HAT.product);
     });
 
     it('an empty list degrades to the defaults', () => {
@@ -91,9 +92,9 @@ describe('per-hat sections', () => {
       expect(resolveHatRegistry(root)).toEqual(['product', 'dev']);
     });
 
-    it('a hat with an empty configuration gets the default sections', () => {
+    it('a hat with an empty configuration gets its own default shape', () => {
       config('hats:\n  product: {}\n');
-      expect(resolveHatSections(root, 'product')).toEqual(DEFAULT_SECTIONS);
+      expect(resolveHatSections(root, 'product')).toEqual(DEFAULT_SECTIONS_BY_HAT.product);
     });
 
     it('a hat declaring sections gets exactly those', () => {
@@ -117,12 +118,12 @@ describe('per-hat sections', () => {
   product: {}
 `);
       expect(resolveHatSections(root, 'dev')).toHaveLength(1);
-      expect(resolveHatSections(root, 'product')).toEqual(DEFAULT_SECTIONS);
+      expect(resolveHatSections(root, 'product')).toEqual(DEFAULT_SECTIONS_BY_HAT.product);
     });
 
-    it('a hat absent from the map gets the defaults', () => {
+    it('a hat the tool does not know gets the generic shape, not nothing', () => {
       config('hats:\n  dev: {}\n');
-      expect(resolveHatSections(root, 'never-declared')).toEqual(DEFAULT_SECTIONS);
+      expect(resolveHatSections(root, 'never-declared')).toEqual(GENERIC_SECTIONS);
     });
   });
 
@@ -145,7 +146,7 @@ describe('per-hat sections', () => {
     sections:
       - { name: bars, inputs: everything }
 `);
-      expect(resolveHatSections(root, 'dev')).toEqual(DEFAULT_SECTIONS);
+      expect(resolveHatSections(root, 'dev')).toEqual(DEFAULT_SECTIONS_BY_HAT.dev);
       const said = warn.mock.calls.flat().join(' ');
       expect(said).toContain('dev');
       expect(said).toContain('bars');
@@ -218,7 +219,7 @@ describe('per-hat sections', () => {
         resolveHatSections(root, h)
       );
       expect(all.filter((s) => s.hat === 'dev')).toHaveLength(1);
-      expect(all.filter((s) => s.hat === 'product')).toHaveLength(DEFAULT_SECTIONS.length);
+      expect(all.filter((s) => s.hat === 'product')).toHaveLength(DEFAULT_SECTIONS_BY_HAT.product.length);
     });
   });
 

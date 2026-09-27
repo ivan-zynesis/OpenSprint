@@ -9,3 +9,12 @@ created: <YYYY-MM-DD>
 ---
 
 <!-- Driver spec content — capture the operator's intent as stated -->
+
+## Measures
+
+<!-- How this is known to be met. Required where the spec states a target —
+     a goal or a bar. Omit for an objective, which is qualitative, or for a
+     strategy, which is an approach rather than a target. -->
+
+- **Primary**: <!-- the measure that says whether the target is met -->
+- **Guardrail**: <!-- what must not get worse while meeting it -->

@@ -40,6 +40,11 @@ export const DEFAULT_RULE_GLOBS = [
  * `opensprint` and `openspec` are excluded because otherwise every record
  * would cite itself and its own ancestors, and the whole surrogate would
  * report as fully guarded by itself.
+ *
+ * Applied as `**\/<dir>/**` rather than `<dir>/**`, because a monorepo has a
+ * `node_modules` and a `dist` under every package. Excluding only the
+ * top-level one let build output through — `packages/db/dist/migrations/*.sql`
+ * was being observed as though it were source.
  */
 export const EXCLUDED_DIRS = [
   'opensprint',
@@ -82,7 +87,7 @@ export function findRuleFiles(
 ): string[] {
   const entries = fg.sync([...globs], {
     cwd: projectRoot,
-    ignore: EXCLUDED_DIRS.map((d) => `${d}/**`),
+    ignore: EXCLUDED_DIRS.map((d) => `**/${d}/**`),
     dot: false,
     onlyFiles: true,
     followSymbolicLinks: false,
@@ -174,4 +179,61 @@ export function resolveObservedFiles(
     }
   }
   return out;
+}
+
+
+/**
+ * Thresholds for reading a repository's diagram habit.
+ *
+ * A heuristic, and deliberately a coarse one. Nothing distinguishes "tried it
+ * once" from "adopted it" except how widely it appears, and the band between
+ * is the case that matters: it routes to the operator rather than being
+ * guessed at.
+ */
+export const MERMAID_HABIT_THRESHOLD = 3;
+
+export type DiagramConvention = 'ascii' | 'mermaid' | 'mixed';
+
+export interface DiagramDetection {
+  convention: DiagramConvention;
+  /** Markdown files containing a mermaid block, project-relative. */
+  mermaidFiles: string[];
+}
+
+/**
+ * Detects which diagram format the repository already uses.
+ *
+ * ASCII is the default where nothing is found, because it survives a terminal,
+ * a diff, and an agent's context with no renderer.
+ */
+export function detectDiagramConvention(projectRoot: string): DiagramDetection {
+  const files = fg
+    .sync(['**/*.md'], {
+      cwd: projectRoot,
+      ignore: EXCLUDED_DIRS.map((d) => `**/${d}/**`),
+      onlyFiles: true,
+      followSymbolicLinks: false,
+      suppressErrors: true,
+    })
+    .sort();
+
+  const mermaidFiles: string[] = [];
+  for (const rel of files) {
+    try {
+      if (fs.readFileSync(path.join(projectRoot, rel), 'utf-8').includes('```mermaid')) {
+        mermaidFiles.push(rel);
+      }
+    } catch {
+      // a file that vanished mid-scan contributes nothing
+    }
+  }
+
+  const convention: DiagramConvention =
+    mermaidFiles.length === 0
+      ? 'ascii'
+      : mermaidFiles.length >= MERMAID_HABIT_THRESHOLD
+        ? 'mermaid'
+        : 'mixed';
+
+  return { convention, mermaidFiles };
 }

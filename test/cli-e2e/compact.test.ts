@@ -19,7 +19,7 @@ describe('opensprint compact (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
@@ -67,11 +67,11 @@ describe('opensprint compact (e2e)', () => {
   it('plan names the records feeding each section', async () => {
     const r = await runCLI(['compact', 'plan', '--json'], { cwd: projectRoot });
     const parsed = JSON.parse(r.stdout);
-    const devDecisions = parsed.sections.find(
-      (s: { hat: string; section: string }) => s.hat === 'dev' && s.section === 'decisions'
+    const devTechStack = parsed.sections.find(
+      (s: { hat: string; section: string }) => s.hat === 'dev' && s.section === 'tech-stack'
     );
-    expect(devDecisions.inputs.map((i: { id: string }) => i.id)).toEqual(['DEC-001']);
-    expect(devDecisions.inputs[0].path).toBe(path.join('opensprint', 'ADRs', 'DEC-001.md'));
+    expect(devTechStack.inputs.map((i: { id: string }) => i.id)).toEqual(['DEC-001']);
+    expect(devTechStack.inputs[0].path).toBe(path.join('opensprint', 'ADRs', 'DEC-001.md'));
   });
 
   it('seal writes the manifest', async () => {
@@ -80,7 +80,8 @@ describe('opensprint compact (e2e)', () => {
     expect(fs.existsSync(manifest())).toBe(true);
     const parsed = JSON.parse(fs.readFileSync(manifest(), 'utf-8'));
     expect(parsed.version).toBe(1);
-    expect(parsed.entries.length).toBe(16); // 4 hats x 4 sections
+    // Shapes differ per hat now: product 5, maintainer 5, dev 4, devops 3.
+    expect(parsed.entries.length).toBe(17);
   });
 
   it('seal reports a hat that has records but no view', async () => {
@@ -169,7 +170,7 @@ describe('opensprint compact loops (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),

@@ -21,7 +21,17 @@ export const OPEN_LOOP_KINDS = [
   'rule-guards-dead-record',
   'decision-on-superseded',
   'record-unclassified',
+  'constraint-unmeasurable',
 ] as const;
+
+/**
+ * Roles that state a target, and therefore owe a measure.
+ *
+ * An objective is qualitative by definition and a strategy is an approach
+ * rather than a target; demanding measures of either would train people to
+ * write fake ones.
+ */
+export const MEASURABLE_ROLES = ['goal', 'bar'] as const;
 
 export type OpenLoopKind = (typeof OPEN_LOOP_KINDS)[number];
 
@@ -39,6 +49,23 @@ export interface OpenLoop {
 
 function isActive(status: string): boolean {
   return status === 'active' || status === 'accepted';
+}
+
+/**
+ * Whether a record's body carries a populated `## Measures` section.
+ *
+ * A heading with nothing beneath it does not count: an empty section is the
+ * shape of an answer without the answer, and reporting it is the whole point.
+ */
+export function hasMeasures(content: string): boolean {
+  const match = content.match(/^##\s+Measures\s*$/m);
+  if (!match || match.index === undefined) return false;
+  const after = content.slice(match.index + match[0].length);
+  const next = after.search(/^##\s/m);
+  const body = (next === -1 ? after : after.slice(0, next))
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .trim();
+  return body.length > 0;
 }
 
 function isDead(status: string): boolean {
@@ -158,6 +185,20 @@ export function deriveOpenLoops(
       record: record.id,
       hats,
       detail: `No role declared. ${declaring.join(', ')} accepts: ${accepted.join(', ')}.`,
+    });
+  }
+
+  // ── a target with no way to tell whether it is met
+  const measurable = new Set<string>(MEASURABLE_ROLES);
+  for (const record of driverSpecs) {
+    if (!isActive(record.status)) continue;
+    if (!record.role || !measurable.has(record.role)) continue;
+    if (hasMeasures(record.content)) continue;
+    loops.push({
+      kind: 'constraint-unmeasurable',
+      record: record.id,
+      hats: record.hats ?? [],
+      detail: `Stated as a ${record.role} but carries no populated '## Measures' section — nothing says how it is known to be met.`,
     });
   }
 

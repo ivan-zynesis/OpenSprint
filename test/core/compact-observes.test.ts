@@ -3,7 +3,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import {
-  DEFAULT_SECTIONS,
+  DEFAULT_SECTIONS_BY_HAT,
+  GENERIC_SECTIONS,
   OBSERVES_RULES,
   groupRecordsByHat,
   resolveSectionInputs,
@@ -283,16 +284,27 @@ describe('system as source', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('defaults and configuration', () => {
-    it('open-loops observes the rules by default', () => {
-      const ol = DEFAULT_SECTIONS.find((s) => s.name === 'open-loops');
-      expect(ol?.observes).toBe(OBSERVES_RULES);
-      expect(ol?.inputs).toBe('none');
+    it('every hat shape ends with an open-loops that observes the rules', () => {
+      for (const [hat, sections] of Object.entries(DEFAULT_SECTIONS_BY_HAT)) {
+        const ol = sections.find((s) => s.name === 'open-loops');
+        expect(ol?.observes, hat).toBe(OBSERVES_RULES);
+        expect(ol?.inputs, hat).toBe('none');
+      }
+      const generic = GENERIC_SECTIONS.find((s) => s.name === 'open-loops');
+      expect(generic?.observes).toBe(OBSERVES_RULES);
     });
 
-    it('no other default section observes anything', () => {
-      for (const s of DEFAULT_SECTIONS.filter((x) => x.name !== 'open-loops')) {
+    it('in the generic shape, only open-loops observes anything', () => {
+      for (const s of GENERIC_SECTIONS.filter((x) => x.name !== 'open-loops')) {
         expect(s.observes).toBeUndefined();
       }
+    });
+
+    it('the dev and devops shapes observe the system, which is the point of them', () => {
+      const observing = (hat: string) =>
+        DEFAULT_SECTIONS_BY_HAT[hat]!.filter((s) => s.observes !== undefined).map((s) => s.name);
+      expect(observing('dev')).toEqual(['tech-stack', 'entity-schema', 'open-loops']);
+      expect(observing('devops')).toEqual(['infra-architecture', 'gitops', 'open-loops']);
     });
 
     it('a declared observes survives resolution', () => {
@@ -322,7 +334,7 @@ describe('system as source', () => {
     sections:
       - { name: bad, inputs: none, observes: [] }
 `);
-      expect(resolveHatSections(root, 'dev')).toEqual(DEFAULT_SECTIONS);
+      expect(resolveHatSections(root, 'dev')).toEqual(DEFAULT_SECTIONS_BY_HAT.dev);
       const said = warn.mock.calls.flat().join(' ');
       expect(said).toContain('dev');
       expect(said).toContain('bad');

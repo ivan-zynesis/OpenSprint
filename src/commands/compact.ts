@@ -38,7 +38,12 @@ import {
   allFresh,
   type SectionStatus,
 } from '../core/compact/status.js';
-import { buildRuleIndex, resolveRuleGlobs, resolveObservedFiles } from '../core/compact/rules.js';
+import {
+  buildRuleIndex,
+  resolveRuleGlobs,
+  resolveObservedFiles,
+  detectDiagramConvention,
+} from '../core/compact/rules.js';
 import { deriveOpenLoops, groupLoopsByHat, type OpenLoop } from '../core/compact/loops.js';
 
 export interface CompactOptions {
@@ -166,6 +171,7 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
           unassigned,
           unknownHats: unknownHats.map(([id, hat]) => ({ record: id, hat })),
           openLoops: loops,
+          diagrams: detectDiagramConvention(projectRoot),
         },
         null,
         2
@@ -199,6 +205,13 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
 
   reportUnrouted(unassigned, unknownHats);
   printLoops(loops, registry);
+
+  const diagrams = detectDiagramConvention(projectRoot);
+  const note =
+    diagrams.convention === 'mixed'
+      ? `mixed — mermaid in ${diagrams.mermaidFiles.length} file(s); ask the operator which to use`
+      : diagrams.convention;
+  console.log(chalk.dim(`Diagram convention: ${note}`));
 }
 
 function reportUnrouted(

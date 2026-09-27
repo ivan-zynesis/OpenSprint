@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import {
-  DEFAULT_SECTIONS,
+  GENERIC_SECTIONS,
   SECTION_INPUT_KINDS,
   headingFor,
   groupRecordsByHat,
@@ -123,14 +123,14 @@ describe('compact', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('resolveSectionInputs', () => {
-    it('defaults to exactly four sections, by explicit list', () => {
-      expect(DEFAULT_SECTIONS.map((s) => s.name)).toEqual([
+    it('the generic shape is exactly four sections, by explicit list', () => {
+      expect(GENERIC_SECTIONS.map((s) => s.name)).toEqual([
         'charter',
         'constraints',
         'decisions',
         'open-loops',
       ]);
-      expect(DEFAULT_SECTIONS.map((s) => s.inputs)).toEqual([
+      expect(GENERIC_SECTIONS.map((s) => s.inputs)).toEqual([
         'all',
         'driver-specs',
         'decisions',
@@ -263,7 +263,7 @@ describe('compact', () => {
           fs.writeFileSync(viewPath(tempDir, hat), view);
         }
         const out = view === undefined ? null : hashContent(view);
-        for (const section of DEFAULT_SECTIONS) {
+        for (const section of GENERIC_SECTIONS) {
           const inputs = resolveSectionInputs(hat, section, g);
           entries.push({
             hat,
@@ -376,8 +376,8 @@ describe('compact', () => {
   describe('classifyAll', () => {
     it('covers every section of every hat, following each hat\'s own list', () => {
       writeSpec('DS-A', '[product]');
-      const all = classifyAll(tempDir, readManifest(tempDir), REGISTRY, group(), () => DEFAULT_SECTIONS);
-      expect(all).toHaveLength(REGISTRY.length * DEFAULT_SECTIONS.length);
+      const all = classifyAll(tempDir, readManifest(tempDir), REGISTRY, group(), () => GENERIC_SECTIONS);
+      expect(all).toHaveLength(REGISTRY.length * GENERIC_SECTIONS.length);
       expect(allFresh(all)).toBe(false);
     });
 

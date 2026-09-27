@@ -15,7 +15,8 @@
 
 import { readProjectConfig } from './project-config.js';
 import {
-  DEFAULT_SECTIONS,
+  DEFAULT_SECTIONS_BY_HAT,
+  GENERIC_SECTIONS,
   OBSERVES_RULES,
   SECTION_INPUT_KINDS,
   type SectionDef,
@@ -140,11 +141,14 @@ export function resolveHatSections(
   projectRoot: string,
   hat: string
 ): readonly SectionDef[] {
+  // A hat the tool has no shape for falls back to the generic four rather than
+  // to nothing: an unknown hat is a project's own, not an error.
+  const fallback = DEFAULT_SECTIONS_BY_HAT[hat] ?? GENERIC_SECTIONS;
   const declared = readProjectConfig(projectRoot)?.hats;
-  if (!declared || Array.isArray(declared)) return DEFAULT_SECTIONS;
+  if (!declared || Array.isArray(declared)) return fallback;
 
   const sections = declared[hat]?.sections;
-  if (!sections || sections.length === 0) return DEFAULT_SECTIONS;
+  if (!sections || sections.length === 0) return fallback;
 
   const bad = sections.filter((s) => !INPUT_KIND_SET.has(s.inputs));
   if (bad.length > 0) {
@@ -153,7 +157,7 @@ export function resolveHatSections(
         `${bad.map((s) => `${s.name}=${s.inputs}`).join(', ')}. ` +
         `Accepted: ${SECTION_INPUT_KINDS.join(', ')}. Using the default sections.`
     );
-    return DEFAULT_SECTIONS;
+    return fallback;
   }
 
   // `observes` is either the named rules set or a non-empty list of globs.
@@ -171,12 +175,13 @@ export function resolveHatSections(
         `${badObserves.map((s) => `${s.name}=${JSON.stringify(s.observes)}`).join(', ')}. ` +
         `Accepted: '${OBSERVES_RULES}' or a non-empty array of globs. Using the default sections.`
     );
-    return DEFAULT_SECTIONS;
+    return fallback;
   }
 
   return sections.map((s) => ({
     name: s.name,
     inputs: s.inputs as SectionInputKind,
+    ...(s.roles === undefined ? {} : { roles: s.roles as string[] }),
     ...(s.observes === undefined
       ? {}
       : { observes: s.observes as typeof OBSERVES_RULES | string[] }),

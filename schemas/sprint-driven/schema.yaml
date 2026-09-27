@@ -36,6 +36,12 @@ artifacts:
 
       The body should contain the driver spec content in the operator's own words.
       Do not embellish or interpret — capture the intent as stated.
+
+      Where the spec states a target rather than a direction — a goal or a bar —
+      include a `## Measures` section saying how the target is known to be met,
+      with a primary measure and a guardrail. Leaving it empty is reported as an
+      open loop. An objective is qualitative and a strategy is an approach, so
+      neither needs measures.
     requires: []
 
   - id: decision-record

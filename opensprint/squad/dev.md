@@ -1,168 +1,92 @@
 # dev — how is it built?
 
-## Charter
+## Tech Stack
 
-**Owns** the architectural decisions: how OpenSprint is built, given what product and maintainer
-say it must do and must remain (`DS-SQUAD-HATS`). Every recorded decision in this project belongs
-to this hat.
+A **TypeScript CLI on Node**, distributed through npm. Node `>=20.19.0`, ESM modules, compiled
+with `tsc` (`package.json`, `tsconfig.json`). The toolchain choice is not recorded as a decision
+in this repository — it predates the surrogate.
 
-**May not trade away:**
-- The record as source of truth. Views are derived; if a view is wrong, the system is wrong
-  (`DEC-006`).
-- Conservative reconciliation. Only purely additive, high-confidence changes auto-accept; all
-  ambiguity escalates (`DEC-002`).
-- Rebuilding from the record. A derived artifact is one hop from its source, never a chain of
-  re-summaries (`DEC-011`, `DEC-014`).
+Nine runtime dependencies, each doing one job (`package.json`):
 
-**Escalates when** a decision cannot be answered from the existing record — reformulated as an
-architectural question, so the answer enriches the record rather than being consumed by one task.
+| | |
+|---|---|
+| `commander` | the CLI surface — every command registers here |
+| `zod` | schema validation, used for both project config and record shapes |
+| `yaml` | frontmatter and schema parsing |
+| `fast-glob` | rule discovery and observation, with directory pruning (`DEC-013`) |
+| `chalk` · `ora` | terminal output |
+| `@inquirer/*` | prompts, imported dynamically — static imports hang the pre-commit hook |
+| `posthog-node` | command-name telemetry |
 
-## Decisions
+`pnpm` is the package manager, pinned by `pnpm-lock.yaml`. Both a `pnpm-lock.yaml` and a
+`package-lock.json` are present, which is a small inconsistency rather than a decision.
 
-### The compacted surrogate
+## Runtime Topology
 
-**Views are compiled artifacts, never hand-edited** (`DEC-006`). Not the body, and not the charter
-(`DEC-008`). A view honestly shows the current state; when a flaw is found, the flaw is in the
-system, and the fix path is `/opsp:explore` into `/opsp:propose` (`DEC-006`, `DEC-007`).
+There is no server. The CLI runs once per invocation and exits; everything else is files on disk.
 
-The reasoning is attribution and blast radius. A compiled section synthesises many records, so an
-edit to one sentence has no unambiguous home; and a view that can be edited becomes a second
-source of truth the moment someone edits it (`DEC-006`). Because compact never mutates the record
-and every view regenerates, it cannot corrupt the surrogate the way `DEC-002` guards against — so
-compact does **not** carry the operator-only guardrail that `/opsp:rebase` and `/opsp:abandon`
-carry under `DS-HIGH-IMPACT-OPS` (`DEC-006`).
+```
+   operator / agent
+         │
+         ▼
+   bin/openspec.js ──► dist/cli/index.js        commander registers every command
+         │
+         ├──► commands/          change · spec · validate · compact · workflow
+         │
+         └──► core/
+                ├─ compact/      sections · records · manifest · status · rules · loops · edges
+                ├─ hats.ts       registry, roles, validation
+                ├─ decision-map  tree, blast radius
+                └─ templates/    14 OPSP workflow templates, compiled into skills at init
 
-**Open loops are the backlog; `/opsp:explore` → `/opsp:propose` is the triage** (`DEC-007`). No new
-mechanism acts on an open loop. Facilitation has two halves — noticing, and deciding what to do —
-and only the first can be encoded. This is why rule harvesting is worth building: its output is
-backlog generation, not a report (`DEC-007`, `DEC-013`).
+   reads                          writes
+   ─────                          ──────
+   opensprint/driver-specs/       opensprint/squad/*.md        via the skill
+   opensprint/ADRs/               opensprint/squad/.manifest.json  via `compact seal`
+   openspec/config.yaml           opensprint/architecture.md   via the skill
+   the project's source           (nothing else)
+```
 
-**The charter compiles too, from governance records** (`DEC-008`). To change what a hat owns,
-record a decision. A project with no governance records gets a thin charter, which is the honest
-report that ownership has not been decided. Cashier's CODEOWNERS, derived from blast radius the
-decision map already computes, is charter content recorded as a decision (`DEC-008`).
+**The split that matters is deterministic versus synthetic.** Grouping, hashing, staleness and
+gating live in code so they can be verified without a model in the loop; writing condensed prose
+lives in a skill. `compact plan` reports what is stale, the skill renders, `compact seal` records,
+`compact check` gates — and neither half computes the other's answer (`DEC-010`, `DEC-014`).
 
-**Every compiled claim carries its record ids inline** (`DEC-009`) — a format requirement, not a
-nicety. The load-bearing case is partial supersession: cashier's `DEC-064` ends one clause of its
-`DEC-062`, so a summary built from `DEC-062` alone states that production is single-AZ, which
-stopped being true. Cited inline, a section naming only the older record is *visibly* incomplete;
-uncited, it is silently wrong (`DEC-009`).
+Universes are git worktrees, so concurrency needs no runtime of its own: `git worktree add`
+produces an independent tree and the surrogate travels in the branch (`DEC-001`).
 
-**Two-state provenance manifest, enforced by `--check`** (`DEC-010`). Per hat and per section: the
-record ids and content hashes compiled from, plus a hash of the rendered output. Inputs changed →
-stale, recompile from full inputs. Output changed → tampered, and the message says the edit will
-be lost and points at `/opsp:explore`. Content hashes rather than a git SHA, because a SHA does
-not survive squash-merge, is unresolvable in a shallow CI clone, and diverges per branch across
-universes (`DEC-010`, `DEC-001`).
+## Entity Schema
 
-**Recompile stale sections from full inputs, never summary-plus-delta** (`DEC-011`). The delta
-decides *which* sections are out of date; each is re-rendered from its complete input set, and the
-previous rendering is never an input. Same reasoning as building an image once and promoting by
-digest: the trusted artifact must be traceable to its source in one hop. Propagation across the
-tree is deliberately not handled by re-rendering — a superseded ancestor flags its descendants as
-open loops pointing at `/opsp:rebuild-assess` (`DEC-011`).
+**No persistent data store.** The durable state is markdown files with YAML frontmatter, and the
+only structured schemas are Zod validators over parsed content (`src/core/schemas/*.schema.ts`) —
+scenario, requirement, spec and change shapes.
 
-**A record declares one or more hats; there is no `agreements` hat** (`DEC-016`, superseding
-`DEC-012`). The single-hat rule had required a fifth hat to hold cross-cutting constraints, and six
-of this repository's twenty-one records routed there — none with an owner, which is what
-`DS-SME-OWNERSHIP` requires a hat to have. The original objection, that a record with two owners
-has none, conflated two things: ownership attaches to the hat *file*, so a record in two views is
-reviewed by both owners, which for a genuinely cross-cutting constraint is correct (`DEC-016`).
+The one machine-written file is `opensprint/squad/.manifest.json`: per hat and per section, the
+record ids and content hashes a section was compiled from, the observed files with theirs, the
+combined input hash, and the rendered output hash (`DEC-010`).
 
-The field is `hats`, accepting a bare string or a list. The registry is per-project, because the
-hat set is a property of the product (`DEC-016`, `DS-SQUAD-HATS`). The existing `type` field could
-not carry this: across four projects it means four different things (`DEC-012`).
+The record graph is the real data model, and it has two layers that do not mix:
 
-**Rule links are harvested from code, not declared in records** (`DEC-013`). A rule cites the record
-it guards; the record says nothing about its rules. The data settles it — 69 of 96 cashier test
-files already cite a record and 16 of 26 codex rules do, while only 4 of 64 ADRs cite a test and no
-frontmatter field links one. Harvesting covers 50 of 64 cashier ADRs with no new authoring
-(`DEC-013`). Driver-spec coverage is indirect by design: a rule cites a decision, and the decision
-depends on the constraint.
+```
+   driver-specs      depends-on ──► driver-specs        the OGSM layer (DEC-016)
+        ▲
+        │ depends-on
+   ADRs ─────────────────────────► ADRs                 the decision layer
 
-**compact is the single compile engine; `architecture.md` is a sibling output** (`DEC-014`). Both
-the hat views and architecture.md compile from the same records. Archive's compile step, the final
-phase of knockdown, and the post-reconciliation rebuild in rebase and abandon all call it rather
-than each synthesising its own way. Compacting an already-compacted document is the failure mode
-`DEC-011` rejects, at a larger scale (`DEC-014`).
-
-**v1 does not change what explore and apply load** (`DEC-015`). The views, manifest, `--check` and
-open-loop backlog ship first; switching the read path is a later initiative, taken once the views
-have been proven against real work. Switching makes the view the effective surrogate with nothing
-cross-checking it — the same asymmetry `DEC-002` records: a deferred win costs time, a wrong
-surrogate costs every decision made against it. When the switch comes, the rule is **use the view
-to find your way, read the record before acting on it** (`DEC-015`, `DEC-009`).
-
-**The surface is the CLI plus generated agent files** (`DEC-017`). No GUI, no CI/CD product. A tool
-built to evolve quickly cannot also carry a graphical surface redesigned on every workflow change;
-the agent *is* the interface, and the generated skill files are text because the consumer is a
-language model. The honest cost is discoverability, accepted rather than dismissed — which is why
-the documentation burden in `DS-SELF-USE-SCOPE` is a requirement, not an aspiration (`DEC-017`).
-
-### Parallel universes and reconciliation
-
-**A universe is a git worktree; the surrogate stays in place** (`DEC-001`). `opensprint/` lives in
-its branch and travels with the code — no copying, no universe registry, no synchronisation
-daemon. Git's worktree model already provides the isolation, and existing diff, log and merge
-tooling applies to surrogate files directly (`DEC-001`).
-
-**The agent reasons, the operator confirms** (`DEC-002`). Auto-accept only when purely additive or
-identical; everything else escalates, including "similar but not identical". The asymmetry is
-intentional: a false escalation costs one prompt, a false auto-accept risks a corrupted surrogate.
-Two ADRs can differ by one sentence and represent incompatible worldviews (`DEC-002`).
-
-**DFS traversal: initiative → ADRs → active changes** (`DEC-003`). The initiative is the unit of
-commitment; if any inner node produces an unresolved conflict, the whole initiative pauses before
-the traversal advances. This gives dependency coherence, atomic commitment, and operator prompts
-grouped at meaningful boundaries. Citizens classify as MIGRATE, CONFLICT, REDUNDANT or SUPERSEDED
-(`DEC-003`).
-
-**A mandatory planning phase precedes execution** (`DEC-004`). Both reconciliation skills open with
-a read-only pass producing a conflict manifest, and execution begins only after explicit
-confirmation. There is no fast path. The phase also warns on model requirements and surfaces a
-wrong-command recommendation when ADR divergence suggests abandon was meant rather than rebase
-(`DEC-004`, `DEC-002`).
-
-**The abandoned universe is archived at `opensprint/abandoned/{name}/`** (`DEC-005`): a verbatim
-snapshot of the loser's surrogate captured *before* any migration, plus a migration manifest
-recording every citizen, its classification, and the operator decisions. The worktree and branch
-are removed only after the operator confirms the manifest. The snapshot is the recovery path if
-the wrong universe was abandoned (`DEC-005`, `DEC-003`).
-
-## Constraints
-
-None assigned to this hat. The constraints these decisions answer live in
-[product.md](product.md) and [maintainer.md](maintainer.md).
+   DECISION-MAP.md builds from ADR edges only; driver-spec edges never appear in it.
+```
 
 ## Open Loops
 
-**Harvested** (`DEC-013`): five of sixteen active decisions have no rule citing them.
-
-| Decision | About |
-|---|---|
-| `DEC-005` | abandoned universe archive structure |
-| `DEC-008` | the charter compiles from governance records |
-| `DEC-013` | rule links harvested from code |
-| `DEC-015` | v1 defers the loading switch |
-| `DEC-017` | CLI plus generated files, no GUI |
+**Harvested** (`DEC-013`): five of sixteen active decisions have no rule citing them —
+`DEC-005`, `DEC-008`, `DEC-013`, `DEC-015`, `DEC-017`.
 
 `DEC-013` is worth noticing: the decision that harvests rule links is not itself named by one.
-Its implementation is tested, but no rule cites it, so the harvest cannot see the link.
-
-Two loops have closed here without any bookkeeping, and the second one is instructive.
-`DEC-007` went when a test in `backlog-seam` named it — which transitively closed
-`DS-LOOP-CLOSURE`'s in [product.md](product.md).
-
-`DEC-010` was guarded a whole milestone before this view admitted it. `hat-sections.test.ts`
-named it during `per-hat-sections`, but `open-loops` had no observed inputs then, so nothing
-restaged it and the view went on reporting the decision as unguarded. `system-as-source` gave the
-section its rule files as observations, and the correction surfaced on the next compile — the
-staleness gap demonstrating itself one last time, on the milestone that closed it
-(`DEC-010`, `DEC-013`).
 
 **Structural:**
 
-- **No charter record.** The charter above is inferred from the decisions themselves rather than
-  from a record stating this hat's boundary.
-- **Sixteen decisions, no constraints.** Every driver-spec routes to `product` or `maintainer`,
-  which is the intended shape (`DS-SQUAD-HATS`) but means no view is self-contained.
+- **The toolchain is undocumented as a decision.** TypeScript, Node, ESM, pnpm and the nine
+  dependencies are all observed from manifests, and no ADR explains any of them. Not wrong — they
+  predate the surrogate — but the tech stack above is almost entirely observation with nothing
+  decided behind it.
+- **Two lockfiles.** `pnpm-lock.yaml` and `package-lock.json` both present.

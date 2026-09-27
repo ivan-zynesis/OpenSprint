@@ -5,6 +5,8 @@ import {
   OPSP_WORKFLOW_IDS,
 } from '../../src/core/shared/index.js';
 
+// NOTE: the instruction template hard-wraps its prose, so any assertion
+// spanning more than a few words must use \s+ rather than a literal space.
 const skill = () => getOpspSkillTemplates().find((t) => t.workflowId === 'opsp-compact');
 const instructions = () => skill()!.template.instructions;
 const workflow = (id: string) =>
@@ -77,14 +79,19 @@ describe('OPSP compact skill', () => {
   });
 
   describe('view structure', () => {
-    it('names the four sections', () => {
+    it('names each hat shape rather than one shared set', () => {
       const i = instructions();
-      for (const section of ['Charter', 'Constraints', 'Decisions', 'Open Loops']) {
-        expect(i).toContain(section);
-      }
+      expect(i).toMatch(/objective · goals · strategies · measures/);
+      expect(i).toMatch(/bars · posture · evidence · exposure/);
+      expect(i).toMatch(/tech-stack · runtime-topology · entity-schema/);
+      expect(i).toMatch(/infra-architecture · gitops/);
     });
 
-    it('requires the charter to be derived, not invented', () => {
+    it('tells the renderer to take sections from the plan, not to assume them', () => {
+      expect(instructions()).toMatch(/do not assume the four generic ones/i);
+    });
+
+    it('still requires a charter to be derived where a hat uses the generic shape', () => {
       const i = instructions();
       expect(i).toContain('derived, not authored');
       expect(i).toMatch(/Do not invent a charter/i);
@@ -93,7 +100,11 @@ describe('OPSP compact skill', () => {
     it('forbids inventing open loops', () => {
       const i = instructions();
       expect(i).toMatch(/Do not infer a missing decision or a missing test/i);
-      expect(i).toMatch(/An invented gap costs/i);
+      expect(i).toMatch(/An invented gap\s+costs/i);
+    });
+
+    it('states that no shape enumerates records', () => {
+      expect(instructions()).toMatch(/None of them enumerate records/i);
     });
 
     it('describes the index as a router rather than a summary', () => {

@@ -47,27 +47,138 @@ export const OBSERVES_RULES = 'rules' as const;
 export interface SectionDef {
   name: string;
   inputs: SectionInputKind;
+  /**
+   * Roles this section accepts. Without it a section takes every record of
+   * its input kind — which would make all of product's sections share an
+   * input hash and restage together, losing the granularity DEC-010 exists
+   * for.
+   */
+  roles?: string[];
   observes?: typeof OBSERVES_RULES | string[];
 }
 
 /**
- * The sections a hat renders when it declares none of its own.
+ * Default observation globs, by explicit list per ecosystem.
+ *
+ * These are what a section describing the system reads. A project overrides
+ * them by declaring its own sections; the defaults exist so that the shapes
+ * work on a project that has configured nothing.
+ */
+export const TECH_STACK_GLOBS = [
+  'package.json',
+  '*/package.json',
+  '*/*/package.json',
+  'pnpm-lock.yaml',
+  'package-lock.json',
+  'yarn.lock',
+  'tsconfig.json',
+  'go.mod',
+  'Cargo.toml',
+  'pyproject.toml',
+  'requirements.txt',
+  'Gemfile',
+  'pom.xml',
+  'build.gradle',
+  '*.csproj',
+] as const;
+
+export const ENTITY_SCHEMA_GLOBS = [
+  '**/migrations/**/*.sql',
+  '**/migrations/**/*.ts',
+  '**/schema.prisma',
+  '**/schema.sql',
+  '**/*.schema.ts',
+  '**/models/**/*.py',
+  '**/entities/**/*.ts',
+] as const;
+
+export const INFRA_GLOBS = [
+  '**/*.tf',
+  '**/*.tfvars',
+  '**/terragrunt.hcl',
+  '**/docker-compose*.yml',
+  '**/docker-compose*.yaml',
+  '**/Dockerfile*',
+  '**/*.k8s.yaml',
+  '**/helm/**/*.yaml',
+] as const;
+
+export const GITOPS_GLOBS = [
+  '.github/workflows/*.yml',
+  '.github/workflows/*.yaml',
+  'bitbucket-pipelines.yml',
+  '.gitlab-ci.yml',
+  'Jenkinsfile',
+  '.circleci/config.yml',
+  'azure-pipelines.yml',
+] as const;
+
+/**
+ * Observes the rules: a deleted guard must restage the section that reports
+ * what is guarded, or the view keeps claiming a decision is covered after its
+ * only test was removed.
+ */
+const OPEN_LOOPS: SectionDef = { name: 'open-loops', inputs: 'none', observes: OBSERVES_RULES };
+
+/**
+ * The shape for a hat the tool has no default for.
  *
  * `charter` takes every record the hat owns, because which of them describe
- * the operating model is a judgement the renderer makes (DEC-008) — the
- * engine cannot narrow those inputs without guessing.
+ * the operating model is a judgement the renderer makes (DEC-008).
  *
- * `open-loops` is computed rather than compiled, so it has no record inputs.
+ * A project declaring its own `designer` hat lands here — an unknown hat is
+ * not an error, since DS-SQUAD-HATS makes the hat set a project's own.
  */
-export const DEFAULT_SECTIONS: readonly SectionDef[] = [
+export const GENERIC_SECTIONS: readonly SectionDef[] = [
   { name: 'charter', inputs: 'all' },
   { name: 'constraints', inputs: 'driver-specs' },
   { name: 'decisions', inputs: 'decisions' },
-  // Observes the rules: a deleted guard must restage the section that reports
-  // what is guarded, or the view keeps claiming a decision is covered after
-  // its only test was removed.
-  { name: 'open-loops', inputs: 'none', observes: OBSERVES_RULES },
+  OPEN_LOOPS,
 ];
+
+/**
+ * Default sections per hat.
+ *
+ * The four accountabilities produce different *kinds* of knowledge rather than
+ * the same kind about different subjects, so one shape cannot serve them all.
+ * Product states a chain of intent; maintainer states positions on spectrums;
+ * dev and devops describe a system.
+ *
+ * None of them enumerate records (DS-BIG-PICTURE): a section earns its place
+ * by conveying the domain, not by giving every record somewhere to live.
+ */
+export const DEFAULT_SECTIONS_BY_HAT: Readonly<Record<string, readonly SectionDef[]>> = {
+  // A causal chain: objective, therefore goals, therefore strategies.
+  // `measures` aggregates across goals — the QA bridge, rendered.
+  product: [
+    { name: 'objective', inputs: 'driver-specs', roles: ['objective'] },
+    { name: 'goals', inputs: 'driver-specs', roles: ['goal'] },
+    { name: 'strategies', inputs: 'driver-specs', roles: ['strategy'] },
+    { name: 'measures', inputs: 'driver-specs', roles: ['goal'], observes: OBSERVES_RULES },
+    OPEN_LOOPS,
+  ],
+  // A bar is a position on a spectrum, not a number. Cost is an axis of every
+  // bar rather than a section of its own.
+  maintainer: [
+    { name: 'bars', inputs: 'driver-specs', roles: ['bar'] },
+    { name: 'posture', inputs: 'driver-specs', roles: ['posture'] },
+    { name: 'evidence', inputs: 'driver-specs', roles: ['evidence'], observes: OBSERVES_RULES },
+    { name: 'exposure', inputs: 'driver-specs', roles: ['exposure'] },
+    OPEN_LOOPS,
+  ],
+  // Describes the system, citing decisions where they explain a choice.
+  dev: [
+    { name: 'tech-stack', inputs: 'decisions', observes: [...TECH_STACK_GLOBS] },
+    { name: 'runtime-topology', inputs: 'decisions' },
+    { name: 'entity-schema', inputs: 'decisions', observes: [...ENTITY_SCHEMA_GLOBS] },
+    OPEN_LOOPS,
+  ],
+  devops: [
+    { name: 'infra-architecture', inputs: 'decisions', observes: [...INFRA_GLOBS] },
+    { name: 'gitops', inputs: 'decisions', observes: [...GITOPS_GLOBS] },
+    OPEN_LOOPS,
+  ],
+};
 
 /**
  * Renders a section name as a view heading: `open-loops` -> `Open Loops`.
@@ -87,6 +198,8 @@ export function headingFor(name: string): string {
 /** A record contributing to a section, reduced to what the manifest needs. */
 export interface RecordRef {
   id: string;
+  /** Role within the hat, for role-filtered sections. */
+  role?: string;
   /** Path relative to the project root, for the renderer to read. */
   path: string;
   content: string;
@@ -134,7 +247,14 @@ export function groupRecordsByHat(
 
   const place = (
     target: Map<string, RecordRef[]>,
-    entry: { id: string; status: string; hats?: string[]; path: string; content: string }
+    entry: {
+      id: string;
+      status: string;
+      hats?: string[];
+      role?: string;
+      path: string;
+      content: string;
+    }
   ): void => {
     if (!isActive(entry.status)) return;
 
@@ -150,7 +270,12 @@ export function groupRecordsByHat(
         unknownHats.push([entry.id, hat]);
         continue;
       }
-      target.get(hat)?.push({ id: entry.id, path: entry.path, content: entry.content });
+      target.get(hat)?.push({
+        id: entry.id,
+        role: entry.role,
+        path: entry.path,
+        content: entry.content,
+      });
       placed = true;
     }
     // Declared only hats the registry does not know: routed nowhere.
@@ -180,14 +305,25 @@ export function resolveSectionInputs(
   const specs = grouped.driverSpecsByHat.get(hat) ?? [];
   const decisions = grouped.decisionsByHat.get(hat) ?? [];
 
+  let candidates: RecordRef[];
   switch (section.inputs) {
     case 'all':
-      return [...specs, ...decisions];
+      candidates = [...specs, ...decisions];
+      break;
     case 'driver-specs':
-      return [...specs];
+      candidates = [...specs];
+      break;
     case 'decisions':
-      return [...decisions];
+      candidates = [...decisions];
+      break;
     case 'none':
       return [];
   }
+
+  if (!section.roles || section.roles.length === 0) return candidates;
+
+  // A record with no role is excluded from a role-filtered section: it has not
+  // been placed in the chain, and record-unclassified already reports it.
+  const accepted = new Set(section.roles);
+  return candidates.filter((r) => r.role !== undefined && accepted.has(r.role));
 }

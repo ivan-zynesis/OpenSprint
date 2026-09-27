@@ -145,39 +145,127 @@ a failing rule is how an implementation and a decision disagreeing becomes visib
 
 ## View structure
 
-Each hat view has four sections. The engine tracks them separately, so a new ADR restages \`Decisions\` and leaves \`Constraints\` alone.
+Each hat's sections come from the plan — **do not assume the four generic ones.** Different
+accountabilities produce different *kinds* of knowledge, not the same kind about different
+subjects, so each hat has its own shape.
 
-\`\`\`markdown
-# <hat> — <the question this hat owns>
+**None of them enumerate records.** A section earns its place by conveying the domain, not by
+giving every record somewhere to live. A record that does not shape the picture simply does not
+appear, and that is not a defect (\`DS-BIG-PICTURE\`).
 
-## Charter
-What this hat owns · what it may not trade away · when it escalates
+### product — a chain, not a list
 
-## Constraints
-<the hat's driver-specs, condensed, each claim cited>
+\`objective · goals · strategies · measures · open-loops\`
 
-## Decisions
-<the hat's ADRs, condensed, each claim cited>
+OGSM, and the causality is the point: there is a long-term **objective**, therefore short-term
+**goals** that reach it, therefore **strategies** that accomplish them, and **measures** that say
+whether the goals landed.
 
-## Open Loops
-<only what the engine reported>
+- **objective** — the long-term direction. One record, usually. Qualitative by nature.
+- **goals** — what must be true to get there, each stated so you could tell whether it is.
+- **strategies** — how the goals are pursued.
+- **measures** — for each goal: what measures it, and what actually asserts that measure. This is
+  the QA bridge rendered — the place where "we said this matters" meets "something checks it". A
+  goal with no measure is **named**, not omitted.
+
+There is **no charter and no constraints section**. What a charter would have said is carried by
+the objective; a constraint is either a goal, or a strategy describing how it is worked around.
+
+### maintainer — positions, and what they cost
+
+\`bars · posture · evidence · exposure · open-loops\`
+
+What this hat controls is always a **position on a spectrum**, and moving along one axis costs
+something on another. So a bar is never just a number:
+
+\`\`\`
+<dimension>          the axis, and why it is an axis
+  chosen:            the point, and the scope it applies to
+  traded for:        what was given up to sit here
+  neighbour:         what the next point along would cost
 \`\`\`
 
-### Charter
+A bar stated without its trade reads like a law of nature when it was a purchase somebody made,
+and the receipt is what a maintainer picking up the hat actually needs. **If the records do not
+say what it cost, say the trade is unrecorded** — do not invent it.
 
-The charter is **derived, not authored**. Draw it from the hat's own records that describe the operating model rather than the system's behaviour — who owns what, what must not be traded away, when something escalates.
+- **posture** — where the project *actually* sits against its bars, including deliberate gaps.
+  A deliberate gap cites the record that makes it deliberate, and its expiry where recorded.
+- **evidence** — what proves each bar, and whether the proof can be trusted.
+- **exposure** — what a breach costs and who it reaches.
 
-If the hat has no such record, **say so** and list it as an open loop. Do not invent a charter. A charter nobody decided is a convention wearing a decision's clothes.
+**Cost is an axis of every bar, not a section.** A cost section would describe spend; a cost
+dimension describes the decision.
 
-### Open Loops
+### dev and devops — describe the system
 
-Report **only** what the plan reported:
+\`tech-stack · runtime-topology · entity-schema · open-loops\`
+\`infra-architecture · gitops · open-loops\`
 
-- records assigned to no hat
-- records declaring a hat outside the registry
-- a hat in the registry with no records at all
+These describe **what the system is**, citing decisions where they explain a choice. A list of
+sixteen condensed ADRs tells a reader nothing about what was built.
 
-Do not infer a missing decision or a missing test from a record's content. An invented gap costs someone a triage conversation about nothing. Gaps between decisions and the rules that guard them are a separate mechanism.
+- **tech-stack** — what it is built with, observed from the project's manifests. Cite the decision
+  behind a choice where one exists, the path where it does not.
+- **runtime-topology** — how the parts run and talk to each other. Usually clearer drawn.
+- **entity-schema** — the durable data model and its relationships. Say so plainly if the project
+  has no persistent data, rather than inventing a section.
+- **infra-architecture** — what is provisioned and how it fits together.
+- **gitops** — the pipelines, what triggers each, which environments they reach.
+
+The dev/devops split serves **reading, not ownership**. In a repository holding application code
+and IaC together, a decision is frequently both — it declares both hats and appears in both views.
+The boundary exists so an agent working on application code need not load pipeline context.
+
+### open-loops — every hat has one
+
+Report **only** what the plan reported. The harvest supplies seven kinds:
+
+| Kind | Means |
+|---|---|
+| \`constraint-unanswered\` | a constraint no decision answers |
+| \`constraint-unasserted\` | answered, but no rule guards any answering decision |
+| \`constraint-unmeasurable\` | a target with no populated \`## Measures\` |
+| \`decision-unguarded\` | a decision no rule cites |
+| \`rule-guards-dead-record\` | a rule still guarding something superseded |
+| \`decision-on-superseded\` | a decision resting on an ancestor that moved |
+| \`record-unclassified\` | a record with no role, in a hat that declares roles |
+
+**Do not infer a missing decision or a missing test from a record's content.** An invented gap
+costs someone a triage conversation about nothing, and the backlog is only useful while everything
+in it is real (\`DEC-007\`).
+
+**Some absences are decisions.** A hat with no records may be settled rather than missing — cite
+the record that settles it rather than reporting a gap.
+
+### a hat with no defined shape
+
+A project's own hat — a \`designer\`, say — falls back to
+\`charter · constraints · decisions · open-loops\`.
+
+The **charter** there is *derived, not authored*. Draw it from the hat's own records that describe
+the operating model — who owns what, what must not be traded away, when something escalates. If
+the hat has no such record, **say so** and list it as an open loop. Do not invent a charter: one
+nobody decided is a convention wearing a decision's clothes.
+
+## Diagrams
+
+The plan reports the repository's existing habit. **Follow it.**
+
+| Detected | Do |
+|---|---|
+| \`ascii\` | Use ASCII |
+| \`mermaid\` | Use mermaid |
+| \`mixed\` | **Ask the operator.** Somebody tried mermaid once; that is not a habit. |
+
+ASCII is the default where nothing is detected, because it survives a terminal, a diff, and an
+agent's context with no renderer at all.
+
+Judge **per diagram**, not per repository: a three-service topology is fine in ASCII, a
+twenty-table schema is not. If you depart from the repository's habit for one diagram, say why.
+
+And be careful with them. A drifting paragraph is vaguely wrong; **a drifting diagram is
+confidently wrong**, and it is the artifact people trust most.
 
 ### index.md
 

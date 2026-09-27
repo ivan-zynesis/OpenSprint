@@ -1,97 +1,97 @@
 # maintainer — what must be true of it while it does that?
 
-Records here are classified as **bars** (what must hold) and **posture** (where we actually sit
-against them). The hat declares `bar · posture · evidence · exposure`; nothing is yet classified
-as evidence or exposure.
+## Bars
 
-## Charter
+Each bar is a **position on a spectrum**, not a number. What this hat controls is always a trade:
+moving along one axis costs something on another.
 
-**Owns** the non-functional intent: what must remain true while OpenSprint does its job
-(`DS-SQUAD-HATS`). In practice that is the safety of the surrogate, the compatibility bar across
-releases, and the honest statement of where the project deliberately sits below its own standard.
+### Who may run a reconciliation
 
-**May not trade away:** the operator-only rule on reconciliation (`DS-HIGH-IMPACT-OPS`). It is
-stated as absolute, not as a preference.
+| | |
+|---|---|
+| **dimension** | automation ←→ human confirmation, on operations that mutate the canonical surrogate |
+| **chosen** | fully manual. `/opsp:rebase` and `/opsp:abandon` are operator-invocable only — never by a pipeline, a sub-agent, or another skill (`DS-HIGH-IMPACT-OPS`) |
+| **traded for** | every scrap of automation on these two operations, permanently |
+| **neighbour** | **unrecorded.** Nothing says what a partially-automated reconciliation would look like or cost |
 
-**Escalates when** a bar is stated without the trade that bought it — a constraint written so
-nothing can check it is a constraint written badly (`DS-SQUAD-HATS`).
+Stated as absolute rather than as a preference. The reasoning is blast radius: a corrupted
+surrogate degrades every downstream agent operation, and the damage is unbounded — so a false
+escalation costs one prompt and a false auto-accept costs the surrogate (`DEC-002`).
 
-**The owner** reviews every change to this view and triages its open loops (`DS-SME-OWNERSHIP`).
+Worth noting what the bar does **not** cover. `DEC-006` releases compaction from it: because
+compact never writes a record and every view regenerates, it cannot corrupt the surrogate, so it
+carries no operator-only guardrail.
 
-## Constraints
+### How far back compatibility reaches
 
-### Bar — reconciliation is operator-invocable only
+| | |
+|---|---|
+| **dimension** | guaranteed compatibility ←→ speed of evolution |
+| **chosen** | best-effort, scoped to one surface: **a new release meeting a project whose directories were written by an older version** (`DS-BACKWARD-COMPAT`) |
+| **traded for** | the ability to move quickly, which `DS-SELF-USE-SCOPE` says is the point |
+| **neighbour** | **unrecorded.** Nothing says what a guarantee would cost, or over what window |
 
-Universe reconciliation is high-impact and hard to reverse. It must never be triggerable by an
-automated pipeline, a sub-agent, or another skill invoking it programmatically
-(`DS-HIGH-IMPACT-OPS`).
-
-The reasoning is blast radius: a corrupted surrogate degrades every downstream agent operation
-that depends on it, and the damage is unbounded. So human confirmation at each ambiguous step is
-non-negotiable, a planning phase must precede all execution, and the most capable available model
-is recommended (`DS-HIGH-IMPACT-OPS`, `DEC-002`, `DEC-004`).
-
-This bar is what `DEC-006` explicitly *releases* compaction from: because compact never writes a
-record and every view regenerates, it cannot corrupt the surrogate, so it does not carry the
-operator-only guardrail that `/opsp:rebase` and `/opsp:abandon` do.
-
-### Bar — compatibility is best-effort, and means one specific thing
-
-OpenSprint is released as open source. Backward compatibility is **best-effort** rather than
-guaranteed: semver is the practice, npm the marketplace, and a published package is static
-(`DS-BACKWARD-COMPAT`).
-
-So the only surface that can break is one where **a new release meets a project whose
-`openspec/` and `opensprint/` directories were written by an older version**. That is the bar, and
-nothing else is.
-
-What follows mechanically: a new field on a record is optional, so older records still parse;
-removing or renaming a frontmatter field is a breaking change; migrations run forward rather than
-requiring a re-init (`DS-BACKWARD-COMPAT`).
-
-Best-effort is a consequence rather than a shortcut — a tool optimised for speed of evolution
-cannot also promise never to move (`DS-BACKWARD-COMPAT`, `DS-SELF-USE-SCOPE`).
+A published package is static, so nothing can break retroactively. What follows mechanically: a
+new field on a record is optional; removing or renaming one is a breaking change under semver;
+migrations run forward rather than requiring a re-init.
 
 ## Posture
 
-### Self-use, and what that lets us accept
+**Self-use, and what that buys.**
 
-Tech giants and LLM providers could release tooling that does this better. **We do not intend to
-compete.** OpenSprint exists to be evolved quickly for our own use, kept well documented, and to
+Tech giants and LLM providers could ship something that does this better. We do not intend to
+compete: OpenSprint exists to be evolved quickly for our own use, kept well documented, and to
 give stakeholders maximum visibility into a well-organised agentic SDLC (`DS-SELF-USE-SCOPE`).
 
-This is a position on a spectrum, not a law. Competing on feature parity with a provider that owns
-the model would set the roadmap by someone else's release schedule; optimising instead for speed
-of evolution and clarity of record keeps the tool useful on the day we need it.
+This is where we actually sit, and it is deliberately below what a product sold to strangers
+would have to hold:
 
-**What the posture buys, and what it costs.** It is what makes an untested case acceptable — the
-`devops` hat is empty here, and that is a recorded decision rather than an oversight
-(`DS-SELF-USE-SCOPE`, `DEC-017`). The same posture accepts no GUI and no CI/CD surface, and pays
-for it in discoverability: the tool is harder to pick up than a graphical one would be, which is
-why the documentation burden is stated as a requirement rather than an aspiration.
+| Below bar | Accepted because | Expires when |
+|---|---|---|
+| the `devops` hat is empty — no infrastructure, no deploys | we orchestrate work in repositories that already have both (`DEC-017`) | this repository acquires infrastructure of its own |
+| no GUI; the surface is a CLI plus generated agent files | the agent *is* the interface, and those files are text because the consumer is a language model (`DEC-017`) | — |
+| discoverability is poor | accepted explicitly rather than dismissed, which is why the documentation burden is a requirement (`DS-SELF-USE-SCOPE`) | adoption by people we do not talk to (`DEC-017`) |
 
-The trade would stop being acceptable on adoption by people we do not talk to — `DEC-017` names
-that as its invalidation trigger.
+Competing on feature parity with a provider that owns the model would set the roadmap by someone
+else's release schedule. Optimising instead for speed of evolution keeps the tool useful on the
+day we need it — and that is the whole trade.
 
-## Decisions
+## Evidence
 
-None assigned to this hat. The decisions answering these bars belong to `dev` — see
-[dev.md](dev.md).
+**Thin, and the shape of what is missing is clear.**
+
+Nothing is classified `evidence`. What exists is indirect: `compact check` fails the build when a
+view disagrees with its records (`DEC-010`), and the rule harvest reports which decisions nothing
+cites (`DEC-013`). Both are real, and neither is recorded as this hat's evidence for a bar.
+
+Neither bar above has evidence at all. Nothing asserts that reconciliation stays
+operator-invocable — the guardrail is instruction text in a skill, which no rule reads. Nothing
+asserts that a record written by an older release still parses, which is the entire compatibility
+bar.
+
+## Exposure
+
+**Unrecorded.** Nothing states what a breach of either bar would cost or who it would reach.
+
+The blast-radius reasoning exists inside `DS-HIGH-IMPACT-OPS` — a corrupted surrogate degrades
+every downstream agent operation, unbounded — but it is stated as justification for the bar rather
+than as a description of exposure, and nothing similar exists for compatibility.
 
 ## Open Loops
 
 **Harvested** (`DEC-013`):
 
-- `constraint-unanswered` **DS-BACKWARD-COMPAT** — no active decision answers it. Every mechanism
-  it implies is convention rather than a recorded decision.
+- `constraint-unmeasurable` **DS-HIGH-IMPACT-OPS**, **DS-BACKWARD-COMPAT** — both bars, neither
+  with a `## Measures` section.
+- `constraint-unanswered` **DS-BACKWARD-COMPAT** — no decision answers it; every mechanism it
+  implies is convention.
+- `constraint-unasserted` **DS-SELF-USE-SCOPE** — answered by `DEC-017`, which no rule cites.
 
 **Structural:**
 
-- **No charter record.** The charter above is inferred from the bars rather than from a record
-  stating this hat's own boundary.
-- **Nothing classified as `evidence` or `exposure`.** The hat declares four roles and uses two.
-  Evidence is where rule harvesting would land for this hat — what proves each bar, and whether
-  the proof can be trusted — and nothing records it yet.
-- **No bar states its trade.** `DS-HIGH-IMPACT-OPS` and `DS-BACKWARD-COMPAT` both state a position
-  without naming what was given up to sit there or what the neighbouring position would cost. That
-  is the shape `hat-templates` will ask for.
+- **Neither bar states its neighbour.** Both say where we sit and roughly what it bought, but
+  nothing records what the next position along would cost — which is the number that makes a
+  future trade arguable rather than re-litigated from scratch.
+- **Two of four sections are empty.** `evidence` and `exposure` have no records. For a tool with
+  no runtime that is partly proportionate, but the compatibility bar in particular is asserted by
+  nothing at all.
