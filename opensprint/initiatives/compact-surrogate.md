@@ -47,6 +47,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 - [ ] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
 - [ ] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
+- [ ] per-hat-classification: Classify records within their hat, and give the driver-spec layer the dependency edges it has never had. Product first, with OGSM — `objective | goal | strategy` as node kinds and `measure` as a section of a goal rather than a node of its own. Backfilled with operator confirmation batched by area, defaulting driver-specs to objective or goal. Uses the `depends-on` the ADR layer already has, and the `revises` / `refines` / `supersedes` vocabulary that emerged organically in overheard and cashier, so "reinforce" and "change" need nothing new. The mechanism is per-hat, not product-specific: maintainer will want a bar dimension, devops a pipeline or environment.
 - [ ] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
   - `product` — OGSM: objective · goal · strategy · measure. No charter, no constraints; the objective or goal covers what a constraint would have said, or the strategy says how it is worked around. Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable.
   - `maintainer` — bars · posture · evidence · exposure. A bar is a position on a spectrum, not a number: dimension, chosen point with its scope, what was traded to sit there, and what the neighbouring point would cost. Cost is an axis of every bar rather than a section of its own. Posture is where we actually sit versus where we chose to.
@@ -104,15 +105,40 @@ what the system is.
   produce the same four-part shape: dimension, chosen point, what was traded, what the neighbour
   costs. `DEC-062` in cashier is that row in a single sentence.
 
-**Plan change:** three milestones added — `per-hat-sections`, `system-as-source`, `hat-templates`.
+**The structure this settles.** The hat-to-record mapping tracks what a repository has historically
+been able to hold: application code gave us `dev`, infrastructure-as-code gave us `devops`, and
+spec-driven development gave us `product` and then `maintainer`. The first pair produce ADRs, the
+second produce driver-specs — and each layer needs its own map.
+
+```
+   ERA                  HAT          RECORD    MAP
+   ──────────────────────────────────────────────────────────
+   application code     dev          ADR     ─┐ DECISION-MAP
+   infrastructure       devops       ADR     ─┘ engineering layer
+   spec-driven          product      DS      ─┐ OGSM MAP
+   ↳ same move again    maintainer   DS      ─┘ product mgmt layer
+```
+
+So the OGSM map is not a competing graph over the same records — it is the structure *above*
+`DECISION-MAP`, which today renders driver-specs as independent roots because no project records
+relationships between them. Measured across five projects: **72 driver-specs, zero relationship
+edges; 64 of 64 cashier ADRs have `depends-on`.** The decision layer is a graph and the
+driver-spec layer is a flat pile.
+
+`DS-SQUAD-HATS` records half of this — "two hats produce driver-specs in one format" — but lists
+devops as producing only infrastructure-as-code. Cashier disagrees: `DEC-055` through `DEC-064`
+are ten devops decisions recorded as ADRs. The driver-spec is worth amending when
+`per-hat-classification` is built.
+
+**Plan change:** four milestones added — `per-hat-sections`, `system-as-source`, `hat-templates`.
 Ordering is a dependency chain: the mechanism, then the inputs that give `dev` and `devops`
 anything to compile from, then the shapes. `system-as-source` is load-bearing — it changes what a
 view *is*.
 
-**Consequence for `DEC-008`:** it states that the charter compiles from governance records. With
-product dropping its charter section, that decision applies to fewer hats than it claims. It needs
-narrowing or superseding when `hat-templates` is built — not now, since reexplore stops at
-planning.
+**`DEC-008` stands.** It states that the charter compiles from governance records. Since governance
+is itself an objective or a goal, the charter is absorbed into OGSM rather than dropped — the
+decision was never wrong, it just describes something that turns out to live in `O`/`G` rather
+than in a section of its own.
 
 **Records created:** `DS-SURROGATE-SCOPE`. No opsx changes proposed; execution is left to
 `/opsp:apply`.
