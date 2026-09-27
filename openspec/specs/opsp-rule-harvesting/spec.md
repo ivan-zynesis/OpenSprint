@@ -9,7 +9,6 @@ The link is harvested from code rather than declared in records, because that is
 Every gap reported here is a graph or index query. Nothing reads a record's prose and nothing guesses, which is what keeps an invented gap out of a backlog someone has to triage.
 
 A citation is evidence of intent, not proof of coverage. That a rule names a decision does not establish that it asserts the decision's substance.
-
 ## Requirements
 ### Requirement: Rule files are located by configured globs
 The system SHALL locate rule files using a configurable glob list, with an explicit default covering the naming conventions projects actually use.
@@ -134,4 +133,21 @@ The system SHALL NOT claim that a cited record is correctly asserted.
 - **WHEN** a decision is cited by at least one rule
 - **THEN** the system SHALL report it as cited rather than as verified
 - **AND** SHALL NOT assert that the citing rule tests the decision's substance
+
+### Requirement: Unclassified records are reported as an open loop
+The system SHALL report a record that carries no role, where the record belongs to a hat that declares roles.
+
+#### Scenario: A record with no role in a hat that declares roles
+- **WHEN** a record belongs to a hat declaring roles
+- **AND** the record declares no role
+- **THEN** the system SHALL report a `record-unclassified` loop against that record's hats
+
+#### Scenario: A hat that declares no roles
+- **WHEN** a record belongs only to hats declaring no roles
+- **THEN** the system SHALL NOT report `record-unclassified` for it
+- **AND** a project not using roles SHALL NOT see its whole surrogate reported as a backlog
+
+#### Scenario: A classified record
+- **WHEN** a record declares a role its hat accepts
+- **THEN** no `record-unclassified` loop SHALL be reported for it
 
