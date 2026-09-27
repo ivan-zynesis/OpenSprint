@@ -19,7 +19,7 @@ describe('opensprint compact (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\n---\n\nA constraint.\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
@@ -169,7 +169,7 @@ describe('opensprint compact loops (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\n---\n\nA constraint.\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),

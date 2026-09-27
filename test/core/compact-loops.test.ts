@@ -187,13 +187,14 @@ describe('rule harvesting', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('deriveOpenLoops', () => {
-    it('defines exactly five kinds, by explicit list', () => {
+    it('defines exactly six kinds, by explicit list', () => {
       expect([...OPEN_LOOP_KINDS]).toEqual([
         'constraint-unanswered',
         'constraint-unasserted',
         'decision-unguarded',
         'rule-guards-dead-record',
         'decision-on-superseded',
+        'record-unclassified',
       ]);
     });
 

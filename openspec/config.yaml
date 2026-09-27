@@ -27,3 +27,10 @@ rules:
     - Use existing constants and lists - don't invent detection mechanisms
     - Prefer explicit lookups over pattern matching or regex
     - If we generate it, we track it by name in a constant
+
+hats:
+  product: {}
+  dev: {}
+  devops: {}
+  maintainer:
+    roles: [bar, posture, evidence, exposure]

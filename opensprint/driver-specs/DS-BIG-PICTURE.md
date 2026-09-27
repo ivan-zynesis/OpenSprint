@@ -4,6 +4,10 @@ type: product
 status: active
 created: 2026-09-27
 hats: [product]
+role: strategy
+depends-on:
+  - DS-DOCUMENTATION-AS-OUTPUT
+  - DS-SURROGATE-BUDGET
 ---
 
 # DS-BIG-PICTURE: A Compiled View Is a Big Picture, Not an Index

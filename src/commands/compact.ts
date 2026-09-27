@@ -14,7 +14,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
-import { resolveHatRegistry, resolveHatSections } from '../core/hats.js';
+import { resolveHatRegistry, resolveHatSections, resolveHatRoles } from '../core/hats.js';
 import {
   readSourcedDriverSpecs,
   readSourcedDecisions,
@@ -101,7 +101,9 @@ function scan(projectRoot: string): Scan {
 function openLoopsFor(projectRoot: string, s: Scan): OpenLoop[] {
   const ids = [...s.driverSpecs.map((r) => r.id), ...s.decisions.map((r) => r.id)];
   const index = buildRuleIndex(projectRoot, ids, resolveRuleGlobs(projectRoot));
-  return deriveOpenLoops(s.driverSpecs, s.decisions, index);
+  return deriveOpenLoops(s.driverSpecs, s.decisions, index, (hat) =>
+    resolveHatRoles(projectRoot, hat)
+  );
 }
 
 function printLoops(loops: readonly OpenLoop[], registry: readonly string[]): void {

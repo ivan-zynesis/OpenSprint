@@ -27,6 +27,12 @@ artifacts:
         product, maintainer, dev, devops (or the project's own registry in
         openspec/config.yaml). A bare string or a list; a record that crosses
         hats declares each of them.
+      - role: optional — this spec's role within its hat. product accepts
+        objective, goal and strategy by default; a measure is a property of a
+        goal rather than a role of its own.
+      - depends-on: optional — other driver specs this one exists because of.
+        An objective has none; a goal depends on its objective, a strategy on
+        its goal. Must reference driver specs, not decisions.
 
       The body should contain the driver spec content in the operator's own words.
       Do not embellish or interpret — capture the intent as stated.
@@ -54,6 +60,8 @@ artifacts:
         from product, maintainer, dev, devops (or the project's own registry in
         openspec/config.yaml). A bare string or a list; a record that crosses
         hats declares each of them.
+      - role: optional — this decision's role within its hat, where the hat
+        declares roles.
 
       Required sections:
       - Question: the ambiguity you raised, in your own words

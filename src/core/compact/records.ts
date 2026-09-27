@@ -13,8 +13,20 @@ import { parseFrontmatter } from '../decision-map.js';
 import type { DriverSpecEntry, DecisionEntry } from '../decision-map.js';
 import { normalizeHats } from '../hats.js';
 
-export type SourcedDriverSpec = DriverSpecEntry & { path: string; content: string };
-export type SourcedDecision = DecisionEntry & { path: string; content: string };
+export type SourcedDriverSpec = DriverSpecEntry & {
+  path: string;
+  content: string;
+  /** Role within the hat, when classified. */
+  role?: string;
+  /** Other driver-specs this one exists because of. */
+  dependsOn: string[];
+};
+export type SourcedDecision = DecisionEntry & {
+  path: string;
+  content: string;
+  /** Role within the hat, when classified. */
+  role?: string;
+};
 
 function readDir(dir: string): Array<{ file: string; content: string }> {
   if (!fs.existsSync(dir)) return [];
@@ -38,6 +50,10 @@ export function readSourcedDriverSpecs(opensprintDir: string): SourcedDriverSpec
       type: (fm.type as string) || 'unknown',
       status: (fm.status as string) || 'active',
       hats: normalizeHats(fm.hats) ?? undefined,
+      role: typeof fm.role === 'string' ? fm.role : undefined,
+      // The same field name the decision layer uses: the relationship means
+      // the same thing, and a second name would mean a second parser.
+      dependsOn: Array.isArray(fm['depends-on']) ? (fm['depends-on'] as string[]) : [],
       path: path.join(opensprintDir, 'driver-specs', file),
       content,
     });
@@ -60,6 +76,7 @@ export function readSourcedDecisions(opensprintDir: string): SourcedDecision[] {
       depth: typeof fm.depth === 'number' ? fm.depth : 0,
       summary: '',
       hats: normalizeHats(fm.hats) ?? undefined,
+      role: typeof fm.role === 'string' ? fm.role : undefined,
       path: path.join(opensprintDir, 'ADRs', file),
       content,
     });

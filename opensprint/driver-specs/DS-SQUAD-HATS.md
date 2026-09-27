@@ -4,6 +4,9 @@ type: architecture
 status: active
 created: 2026-09-26
 hats: [product]
+role: strategy
+depends-on:
+  - DS-FULL-COVERAGE
 ---
 
 # DS-SQUAD-HATS: Engineering Accountability Partitions Into Four Hats

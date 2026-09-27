@@ -58,6 +58,24 @@ export const DRIVER_SPEC_TYPES = [
 
 export type DriverSpecType = (typeof DRIVER_SPEC_TYPES)[number];
 
+/**
+ * The roles a hat's records can take, by default.
+ *
+ * `product` gets the OGSM node kinds. `measure` is deliberately absent: a
+ * measure is a property of a goal, not a node of its own, and making it a role
+ * would invite measures to be filed as separate driver-specs.
+ *
+ * Every other hat defaults to none. A hat with no roles has nothing to
+ * classify against, so a project not using them never sees its surrogate
+ * reported as a backlog of unclassified records.
+ */
+export const DEFAULT_ROLES: Readonly<Record<string, readonly string[]>> = {
+  product: ['objective', 'goal', 'strategy'],
+  maintainer: [],
+  dev: [],
+  devops: [],
+};
+
 const DRIVER_SPEC_TYPE_SET: ReadonlySet<string> = new Set(DRIVER_SPEC_TYPES);
 
 /**
@@ -272,4 +290,67 @@ export function defaultHatsForDecision(
 
   if (hats.size !== 1) return [];
   return [...hats];
+}
+
+
+/**
+ * Resolves the roles a hat's records may take.
+ *
+ * Mirrors resolveHatSections: declared wins, malformed degrades to the default
+ * and warns rather than failing the command.
+ */
+export function resolveHatRoles(projectRoot: string, hat: string): readonly string[] {
+  const fallback = DEFAULT_ROLES[hat] ?? [];
+  const declared = readProjectConfig(projectRoot)?.hats;
+  if (!declared || Array.isArray(declared)) return fallback;
+
+  const roles = declared[hat]?.roles;
+  if (roles === undefined) return fallback;
+
+  const valid =
+    Array.isArray(roles) &&
+    roles.length > 0 &&
+    roles.every((r) => typeof r === 'string' && r.length > 0);
+  if (!valid) {
+    console.warn(
+      `Hat '${hat}' declares an invalid 'roles' value (must be a non-empty array of non-empty strings). Using the default roles.`
+    );
+    return fallback;
+  }
+  return roles;
+}
+
+/** A record whose role no hat of that record accepts. */
+export interface RoleProblem {
+  record: string;
+  role: string;
+  hats: string[];
+  accepted: string[];
+  reason: 'not-accepted' | 'hat-declares-none';
+}
+
+/**
+ * Validates each record's role against the roles its hats declare.
+ *
+ * A record is checked against the union of its hats' roles, so a record in two
+ * hats is classified legitimately if either accepts it. A role on a record
+ * whose hats declare none is reported rather than silently accepted — it
+ * usually means the hat's roles were never configured.
+ */
+export function validateRoles(
+  records: readonly { id: string; role?: string; hats?: string[] }[],
+  rolesFor: (hat: string) => readonly string[]
+): RoleProblem[] {
+  const problems: RoleProblem[] = [];
+  for (const record of records) {
+    if (!record.role) continue;
+    const hats = record.hats ?? [];
+    const accepted = [...new Set(hats.flatMap((h) => [...rolesFor(h)]))].sort();
+    if (accepted.length === 0) {
+      problems.push({ record: record.id, role: record.role, hats, accepted, reason: 'hat-declares-none' });
+    } else if (!accepted.includes(record.role)) {
+      problems.push({ record: record.id, role: record.role, hats, accepted, reason: 'not-accepted' });
+    }
+  }
+  return problems;
 }

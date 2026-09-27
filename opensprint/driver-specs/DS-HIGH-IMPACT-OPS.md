@@ -3,7 +3,8 @@ id: DS-HIGH-IMPACT-OPS
 type: reliability
 status: active
 created: 2026-05-22
-hats: [product]
+hats: [maintainer]
+role: bar
 ---
 
 # DS-HIGH-IMPACT-OPS: High-Impact Operation Constraints

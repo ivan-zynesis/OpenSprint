@@ -6,6 +6,7 @@ depends-on:
 created: <YYYY-MM-DD>
 depth: <0-N>
 # hats: [<product|maintainer|dev|devops>]   # optional; a string or a list
+# role: <role>                      # optional; where the hat declares roles
 ---
 
 ## Question

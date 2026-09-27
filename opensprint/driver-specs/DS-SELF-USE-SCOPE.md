@@ -3,7 +3,8 @@ id: DS-SELF-USE-SCOPE
 type: product
 status: active
 created: 2026-09-26
-hats: [product]
+hats: [maintainer]
+role: posture
 ---
 
 # DS-SELF-USE-SCOPE: A Self-Use Tool, Not a Competitor

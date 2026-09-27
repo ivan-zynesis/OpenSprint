@@ -4,6 +4,9 @@ type: architecture
 status: active
 created: 2026-09-26
 hats: [product]
+role: strategy
+depends-on:
+  - DS-FULL-COVERAGE
 ---
 
 # DS-LOOP-CLOSURE: The Loop Must Close Mechanically

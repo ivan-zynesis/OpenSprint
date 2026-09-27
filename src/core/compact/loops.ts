@@ -20,6 +20,7 @@ export const OPEN_LOOP_KINDS = [
   'decision-unguarded',
   'rule-guards-dead-record',
   'decision-on-superseded',
+  'record-unclassified',
 ] as const;
 
 export type OpenLoopKind = (typeof OPEN_LOOP_KINDS)[number];
@@ -58,7 +59,8 @@ function isDead(status: string): boolean {
 export function deriveOpenLoops(
   driverSpecs: readonly SourcedDriverSpec[],
   decisions: readonly SourcedDecision[],
-  index: RuleIndex
+  index: RuleIndex,
+  rolesFor: (hat: string) => readonly string[] = () => []
 ): OpenLoop[] {
   const loops: OpenLoop[] = [];
   const activeDecisions = decisions.filter((d) => isActive(d.status));
@@ -137,6 +139,26 @@ export function deriveOpenLoops(
         detail: `Depends on ${dead.join(', ')}, which is no longer active. Re-evaluate with /opsp:rebuild-assess.`,
       });
     }
+  }
+
+  // ── a record in a role-declaring hat that carries no role
+  //
+  // Fires only where a hat declares roles. Otherwise a project not using them
+  // would see its entire surrogate reported as a backlog on first run, which
+  // is noise rather than a gap.
+  for (const record of [...driverSpecs, ...decisions]) {
+    if (!isActive(record.status)) continue;
+    if (record.role) continue;
+    const hats = record.hats ?? [];
+    const declaring = hats.filter((h) => rolesFor(h).length > 0);
+    if (declaring.length === 0) continue;
+    const accepted = [...new Set(declaring.flatMap((h) => [...rolesFor(h)]))].sort();
+    loops.push({
+      kind: 'record-unclassified',
+      record: record.id,
+      hats,
+      detail: `No role declared. ${declaring.join(', ')} accepts: ${accepted.join(', ')}.`,
+    });
   }
 
   return loops;

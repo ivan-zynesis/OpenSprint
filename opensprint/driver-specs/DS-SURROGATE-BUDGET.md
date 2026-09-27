@@ -4,6 +4,9 @@ type: reliability
 status: active
 created: 2026-09-26
 hats: [product]
+role: goal
+depends-on:
+  - DS-AGENTIC-SDLC
 ---
 
 # DS-SURROGATE-BUDGET: Surrogate Loading Must Not Consume the Session Budget

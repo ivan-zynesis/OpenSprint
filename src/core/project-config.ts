@@ -58,6 +58,9 @@ export const ProjectConfigSchema = z.object({
               observes: z.union([z.string().min(1), z.array(z.string().min(1))]).optional(),
             }))
             .optional(),
+          // Lenient on purpose: resolveHatRoles validates and degrades per hat,
+          // so one bad value cannot blank every other hat's configuration.
+          roles: z.unknown().optional(),
         })
       ),
     ])
@@ -201,6 +204,7 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
             }))
               .min(1)
               .optional(),
+            roles: z.unknown().optional(),
           })
         )
         .refine((m) => Object.keys(m).length > 0)

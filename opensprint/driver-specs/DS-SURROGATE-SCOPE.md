@@ -4,6 +4,9 @@ type: product
 status: active
 created: 2026-09-27
 hats: [product]
+role: strategy
+depends-on:
+  - DS-AGENTIC-SDLC
 ---
 
 # DS-SURROGATE-SCOPE: Compaction Stops at the Surrogate

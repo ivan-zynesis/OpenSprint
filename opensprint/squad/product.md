@@ -2,191 +2,156 @@
 
 ## Charter
 
-**Owns** the functional constraints: what OpenSprint must do for the operator and for downstream
-projects consuming it (`DS-SQUAD-HATS`). This is a highly technical product, so its requirements
-read technically — that does not make them engineering decisions.
+**Owns** the functional intent: what OpenSprint must do for the operator, the agent and the
+downstream project (`DS-SQUAD-HATS`). A highly technical product still has product requirements;
+they just read technically.
 
-**May not trade away:**
-- The accountabilities themselves. Hats group however team size demands; what each one answers
-  for does not move (`DS-SQUAD-HATS`).
-- Single ownership per hat. A hat with two owners has none (`DS-SME-OWNERSHIP`).
-- Closing the loop. A process whose last arrow is missing produces documents (`DS-LOOP-CLOSURE`).
+**Owns the objective and what follows from it.** The records here are classified as a chain —
+objective, then goals, then strategies (`DS-AGENTIC-SDLC`). Deciding what OpenSprint will *not* do
+is part of that (`DS-SURROGATE-SCOPE`), as is deciding what a compiled view is for
+(`DS-BIG-PICTURE`).
 
-**Also owns what a compiled view is.** A view is a big picture, not an index — it selects, and a
-record may legitimately appear in none (`DS-BIG-PICTURE`). What each hat's view is *for* is a
-product decision.
+**May not trade away:** coverage of all four accountabilities (`DS-FULL-COVERAGE`); documentation
+being compiled rather than authored (`DS-DOCUMENTATION-AS-OUTPUT`); single ownership per hat
+(`DS-SME-OWNERSHIP`).
 
-**Also owns the boundary.** Deciding what OpenSprint will *not* do is a product decision, not an
-engineering one (`DS-SURROGATE-SCOPE`). Compaction stops at preparing the surrogate; certification,
-change management and release management sit outside it deliberately.
-
-**Escalates when** a constraint is written so that nothing can check it — a constraint nothing can
-assert was written badly, and that bridging work lands on this hat (`DS-SQUAD-HATS`).
-
-**The owner** reviews every change to this view, receives escalations in its domain, and triages
-its open loops as backlog (`DS-SME-OWNERSHIP`).
+**Escalates when** a constraint is written so that nothing can check it — the bridging work
+`DS-SQUAD-HATS` assigns to this hat.
 
 ## Constraints
 
-### The squad is four hats, and one person may wear all of them
+### Objective — power an entire engineering team, human or agent
 
-Accountability partitions into **product** (what it must do), **maintainer** (what must be true of
-it), **dev** (how it is built) and **devops** (how it is run) (`DS-SQUAD-HATS`). A hat is a context
-boundary: wearing it means knowing what that role answers for, what it produces, and which
-constraints it may not trade away. An agent must be told which one it is wearing.
+Software development becomes real engineering only when the detail across **dev, sec and ops** is
+all taken care of. OpenSprint exists to power a whole engineering team at that standard,
+regardless of whether the participants are human or agent, at a scale beyond a single change
+workflow (`DS-AGENTIC-SDLC`).
 
-Two hats produce driver-specs in one format. A constraint is a constraint whether it reads
-"multiple payment rails with divergent semantics" or "99.9% monthly" (`DS-SQUAD-HATS`).
+The premise has not changed since the project began: **code became cheap.** Connecting context and
+building the knowledge base are the load-bearing activities now. Where every detail of the context
+is recorded, rebuilding a whole application from it is easy — generating the code was never the
+hard part (`DS-AGENTIC-SDLC`).
 
-**QA is redistributed, not absent.** Engineers write the tests, because the person who can most
-cheaply make something verifiable is the person building it. But *what must be tested* is answered
-upstream by the driver-specs, so the bridge between specification and assertion lands mostly on
-product and maintainer (`DS-SQUAD-HATS`).
+This is a different ambition from OpenSpec's rather than a correction of it. A quick change against
+a brownfield project is well served by OPSX. OpenSprint is the larger claim, and the move is
+deliberately away from vibe coding — not because generating code fast is wrong, but because a
+system nobody can explain is not engineered, whoever wrote it (`DS-AGENTIC-SDLC`).
 
-**Designer is product-dependent** and the hat set is therefore per-project, not a fixed list
-(`DS-SQUAD-HATS`, `DEC-012` as superseded by `DEC-016`).
+### Goal — cover all four accountabilities
 
-**Hats are an ownership partition, not a loading filter.** Measured against cashier's six
-initiatives, four touch all four hats and none touches fewer than two (`DS-SQUAD-HATS`). Real work
-spans them — which is why one person wears all of them.
+Specification must cover **functional** intent (product) and **non-functional** intent
+(maintainer); delivered results must cover **application** (dev) and **infrastructure** (devops).
+A practice covering only some of those is not engineering (`DS-FULL-COVERAGE`).
 
-### Every hat needs one human owner
+Spec-driven development as commonly practised covers the product and dev hats — half a system.
+What must remain true while it runs, and how it is stood up, are left to convention. That gap is
+why an implementation can satisfy every stated requirement and still be unfit: nothing stated the
+availability bar, or the compliance obligation, or the topology that follows from either
+(`DS-FULL-COVERAGE`).
 
-Laying the hats out as distinct artifacts is what makes ownership assignable (`DS-SME-OWNERSHIP`).
-A condensed view is in effect a surrogate of the person holding that expertise, and a surrogate
-nobody is accountable for drifts without anyone noticing.
+Measured by: every hat in a project's registry has records, or a recorded decision explaining why
+not; and no hat accumulates records nothing asserts (`DS-FULL-COVERAGE`, `DS-LOOP-CLOSURE`).
 
-Ownership means **reviewer**, **escalation target** and **triage owner** — not author. The owner
-owns the system's behaviour in their domain, not a document describing it (`DS-SME-OWNERSHIP`,
-`DEC-006`). In a one-person team all four owners are the same engineer on different days; the
-accountabilities still do not move.
+### Goal — documentation is compiled, never a second effort
 
-### The loop must close mechanically
+The compacted surrogate **is** the documentation, compiled from work already done rather than
+authored alongside it (`DS-DOCUMENTATION-AS-OUTPUT`).
 
-`driver-spec → ADR → implementation → rule → back to the constraint` (`DS-LOOP-CLOSURE`). Each
-arrow is a skill or a hook rather than a meeting. Facilitation — noticing that a constraint has no
-decision, that a decision was never implemented, that an implementation drifted — is the role an
-AI-native team does not fill with a person, because it is exactly the part that can be encoded.
+Documentation fails structurally rather than through indiscipline: it is written after the fact,
+by someone with no remaining incentive, about reasoning that has already faded. Compiling removes
+the second effort entirely — the records are made *during* the work because the work cannot
+proceed without them (`DS-DOCUMENTATION-AS-OUTPUT`).
 
-**The last arrow is the one that matters.** Without it a process produces documents; with it,
-drift becomes a build failure rather than an archaeology exercise (`DS-LOOP-CLOSURE`).
+It also makes the artifact honest. A compiled document cannot drift from what it describes without
+the compile reporting it, which no authored document has ever guaranteed
+(`DS-DOCUMENTATION-AS-OUTPUT`, `DEC-010`).
 
-The compacted surrogate is itself subject to this: it must not be able to disagree silently with
-the record it derives from (`DS-LOOP-CLOSURE`, `DEC-010`).
+### Goal — loading the surrogate must not consume the session budget
 
-### Loading the surrogate must not consume the session budget
+Measured across projects in production use: **93–157K tokens**, of which ADRs are 61–74%
+(`DS-SURROGATE-BUDGET`). `architecture.md` is loaded alongside the ADRs it summarises, so today's
+compaction saves nothing at load time; completed initiatives add ~47K of cashier's 157K although
+their durable output already lives in the records.
 
-Measured across projects in production use, loading costs **93–157K tokens**: cashier ~106K for
-apply and ~157K for explore, overheard ~94K/~129K, ai-gateway ~93K/~127K (`DS-SURROGATE-BUDGET`).
+Progressive discovery must therefore extend one layer further. An agent that *acts* on a decision
+still reads its full record — the budget is saved on orientation, not on judgement
+(`DS-SURROGATE-BUDGET`, `DEC-015`).
 
-Three facts drive it (`DS-SURROGATE-BUDGET`):
-- **ADRs are 61–74% of every load** — that is the layer worth condensing
-- **`architecture.md` is loaded alongside the ADRs it summarises**, so today's compaction saves
-  nothing at load time; it works as documentation, not as a surrogate layer
-- **Completed initiatives are loaded on every explore** — roughly 47K of cashier's 157K — although
-  their durable output already lives in the driver-specs and ADRs
+### Strategy — four hats, and the accountabilities do not move
 
-Progressive discovery must therefore extend one layer further: an agent works from the compacted
-surrogate rather than the full record set. Condensation earns the tokens; how the output is
-partitioned is a separate question (`DS-SURROGATE-BUDGET`, `DS-SQUAD-HATS`). An agent that *acts*
-on a decision still reads that decision's full record — the budget is saved on orientation, not on
-judgement (`DS-SURROGATE-BUDGET`, `DEC-015`).
+Accountability partitions into **product**, **maintainer**, **dev** and **devops**
+(`DS-SQUAD-HATS`). A hat is a context boundary: wearing it means knowing what that role answers
+for and which constraints it may not trade away. An agent must be told which one it wears.
 
-### Initiatives run concurrently, in independent universes
+QA is redistributed rather than absent — engineers write the tests, but *what* must be tested is
+answered upstream by the driver-specs, so the bridge lands on product and maintainer. Designer is
+product-dependent, so the hat set is a per-project registry (`DS-SQUAD-HATS`, `DEC-016`).
 
-Initiatives must support concurrent execution across independent git worktrees, each carrying its
-own surrogate and evolving independently, with no shared mutable state during execution
-(`DS-PARALLEL-EXEC`). Serial execution is insufficient when a redesign and a maintenance
-initiative should not block each other.
+Hats are an ownership partition, not a loading filter: four of cashier's six initiatives touch all
+four hats (`DS-SQUAD-HATS`).
 
-Parallel universes will diverge in ADRs, driver-specs and architecture.md over time, so
-reconciliation is required when they converge or one wins (`DS-PARALLEL-EXEC`).
+### Strategy — the loop must close mechanically
 
-### Reconciliation is operator-invocable only
+`driver-spec → ADR → implementation → rule`, and back to the constraint when a rule fails
+(`DS-LOOP-CLOSURE`). Each arrow is a skill or a hook rather than a meeting. Facilitation — noticing
+a constraint has no decision, or an implementation has drifted — is the part that can be encoded.
 
-Universe reconciliation is high-impact and difficult to reverse. It must never be triggerable by
-an automated pipeline, a sub-agent, or another skill invoking it programmatically
-(`DS-HIGH-IMPACT-OPS`).
+**The last arrow is the one that matters.** Without it a process produces documents; with it, drift
+becomes a build failure rather than an archaeology exercise (`DS-LOOP-CLOSURE`).
 
-A corrupted surrogate degrades every downstream agent operation that depends on it; the blast
-radius is unbounded. Human confirmation at each ambiguous step is non-negotiable
-(`DS-HIGH-IMPACT-OPS`). A planning phase with operator confirmation must precede all execution,
-and the most capable available model with extended thinking is recommended.
+### Strategy — one human owner per hat
 
-### A self-use tool, deliberately not competing
+Ownership means **reviewer**, **escalation target** and **triage owner** — not author
+(`DS-SME-OWNERSHIP`). A condensed view is in effect a surrogate of the person holding that
+expertise, and one nobody is accountable for drifts unnoticed. In a one-person team all four
+owners are the same engineer on different days; the accountabilities still do not move.
 
-Tech giants and LLM providers could release tooling that does this better. **We do not intend to
-compete** (`DS-SELF-USE-SCOPE`). OpenSprint exists to be evolved quickly for our own use, kept
-well documented, and to give stakeholders maximum visibility into a well-organised agentic SDLC.
+### Strategy — a view is a big picture, not an index
 
-Competing on feature parity with a provider that owns the model would set the roadmap by someone
-else's release schedule. Open source is a consequence of building in the open, not a bid for
-market share (`DS-SELF-USE-SCOPE`).
+A hat view conveys what someone wearing that hat needs to understand. It does not contain every
+working file of that hat, and **views select** — a record may appear in no view without that being
+a defect (`DS-BIG-PICTURE`).
 
-What follows: no GUI, no CI/CD of its own, an empty `devops` hat that a compiled view should
-report honestly, and speed of evolution beating feature parity where the two conflict
-(`DS-SELF-USE-SCOPE`, `DEC-017`).
+The first implementation compiled every record into its hat's view, producing an index rather than
+a picture, and measured only 2.9x against the raw record. Selection is the other half of
+compaction (`DS-BIG-PICTURE`, `DS-SURROGATE-BUDGET`).
 
-### Compaction stops at the surrogate
+### Strategy — initiatives run concurrently, in independent universes
 
-OpenSprint's compaction scope is preparing the compacted surrogate — reading the records and the
-system, and rendering the views a team orients from. **Certification, change management and release
-management are deliberately out of scope** (`DS-SURROGATE-SCOPE`).
+Concurrent execution across independent git worktrees, each carrying its own surrogate, with no
+shared mutable state during execution (`DS-PARALLEL-EXEC`). Serial execution is insufficient when a
+redesign and a maintenance initiative should not block each other. Universes diverge, so
+reconciliation is required when they converge or one wins.
 
-The reasoning is that each is a plausible next step and each pulls in a domain of its own.
-Certification looks small — a hat owner signing off on a compiled section — but a signature only
-means something if something governs what happens when it is withheld, which is change management;
-and once a product decision can gate what ships, that is release management. One artifact drags in
-two disciplines (`DS-SURROGATE-SCOPE`).
+### Strategy — compaction stops at the surrogate
 
-So compaction renders and reports; it does not approve, gate or promote. A view is reviewed through
-whatever the project already uses, and OpenSprint supplies no review mechanism — the same position
-`DEC-007` takes on remediation. Revisiting this is a product decision, and the question to answer
-first is which of the three is being taken on *in full* (`DS-SURROGATE-SCOPE`).
+Certification, change management and release management are deliberately out of scope
+(`DS-SURROGATE-SCOPE`). Each is a plausible next step that pulls in a domain of its own:
+certification looks small, but a signature only means something if something governs what happens
+when it is withheld — which is change management, and then release management. One artifact drags
+in two disciplines.
 
-### A compiled view is a big picture, not an index
-
-The compacted surrogate conveys what someone wearing a hat needs to understand about that domain.
-It does not contain every working file of that hat, and views **select** — a record may appear in
-no view at all without that being a defect (`DS-BIG-PICTURE`).
-
-The first implementation did the opposite: it compiled every record assigned to a hat, producing
-an index rather than a picture. A `dev` view listing sixteen decision records says nothing about
-what the system is (`DS-BIG-PICTURE`).
-
-Selection is the other half of compaction, and its absence is the likeliest explanation for the
-2.9x measured against the raw record — that pass condensed prose while preserving full coverage
-(`DS-BIG-PICTURE`, `DS-SURROGATE-BUDGET`).
-
-Three consequences. Completeness stops being the check; the records and `DECISION-MAP.md` remain
-the inventory, and the view is neither. The provenance manifest is unaffected, because a section's
-inputs remain every record the hat owns — including ones the picture does not name. And citation
-still binds for the claims a view *does* make (`DEC-009`).
+So compaction renders and reports; it does not approve, gate or promote.
 
 ## Decisions
 
-None assigned to this hat. Every recorded decision belongs to `dev` — see
-[dev.md](dev.md).
+None assigned to this hat. Every recorded decision belongs to `dev` — see [dev.md](dev.md).
 
 ## Open Loops
 
 **Harvested** (`DEC-013`):
 
-- `constraint-unasserted` **DS-SELF-USE-SCOPE** — answered by `DEC-017`, which no rule cites.
-- `constraint-unanswered` **DS-SURROGATE-SCOPE** — no decision answers it. Recorded 2026-09-27 as a
-  scope boundary; whether it needs a decision behind it is itself a triage question.
-- `constraint-unanswered` **DS-BIG-PICTURE** — no decision answers it yet. `DEC-008` is the
-  nearest, and it is partly contradicted: it states the charter compiles from governance records,
-  while product's shape drops its charter entirely. Needs narrowing or superseding when
-  `hat-templates` is built.
-
-`DS-LOOP-CLOSURE` was on this list until a test named `DEC-007`, one of its three answering
-decisions. Transitive coverage closed it with nothing marking it resolved (`DEC-013`).
+- `constraint-unanswered` **DS-AGENTIC-SDLC**, **DS-FULL-COVERAGE**,
+  **DS-DOCUMENTATION-AS-OUTPUT** — the objective and both goals were recorded on 2026-09-27 and no
+  decision answers any of them yet. Expected for records this new; a real gap if it persists.
+- `constraint-unanswered` **DS-SURROGATE-SCOPE** — a scope boundary with no decision behind it.
+- `constraint-unasserted` **DS-SELF-USE-SCOPE** is no longer this hat's; it moved to
+  [maintainer.md](maintainer.md) as a posture.
 
 **Structural:**
 
-- **No charter record.** The charter above is assembled from `DS-SQUAD-HATS` and
-  `DS-SME-OWNERSHIP`, which describe the model in general rather than this hat's boundary in this
-  project. Nothing records what product specifically may not trade away here.
-- **Seven constraints, no decisions.** Every ADR routes to `dev`, so this hat's constraints are
-  answered in another hat's view.
+- **No charter record.** The charter above is assembled from the strategies rather than from a
+  record stating this hat's own boundary.
+- **Ten records, no decisions.** Every ADR routes to `dev`, so this hat's constraints are answered
+  in another hat's view — the intended shape (`DS-SQUAD-HATS`), but it means no view is
+  self-contained.

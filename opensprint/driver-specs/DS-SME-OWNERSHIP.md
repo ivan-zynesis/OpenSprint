@@ -4,6 +4,9 @@ type: business
 status: active
 created: 2026-09-26
 hats: [product]
+role: strategy
+depends-on:
+  - DS-SQUAD-HATS
 ---
 
 # DS-SME-OWNERSHIP: Every Hat Needs One Human Owner

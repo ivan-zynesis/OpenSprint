@@ -5,14 +5,18 @@ If a view is wrong, the system is wrong: raise it with `/opsp:explore`, not with
 
 | Wearing | Owns the question | Start with | Records |
 |---|---|---|---|
-| **product** | what must it **do**? | [product.md](product.md) | 7 |
-| **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | 1 |
+| **product** | what must it **do**? | [product.md](product.md) | 10 |
+| **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | 3 |
 | **dev** | how is it **built**? | [dev.md](dev.md) | 16 |
 | **devops** | how is it **stood up and kept running**? | [devops.md](devops.md) | 0 |
 
 The hats do not partition the work. Most initiatives touch every one of them — which is why one
 person wears all four (`DS-SQUAD-HATS`). This table is here to tell you which hat *owns* a
 question, not to let you skip the others.
+
+Records carry a **role** within their hat. Product's are an OGSM chain — objective, then goals,
+then strategies — and maintainer's are bars and posture. The roles a hat accepts are configuration
+(`DEC-016`), so a project declares its own.
 
 ## Reading order
 

@@ -4,6 +4,7 @@ type: reliability
 status: active
 created: 2026-09-26
 hats: [maintainer]
+role: bar
 ---
 
 # DS-BACKWARD-COMPAT: Best-Effort Backward Compatibility Across Tooling Releases
