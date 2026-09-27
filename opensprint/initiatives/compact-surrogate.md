@@ -45,7 +45,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] compact-engine: Compile hat views and architecture.md from the record with inline citations, write the provenance manifest, and implement `--check`.
 - [x] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
 - [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
-- [ ] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
+- [x] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
 - [ ] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
 - [ ] per-hat-classification: Classify records within their hat, and give the driver-spec layer the dependency edges it has never had. Product first, with OGSM — `objective | goal | strategy` as node kinds and `measure` as a section of a goal rather than a node of its own. Backfilled with operator confirmation batched by area, defaulting driver-specs to objective or goal. Uses the `depends-on` the ADR layer already has, and the `revises` / `refines` / `supersedes` vocabulary that emerged organically in overheard and cashier, so "reinforce" and "change" need nothing new. The mechanism is per-hat, not product-specific: maintainer will want a bar dimension, devops a pipeline or environment.
 - [ ] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
@@ -62,6 +62,30 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
     it is run.
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
+
+### per-hat-sections — complete (2026-09-27)
+
+**OPSX change:** `2026-09-27-per-hat-sections` (archived)
+
+A section is now `{ name, inputs }` rather than a name the engine switches on. The input kind —
+`all | driver-specs | decisions | none` — is what preserves `DEC-010`'s granularity once sections
+are arbitrary. `hats` accepts the list of names older configs carry or a map to `{ sections }`.
+
+**Backward compatibility demonstrated, not asserted.** This repository declares no `hats`: its five
+views are byte-identical after the change, the manifest still holds 16 entries with the same four
+section names per hat, and `check` exits zero.
+
+**The map form exercised end to end.** Declaring `dev` with three custom sections resolved them
+correctly, left the other three hats on defaults and fresh, and — the live proof of the orphan
+rule — silently ignored `dev`'s now-unused `charter`, `constraints` and `decisions` manifest
+entries rather than reporting them as drift.
+
+**Process failure worth recording.** The first archive attempt failed because the delta put
+`Per-project hat registry` under the wrong capability. The archive refused and changed nothing,
+but the failure was invisible: the command was piped to `tail`, so the shell saw `tail`'s exit
+code. The merge proceeded on a change whose specs had not synced. This is the third time in this
+initiative that a pipe has masked a non-zero exit — the earlier two hid a red test suite and a
+red build. Repaired by splitting the delta and re-archiving with the exit code unmasked.
 
 ## Re-exploration log
 
