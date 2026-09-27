@@ -149,10 +149,16 @@ None assigned to this hat. The constraints these decisions answer live in
 `DEC-013` is worth noticing: the decision that harvests rule links is not itself named by one.
 Its implementation is tested, but no rule cites it, so the harvest cannot see the link.
 
-Two loops have closed here without any bookkeeping. `DEC-007` went when a test in `backlog-seam`
-named it — which transitively closed `DS-LOOP-CLOSURE`'s in [product.md](product.md). `DEC-010`
-went when the tests for `system-as-source` named it. In both cases the harvest simply stopped
-reporting them (`DEC-013`).
+Two loops have closed here without any bookkeeping, and the second one is instructive.
+`DEC-007` went when a test in `backlog-seam` named it — which transitively closed
+`DS-LOOP-CLOSURE`'s in [product.md](product.md).
+
+`DEC-010` was guarded a whole milestone before this view admitted it. `hat-sections.test.ts`
+named it during `per-hat-sections`, but `open-loops` had no observed inputs then, so nothing
+restaged it and the view went on reporting the decision as unguarded. `system-as-source` gave the
+section its rule files as observations, and the correction surfaced on the next compile — the
+staleness gap demonstrating itself one last time, on the milestone that closed it
+(`DEC-010`, `DEC-013`).
 
 **Structural:**
 
