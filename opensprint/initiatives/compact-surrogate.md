@@ -47,7 +47,13 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 - [ ] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
 - [ ] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
-- [ ] hat-templates: The actual shapes — `dev` (tech stack · runtime topology · entity schema), `devops` (infra architecture · gitops), and `product` (OGSM: objective · goal · strategy · measure). Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable. Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
+- [ ] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
+  - `product` — OGSM: objective · goal · strategy · measure. No charter, no constraints; the objective or goal covers what a constraint would have said, or the strategy says how it is worked around. Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable.
+  - `maintainer` — bars · posture · evidence · exposure. A bar is a position on a spectrum, not a number: dimension, chosen point with its scope, what was traded to sit there, and what the neighbouring point would cost. Cost is an axis of every bar rather than a section of its own. Posture is where we actually sit versus where we chose to.
+  - `dev` — tech stack · runtime topology · entity schema. Describes the system, citing ADRs where they explain a choice; does not enumerate them.
+  - `devops` — infra architecture · gitops.
+  - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
+  - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
 
 ## Re-exploration log
 
@@ -84,10 +90,29 @@ what the system is.
 - **Actors** as a product section. Impact Mapping has the slot and OGSM does not; not worth
   forcing.
 
+**Settled after the first pass:**
+
+- **Views are big-picture documentation, not an index.** The four uniform sections forced every
+  record into a view; a dev view enumerating sixteen ADRs is an index, not a picture. Selection is
+  the other half of compaction — which probably explains why the measured ratio was only 2.9x, as
+  that pass condensed prose while preserving full coverage.
+- **Product drops `charter` and `constraints`.** The objective or goal covers what a constraint
+  would have said, or the strategy says how it is worked around.
+- **Maintainer's domain is a spectrum.** What the role controls is always a position on a
+  continuum, and moving along one axis costs something on another — an SLA percentage traded
+  against infrastructure cost, a compliance commitment traded against engineering cost. Both
+  produce the same four-part shape: dimension, chosen point, what was traded, what the neighbour
+  costs. `DEC-062` in cashier is that row in a single sentence.
+
 **Plan change:** three milestones added — `per-hat-sections`, `system-as-source`, `hat-templates`.
 Ordering is a dependency chain: the mechanism, then the inputs that give `dev` and `devops`
 anything to compile from, then the shapes. `system-as-source` is load-bearing — it changes what a
 view *is*.
+
+**Consequence for `DEC-008`:** it states that the charter compiles from governance records. With
+product dropping its charter section, that decision applies to fewer hats than it claims. It needs
+narrowing or superseding when `hat-templates` is built — not now, since reexplore stops at
+planning.
 
 **Records created:** `DS-SURROGATE-SCOPE`. No opsx changes proposed; execution is left to
 `/opsp:apply`.
