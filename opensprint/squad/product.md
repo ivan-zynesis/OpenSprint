@@ -12,6 +12,10 @@ read technically — that does not make them engineering decisions.
 - Single ownership per hat. A hat with two owners has none (`DS-SME-OWNERSHIP`).
 - Closing the loop. A process whose last arrow is missing produces documents (`DS-LOOP-CLOSURE`).
 
+**Also owns what a compiled view is.** A view is a big picture, not an index — it selects, and a
+record may legitimately appear in none (`DS-BIG-PICTURE`). What each hat's view is *for* is a
+product decision.
+
 **Also owns the boundary.** Deciding what OpenSprint will *not* do is a product decision, not an
 engineering one (`DS-SURROGATE-SCOPE`). Compaction stops at preparing the surrogate; certification,
 change management and release management sit outside it deliberately.
@@ -140,6 +144,25 @@ whatever the project already uses, and OpenSprint supplies no review mechanism �
 `DEC-007` takes on remediation. Revisiting this is a product decision, and the question to answer
 first is which of the three is being taken on *in full* (`DS-SURROGATE-SCOPE`).
 
+### A compiled view is a big picture, not an index
+
+The compacted surrogate conveys what someone wearing a hat needs to understand about that domain.
+It does not contain every working file of that hat, and views **select** — a record may appear in
+no view at all without that being a defect (`DS-BIG-PICTURE`).
+
+The first implementation did the opposite: it compiled every record assigned to a hat, producing
+an index rather than a picture. A `dev` view listing sixteen decision records says nothing about
+what the system is (`DS-BIG-PICTURE`).
+
+Selection is the other half of compaction, and its absence is the likeliest explanation for the
+2.9x measured against the raw record — that pass condensed prose while preserving full coverage
+(`DS-BIG-PICTURE`, `DS-SURROGATE-BUDGET`).
+
+Three consequences. Completeness stops being the check; the records and `DECISION-MAP.md` remain
+the inventory, and the view is neither. The provenance manifest is unaffected, because a section's
+inputs remain every record the hat owns — including ones the picture does not name. And citation
+still binds for the claims a view *does* make (`DEC-009`).
+
 ## Decisions
 
 None assigned to this hat. Every recorded decision belongs to `dev` — see
@@ -152,6 +175,10 @@ None assigned to this hat. Every recorded decision belongs to `dev` — see
 - `constraint-unasserted` **DS-SELF-USE-SCOPE** — answered by `DEC-017`, which no rule cites.
 - `constraint-unanswered` **DS-SURROGATE-SCOPE** — no decision answers it. Recorded 2026-09-27 as a
   scope boundary; whether it needs a decision behind it is itself a triage question.
+- `constraint-unanswered` **DS-BIG-PICTURE** — no decision answers it yet. `DEC-008` is the
+  nearest, and it is partly contradicted: it states the charter compiles from governance records,
+  while product's shape drops its charter entirely. Needs narrowing or superseding when
+  `hat-templates` is built.
 
 `DS-LOOP-CLOSURE` was on this list until a test named `DEC-007`, one of its three answering
 decisions. Transitive coverage closed it with nothing marking it resolved (`DEC-013`).
