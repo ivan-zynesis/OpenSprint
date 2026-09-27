@@ -48,7 +48,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
 - [x] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
 - [x] per-hat-classification: Classify records within their hat, and give the driver-spec layer the dependency edges it has never had. Product first, with OGSM — `objective | goal | strategy` as node kinds and `measure` as a section of a goal rather than a node of its own. Backfilled with operator confirmation batched by area, defaulting driver-specs to objective or goal. Uses the `depends-on` the ADR layer already has, and the `revises` / `refines` / `supersedes` vocabulary that emerged organically in overheard and cashier, so "reinforce" and "change" need nothing new. The mechanism is per-hat, not product-specific: maintainer will want a bar dimension, devops a pipeline or environment.
-- [ ] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
+- [x] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
   - `product` — OGSM: objective · goal · strategy · measure. No charter, no constraints; the objective or goal covers what a constraint would have said, or the strategy says how it is worked around. Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable.
   - `maintainer` — bars · posture · evidence · exposure. A bar is a position on a spectrum, not a number: dimension, chosen point with its scope, what was traded to sit there, and what the neighbouring point would cost. Cost is an axis of every bar rather than a section of its own. Posture is where we actually sit versus where we chose to.
   - `dev` — tech stack · runtime topology · entity schema. Describes the system, citing ADRs where they explain a choice; does not enumerate them.
@@ -62,6 +62,31 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
     it is run.
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
+
+### hat-templates — complete (2026-09-28)
+
+**OPSX change:** `2026-09-27-hat-templates` (archived)
+
+The four shapes, and the first views that are not indexes. Product is an OGSM chain; maintainer is
+positions and what they cost; dev and devops describe the system. A hat the tool does not know
+falls back to the generic four rather than to nothing. Sections may filter inputs by role, so
+adding a strategy restages `strategies` and leaves `objective` fresh.
+
+**Compaction re-measured: 3.5x, up from 2.9x** — but the ratio is the less interesting number.
+**The record grew 17% and the views shrank 3%.** `dev.md` went from 9,401 bytes to 4,284 by
+describing the system instead of listing sixteen ADRs. Selection means the big picture does not
+scale with the record.
+
+**The shapes found things the generic four never would have.** `DS-SURROGATE-BUDGET` — the most
+quantified record in the project, 93–157K measured across four codebases — carries no `## Measures`
+section at all; numbers in a rationale are not a stated measure. Neither maintainer bar states its
+neighbour. The dev tech stack is almost entirely observation with no ADR behind any of it.
+
+**A real bug, found by running against cashier.** Directory exclusions were applied as `<dir>/**`,
+which matches only a top-level directory. A monorepo has a `node_modules` and a `dist` under every
+package, so `packages/db/dist/migrations/*.sql` was observed as though it were source — 42 files
+reported where 21 are real. Fixed at both call sites with a regression test. Rule discovery was
+unaffected, which is why it survived two milestones unnoticed.
 
 ### per-hat-classification — complete (2026-09-27)
 
@@ -337,6 +362,12 @@ seven unguarded decisions, and `compact check` kept reporting all sections fresh
 exactly what the gap makes necessary.
 
 ### Open loops
+
+- **`openspec archive` exits 0 when it aborts.** It printed `Aborted. No files were changed.` and
+  returned success. A script or CI step cannot detect that failure, and this initiative hit the
+  abort twice. Third instance of the same shape: a guard that does not guard what it claims to,
+  after the two malformed source specs and the `zsh-installer` isolation defect. Worth its own
+  change.
 
 - **`open-loops` sections never go stale.** The section has no record inputs by design, so its
   input hash is constant. Deleting a rule file does not restage it, and the view would keep
