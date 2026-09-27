@@ -53,6 +53,13 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
   - `maintainer` — bars · posture · evidence · exposure. A bar is a position on a spectrum, not a number: dimension, chosen point with its scope, what was traded to sit there, and what the neighbouring point would cost. Cost is an axis of every bar rather than a section of its own. Posture is where we actually sit versus where we chose to.
   - `dev` — tech stack · runtime topology · entity schema. Describes the system, citing ADRs where they explain a choice; does not enumerate them.
   - `devops` — infra architecture · gitops.
+  - **The dev/devops split serves reading, not ownership.** In a codebase holding both application
+    code and IaC, a decision is frequently both — `DEC-025` in cashier sets a CI gate that is a
+    test strategy and a pipeline at once, and `DEC-049` and `DEC-050` amend it from either side.
+    Such a record declares `hats: [dev, devops]` and renders in both views, which is the case
+    `DEC-016` exists for. The boundary is there so an agent working on application code need not
+    load pipeline context, and so a reader orienting on how something is built is not reading how
+    it is run.
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
 
@@ -130,6 +137,19 @@ devops as producing only infrastructure-as-code. Cashier disagrees: `DEC-055` th
 are ten devops decisions recorded as ADRs. The driver-spec is worth amending when
 `per-hat-classification` is built.
 
+**What a hat is, restated.** A hat is a responsibility that whoever works in the codebase has to
+cover — not a mapping to an organizational role. The product owner may be a proprietor who never
+opens the repository; someone working in it still wears the product hat. Consulting outward happens
+when the team lacks the domain know-how, which is situational and applies to any hat, not a
+structural property of one. `DS-SQUAD-HATS` and `DS-SME-OWNERSHIP` already say this.
+
+Two consequences the session had been misreading as defects:
+
+- **An empty hat view is a seat at the table with nobody in it.** `devops` rendering empty here is
+  the tool doing its job, with `DEC-017` as the record saying the absence is deliberate.
+- **Charters coming back "not established" across all four hats** is a prompt, not a gap in the
+  surrogate. Nobody has yet written down what they are accountable for, and the view is showing it.
+
 **Plan change:** four milestones added — `per-hat-sections`, `system-as-source`, `hat-templates`.
 Ordering is a dependency chain: the mechanism, then the inputs that give `dev` and `devops`
 anything to compile from, then the shapes. `system-as-source` is load-bearing — it changes what a
@@ -140,7 +160,13 @@ is itself an objective or a goal, the charter is absorbed into OGSM rather than 
 decision was never wrong, it just describes something that turns out to live in `O`/`G` rather
 than in a section of its own.
 
-**Records created:** `DS-SURROGATE-SCOPE`. No opsx changes proposed; execution is left to
+**Considered and not recorded:** the era framing above (understanding, not a constraint); an
+amendment to `DS-SME-OWNERSHIP` for externally-owned hats (withdrawn — it encoded an org-chart
+assumption the model does not make); and "documentation is compiled from work already done, never
+authored separately", which `DEC-006` implies as a mechanism and which may be worth stating as a
+purpose when `hat-templates` makes it concrete.
+
+**Records created:** `DS-SURROGATE-SCOPE`, `DS-BIG-PICTURE`. No opsx changes proposed; execution is left to
 `/opsp:apply`.
 
 ## Progress
