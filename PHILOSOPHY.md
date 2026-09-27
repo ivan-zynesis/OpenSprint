@@ -1,159 +1,152 @@
-# OpenSprint Philosophy
+# Where OpenSprint Came From
 
-## Where We Come From
-
-OpenSpec established five principles:
-
-```
-→ fluid not rigid
-→ iterative not waterfall
-→ easy not complex
-→ built for brownfield not just greenfield
-→ scalable from personal projects to enterprises
-```
-
-OpenSprint inherits the first two. It respectfully diverges from the third. And it reframes the last two into something more ambitious.
+> **This is history, not current documentation.**
+>
+> It records what the project set out to do and why, written before any of it was built. Its
+> claims are left standing as what was believed at the time, including the ones that later moved.
+>
+> **For what OpenSprint is now**, read [`opensprint/squad/index.md`](opensprint/squad/index.md) —
+> compiled from the records, and unable to drift from them.
 
 ---
 
-## The OpenSprint Principles
+## The premise, which has not changed
+
+**Code became cheap.**
+
+That was the observation the project started from, and everything else followed. If an agent can
+write the code, the bottleneck moves to deciding what to write and why. The hard part stops being
+implementation and becomes intent, judgement and memory:
+
+- Why was this built this way?
+- What alternatives were rejected?
+- What constraints drove this?
+- Could we rebuild it differently without losing the original reasoning?
+
+The claim was that these should all be answerable by design rather than by archaeology, because
+**reasoning is the most valuable engineering artifact that is routinely thrown away.** Code can be
+regenerated. Tests can be rewritten. But *why this approach and not that one*, once lost, gets
+rediscovered the hard way — usually during an incident or a failed rewrite.
+
+That premise held. It is now recorded as [`DS-AGENTIC-SDLC`](opensprint/driver-specs/DS-AGENTIC-SDLC.md),
+and the phrasing there is nearly the same.
+
+---
+
+## What was inherited, and what was argued with
+
+OpenSpec established five principles. The project took the first two, diverged on the third, and
+reframed the last two.
 
 ```
-→ fluid, not rigid
-→ iterative, not waterfall
-→ clear, not simple
-→ navigable, not hidden
-→ reasoned, not assumed
-→ enterprise-intuitive, not enterprise-complicated
+OpenSpec                    became
+────────                    ──────
+fluid, not rigid            fluid, not rigid                  unchanged
+iterative, not waterfall    iterative, not waterfall          elevated to initiatives
+easy, not complex           clear, not simple                 argued with
+built for brownfield        navigable, not hidden             reframed
+scalable to enterprises     enterprise-intuitive              reframed
+                          + reasoned, not assumed             added
 ```
 
-### Fluid, not rigid
-
-Same as OpenSpec. The harness should adapt to how operators actually work — not force a ceremony that doesn't fit the problem. No mandatory sequence when a shortcut is safe. No bureaucratic artifact when a lightweight one suffices.
-
-### Iterative, not waterfall
-
-Same as OpenSpec. But OpenSprint extends what "iterative" means. In OpenSpec, one iteration is one change lifecycle — explore, propose, apply, archive. In OpenSprint, **iteration operates at the level of sprints, milestones, and initiatives**. Each OPSX cycle is a single heartbeat. OpenSprint manages the rhythm of many heartbeats across a coordinated effort.
-
-```
-OpenSpec iteration:   one change, one cycle
-OpenSprint iteration: many changes, many cycles, one coherent initiative
-```
-
-### Clear, not simple
-
-This is where we diverge.
-
-OpenSpec optimized for simplicity — keep the overhead low, keep the learning curve gentle. That's right for a single-change workflow. But OpenSprint exists because the problems we're solving are not simple. Multi-domain systems, cross-team dependencies, compliance constraints, architectural trade-offs that ripple across services — these are inherently complex.
-
-**We do not pretend complexity doesn't exist. We make it legible.**
-
-A complex system managed through OpenSprint should feel like reading a well-organized book, not like navigating a maze. Every artifact has a reason. Every decision has a record. Every escalation has a trail. The complexity is real, but the structure makes it traversable.
+The divergence on *easy, not complex* was the load-bearing one. OpenSpec optimised for a gentle
+learning curve, which is right for a single-change workflow. The argument here was that
+multi-domain systems are **inherently** complex, and that hiding complexity is not the same as
+handling it:
 
 ```
 Simple:    hide the complexity, hope it doesn't matter
 Clear:     show the complexity, make it navigable
 ```
 
-### Navigable, not hidden
+---
 
-Every operator should be able to answer these questions at any point:
+## How the six principles held up
 
-- **Where am I?** — Which initiative, which milestone, which squad, which task.
-- **How did we get here?** — The chain of decisions that led to this moment.
-- **What's next?** — What's ready, what's blocked, and why.
-- **What if we went differently?** — Which decision nodes could be revisited, and what would change downstream.
+Judged against the objective the project eventually recorded, three years of intent compressed
+into about one year of building:
 
-Nothing is buried. The decision tree is explicit. The artifact graph is walkable. The escalation history is traceable. An operator joining mid-initiative can reconstruct the full reasoning in minutes, not days.
+### Held unchanged
 
-### Reasoned, not assumed
+**Fluid, not rigid.** No mandatory ceremony where a shortcut is safe. This survived contact with
+everything — the hat set is per-project, sections are configurable, an unknown hat falls back
+rather than failing.
 
-Every architectural choice, every trade-off, every scope decision should have a recorded rationale — not because we love documentation, but because **reasoning is the most valuable engineering artifact that is routinely thrown away**.
+**Reasoned, not assumed.** Every decision carrying its rationale is what the whole surrogate is.
+It is now enforced rather than encouraged: a compiled claim must cite the record it came from, and
+one that cannot be traced does not belong in a view.
 
-Code can be regenerated. Tests can be rewritten. But the reasoning behind *why this approach and not that one* — once lost, it gets rediscovered the hard way, usually during an incident or a failed rewrite.
+**Iterative, not waterfall.** Still true, and the initiative-level framing held.
 
-OpenSprint makes reasoning durable:
+### Needed reframing
 
-- **Decision records** capture what was chosen, what was rejected, and why.
-- **Driver specs** capture the immutable intent — the *why* behind everything.
-- **Review artifacts** capture what we learned, so future decisions are better informed.
+**Navigable, not hidden** was written about the decision tree — *where am I, how did we get here,
+what's next*. It assumed a human doing the navigating. The primary reader turned out to be an
+agent, and navigability for an agent is a different property: not a map you can follow, but a
+context small enough to load and precise enough to act on. That became
+[`DS-SURROGATE-BUDGET`](opensprint/driver-specs/DS-SURROGATE-BUDGET.md) — measured across real
+projects rather than asserted, and the figures live there rather than here, because they move.
 
-This is the foundation of the decision tree model. When every node in the tree carries its rationale, you can:
+**Enterprise-intuitive, not enterprise-complicated** aimed at scale: *enterprise engineering
+should feel as intuitive as a personal project*. The framing was right and the mechanism was
+missing. What supplied it was not a better mental model but a division of accountability —
+product, maintainer, dev, devops — where one person may wear several and an agent must be told
+which it is wearing. That became
+[`DS-SQUAD-HATS`](opensprint/driver-specs/DS-SQUAD-HATS.md).
 
-- Revisit any past decision with full context
-- Rebuild downstream from any node with different choices
-- Train future agent personas on accumulated engineering judgment
+### Answered by the work
 
-### Enterprise-intuitive, not enterprise-complicated
+**Clear, not simple** was an argument. It got settled by building the thing, and the answer was
+more specific than the principle.
 
-The last OpenSpec principle — "scalable from personal projects to enterprises" — is a spectrum. OpenSprint takes a position on that spectrum:
+Clarity is not achieved by showing everything in an organised way — the first compaction did
+exactly that, rendering every record into its hat's view, and produced an index nobody would read.
+Clarity came from **selection**: a view conveys what someone wearing that hat needs, and a record
+that does not shape the picture does not appear. Completeness stopped being the goal, and the
+records remained the source of truth underneath.
 
-**Enterprise-scale engineering should feel as intuitive as working on a personal project.**
-
-Not because enterprise problems are simple. Because the mental model should be.
-
-A personal project has a clear mental model: you know what you're building, why, and what's left. You hold the whole picture in your head. Enterprise projects lose this. The picture fragments across teams, tools, Jira boards, Slack threads, and tribal knowledge. Nobody holds the whole picture. Everyone navigates by partial maps and assumptions.
-
-OpenSprint's ambition is to restore that clarity at scale:
-
-```
-Personal project:     one person, one mental model, total clarity
-Enterprise project:   many people, fragmented models, partial clarity
-
-OpenSprint promise:   many people, one navigable model, restored clarity
-```
-
-The operator of an OpenSprint initiative — whether managing 3 squads or 30 — should have the same feeling of "I know where everything is, I know why every decision was made, I know what's next" that a solo developer has on a weekend project.
-
-This is not about dumbing things down. It's about making the structure so clear that complexity becomes manageable rather than overwhelming.
+That is [`DS-BIG-PICTURE`](opensprint/driver-specs/DS-BIG-PICTURE.md), and it is a narrower claim
+than *clear, not simple* ever made.
 
 ---
 
-## How This Extends OpenSpec
+## What the project did not anticipate
 
-```mermaid
-graph TB
-    subgraph openspec ["OpenSpec (OPSX)"]
-        direction LR
-        A["fluid"] ~~~ B["iterative"] ~~~ C["simple"] ~~~ D["brownfield"] ~~~ E["scalable"]
-    end
+Three things emerged from building that were not in the original thinking.
 
-    subgraph opensprint ["OpenSprint (OPSP)"]
-        direction LR
-        F["fluid<br/><i>inherited</i>"] ~~~ G["iterative<br/><i>elevated to<br/>initiative-level</i>"] ~~~ H["clear<br/><i>not simple —<br/>legible complexity</i>"] ~~~ I["navigable<br/><i>explicit decision<br/>trees & trails</i>"] ~~~ J["enterprise-<br/>intuitive<br/><i>personal-project<br/>clarity at scale</i>"]
-    end
+**Specification has four faces, not one.** The early framing treated specs as one thing. It is two
+— functional intent and non-functional intent — and what gets delivered is also two — application
+and infrastructure. A practice covering only the first of each is half a system, and that is most
+of what spec-driven development means in common use. Recorded as
+[`DS-FULL-COVERAGE`](opensprint/driver-specs/DS-FULL-COVERAGE.md).
 
-    openspec -->|"extends"| opensprint
+**Documentation is an output, not a task.** The original text did not mention documentation at
+all. It turns out to be a large part of engineering and to fail structurally rather than through
+indiscipline — written after the fact, by someone with no remaining incentive, about reasoning
+that has already faded. Compiling it removes the second effort entirely. Recorded as
+[`DS-DOCUMENTATION-AS-OUTPUT`](opensprint/driver-specs/DS-DOCUMENTATION-AS-OUTPUT.md).
 
-    style openspec fill:#1a2a3a,stroke:#4682b4,color:#fff
-    style opensprint fill:#2d5016,stroke:#4a8c2a,color:#fff
-```
-
-| OpenSpec | OpenSprint | What changed |
-|---|---|---|
-| Fluid, not rigid | Fluid, not rigid | Same. No unnecessary ceremony. |
-| Iterative, not waterfall | Iterative, not waterfall | Elevated. Iteration now spans initiatives and milestones, not just single changes. |
-| Easy, not complex | Clear, not simple | Diverged. We embrace real complexity but demand it be legible. |
-| Built for brownfield | Navigable, not hidden | Reframed. Every decision, escalation, and dependency is explicit and traversable. |
-| Scalable to enterprises | Enterprise-intuitive | Sharpened. Enterprise-scale should feel as clear as a personal project. |
+**The loop has four arrows and only three were being built.** Constraint to decision, decision to
+implementation — those were the original scope. What was missing was *implementation to rule*, and
+then the rule failing back to the constraint. Without that last arrow a process produces
+documents; with it, drift becomes a build failure. Recorded as
+[`DS-LOOP-CLOSURE`](opensprint/driver-specs/DS-LOOP-CLOSURE.md).
 
 ---
 
-## The Insight Behind the Divergence
+## On OpenSpec
 
-OpenSpec asks: *"How do we make spec-driven development easy enough that people actually do it?"*
+Nothing here is a correction of OpenSpec.
 
-OpenSprint asks: *"How do we make the entire engineering decision-making process so clear that AI agents can participate in it — and that humans can trust, navigate, and rebuild from it at any scale?"*
+Running a quick change against a brownfield project is what OPSX does, and it still does it well.
+OpenSprint made a larger claim — that the same discipline, applied across every accountability a
+team carries, produces an engineering organisation that agents can participate in without the
+reasoning being lost.
 
-The answer isn't simplicity. The answer is **structural clarity**:
+Different ambition, same premise.
 
-- A simple system hides what you don't need to see.
-- A clear system shows you everything, organized so well that you only *look at* what you need.
+---
 
-When the structure is clear enough:
-
-- An AI agent can make architectural decisions within well-defined authority boundaries.
-- A human operator can review those decisions with full context, not blind trust.
-- A future team can revisit any past decision node and rebuild differently — because the *why* was never lost, only the *how* was.
-
-This is what makes the "rebuild over maintain" thesis possible. Not because rebuilding is free. Because **when reasoning is preserved, rebuilding is informed** — and informed rebuilding at AI speed is faster, cheaper, and more correct than maintaining a system whose original reasoning has been forgotten.
+*Written 2026. Superseded as a statement of current intent by the records under
+[`opensprint/`](opensprint/), which are compiled into
+[`opensprint/squad/`](opensprint/squad/) and cannot disagree with them.*
