@@ -11,10 +11,11 @@
         "DS-SELF-USE-SCOPE": "76ce7d641f54250fa5b0810ff17039a6763d35d95b5ba9d2ffc5141663edc603",
         "DS-SME-OWNERSHIP": "36afd110e18cb9196b4086144b69940cccd2ed4ad270ac7ff4cff7515644cb18",
         "DS-SQUAD-HATS": "556eb7c6b0821d06a13ef49fe8d7fd7e4aa7016f8275b3ffb7e09818aba1b560",
-        "DS-SURROGATE-BUDGET": "a11e0b2628597439a229a3254f92cb4f285e4caf031b45a7fb4bb1f9695a0a75"
+        "DS-SURROGATE-BUDGET": "a11e0b2628597439a229a3254f92cb4f285e4caf031b45a7fb4bb1f9695a0a75",
+        "DS-SURROGATE-SCOPE": "c0c98a19c3eaefa13c6320bfcd9880ee1a54fffe0877e13b4c9d3b8be66aa2e2"
       },
-      "inputHash": "d37793f248be58714e6de9d5ca9a230ab7e2fa110e81690ea395246a65333387",
-      "outputHash": "ca801734650354474bfcc14e37560c31ba04722eb0551cb68d942d1beb7831b9"
+      "inputHash": "1211da9d2d6cdc81356a84dd8dc887a114d01e7dab44751ef3b2ddc474689eb9",
+      "outputHash": "8cc6249d5abd2969963a74c812b6f6ae7e8c44c36e234a30a4db6e1c5d79e840"
     },
     {
       "hat": "product",
@@ -26,24 +27,25 @@
         "DS-SELF-USE-SCOPE": "76ce7d641f54250fa5b0810ff17039a6763d35d95b5ba9d2ffc5141663edc603",
         "DS-SME-OWNERSHIP": "36afd110e18cb9196b4086144b69940cccd2ed4ad270ac7ff4cff7515644cb18",
         "DS-SQUAD-HATS": "556eb7c6b0821d06a13ef49fe8d7fd7e4aa7016f8275b3ffb7e09818aba1b560",
-        "DS-SURROGATE-BUDGET": "a11e0b2628597439a229a3254f92cb4f285e4caf031b45a7fb4bb1f9695a0a75"
+        "DS-SURROGATE-BUDGET": "a11e0b2628597439a229a3254f92cb4f285e4caf031b45a7fb4bb1f9695a0a75",
+        "DS-SURROGATE-SCOPE": "c0c98a19c3eaefa13c6320bfcd9880ee1a54fffe0877e13b4c9d3b8be66aa2e2"
       },
-      "inputHash": "d37793f248be58714e6de9d5ca9a230ab7e2fa110e81690ea395246a65333387",
-      "outputHash": "ca801734650354474bfcc14e37560c31ba04722eb0551cb68d942d1beb7831b9"
+      "inputHash": "1211da9d2d6cdc81356a84dd8dc887a114d01e7dab44751ef3b2ddc474689eb9",
+      "outputHash": "8cc6249d5abd2969963a74c812b6f6ae7e8c44c36e234a30a4db6e1c5d79e840"
     },
     {
       "hat": "product",
       "section": "decisions",
       "inputs": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "ca801734650354474bfcc14e37560c31ba04722eb0551cb68d942d1beb7831b9"
+      "outputHash": "8cc6249d5abd2969963a74c812b6f6ae7e8c44c36e234a30a4db6e1c5d79e840"
     },
     {
       "hat": "product",
       "section": "open-loops",
       "inputs": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "ca801734650354474bfcc14e37560c31ba04722eb0551cb68d942d1beb7831b9"
+      "outputHash": "8cc6249d5abd2969963a74c812b6f6ae7e8c44c36e234a30a4db6e1c5d79e840"
     },
     {
       "hat": "maintainer",

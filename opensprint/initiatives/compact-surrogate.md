@@ -22,6 +22,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - DS-LOOP-CLOSURE
 - DS-SELF-USE-SCOPE (raised during hat-registry)
 - DS-BACKWARD-COMPAT (raised during hat-registry)
+- DS-SURROGATE-SCOPE (raised during reexplore, 2026-09-27)
 
 ## ADRs
 
@@ -44,6 +45,52 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] compact-engine: Compile hat views and architecture.md from the record with inline citations, write the provenance manifest, and implement `--check`.
 - [x] rule-harvesting: Scan the codebase for records cited by tests and checks, build the record-to-rule index, and detect open loops per hat.
 - [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
+- [ ] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
+- [ ] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
+- [ ] hat-templates: The actual shapes — `dev` (tech stack · runtime topology · entity schema), `devops` (infra architecture · gitops), and `product` (OGSM: objective · goal · strategy · measure). Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable. Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
+
+## Re-exploration log
+
+### 2026-09-27 — per-hat view shapes
+
+**Explored:** whether the four uniform sections (`charter · constraints · decisions · open-loops`)
+are the right shape for every hat. They are not. Product and maintainer both produce constraints
+in one format, which `DS-SQUAD-HATS` says explicitly — but `dev` and `devops` produce a different
+*kind* of knowledge, not a different subject, and a list of condensed ADRs does not tell a dev
+what the system is.
+
+**Settled during the session:**
+
+- **A view describes the system, not the record.** Where the record is silent, something was never
+  made explicit, which is reportable but not wrong. Where the record contradicts the system, that
+  is a defect — and `DS-LOOP-CLOSURE` already says how it is caught: a rule fails. So compaction
+  describes and reports absence; rules catch contradiction.
+- **Sections are per-hat.** No one shape fits domains this different.
+- **Diagram format follows the repository's habit**, ASCII as the default, escalating when unsure.
+- **Product adopts OGSM** — objective, goal, strategy, measure. Its value is separating four things
+  that are currently mixed in prose: `DS-SELF-USE-SCOPE` states an objective and a strategy in one
+  paragraph.
+
+**Considered and dropped:**
+
+- **Cross-hat section inputs.** The session initially proposed compiling `product/strategy` from
+  dev's decisions. Wrong: an ADR is a technical intermediary created when the surrogate could not
+  answer an implementation question, usually tracing to no driver-spec. Product strategy is
+  high-level with direct business relevance. Compacting sixteen technical ADRs would produce
+  something that reads like strategy and is not. Hat views stay independent partitions.
+- **Certification**, and with it any approval or gating mechanism. Recorded as
+  [[DS-SURROGATE-SCOPE]] rather than merely declined, because it is a boundary a future
+  exploration would otherwise re-argue.
+- **Actors** as a product section. Impact Mapping has the slot and OGSM does not; not worth
+  forcing.
+
+**Plan change:** three milestones added — `per-hat-sections`, `system-as-source`, `hat-templates`.
+Ordering is a dependency chain: the mechanism, then the inputs that give `dev` and `devops`
+anything to compile from, then the shapes. `system-as-source` is load-bearing — it changes what a
+view *is*.
+
+**Records created:** `DS-SURROGATE-SCOPE`. No opsx changes proposed; execution is left to
+`/opsp:apply`.
 
 ## Progress
 

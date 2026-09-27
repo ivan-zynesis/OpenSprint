@@ -12,6 +12,10 @@ read technically — that does not make them engineering decisions.
 - Single ownership per hat. A hat with two owners has none (`DS-SME-OWNERSHIP`).
 - Closing the loop. A process whose last arrow is missing produces documents (`DS-LOOP-CLOSURE`).
 
+**Also owns the boundary.** Deciding what OpenSprint will *not* do is a product decision, not an
+engineering one (`DS-SURROGATE-SCOPE`). Compaction stops at preparing the surrogate; certification,
+change management and release management sit outside it deliberately.
+
 **Escalates when** a constraint is written so that nothing can check it — a constraint nothing can
 assert was written badly, and that bridging work lands on this hat (`DS-SQUAD-HATS`).
 
@@ -119,6 +123,23 @@ What follows: no GUI, no CI/CD of its own, an empty `devops` hat that a compiled
 report honestly, and speed of evolution beating feature parity where the two conflict
 (`DS-SELF-USE-SCOPE`, `DEC-017`).
 
+### Compaction stops at the surrogate
+
+OpenSprint's compaction scope is preparing the compacted surrogate — reading the records and the
+system, and rendering the views a team orients from. **Certification, change management and release
+management are deliberately out of scope** (`DS-SURROGATE-SCOPE`).
+
+The reasoning is that each is a plausible next step and each pulls in a domain of its own.
+Certification looks small — a hat owner signing off on a compiled section — but a signature only
+means something if something governs what happens when it is withheld, which is change management;
+and once a product decision can gate what ships, that is release management. One artifact drags in
+two disciplines (`DS-SURROGATE-SCOPE`).
+
+So compaction renders and reports; it does not approve, gate or promote. A view is reviewed through
+whatever the project already uses, and OpenSprint supplies no review mechanism — the same position
+`DEC-007` takes on remediation. Revisiting this is a product decision, and the question to answer
+first is which of the three is being taken on *in full* (`DS-SURROGATE-SCOPE`).
+
 ## Decisions
 
 None assigned to this hat. Every recorded decision belongs to `dev` — see
@@ -129,6 +150,8 @@ None assigned to this hat. Every recorded decision belongs to `dev` — see
 **Harvested** (`DEC-013`):
 
 - `constraint-unasserted` **DS-SELF-USE-SCOPE** — answered by `DEC-017`, which no rule cites.
+- `constraint-unanswered` **DS-SURROGATE-SCOPE** — no decision answers it. Recorded 2026-09-27 as a
+  scope boundary; whether it needs a decision behind it is itself a triage question.
 
 `DS-LOOP-CLOSURE` was on this list until a test named `DEC-007`, one of its three answering
 decisions. Transitive coverage closed it with nothing marking it resolved (`DEC-013`).
