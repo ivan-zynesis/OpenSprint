@@ -63,6 +63,28 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
 
+### documentation-rewrite — complete (2026-09-28)
+
+**OPSX change:** `2026-09-27-documentation-rewrite` (archived)
+
+`PHILOSOPHY.md` becomes the origin story, dated and left standing — including the claims that
+later moved, because rewriting it to agree with the present would destroy the only record of how
+the thinking changed. It judges the six principles against the objective: three held, two needed
+reframing, and *clear, not simple* turned out to have been answered by building rather than by
+argument.
+
+`README.md` drops from 404 lines to 150, by deleting what the views now state and by removing a
+command table that listed seven OPSX commands under `/opsp:` which do not exist.
+
+The boundary recorded: a **compiled** document claims what is true now and cannot drift; an
+**authored** one claims either what was thought at a time, or where to find what is true. A
+document stating current truth without being compiled is the drift case.
+
+**The change's own spec caught the author.** Draft one of `PHILOSOPHY.md` quoted the 93–157K
+measurement while narrating how navigability was reframed — current truth in an authored document,
+and a figure that had already moved once during this initiative. Replaced with a pointer to the
+record.
+
 ### hat-templates — complete (2026-09-28)
 
 **OPSX change:** `2026-09-27-hat-templates` (archived)
@@ -385,7 +407,7 @@ exactly what the gap makes necessary.
 
 ## Added at re-exploration, 2026-09-27
 
-- [ ] documentation-rewrite: Rewrite the primary documentation now that the surrogate holds what it
+- [x] documentation-rewrite: Rewrite the primary documentation now that the surrogate holds what it
   used to. `PHILOSOPHY.md` becomes the origin story, explicitly marked as history — what inspired
   the project, what it got right, why the ambition grew. `README.md` states what OpenSprint is now
   and points at the compiled views rather than restating them. The five OpenSprint principles are
