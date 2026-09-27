@@ -47,7 +47,7 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
 - [x] backlog-seam: Hand open loops off to `/opsp:explore`, and make `/opsp:archive` and `/opsp:knockdown` call compact as their compile step.
 - [x] per-hat-sections: Make the view's section set per-hat rather than uniform — section templates in the hat registry, variable section lists in the provenance manifest. The four generic sections become the default for hats that want them, not the shape every hat is forced into.
 - [x] system-as-source: Make code a compile input. A view describes the system, citing records where they explain it and reporting what no record explains. Extends the manifest to hash code inputs, which closes the `open-loops` staleness gap as a side effect.
-- [ ] per-hat-classification: Classify records within their hat, and give the driver-spec layer the dependency edges it has never had. Product first, with OGSM — `objective | goal | strategy` as node kinds and `measure` as a section of a goal rather than a node of its own. Backfilled with operator confirmation batched by area, defaulting driver-specs to objective or goal. Uses the `depends-on` the ADR layer already has, and the `revises` / `refines` / `supersedes` vocabulary that emerged organically in overheard and cashier, so "reinforce" and "change" need nothing new. The mechanism is per-hat, not product-specific: maintainer will want a bar dimension, devops a pipeline or environment.
+- [x] per-hat-classification: Classify records within their hat, and give the driver-spec layer the dependency edges it has never had. Product first, with OGSM — `objective | goal | strategy` as node kinds and `measure` as a section of a goal rather than a node of its own. Backfilled with operator confirmation batched by area, defaulting driver-specs to objective or goal. Uses the `depends-on` the ADR layer already has, and the `revises` / `refines` / `supersedes` vocabulary that emerged organically in overheard and cashier, so "reinforce" and "change" need nothing new. The mechanism is per-hat, not product-specific: maintainer will want a bar dimension, devops a pipeline or environment.
 - [ ] hat-templates: The actual shapes. Views are big-picture documentation, not an index of every record — no hat enumerates its records, and a record may legitimately appear in no view.
   - `product` — OGSM: objective · goal · strategy · measure. No charter, no constraints; the objective or goal covers what a constraint would have said, or the strategy says how it is worked around. Restores the `Measures` section to the driver-spec template so `constraint-unmeasurable` is detectable.
   - `maintainer` — bars · posture · evidence · exposure. A bar is a position on a spectrum, not a number: dimension, chosen point with its scope, what was traded to sit there, and what the neighbouring point would cost. Cost is an axis of every bar rather than a section of its own. Posture is where we actually sit versus where we chose to.
@@ -62,6 +62,30 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
     it is run.
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
+
+### per-hat-classification — complete (2026-09-27)
+
+**OPSX change:** `2026-09-27-per-hat-classification` (archived)
+
+Records gain a `role` validated per hat; driver-specs gain `depends-on`. Edges are validated for
+existence, record type and acyclicity — causal ordering deliberately is not, because no project
+had recorded an edge and a premature rule teaches people to stop recording them.
+
+**The backfill found what the exercise is for: our surrogate was missing its own objective.**
+
+The first attempt read the records as descriptions of OpenSprint itself. They mostly describe what
+is being built **for downstream teams** — so the hat model and loop closure are strategies, not
+goals, and the objective and the goals were recorded nowhere. They lived as prose in
+`PHILOSOPHY.md` and `architecture.md`. Now recorded as `DS-AGENTIC-SDLC`, `DS-FULL-COVERAGE` and
+`DS-DOCUMENTATION-AS-OUTPUT`.
+
+`DS-SELF-USE-SCOPE` was misfiled too. "We do not compete, we build for ourselves" is not a
+direction — it is a position on a spectrum and what we accept for it, which is a maintainer
+posture. It moved hats along with `DS-HIGH-IMPACT-OPS`, taking maintainer from one record to three
+and making that hat's shape testable for the first time.
+
+`record-unclassified` went 9 → 0; `constraint-unanswered` 3 → 6, since the three new records have
+no decisions behind them yet. `DECISION-MAP.md` is byte-identical — the two layers stay separate.
 
 ### system-as-source — complete (2026-09-27)
 
@@ -327,3 +351,14 @@ exactly what the gap makes necessary.
   true where the test expects false. These pass in CI, where Oh My Zsh is absent, and fail for
   any developer who has it. Same shape as the defect above: a guard that does not guard what
   it claims to. Awaiting triage via `/opsp:explore`.
+
+## Added at re-exploration, 2026-09-27
+
+- [ ] documentation-rewrite: Rewrite the primary documentation now that the surrogate holds what it
+  used to. `PHILOSOPHY.md` becomes the origin story, explicitly marked as history — what inspired
+  the project, what it got right, why the ambition grew. `README.md` states what OpenSprint is now
+  and points at the compiled views rather than restating them. The five OpenSprint principles are
+  revisited against `DS-AGENTIC-SDLC`; "clear not simple" and "enterprise-intuitive" predate the
+  hat model and the dev/sec/ops framing entirely. Sequenced after `hat-templates` because the
+  compiled product view is what the documentation should point a reader at — writing it first
+  means writing it twice.
