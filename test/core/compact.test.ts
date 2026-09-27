@@ -3,10 +3,13 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import {
-  SECTION_NAMES,
+  DEFAULT_SECTIONS,
+  SECTION_INPUT_KINDS,
+  headingFor,
   groupRecordsByHat,
   resolveSectionInputs,
   type RecordRef,
+  type SectionDef,
 } from '../../src/core/compact/sections.js';
 import {
   hashContent,
@@ -120,18 +123,49 @@ describe('compact', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('resolveSectionInputs', () => {
-    it('defines exactly four sections, by explicit list', () => {
-      expect([...SECTION_NAMES]).toEqual(['charter', 'constraints', 'decisions', 'open-loops']);
+    it('defaults to exactly four sections, by explicit list', () => {
+      expect(DEFAULT_SECTIONS.map((s) => s.name)).toEqual([
+        'charter',
+        'constraints',
+        'decisions',
+        'open-loops',
+      ]);
+      expect(DEFAULT_SECTIONS.map((s) => s.inputs)).toEqual([
+        'all',
+        'driver-specs',
+        'decisions',
+        'none',
+      ]);
     });
 
-    it('routes each section to its documented input set', () => {
+    it('accepts exactly four input kinds, by explicit list', () => {
+      expect([...SECTION_INPUT_KINDS]).toEqual(['all', 'driver-specs', 'decisions', 'none']);
+    });
+
+    it('resolves each input kind to its documented set', () => {
       writeSpec('DS-A', '[dev]');
       writeDecision('DEC-1', '[dev]');
       const g = group();
-      expect(resolveSectionInputs('dev', 'charter', g).map((r) => r.id)).toEqual(['DS-A', 'DEC-1']);
-      expect(resolveSectionInputs('dev', 'constraints', g).map((r) => r.id)).toEqual(['DS-A']);
-      expect(resolveSectionInputs('dev', 'decisions', g).map((r) => r.id)).toEqual(['DEC-1']);
-      expect(resolveSectionInputs('dev', 'open-loops', g)).toEqual([]);
+      const sec = (inputs: string): SectionDef => ({ name: 'x', inputs: inputs as never });
+      expect(resolveSectionInputs('dev', sec('all'), g).map((r) => r.id)).toEqual(['DS-A', 'DEC-1']);
+      expect(resolveSectionInputs('dev', sec('driver-specs'), g).map((r) => r.id)).toEqual(['DS-A']);
+      expect(resolveSectionInputs('dev', sec('decisions'), g).map((r) => r.id)).toEqual(['DEC-1']);
+      expect(resolveSectionInputs('dev', sec('none'), g)).toEqual([]);
+    });
+
+    it('resolves inputs by kind, not by section name', () => {
+      writeSpec('DS-A', '[dev]');
+      const g = group();
+      // a section named nothing like `constraints` still gets driver-specs
+      const custom: SectionDef = { name: 'bars', inputs: 'driver-specs' };
+      expect(resolveSectionInputs('dev', custom, g).map((r) => r.id)).toEqual(['DS-A']);
+    });
+
+    it('derives a heading from a section name', () => {
+      expect(headingFor('open-loops')).toBe('Open Loops');
+      expect(headingFor('charter')).toBe('Charter');
+      expect(headingFor('runtime-topology')).toBe('Runtime Topology');
+      expect(headingFor('')).toBe('');
     });
   });
 
@@ -220,9 +254,15 @@ describe('compact', () => {
           fs.writeFileSync(viewPath(tempDir, hat), view);
         }
         const out = view === undefined ? null : hashContent(view);
-        for (const section of SECTION_NAMES) {
+        for (const section of DEFAULT_SECTIONS) {
           const inputs = resolveSectionInputs(hat, section, g);
-          entries.push({ hat, section, inputs: inputMap(inputs), inputHash: sectionInputHash(inputs), outputHash: out });
+          entries.push({
+            hat,
+            section: section.name,
+            inputs: inputMap(inputs),
+            inputHash: sectionInputHash(inputs),
+            outputHash: out,
+          });
         }
       }
       writeManifest(tempDir, { version: 1, entries });
@@ -230,14 +270,14 @@ describe('compact', () => {
 
     it('reports unsealed when no manifest exists', () => {
       writeSpec('DS-A', '[product]');
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('unsealed');
     });
 
     it('reports unsealed, never stale, for a section with no manifest entry', () => {
       writeSpec('DS-A', '[product]');
       writeManifest(tempDir, { version: 1, entries: [] });
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('unsealed');
       expect(s.state).not.toBe('stale');
     });
@@ -245,7 +285,7 @@ describe('compact', () => {
     it('reports fresh when inputs and output both match', () => {
       writeSpec('DS-A', '[product]');
       seal({ product: '# product view' });
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('fresh');
     });
 
@@ -253,7 +293,7 @@ describe('compact', () => {
       writeSpec('DS-A', '[product]');
       seal({ product: '# product view' });
       writeSpec('DS-A', '[product]', { body: 'changed body' });
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('stale');
       expect(s.modified).toEqual(['DS-A']);
       expect(s.added).toEqual([]);
@@ -264,7 +304,7 @@ describe('compact', () => {
       writeSpec('DS-A', '[product]');
       seal({ product: '# product view' });
       writeSpec('DS-B', '[product]');
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('stale');
       expect(s.added).toEqual(['DS-B']);
     });
@@ -274,7 +314,7 @@ describe('compact', () => {
       writeSpec('DS-B', '[product]');
       seal({ product: '# product view' });
       fs.rmSync(path.join(tempDir, 'driver-specs', 'DS-B.md'));
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('stale');
       expect(s.removed).toEqual(['DS-B']);
     });
@@ -283,7 +323,7 @@ describe('compact', () => {
       writeSpec('DS-A', '[product]');
       seal({ product: '# product view' });
       fs.writeFileSync(viewPath(tempDir, 'product'), '# edited by hand');
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('tampered');
     });
 
@@ -292,7 +332,7 @@ describe('compact', () => {
       seal({ product: '# product view' });
       writeSpec('DS-A', '[product]', { body: 'changed' });
       fs.writeFileSync(viewPath(tempDir, 'product'), '# also edited');
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('stale');
     });
 
@@ -303,8 +343,8 @@ describe('compact', () => {
       writeDecision('DEC-1', '[dev]', { body: 'a different decision' });
       const m = readManifest(tempDir);
       const g = group();
-      expect(classifySection(tempDir, m, 'dev', 'decisions', g).state).toBe('stale');
-      expect(classifySection(tempDir, m, 'dev', 'constraints', g).state).toBe('fresh');
+      expect(classifySection(tempDir, m, 'dev', { name: 'decisions', inputs: 'decisions' }, g).state).toBe('stale');
+      expect(classifySection(tempDir, m, 'dev', { name: 'constraints', inputs: 'driver-specs' }, g).state).toBe('fresh');
     });
 
     it('a changed superseded record restages nothing', () => {
@@ -312,23 +352,23 @@ describe('compact', () => {
       writeSpec('DS-OLD', '[product]', { status: 'superseded' });
       seal({ product: '# product view' });
       writeSpec('DS-OLD', '[product]', { status: 'superseded', body: 'rewritten history' });
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.state).toBe('fresh');
     });
 
     it('carries the section inputs so a renderer can read them (DEC-011)', () => {
       writeSpec('DS-A', '[product]');
-      const s = classifySection(tempDir, readManifest(tempDir), 'product', 'constraints', group());
+      const s = classifySection(tempDir, readManifest(tempDir), 'product', { name: 'constraints', inputs: 'driver-specs' }, group());
       expect(s.inputs.map((r) => r.id)).toEqual(['DS-A']);
       expect(s.inputs[0].path).toBe(path.join(tempDir, 'driver-specs', 'DS-A.md'));
     });
   });
 
   describe('classifyAll', () => {
-    it('covers every section of every hat in the registry', () => {
+    it('covers every section of every hat, following each hat\'s own list', () => {
       writeSpec('DS-A', '[product]');
-      const all = classifyAll(tempDir, readManifest(tempDir), REGISTRY, group());
-      expect(all).toHaveLength(REGISTRY.length * SECTION_NAMES.length);
+      const all = classifyAll(tempDir, readManifest(tempDir), REGISTRY, group(), () => DEFAULT_SECTIONS);
+      expect(all).toHaveLength(REGISTRY.length * DEFAULT_SECTIONS.length);
       expect(allFresh(all)).toBe(false);
     });
 

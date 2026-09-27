@@ -9,11 +9,10 @@
 
 import * as fs from 'node:fs';
 import {
-  SECTION_NAMES,
   resolveSectionInputs,
   type GroupedRecords,
   type RecordRef,
-  type SectionName,
+  type SectionDef,
 } from './sections.js';
 import {
   findEntry,
@@ -29,7 +28,7 @@ export type SectionState = (typeof SECTION_STATES)[number];
 
 export interface SectionStatus {
   hat: string;
-  section: SectionName;
+  section: string;
   state: SectionState;
   /** Records feeding this section, for the renderer to read (DEC-011). */
   inputs: RecordRef[];
@@ -52,14 +51,14 @@ export function classifySection(
   opensprintDir: string,
   manifest: Manifest,
   hat: string,
-  section: SectionName,
+  section: SectionDef,
   grouped: GroupedRecords
 ): SectionStatus {
   const inputs = resolveSectionInputs(hat, section, grouped);
-  const entry = findEntry(manifest, hat, section);
+  const entry = findEntry(manifest, hat, section.name);
   const base: Omit<SectionStatus, 'state'> = {
     hat,
-    section,
+    section: section.name,
     inputs,
     added: [],
     removed: [],
@@ -97,16 +96,24 @@ export function classifySection(
   return { ...base, state: 'fresh' };
 }
 
-/** Classifies every section of every hat in the registry. */
+/**
+ * Classifies every section of every hat.
+ *
+ * Iterates each hat's own sections, so hats with different shapes are each
+ * classified against what they actually declare. A manifest entry naming a
+ * section a hat no longer declares is simply never looked up — ignored rather
+ * than reported, since nothing is claiming anything about it.
+ */
 export function classifyAll(
   opensprintDir: string,
   manifest: Manifest,
   registry: readonly string[],
-  grouped: GroupedRecords
+  grouped: GroupedRecords,
+  sectionsFor: (hat: string) => readonly SectionDef[]
 ): SectionStatus[] {
   const out: SectionStatus[] = [];
   for (const hat of registry) {
-    for (const section of SECTION_NAMES) {
+    for (const section of sectionsFor(hat)) {
       out.push(classifySection(opensprintDir, manifest, hat, section, grouped));
     }
   }

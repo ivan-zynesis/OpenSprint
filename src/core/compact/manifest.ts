@@ -10,14 +10,15 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { createHash } from 'node:crypto';
-import type { RecordRef, SectionName } from './sections.js';
+import type { RecordRef } from './sections.js';
 
 export const MANIFEST_FILENAME = '.manifest.json';
 export const SQUAD_DIRNAME = 'squad';
 
 export interface ManifestEntry {
   hat: string;
-  section: SectionName;
+  /** Section name. A string rather than a union, since sections are per-hat. */
+  section: string;
   /** Contributing record ids to their content hashes. */
   inputs: Record<string, string>;
   /** Combined hash over the sorted inputs. */
@@ -108,7 +109,7 @@ export function writeManifest(opensprintDir: string, manifest: Manifest): void {
 export function findEntry(
   manifest: Manifest,
   hat: string,
-  section: SectionName
+  section: string
 ): ManifestEntry | undefined {
   return manifest.entries.find((e) => e.hat === hat && e.section === section);
 }

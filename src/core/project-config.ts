@@ -42,10 +42,23 @@ export const ProjectConfigSchema = z.object({
   // Optional: per-project hat registry (DS-SQUAD-HATS).
   // The hat set is a property of the product, not of the tool, so a project
   // may declare its own. Absent or malformed falls back to DEFAULT_HATS.
+  // Either a list of hat names, or a map from name to per-hat configuration.
+  // The list form is what older configs contain and keeps its meaning
+  // (DS-BACKWARD-COMPAT); the map form lets a hat declare its own sections.
   hats: z
-    .array(z.string())
+    .union([
+      z.array(z.string()),
+      z.record(
+        z.string(),
+        z.object({
+          sections: z
+            .array(z.object({ name: z.string().min(1), inputs: z.string().min(1) }))
+            .optional(),
+        })
+      ),
+    ])
     .optional()
-    .describe('Hat registry for this project (defaults to DEFAULT_HATS)'),
+    .describe('Hat registry: a list of names, or a map from name to { sections }'),
 
   // Optional: globs identifying rule files for DEC-013 citation harvesting.
   // Named ruleGlobs rather than rules because `rules` above already means
@@ -168,15 +181,30 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
       }
     }
 
-    // Parse hats field using Zod
+    // Parse hats field using Zod. Two accepted shapes, tried in order:
+    // the list of names older configs carry, then the map form.
     if (raw.hats !== undefined) {
-      const hatsResult = z.array(z.string().min(1)).min(1).safeParse(raw.hats);
+      const asList = z.array(z.string().min(1)).min(1).safeParse(raw.hats);
+      const asMap = z
+        .record(
+          z.string().min(1),
+          z.object({
+            sections: z
+              .array(z.object({ name: z.string().min(1), inputs: z.string().min(1) }))
+              .min(1)
+              .optional(),
+          })
+        )
+        .refine((m) => Object.keys(m).length > 0)
+        .safeParse(raw.hats);
 
-      if (hatsResult.success) {
-        config.hats = hatsResult.data;
+      if (asList.success) {
+        config.hats = asList.data;
+      } else if (asMap.success) {
+        config.hats = asMap.data;
       } else {
         console.warn(
-          `Invalid 'hats' field in config (must be a non-empty array of non-empty strings), using the default hat set`
+          `Invalid 'hats' field in config (must be a non-empty array of names, or a map from name to { sections }), using the default hat set`
         );
       }
     }

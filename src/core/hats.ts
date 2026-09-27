@@ -14,6 +14,12 @@
  */
 
 import { readProjectConfig } from './project-config.js';
+import {
+  DEFAULT_SECTIONS,
+  SECTION_INPUT_KINDS,
+  type SectionDef,
+  type SectionInputKind,
+} from './compact/sections.js';
 
 /**
  * The default hat set.
@@ -87,12 +93,51 @@ export interface DecisionAncestryNode {
  * readProjectConfig and degrades to the default rather than failing.
  */
 export function resolveHatRegistry(projectRoot: string): readonly string[] {
-  const config = readProjectConfig(projectRoot);
-  const declared = config?.hats;
-  if (declared && declared.length > 0) {
-    return declared;
+  const declared = readProjectConfig(projectRoot)?.hats;
+  if (Array.isArray(declared)) {
+    return declared.length > 0 ? declared : DEFAULT_HATS;
+  }
+  if (declared && typeof declared === 'object') {
+    const names = Object.keys(declared);
+    return names.length > 0 ? names : DEFAULT_HATS;
   }
   return DEFAULT_HATS;
+}
+
+const INPUT_KIND_SET: ReadonlySet<string> = new Set(SECTION_INPUT_KINDS);
+
+/**
+ * Resolves the sections a hat renders.
+ *
+ * A hat that declares none gets DEFAULT_SECTIONS rather than an empty list:
+ * otherwise adopting per-hat sections for one hat would silently blank every
+ * other hat's view.
+ *
+ * A section declaring an unknown input kind degrades that hat to the defaults
+ * and warns. Rendering it with a guessed kind would put content under a
+ * heading nobody asked for.
+ */
+export function resolveHatSections(
+  projectRoot: string,
+  hat: string
+): readonly SectionDef[] {
+  const declared = readProjectConfig(projectRoot)?.hats;
+  if (!declared || Array.isArray(declared)) return DEFAULT_SECTIONS;
+
+  const sections = declared[hat]?.sections;
+  if (!sections || sections.length === 0) return DEFAULT_SECTIONS;
+
+  const bad = sections.filter((s) => !INPUT_KIND_SET.has(s.inputs));
+  if (bad.length > 0) {
+    console.warn(
+      `Hat '${hat}' declares section(s) with an unknown 'inputs' value: ` +
+        `${bad.map((s) => `${s.name}=${s.inputs}`).join(', ')}. ` +
+        `Accepted: ${SECTION_INPUT_KINDS.join(', ')}. Using the default sections.`
+    );
+    return DEFAULT_SECTIONS;
+  }
+
+  return sections.map((s) => ({ name: s.name, inputs: s.inputs as SectionInputKind }));
 }
 
 /**

@@ -10,7 +10,30 @@
 import type { DriverSpecEntry, DecisionEntry } from '../decision-map.js';
 
 /**
- * The sections of a hat view, in render order.
+ * What kind of record feeds a section.
+ *
+ * Declaring this per section is what preserves DEC-010's granularity: a
+ * section taking `decisions` restages when an ADR moves, while one taking
+ * `driver-specs` beside it stays fresh. A section list without input kinds
+ * would force every section to take everything and collapse that.
+ */
+export const SECTION_INPUT_KINDS = [
+  'all',
+  'driver-specs',
+  'decisions',
+  'none',
+] as const;
+
+export type SectionInputKind = (typeof SECTION_INPUT_KINDS)[number];
+
+/** A section of a hat's view: a name, and what feeds it. */
+export interface SectionDef {
+  name: string;
+  inputs: SectionInputKind;
+}
+
+/**
+ * The sections a hat renders when it declares none of its own.
  *
  * `charter` takes every record the hat owns, because which of them describe
  * the operating model is a judgement the renderer makes (DEC-008) — the
@@ -18,14 +41,27 @@ import type { DriverSpecEntry, DecisionEntry } from '../decision-map.js';
  *
  * `open-loops` is computed rather than compiled, so it has no record inputs.
  */
-export const SECTION_NAMES = [
-  'charter',
-  'constraints',
-  'decisions',
-  'open-loops',
-] as const;
+export const DEFAULT_SECTIONS: readonly SectionDef[] = [
+  { name: 'charter', inputs: 'all' },
+  { name: 'constraints', inputs: 'driver-specs' },
+  { name: 'decisions', inputs: 'decisions' },
+  { name: 'open-loops', inputs: 'none' },
+];
 
-export type SectionName = (typeof SECTION_NAMES)[number];
+/**
+ * Renders a section name as a view heading: `open-loops` -> `Open Loops`.
+ *
+ * Derived rather than configured, so a project declaring sections states one
+ * concept rather than two. A name that cannot be title-cased into the wanted
+ * heading is a reason to add a field, not a reason to add one now.
+ */
+export function headingFor(name: string): string {
+  return name
+    .split('-')
+    .filter((word) => word.length > 0)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 /** A record contributing to a section, reduced to what the manifest needs. */
 export interface RecordRef {
@@ -111,25 +147,26 @@ export function groupRecordsByHat(
 /**
  * Resolves the input records for one section of one hat's view.
  *
- * `open-loops` returns an empty list by design: it is computed from the
- * record set rather than compiled from record content.
+ * Switches on the declared input kind rather than on the section name, so a
+ * project can name its sections whatever suits its domain without the engine
+ * knowing what those names mean.
  */
 export function resolveSectionInputs(
   hat: string,
-  section: SectionName,
+  section: SectionDef,
   grouped: GroupedRecords
 ): RecordRef[] {
   const specs = grouped.driverSpecsByHat.get(hat) ?? [];
   const decisions = grouped.decisionsByHat.get(hat) ?? [];
 
-  switch (section) {
-    case 'charter':
+  switch (section.inputs) {
+    case 'all':
       return [...specs, ...decisions];
-    case 'constraints':
+    case 'driver-specs':
       return [...specs];
     case 'decisions':
       return [...decisions];
-    case 'open-loops':
+    case 'none':
       return [];
   }
 }

@@ -14,7 +14,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
-import { resolveHatRegistry } from '../core/hats.js';
+import { resolveHatRegistry, resolveHatSections } from '../core/hats.js';
 import {
   readSourcedDriverSpecs,
   readSourcedDecisions,
@@ -22,7 +22,6 @@ import {
 import {
   groupRecordsByHat,
   resolveSectionInputs,
-  SECTION_NAMES,
 } from '../core/compact/sections.js';
 import {
   readManifest,
@@ -76,7 +75,9 @@ function scan(projectRoot: string): Scan {
   return {
     opensprintDir,
     registry,
-    statuses: classifyAll(opensprintDir, manifest, registry, grouped),
+    statuses: classifyAll(opensprintDir, manifest, registry, grouped, (hat) =>
+      resolveHatSections(projectRoot, hat)
+    ),
     unassigned: grouped.unassigned,
     unknownHats: grouped.unknownHats,
     grouped,
@@ -217,11 +218,11 @@ export async function compactSealCommand(): Promise<void> {
       (grouped.decisionsByHat.get(hat)?.length ?? 0) > 0;
     if (rendered === null && hatHasRecords) unrendered.push(hat);
 
-    for (const section of SECTION_NAMES) {
+    for (const section of resolveHatSections(projectRoot, hat)) {
       const inputs = resolveSectionInputs(hat, section, grouped);
       entries.push({
         hat,
-        section,
+        section: section.name,
         inputs: inputMap(inputs),
         inputHash: sectionInputHash(inputs),
         outputHash: rendered,
