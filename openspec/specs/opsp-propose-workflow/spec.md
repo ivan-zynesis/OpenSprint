@@ -3,9 +3,7 @@
 ## Purpose
 
 Analyze exploration conversations to classify inputs into driver specs and ADRs, and produce an initiative descriptor with a milestone plan.
-
 ## Requirements
-
 ### Requirement: Create initiative from exploration
 The `/opsp:propose` skill SHALL analyze the operator's exploration conversation, classify inputs into driver-specs and ADRs, and produce an initiative descriptor with a high-level milestone plan.
 
@@ -45,3 +43,12 @@ The `/opsp:propose` skill SHALL create driver-spec and ADR files as part of the 
 - **THEN** it SHALL draft ADR files with proper frontmatter (id, status, depends-on, created, depth)
 - **AND** SHALL include the Question, Operator Decision, Consideration Factors, Rationale, and Invalidation Trigger sections
 - **AND** SHALL link each ADR to its parent driver-specs and decisions via `depends-on`
+
+### Requirement: Initiative descriptors record addressed open loops
+The `/opsp:propose` skill SHALL record which open loops an initiative addresses, when it arose from triaging them.
+
+#### Scenario: Descriptor structure with addressed loops
+- **WHEN** an initiative is created from one or more open loops
+- **THEN** the descriptor SHALL contain an `## Addresses` section listing each loop's kind and record
+- **AND** the section SHALL appear in the body alongside Driver Specs, ADRs and Milestones
+

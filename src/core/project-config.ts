@@ -38,6 +38,43 @@ export const ProjectConfigSchema = z.object({
     )
     .optional()
     .describe('Per-artifact rules, keyed by artifact ID'),
+
+  // Optional: per-project hat registry (DS-SQUAD-HATS).
+  // The hat set is a property of the product, not of the tool, so a project
+  // may declare its own. Absent or malformed falls back to DEFAULT_HATS.
+  // Either a list of hat names, or a map from name to per-hat configuration.
+  // The list form is what older configs contain and keeps its meaning
+  // (DS-BACKWARD-COMPAT); the map form lets a hat declare its own sections.
+  hats: z
+    .union([
+      z.array(z.string()),
+      z.record(
+        z.string(),
+        z.object({
+          sections: z
+            .array(z.object({
+              name: z.string().min(1),
+              inputs: z.string().min(1),
+              observes: z.union([z.string().min(1), z.array(z.string().min(1))]).optional(),
+              roles: z.array(z.string().min(1)).optional(),
+            }))
+            .optional(),
+          // Lenient on purpose: resolveHatRoles validates and degrades per hat,
+          // so one bad value cannot blank every other hat's configuration.
+          roles: z.unknown().optional(),
+        })
+      ),
+    ])
+    .optional()
+    .describe('Hat registry: a list of names, or a map from name to { sections }'),
+
+  // Optional: globs identifying rule files for DEC-013 citation harvesting.
+  // Named ruleGlobs rather than rules because `rules` above already means
+  // per-artifact authoring guidance — a different thing entirely.
+  ruleGlobs: z
+    .array(z.string())
+    .optional()
+    .describe('Globs identifying rule files (defaults to DEFAULT_RULE_GLOBS)'),
 });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -149,6 +186,53 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
         }
       } else {
         console.warn(`Invalid 'rules' field in config (must be object)`);
+      }
+    }
+
+    // Parse hats field using Zod. Two accepted shapes, tried in order:
+    // the list of names older configs carry, then the map form.
+    if (raw.hats !== undefined) {
+      const asList = z.array(z.string().min(1)).min(1).safeParse(raw.hats);
+      const asMap = z
+        .record(
+          z.string().min(1),
+          z.object({
+            sections: z
+              .array(z.object({
+              name: z.string().min(1),
+              inputs: z.string().min(1),
+              observes: z.union([z.string().min(1), z.array(z.string().min(1))]).optional(),
+              roles: z.array(z.string().min(1)).optional(),
+            }))
+              .min(1)
+              .optional(),
+            roles: z.unknown().optional(),
+          })
+        )
+        .refine((m) => Object.keys(m).length > 0)
+        .safeParse(raw.hats);
+
+      if (asList.success) {
+        config.hats = asList.data;
+      } else if (asMap.success) {
+        config.hats = asMap.data;
+      } else {
+        console.warn(
+          `Invalid 'hats' field in config (must be a non-empty array of names, or a map from name to { sections }), using the default hat set`
+        );
+      }
+    }
+
+    // Parse ruleGlobs field using Zod
+    if (raw.ruleGlobs !== undefined) {
+      const globsResult = z.array(z.string().min(1)).min(1).safeParse(raw.ruleGlobs);
+
+      if (globsResult.success) {
+        config.ruleGlobs = globsResult.data;
+      } else {
+        console.warn(
+          `Invalid 'ruleGlobs' field in config (must be a non-empty array of non-empty strings), using the default rule globs`
+        );
       }
     }
 

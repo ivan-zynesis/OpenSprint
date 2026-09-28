@@ -45,6 +45,31 @@ Read all existing opensprint artifacts to establish context:
 4. \`opensprint/DECISION-MAP.md\` — decision tree visualization
 5. \`opensprint/initiatives/*.md\` — any active initiatives
 
+Then load the **backlog**:
+
+\`\`\`bash
+opensprint compact loops --json
+\`\`\`
+
+These are the open loops — what the record says does not line up. Present them grouped by the hat
+accountable for each:
+
+- \`constraint-unanswered\` — a constraint nobody decided
+- \`constraint-unasserted\` — decided, but no rule guards any of the answering decisions
+- \`decision-unguarded\` — a decision no rule cites
+- \`rule-guards-dead-record\` — a rule still guarding something superseded
+- \`decision-on-superseded\` — a decision resting on an ancestor that moved
+
+**Do not rank them, score them, or recommend one over another.** Which gap is worth work now is
+the operator's call; an agent nudging the backlog is an agent setting the roadmap.
+
+**Some absences are decisions.** A hat with no records, or a constraint left deliberately open,
+may be settled rather than missing — say so and cite the record that settles it rather than
+proposing work to close it.
+
+If the command cannot run — no surrogate, or no CLI — continue without the backlog. It is context,
+not a precondition.
+
 This is the **operator surrogate** — the accumulated knowledge of how the operator thinks about this system. Use it to inform your reasoning.
 
 ---

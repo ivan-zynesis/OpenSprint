@@ -52,7 +52,9 @@ import {
   getOpspRebaseSkillTemplate,
   getOpspRebaseCommandTemplate,
   getOpspAbandonSkillTemplate,
+  getOpspCompactSkillTemplate,
   getOpspAbandonCommandTemplate,
+  getOpspCompactCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -157,6 +159,8 @@ export const OPSP_WORKFLOW_IDS = [
   'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
   // Universe reconciliation commands
   'opsp-rebase', 'opsp-abandon',
+  // Surrogate compaction
+  'opsp-compact',
 ] as const;
 
 /**
@@ -180,6 +184,8 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     // Universe reconciliation skills
     { template: getOpspRebaseSkillTemplate(), dirName: 'opensprint-rebase', workflowId: 'opsp-rebase' },
     { template: getOpspAbandonSkillTemplate(), dirName: 'opensprint-abandon', workflowId: 'opsp-abandon' },
+    // Surrogate compaction
+    { template: getOpspCompactSkillTemplate(), dirName: 'opensprint-compact', workflowId: 'opsp-compact' },
   ];
 }
 
@@ -204,6 +210,8 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     // Universe reconciliation commands
     { template: getOpspRebaseCommandTemplate(), id: 'opsp-rebase' },
     { template: getOpspAbandonCommandTemplate(), id: 'opsp-abandon' },
+    // Surrogate compaction
+    { template: getOpspCompactCommandTemplate(), id: 'opsp-compact' },
   ];
 }
 

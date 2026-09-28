@@ -8,6 +8,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { parse as parseYaml } from 'yaml';
+import { normalizeHats } from './hats.js';
 
 // ═══════════════════════════════════════════════════════════
 // Types
@@ -17,6 +18,8 @@ export interface DriverSpecEntry {
   id: string;
   type: string;
   status: string;
+  /** Accountable hats, when assigned. Absent means unassigned. */
+  hats?: string[];
 }
 
 export interface DecisionEntry {
@@ -26,6 +29,8 @@ export interface DecisionEntry {
   depth: number;
   /** First line of the Question section, for summary display */
   summary: string;
+  /** Accountable hats, when assigned. Absent means unassigned. */
+  hats?: string[];
 }
 
 export interface TreeNode {
@@ -44,7 +49,7 @@ export interface TreeNode {
  * Parses YAML frontmatter from a markdown file.
  * Returns null if no valid frontmatter is found.
  */
-function parseFrontmatter(content: string): Record<string, unknown> | null {
+export function parseFrontmatter(content: string): Record<string, unknown> | null {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
   try {
@@ -83,6 +88,7 @@ export function readDriverSpecs(opensprintDir: string): DriverSpecEntry[] {
       id: fm.id as string,
       type: (fm.type as string) || 'unknown',
       status: (fm.status as string) || 'active',
+      hats: normalizeHats(fm.hats) ?? undefined,
     });
   }
   return entries;
@@ -112,6 +118,7 @@ export function readDecisionRecords(opensprintDir: string): DecisionEntry[] {
       dependsOn,
       depth: typeof fm.depth === 'number' ? fm.depth : 0,
       summary: extractQuestionSummary(content),
+      hats: normalizeHats(fm.hats) ?? undefined,
     });
   }
   return entries;

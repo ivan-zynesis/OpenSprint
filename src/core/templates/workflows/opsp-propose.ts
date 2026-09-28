@@ -116,6 +116,13 @@ created: <YYYY-MM-DD>
 - DEC-001
 - DEC-002
 
+## Addresses
+
+<!-- Only when this initiative arose from triaging open loops. Omit otherwise. -->
+
+- constraint-unanswered: DS-BACKWARD-COMPAT
+- decision-unguarded: DEC-010
+
 ## Milestones
 
 - [ ] extract-auth-service: Extract authentication into standalone service
@@ -130,6 +137,18 @@ Display what was created:
 - Count of ADRs
 - Initiative name and milestone count
 - Prompt: "Run \`/opsp:apply <name>\` to start executing milestones."
+
+---
+
+### Recording what the initiative closes
+
+If the exploration started from open loops (\`opensprint compact loops\`), list them under
+\`## Addresses\` in the descriptor — the loop kind and the record it concerns. Omit the section
+entirely when the initiative did not arise from a loop.
+
+It is prose, not frontmatter, and deliberately so. **Nothing marks a loop resolved.** A gap exists
+while the harvest reports it and stops existing when it stops reporting it, so the backlog cannot
+drift from reality. \`Addresses\` records what the initiative set out to close, not what it did.
 
 ---
 

@@ -3,12 +3,32 @@
 ## Purpose
 
 Define the format of the planning phase output produced by `/opsp:rebase` and `/opsp:abandon` before any files are written. The conflict manifest is displayed to the operator for confirmation; it is never persisted to disk.
+## Requirements
+### Requirement: Conflict manifest is produced during the mandatory planning phase
+The system SHALL produce a conflict manifest during the read-only planning phase mandated by `DEC-004`, before any file is written, and SHALL NOT persist it to disk. The phase applies to both `/opsp:rebase` and `/opsp:abandon`.
 
-## When It Is Produced
+#### Scenario: Producing the manifest
+- **WHEN** a reconciliation operation begins
+- **THEN** the agent SHALL perform a read-only scan of both universes
+- **AND** SHALL classify all citizens
+- **AND** SHALL display the manifest to the operator
+- **AND** SHALL NOT write the manifest to a file
 
-During the mandatory planning phase (per DEC-004). The agent performs a read-only scan of both universes, classifies all citizens, and displays this manifest. The operator must confirm before execution begins.
+#### Scenario: No writes before confirmation
+- **WHEN** the manifest has been displayed
+- **THEN** execution SHALL NOT begin until the operator explicitly confirms
 
-## Display Format
+### Requirement: Manifest summary table
+The system SHALL display a summary of the scan identifying both universes and counting citizens by type and classification.
+
+#### Scenario: Summary table contents
+- **WHEN** the manifest is displayed
+- **THEN** it SHALL identify the source and target universes by worktree path and branch name
+- **AND** SHALL state the scan date
+- **AND** SHALL present counts per citizen type — Driver Specs, ADRs, Initiatives, Active Changes — across the columns Total, MIGRATE, CONFLICT, REDUNDANT, SUPERSEDED, with a TOTAL row
+- **AND** SHALL state the auto-resolvable count, being HIGH-confidence MIGRATE plus REDUNDANT
+- **AND** SHALL state the count requiring operator input, being CONFLICT plus LOW-confidence MIGRATE
+- **AND** SHALL display the rendering below
 
 ```
 ╔══════════════════════════════════════════════════════════╗
@@ -34,14 +54,33 @@ Scan date:        <YYYY-MM-DD>
 
 Auto-resolvable (HIGH confidence MIGRATE + REDUNDANT):  <N>
 Requires operator input (CONFLICT + LOW confidence):    <K>
-
-⚠  Model recommendation: Run with the most capable available model and
-   extended thinking enabled. These operations modify the canonical surrogate.
 ```
 
-## Detail Section (for CONFLICT and LOW-confidence MIGRATE citizens)
+#### Scenario: Model recommendation
+- **WHEN** the manifest is displayed
+- **THEN** it SHALL warn that the operation is recommended to run with the most capable available model and extended thinking enabled
+- **AND** SHALL state that these operations modify the canonical surrogate
 
-After the summary table, list each citizen requiring operator input:
+### Requirement: Detail section for citizens requiring operator input
+The system SHALL list, after the summary table, every citizen classified CONFLICT or LOW-confidence MIGRATE.
+
+#### Scenario: Listing a CONFLICT citizen
+- **WHEN** a CONFLICT citizen is listed
+- **THEN** the entry SHALL state the citizen id and type
+- **AND** SHALL summarise the source content in one line
+- **AND** SHALL summarise the target content in one line
+- **AND** SHALL state why the two are incompatible
+
+#### Scenario: Listing a LOW-confidence MIGRATE citizen
+- **WHEN** a LOW-confidence MIGRATE citizen is listed
+- **THEN** the entry SHALL state the citizen id and type
+- **AND** SHALL summarise the source content in one line
+- **AND** SHALL state what overlaps with existing target content
+- **AND** SHALL state what could go wrong if it were auto-accepted
+
+#### Scenario: Detail section rendering
+- **WHEN** the detail section is displayed
+- **THEN** it SHALL follow this shape
 
 ```
 ── Citizens Requiring Operator Input ────────────────────────
@@ -55,27 +94,28 @@ After the summary table, list each citizen requiring operator input:
     Source: <one-line summary>
     Overlap: <what overlaps with existing target content>
     Risk: <what could go wrong if auto-accepted>
-
-...
 ```
 
-## Cross-Skill Warning
+### Requirement: Cross-skill warning on high ADR conflict rate
+The system SHALL warn the operator when a `/opsp:rebase` manifest suggests the universes have split architecturally rather than diverged softly.
 
-If the operation is `/opsp:rebase` but the manifest reveals a high proportion of CONFLICT ADRs (>50% of ADRs are CONFLICT), the agent appends:
+#### Scenario: High ADR conflict rate during rebase
+- **WHEN** the operation is `/opsp:rebase`
+- **AND** more than 50% of evaluated ADRs are classified CONFLICT
+- **THEN** the agent SHALL append a warning stating the conflict count and total
+- **AND** SHALL state that this may indicate a fundamental architecture split rather than a soft fork
+- **AND** SHALL ask whether `/opsp:abandon` is more appropriate
 
-```
-⚠  High ADR conflict rate detected (<N>/<total> ADRs conflict).
-   This may indicate a fundamental architecture split rather than
-   a soft fork. Consider: is `/opsp:abandon` more appropriate?
-```
+#### Scenario: Conflict rate at or below the threshold
+- **WHEN** 50% or fewer of evaluated ADRs are classified CONFLICT
+- **THEN** the agent SHALL NOT append the cross-skill warning
 
-## Operator Confirmation Prompt
+### Requirement: Operator confirmation prompt
+The system SHALL prompt for explicit confirmation after displaying the full manifest, and SHALL begin execution only on an affirmative answer.
 
-After displaying the full manifest:
+#### Scenario: Prompting for confirmation
+- **WHEN** the full manifest has been displayed
+- **THEN** the agent SHALL prompt with the operation name and a statement that the target universe's surrogate will be modified
+- **AND** SHALL offer an explicit yes and cancel choice
+- **AND** SHALL begin execution only after an affirmative answer
 
-```
-Proceed with <operation>? This will modify the target universe's surrogate.
-[Y] Yes, proceed   [N] Cancel
-```
-
-Execution begins only after explicit confirmation.

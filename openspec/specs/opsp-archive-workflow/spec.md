@@ -3,28 +3,20 @@
 ## Purpose
 
 Compile all active driver specs, ADRs, and the decision tree into architecture.md and mark the initiative as completed.
-
 ## Requirements
-
 ### Requirement: Compile initiative into architecture.md
-The `/opsp:archive` skill SHALL synthesize all active driver-specs, ADRs, and the current decision tree into a single `opensprint/architecture.md` file that captures the complete architectural state.
+The `/opsp:archive` skill SHALL delegate its compile step to `/opsp:compact`, so that every compiled artifact is produced by one engine under one set of rules.
 
 #### Scenario: Generating architecture.md
 - **WHEN** the operator invokes `/opsp:archive <initiative-name>`
-- **THEN** the agent SHALL read all active driver-specs from `opensprint/driver-specs/`
-- **AND** read all active/accepted ADRs from `opensprint/ADRs/`
-- **AND** read the current `opensprint/DECISION-MAP.md`
-- **AND** compile them into `opensprint/architecture.md` with sections:
-  - System Overview (derived from driver-specs)
-  - Driver Specs (compiled narrative of active specs)
-  - Architectural Decisions (current decision tree in narrative form, each linking to its ADR)
-  - System Structure (high-level component description derived from decisions)
-  - Constraints & Non-Negotiables (extracted from driver-specs)
+- **THEN** the agent SHALL invoke the compact workflow to compile the surrogate
+- **AND** SHALL NOT synthesise `architecture.md` with its own section list
+- **AND** the compiled output SHALL include `opensprint/architecture.md` and the per-hat views
 
 #### Scenario: Rewriting architecture.md
 - **WHEN** `opensprint/architecture.md` already exists
-- **THEN** the agent SHALL rewrite it completely with current state
-- **AND** SHALL NOT append or version — ADRs are the version history
+- **THEN** it SHALL be rewritten completely from the current records
+- **AND** SHALL NOT be appended to or versioned — the decision records are the version history
 
 ### Requirement: Archive initiative descriptor
 The `/opsp:archive` skill SHALL mark the initiative as completed after compiling architecture.md.
@@ -43,3 +35,4 @@ The `/opsp:archive` skill SHALL mark the initiative as completed after compiling
   - Count of ADRs (active/accepted)
   - Count of opsx changes completed
   - Confirmation that architecture.md was updated
+

@@ -31,6 +31,13 @@ import {
   type NewChangeOptions,
 } from '../commands/workflow/index.js';
 import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/index.js';
+import {
+  compactPlanCommand,
+  compactSealCommand,
+  compactCheckCommand,
+  compactLoopsCommand,
+  type CompactOptions,
+} from '../commands/compact.js';
 
 const program = new Command();
 const require = createRequire(import.meta.url);
@@ -451,6 +458,66 @@ program
       } else {
         await instructionsCommand(artifactId, options);
       }
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// Compact command — the deterministic half of /opsp:compact
+const compactCmd = program
+  .command('compact')
+  .description('Inspect and gate the compiled per-hat surrogate views');
+
+compactCmd
+  .command('plan')
+  .description('Report which view sections need recompiling, and the records feeding them')
+  .option('--json', 'Output as JSON')
+  .action(async (options: CompactOptions) => {
+    try {
+      await compactPlanCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+compactCmd
+  .command('seal')
+  .description('Record the current views and their inputs in the provenance manifest')
+  .action(async () => {
+    try {
+      await compactSealCommand();
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+compactCmd
+  .command('check')
+  .description('Fail when any view section is stale, tampered or unsealed')
+  .option('--json', 'Output as JSON')
+  .action(async (options: CompactOptions) => {
+    try {
+      await compactCheckCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+compactCmd
+  .command('loops')
+  .description('Report open loops — constraints, decisions and rules that do not line up')
+  .option('--json', 'Output as JSON')
+  .action(async (options: CompactOptions) => {
+    try {
+      await compactLoopsCommand(options);
     } catch (error) {
       console.log();
       ora().fail(`Error: ${(error as Error).message}`);
