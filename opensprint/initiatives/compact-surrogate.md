@@ -1,7 +1,8 @@
 ---
 id: compact-surrogate
-status: active
+status: completed
 created: 2026-09-26
+completed: 2026-09-28
 ---
 
 ## Description
@@ -291,6 +292,27 @@ purpose when `hat-templates` makes it concrete.
 **Records created:** `DS-SURROGATE-SCOPE`, `DS-BIG-PICTURE`. No opsx changes proposed; execution is left to
 `/opsp:apply`.
 
+## OPSX Changes
+
+All archived under `openspec/changes/archive/`:
+
+| Change | Milestone |
+|---|---|
+| `2026-09-26-hat-registry` | hat-registry |
+| `2026-09-26-fix-reconciliation-specs` | unplanned repair |
+| `2026-09-26-compact-engine-core` | compact-engine |
+| `2026-09-26-compact-skill` | compact-engine |
+| `2026-09-26-rule-harvesting` | rule-harvesting |
+| `2026-09-26-backlog-seam` | backlog-seam |
+| `2026-09-27-per-hat-sections` | per-hat-sections |
+| `2026-09-27-system-as-source` | system-as-source |
+| `2026-09-27-per-hat-classification` | per-hat-classification |
+| `2026-09-27-hat-templates` | hat-templates |
+| `2026-09-27-documentation-rewrite` | documentation-rewrite |
+
+Eleven changes across nine milestones. Change branch refs are preserved under
+`opsx/compact-surrogate/*` for history inspection.
+
 ## Progress
 
 ### hat-registry — complete (2026-09-26)
@@ -384,6 +406,16 @@ seven unguarded decisions, and `compact check` kept reporting all sections fresh
 exactly what the gap makes necessary.
 
 ### Open loops
+
+- **This repository runs stale OPSP skills, and nothing detects it.** The installed
+  `opensprint-archive` skill predates `DEC-014` — it still instructs a hand-synthesis of
+  architecture.md rather than delegating to compact — and `opensprint-compact` was never installed
+  at all. Root cause: OPSP skills are generated only when the schema is `sprint-driven`, and this
+  project's `openspec/config.yaml` says `spec-driven`. `opensprint update --force` reports success
+  and changes nothing. So the tool would not install its own OPSP skills here, and every
+  `/opsp:*` invocation in this initiative ran a template older than the source it was editing.
+  **Fourth instance of a guard that does not guard**, and the most consequential: it means a
+  template change has no mechanical path to the skill that runs.
 
 - **`openspec archive` exits 0 when it aborts.** It printed `Aborted. No files were changed.` and
   returned success. A script or CI step cannot detect that failure, and this initiative hit the
