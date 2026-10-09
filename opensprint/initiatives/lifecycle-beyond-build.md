@@ -161,7 +161,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] initiative-state: The OGSM state machine, plus the state-versus-content check
 - [~] explore-persists: **superseded by [[DEC-034]]** — `/opsp:explore` reverts to writing nothing; `/opsp:backlog` persists instead. The work moved to `backlog-and-triage` in [[sdlc-operating-contract]]. No code in this initiative.
 - [x] board-view: Compile `BOARD.md` — doing, next, roadmap — from record state
-- [ ] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
+- [x] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
 - [ ] attest-tool: The `/opsp:attest` skill, with bounded record amendment
 - [ ] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
 
@@ -216,6 +216,14 @@ Implementing it as written would have built behaviour we deliberately replaced. 
 The Problems section carries the state check and orphaned milestones, because both describe ways the board would otherwise look complete while being wrong.
 
 **Discovered:** the `[~]` superseded marker — introduced earlier this session for milestone 6 — was not recognised by the parser, so that line vanished and the board under-reported. Now first-class: parsed, listed, excluded from progress rather than holding an initiative open.
+
+**8/10 — `attested-authority`** · opsx change `2026-10-09-attested-authority`
+
+The third authority. `### Posture` carries `verdict`, `attested-by` and `attested-on` as labelled lines; `attestationOf` computes the authority from content rather than from a frontmatter claim, so it cannot drift from the evidence. **Attested requires both a date and evidence** — a verdict nothing asserts is an opinion.
+
+All 57 staged records report `decided`. That is not a gap in the implementation; it is the finding `DS-ATTESTED-TRUTH` was written to surface, and it stays true until milestone 9.
+
+The rendering contract now carries the real failure as its worked example: `architecture.md` calling operator-only reconciliation "absolute, not a preference" while `squad/maintainer.md`, compiled in the same pass from the same records, admitted the guardrail was instruction text no rule read.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
