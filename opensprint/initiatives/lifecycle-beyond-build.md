@@ -159,7 +159,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] strategy-altitude: Maintainer strategies render position plus citation; harvest `strategy-unimplemented`
 - [x] initiative-parser: The first deterministic half for initiatives — frontmatter, milestones, membership
 - [x] initiative-state: The OGSM state machine, plus the state-versus-content check
-- [ ] explore-persists: `/opsp:explore` creates and updates the initiative at `state: exploring`
+- [~] explore-persists: **superseded by [[DEC-034]]** — `/opsp:explore` reverts to writing nothing; `/opsp:backlog` persists instead. The work moved to `backlog-and-triage` in [[sdlc-operating-contract]]. No code in this initiative.
 - [ ] board-view: Compile `BOARD.md` — doing, next, roadmap — from record state
 - [ ] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
 - [ ] attest-tool: The `/opsp:attest` skill, with bounded record amendment
@@ -202,6 +202,12 @@ The OGSM state machine, with `declined` from `DEC-035`. The check reports **cont
 `attested` and `completed` are deliberately not distinguished from content, because nothing separates "every milestone done" from "every bar attested" until milestone 9. The check records the limitation rather than guessing.
 
 No state problems on this repository — both older initiatives are `completed` and correctly silent. The check was confirmed to fire by test rather than inferred from the quiet result.
+
+**6/10 — `explore-persists`** · **superseded, no work done**
+
+[[DEC-025]] had `/opsp:explore` persist the initiative, a compromise reached because persistence had nowhere else to live. [[DEC-034]] gave it somewhere — `/opsp:backlog` — and reverted explore to its original guardrail: it writes nothing. Both decisions were made in the same planning session, and this milestone was written against the earlier one.
+
+Implementing it as written would have built behaviour we deliberately replaced. The work lives in `backlog-and-triage`, milestone 1 of [[sdlc-operating-contract]].
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
