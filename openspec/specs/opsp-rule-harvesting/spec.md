@@ -73,7 +73,11 @@ The system SHALL build an index from each record to the rule files citing it.
 - **AND** rule file paths SHALL be recorded relative to the project root
 
 ### Requirement: Open loop derivation
-The system SHALL derive open loops from the index and the decision graph, and SHALL NOT infer them from record content.
+The system SHALL derive open loops from the index and the decision graph, and SHALL NOT infer them from record content — **except for the measure anatomy, which is content by definition** and is read from the record's `## Measures` section.
+
+#### Scenario: The loop kinds
+- **WHEN** the system enumerates the kinds of open loop it can report
+- **THEN** the list SHALL be exactly: `constraint-unanswered`, `constraint-unasserted`, `decision-unguarded`, `rule-guards-dead-record`, `decision-on-superseded`, `record-unclassified`, `constraint-unmeasurable`, `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`, `record-without-objective`
 
 #### Scenario: A constraint no decision answers
 - **WHEN** an active driver-spec has no active decision whose `depends-on` includes it
@@ -180,4 +184,26 @@ The system SHALL report a record that states a target without a way to tell whet
 - **WHEN** a record contains a `## Measures` heading with no content beneath it
 - **THEN** the record SHALL still be reported as unmeasurable
 - **AND** a heading alone SHALL NOT satisfy the requirement
+
+### Requirement: A record its hat cannot select is reported
+The system SHALL report a record that declares no `objective` where every section of one of its hats that could otherwise take it filters on one, because such a record is invisible in that view rather than merely unclassified.
+
+#### Scenario: Every section filters on objective
+- **WHEN** an active record declares no `objective`
+- **AND** every section of one of its hats either filters on `objective` or accepts none of the record's roles
+- **THEN** the system SHALL report a `record-without-objective` loop naming that hat
+
+#### Scenario: An unfiltered section can take it
+- **WHEN** a hat has a section that filters on no objective
+- **AND** that section's roles accept the record
+- **THEN** `record-without-objective` SHALL NOT be reported for that hat
+
+#### Scenario: The record declares an objective
+- **WHEN** a record declares an `objective`
+- **THEN** `record-without-objective` SHALL NOT be reported for it
+
+#### Scenario: No sections supplied
+- **WHEN** the caller supplies no sections for a hat
+- **THEN** `record-without-objective` SHALL NOT be reported for that hat
+- **AND** a caller unaware of sections SHALL see no new loops
 
