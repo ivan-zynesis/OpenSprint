@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { renderBoard, regenerateBoard, BOARD_FILENAME } from '../../src/core/board.js';
+import { renderBoard, regenerateBoard, roadmapRows, BOARD_FILENAME } from '../../src/core/board.js';
 import { readInitiatives, type InitiativeEntry } from '../../src/core/initiatives.js';
 
 /**
@@ -161,12 +161,13 @@ describe('board', () => {
     });
   });
 
-  describe('roadmap', () => {
-    it('exists before it has content, naming what will land there', () => {
+  describe('roadmap section', () => {
+    it('always renders, naming the assurance gradient', () => {
       const b = renderBoard([]);
       expect(b).toContain('## Roadmap');
       expect(b).toContain('DS-FORWARD-CLOSURE');
-      expect(b).toContain('forward-closure');
+      expect(b).toContain('a confession');
+      expect(b).toContain("initiative's state is the assurance level");
     });
   });
 
@@ -193,6 +194,80 @@ describe('board', () => {
       );
       regenerateBoard(root);
       expect(fs.readFileSync(path.join(root, BOARD_FILENAME), 'utf-8')).toContain('initiatives/20261009-a.md');
+    });
+  });
+
+  describe('roadmap (DS-FORWARD-CLOSURE)', () => {
+    const specDir = () => path.join(root, 'driver-specs');
+    const spec = (id: string, exposure: string) => {
+      fs.mkdirSync(specDir(), { recursive: true });
+      fs.writeFileSync(
+        path.join(specDir(), `${id}.md`),
+        `---\nid: ${id}\ntype: product\nstatus: active\nhats: [product]\nrole: goal\n---\n\n` +
+          `# ${id}\n\n## Measures\n\n- x\n\n### Exposure\n\n${exposure}\n`
+      );
+    };
+    const initiative = (id: string, state: string) =>
+      fs.writeFileSync(
+        path.join(dir(), `${id}.md`),
+        `---\nid: ${id}\nstatus: active\nstate: ${state}\n---\n\n## Description\n\nd\n`
+      );
+
+    it('reports an exposure pointing at nothing as a confession', () => {
+      spec('DS-A', 'unbounded, nothing planned');
+      const rows = roadmapRows(root, []);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].mitigatedBy).toBeNull();
+      expect(renderBoard([], rows)).toContain('a confession');
+    });
+
+    it('resolves the mitigating initiative\'s state as the assurance level', () => {
+      spec('DS-A', 'unbounded\nmitigated-by: harden-it');
+      initiative('harden-it', 'proposed');
+      const rows = roadmapRows(root, readInitiatives(root));
+      expect(rows[0].mitigationState).toBe('proposed');
+      expect(renderBoard(readInitiatives(root), rows)).toContain('committed, with a bar');
+    });
+
+    it('shows the gradient across states', () => {
+      spec('DS-A', 'x\nmitigated-by: a');
+      initiative('a', 'exploring');
+      const board = renderBoard(readInitiatives(root), roadmapRows(root, readInitiatives(root)));
+      expect(board).toContain('we know, we are thinking');
+    });
+
+    it('does not treat a dangling pointer as mitigated', () => {
+      spec('DS-A', 'x\nmitigated-by: no-such-initiative');
+      const rows = roadmapRows(root, []);
+      expect(rows[0].mitigatedBy).toBe('no-such-initiative');
+      expect(rows[0].mitigationState).toBeNull();
+      expect(renderBoard([], rows)).toContain('points nowhere real');
+    });
+
+    it('says so when a declined initiative was the plan', () => {
+      spec('DS-A', 'x\nmitigated-by: dropped');
+      initiative('dropped', 'declined');
+      const board = renderBoard(readInitiatives(root), roadmapRows(root, readInitiatives(root)));
+      expect(board).toContain('the exposure stands');
+    });
+
+    it('ignores a superseded record', () => {
+      fs.mkdirSync(specDir(), { recursive: true });
+      fs.writeFileSync(
+        path.join(specDir(), 'DS-OLD.md'),
+        '---\nid: DS-OLD\ntype: product\nstatus: superseded\nhats: [product]\n---\n\n## Measures\n\n### Exposure\n\nold\n'
+      );
+      expect(roadmapRows(root, [])).toEqual([]);
+    });
+
+    it('says none when no exposure is recorded', () => {
+      expect(renderBoard([], [])).toContain('_No exposures recorded._');
+    });
+
+    it('omits the mitigated-by line from the rendered exposure text', () => {
+      spec('DS-A', 'the real risk here.\nmitigated-by: plan');
+      const rows = roadmapRows(root, []);
+      expect(rows[0].exposure).toBe('the real risk here.');
     });
   });
 });

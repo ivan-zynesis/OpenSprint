@@ -647,6 +647,44 @@ describe('per-hat classification', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
+  // exposure-unmitigated (DS-FORWARD-CLOSURE)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('exposure-unmitigated', () => {
+    const rolesFor = () => ['goal', 'strategy'];
+    const loops = () =>
+      deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
+    const found = () => loops().filter((l) => l.kind === 'exposure-unmitigated').map((l) => l.record);
+
+    it('is among the loop kinds', () => {
+      expect([...OPEN_LOOP_KINDS]).toContain('exposure-unmitigated');
+    });
+
+    it('fires for an exposure pointing at nothing', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Exposure\n\nunbounded, nothing planned' });
+      expect(found()).toEqual(['DS-A']);
+    });
+
+    it('does not fire when the exposure names an initiative', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: '## Measures\n\n- x\n\n### Exposure\n\nunbounded\nmitigated-by: harden-it',
+      });
+      expect(found()).toEqual([]);
+    });
+
+    it('does not fire for a record with no exposure', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
+      expect(found()).toEqual([]);
+    });
+
+    it('does not fire for a record with no measures at all', () => {
+      spec('DS-A', { role: 'goal' });
+      expect(found()).toEqual([]);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
   // record-without-objective
   // ═══════════════════════════════════════════════════════════
 

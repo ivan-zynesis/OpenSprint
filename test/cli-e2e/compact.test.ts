@@ -19,7 +19,7 @@ describe('opensprint compact (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\nmitigated-by: not-needed\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
@@ -171,7 +171,7 @@ describe('opensprint compact loops (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\nmitigated-by: not-needed\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),

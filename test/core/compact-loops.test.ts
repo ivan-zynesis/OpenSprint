@@ -187,7 +187,7 @@ describe('rule harvesting', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('deriveOpenLoops', () => {
-    it('defines exactly eleven kinds, by explicit list', () => {
+    it('defines exactly twelve kinds, by explicit list', () => {
       expect([...OPEN_LOOP_KINDS]).toEqual([
         // properties of the record graph
         'constraint-unanswered',
@@ -205,6 +205,8 @@ describe('rule harvesting', () => {
         'record-without-objective',
         // an approach with no decision descending from it
         'strategy-unimplemented',
+        // a risk with no planned work behind it
+        'exposure-unmitigated',
       ]);
     });
 

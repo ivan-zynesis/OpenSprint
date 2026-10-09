@@ -5,6 +5,7 @@ import {
   POSTURE_LABELS,
   parsePosture,
   attestationOf,
+  mitigatedBy,
   measuresSection,
   hasMeasures,
   parseMeasureAnatomy,
@@ -243,6 +244,36 @@ ci/secret-scan run 4821
       const a = attestationOf(old);
       expect(a.attested).toBe(true);
       expect(a.on).toBe('1999-01-01');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // The forward edge (DS-FORWARD-CLOSURE)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('mitigatedBy', () => {
+    it('reads a bare pointer', () => {
+      expect(mitigatedBy('unbounded blast radius\nmitigated-by: harden-reconciliation')).toBe('harden-reconciliation');
+    });
+
+    it('reads a bulleted, bolded pointer', () => {
+      expect(mitigatedBy('- **mitigated-by**: harden-reconciliation')).toBe('harden-reconciliation');
+    });
+
+    it('is case-insensitive on the label', () => {
+      expect(mitigatedBy('Mitigated-By: x')).toBe('x');
+    });
+
+    it('strips trailing punctuation', () => {
+      expect(mitigatedBy('mitigated-by: plan-a.')).toBe('plan-a');
+    });
+
+    it('returns null when the exposure points nowhere', () => {
+      expect(mitigatedBy('unbounded blast radius, nothing planned')).toBeNull();
+    });
+
+    it('returns null for an empty block', () => {
+      expect(mitigatedBy('')).toBeNull();
     });
   });
 });

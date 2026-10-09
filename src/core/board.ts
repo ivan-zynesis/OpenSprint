@@ -24,6 +24,65 @@ import {
   checkInitiativeState,
   type InitiativeEntry,
 } from './initiatives.js';
+import { readSourcedDriverSpecs } from './compact/records.js';
+import { parseMeasureAnatomy, mitigatedBy } from './compact/measures.js';
+
+/** An exposure and the work, if any, planned to close it. */
+export interface RoadmapRow {
+  record: string;
+  exposure: string;
+  /** The initiative named by `mitigated-by`, or null. */
+  mitigatedBy: string | null;
+  /** That initiative's state, or null when it points nowhere or nowhere real. */
+  mitigationState: string | null;
+}
+
+/**
+ * Every recorded exposure, with the state of whatever is meant to close it.
+ *
+ * The state is the assurance level (DS-FORWARD-CLOSURE): nothing is a
+ * confession, `exploring` means we know and are thinking, `proposed` means
+ * committed with a bar, `building` means in flight. A reader can tell those
+ * apart without opening anything, which a static risk register never allows.
+ */
+export function roadmapRows(
+  opensprintDir: string,
+  initiatives: readonly InitiativeEntry[]
+): RoadmapRow[] {
+  const stateOf = new Map(initiatives.map((i) => [i.id, i.state ?? i.status]));
+  const rows: RoadmapRow[] = [];
+
+  for (const spec of readSourcedDriverSpecs(opensprintDir)) {
+    if (spec.status !== 'active') continue;
+    const exposure = parseMeasureAnatomy(spec.content).exposure;
+    if (exposure === undefined) continue;
+
+    const target = mitigatedBy(exposure);
+    rows.push({
+      record: spec.id,
+      exposure: firstSentence(exposure),
+      mitigatedBy: target,
+      // A pointer at an initiative that does not exist resolves to null
+      // rather than being reported as mitigated — a dangling pointer is a
+      // confession wearing a plan's clothes.
+      mitigationState: target === null ? null : stateOf.get(target) ?? null,
+    });
+  }
+  return rows;
+}
+
+/** The exposure's first sentence, for a table cell. */
+function firstSentence(text: string): string {
+  const flat = text
+    .split('\n')
+    .filter((line) => !/^\s*(?:[-*]\s*)?(?:\*\*)?mitigated-by/i.test(line))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const stop = flat.search(/[.!?](\s|$)/);
+  const sentence = stop === -1 ? flat : flat.slice(0, stop + 1);
+  return sentence.length > 120 ? `${sentence.slice(0, 117)}…` : sentence;
+}
 
 export const BOARD_FILENAME = 'BOARD.md';
 
@@ -41,6 +100,16 @@ const SECTION_BY_STATE: Readonly<Record<string, string>> = {
   attested: 'Doing',
   completed: 'Done',
   declined: 'Declined',
+};
+
+/** What each mitigation state tells a reader about the risk. */
+const ASSURANCE: Readonly<Record<string, string>> = {
+  exploring: 'we know, we are thinking',
+  proposed: 'committed, with a bar',
+  building: 'in flight',
+  attested: 'done, pending close',
+  completed: 'closed',
+  declined: '**dropped — the exposure stands**',
 };
 
 /** Rendered in this order, every one of them, empty or not. */
@@ -83,7 +152,10 @@ function nextMilestoneOf(entry: InitiativeEntry): string {
 }
 
 /** Renders the board from the initiatives, deterministically. */
-export function renderBoard(initiatives: readonly InitiativeEntry[]): string {
+export function renderBoard(
+  initiatives: readonly InitiativeEntry[],
+  roadmap: readonly RoadmapRow[] = []
+): string {
   const lines: string[] = [
     '# Board',
     '',
@@ -120,13 +192,32 @@ export function renderBoard(initiatives: readonly InitiativeEntry[]): string {
   lines.push(
     '## Roadmap',
     '',
-    'Where every open exposure appears beside the state of the work planned to close it',
-    '(`DS-FORWARD-CLOSURE`). An exposure pointing at nothing is a confession; one pointing at',
-    'an initiative is a managed risk, and the state of that initiative is the assurance level.',
-    '',
-    '_Not yet compiled — needs `mitigated-by`, which the `forward-closure` milestone adds._',
+    'Every open exposure beside the state of the work planned to close it (`DS-FORWARD-CLOSURE`).',
+    'An exposure pointing at nothing is a confession; one pointing at an initiative is a managed',
+    'risk, and **that initiative\'s state is the assurance level**.',
     ''
   );
+  if (roadmap.length === 0) {
+    lines.push('_No exposures recorded._', '');
+  } else {
+    lines.push('| Record | Exposure | Mitigated by | Assurance |', '|---|---|---|---|');
+    for (const row of roadmap) {
+      const target =
+        row.mitigatedBy === null
+          ? '**nothing**'
+          : row.mitigationState === null
+            ? `\`${row.mitigatedBy}\` _(no such initiative)_`
+            : `[${row.mitigatedBy}](initiatives/${row.mitigatedBy}.md)`;
+      const assurance =
+        row.mitigatedBy === null
+          ? 'a confession'
+          : row.mitigationState === null
+            ? 'points nowhere real'
+            : ASSURANCE[row.mitigationState] ?? row.mitigationState;
+      lines.push(`| \`${row.record}\` | ${row.exposure} | ${target} | ${assurance} |`);
+    }
+    lines.push('');
+  }
 
   const problems: string[] = [];
   for (const entry of initiatives) {
@@ -153,6 +244,7 @@ export function renderBoard(initiatives: readonly InitiativeEntry[]): string {
 
 /** Regenerates `BOARD.md`, mirroring `regenerateDecisionMap`. */
 export function regenerateBoard(opensprintDir: string): void {
-  const board = renderBoard(readInitiatives(opensprintDir));
+  const initiatives = readInitiatives(opensprintDir);
+  const board = renderBoard(initiatives, roadmapRows(opensprintDir, initiatives));
   fs.writeFileSync(path.join(opensprintDir, BOARD_FILENAME), board, 'utf-8');
 }

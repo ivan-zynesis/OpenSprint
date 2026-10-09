@@ -208,6 +208,26 @@ export function attestationOf(content: string): Attestation {
 }
 
 /**
+ * The initiative an exposure points at, or null.
+ *
+ * DS-FORWARD-CLOSURE closes the loop forward: an exposure discovered at
+ * attestation has no backward target, because nothing went wrong upstream —
+ * the constraint was right, the decision was right, the bar simply was not
+ * met. The only honest response points at work not yet done.
+ *
+ * Read as `mitigated-by: <initiative-id>` anywhere in the exposure block,
+ * because the pointer belongs beside the prose explaining the risk rather
+ * than in frontmatter away from it.
+ */
+export function mitigatedBy(exposureBlock: string): string | null {
+  for (const line of exposureBlock.split('\n')) {
+    const match = line.match(/^\s*(?:[-*]\s*)?(?:\*\*)?mitigated-by(?:\*\*)?\s*:\s*(\S+)/i);
+    if (match) return match[1].replace(/[.,;]$/, '');
+  }
+  return null;
+}
+
+/**
  * Whether a bar states the position it did not take.
  *
  * Presence of the label is the test, not what it says. A bar declaring

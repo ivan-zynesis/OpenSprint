@@ -13,7 +13,7 @@
 
 import type { SourcedDriverSpec, SourcedDecision } from './records.js';
 import type { RuleIndex } from './rules.js';
-import { hasMeasures, parseMeasureAnatomy, statesNeighbour } from './measures.js';
+import { hasMeasures, parseMeasureAnatomy, statesNeighbour, mitigatedBy } from './measures.js';
 import type { SectionDef } from './sections.js';
 
 export const OPEN_LOOP_KINDS = [
@@ -32,6 +32,7 @@ export const OPEN_LOOP_KINDS = [
   'bar-without-neighbour',
   'record-without-objective',
   'strategy-unimplemented',
+  'exposure-unmitigated',
 ] as const;
 
 /**
@@ -327,6 +328,19 @@ export function deriveOpenLoops(
         record: record.id,
         hats,
         detail: 'States a measure with no `### Exposure`. Nothing records what a breach would cost or who it reaches.',
+      });
+    }
+
+    // DS-FORWARD-CLOSURE: an exposure pointing at nothing is a confession;
+    // one pointing at planned work is a managed risk. The loop closes
+    // forward, because an exposure found at attestation has no backward
+    // target — nothing went wrong upstream.
+    if (anatomy.exposure !== undefined && mitigatedBy(anatomy.exposure) === null) {
+      loops.push({
+        kind: 'exposure-unmitigated',
+        record: record.id,
+        hats,
+        detail: 'States an exposure with no `mitigated-by`. A risk with no planned work is a confession.',
       });
     }
 
