@@ -162,7 +162,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [~] explore-persists: **superseded by [[DEC-034]]** — `/opsp:explore` reverts to writing nothing; `/opsp:backlog` persists instead. The work moved to `backlog-and-triage` in [[sdlc-operating-contract]]. No code in this initiative.
 - [x] board-view: Compile `BOARD.md` — doing, next, roadmap — from record state
 - [x] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
-- [ ] attest-tool: The `/opsp:attest` skill, with bounded record amendment
+- [x] attest-tool: The `/opsp:attest` skill, with bounded record amendment
 - [ ] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
 
 ## Progress
@@ -224,6 +224,14 @@ The third authority. `### Posture` carries `verdict`, `attested-by` and `atteste
 All 57 staged records report `decided`. That is not a gap in the implementation; it is the finding `DS-ATTESTED-TRUTH` was written to surface, and it stays true until milestone 9.
 
 The rendering contract now carries the real failure as its worked example: `architecture.md` calling operator-only reconciliation "absolute, not a preference" while `squad/maintainer.md`, compiled in the same pass from the same records, admitted the guardrail was instruction text no rule read.
+
+**9/10 — `attest-tool`** · opsx change `2026-10-09-attest-tool`
+
+`/opsp:attest` exists, sitting between `apply` and `archive`. Two bounds make it mean something: it **reads** narrowly — objective, goals, bars, CI evidence, never the diff or the ADR rationales — and it **writes** narrowly, only inside `## Measures`, verified by `checkAmendment` rather than merely instructed.
+
+It refuses to continue in the session that authored the implementation, because a narrow context arrived at by forgetting is not a narrow context. And `cannot assess` is a complete outcome: record the missing coverage and stop looking, which turns inadequate evidence into the backlog item that fixes it.
+
+**Discovered:** the amendment bound initially rejected a record's *first* attestation — the heading was left behind when the body was stripped, which would have made it impossible to attest anything not already carrying measures.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
