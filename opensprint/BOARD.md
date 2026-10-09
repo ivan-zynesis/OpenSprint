@@ -25,7 +25,7 @@ In flight.
 
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | building | 8/9 _(+1 superseded)_ | forward-closure |
+| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | attested | 9/9 _(+1 superseded)_ | — |
 
 ## Done
 
@@ -44,13 +44,11 @@ _Empty._
 
 ## Roadmap
 
-Every open exposure beside the state of the work planned to close it (`DS-FORWARD-CLOSURE`).
-An exposure pointing at nothing is a confession; one pointing at an initiative is a managed
-risk, and **that initiative's state is the assurance level**.
+Where every open exposure appears beside the state of the work planned to close it
+(`DS-FORWARD-CLOSURE`). An exposure pointing at nothing is a confession; one pointing at
+an initiative is a managed risk, and the state of that initiative is the assurance level.
 
-| Record | Exposure | Mitigated by | Assurance |
-|---|---|---|---|
-| `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
+_Not yet compiled — needs `mitigated-by`, which the `forward-closure` milestone adds._
 
 ## Problems
 

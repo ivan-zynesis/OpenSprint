@@ -1,7 +1,7 @@
 ---
 id: lifecycle-beyond-build
 status: active
-state: building
+state: attested
 created: 2026-10-01
 ---
 
@@ -163,7 +163,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] board-view: Compile `BOARD.md` — doing, next, roadmap — from record state
 - [x] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
 - [x] attest-tool: The `/opsp:attest` skill, with bounded record amendment
-- [ ] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
+- [x] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
 
 ## Progress
 
@@ -232,6 +232,16 @@ The rendering contract now carries the real failure as its worked example: `arch
 It refuses to continue in the session that authored the implementation, because a narrow context arrived at by forgetting is not a narrow context. And `cannot assess` is a complete outcome: record the missing coverage and stop looking, which turns inadequate evidence into the backlog item that fixes it.
 
 **Discovered:** the amendment bound initially rejected a record's *first* attestation — the heading was left behind when the body was stripped, which would have made it impossible to attest anything not already carrying measures.
+
+**10/10 — `forward-closure`** · opsx change `2026-10-09-forward-closure`
+
+The loop closes forward. `### Exposure` carries `mitigated-by`, and the board's Roadmap renders every exposure beside the **live** state of what mitigates it — resolved at compile time so it cannot drift when the initiative moves. A dangling pointer renders as "points nowhere real" rather than as mitigated, because false assurance about a known risk is worse than none.
+
+One exposure on this repository, pointing nowhere: `DS-HIGH-IMPACT-OPS`. The board says "a confession", and it was left that way rather than inventing a mitigation to make the table look better — which is the behaviour the milestone exists to produce.
+
+---
+
+**All milestones complete.** `state: attested` is declared but **not earned**: `/opsp:attest` now exists and has not been run against this initiative's own bars. That is the operator's call, and running it would need a fresh session with a narrow context ([[DEC-033]]) — this one wrote the implementation.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
