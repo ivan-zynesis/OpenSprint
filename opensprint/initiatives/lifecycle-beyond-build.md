@@ -155,7 +155,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 ## Milestones
 
 - [x] maintainer-objectives: Ship the seven as the maintainer hat's default section list; add the `objective` selector; widen `role` to a list; exempt decisions from role classification per DEC-028
-- [ ] measure-anatomy: Optional `### Bar/Posture/Evidence/Exposure` sub-blocks under `## Measures`; migrate DS-HIGH-IMPACT-OPS and DS-BACKWARD-COMPAT; harvest `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`
+- [x] measure-anatomy: Optional `### Bar/Posture/Evidence/Exposure` sub-blocks under `## Measures`; migrate DS-HIGH-IMPACT-OPS and DS-BACKWARD-COMPAT; harvest `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`
 - [ ] strategy-altitude: Maintainer strategies render position plus citation; harvest `strategy-unimplemented`
 - [ ] initiative-parser: The first deterministic half for initiatives — frontmatter, milestones, membership
 - [ ] initiative-state: The OGSM state machine, plus the state-versus-content check
@@ -172,6 +172,14 @@ The assurance gradient this produces is the reason exposures are worth recording
 Shipped the seven objectives as maintainer's default sections, the `objective` selector, `role` as a list, `heading` on a section, and the `DEC-028` exemption. On this repository `record-unclassified` went 6 → 0, and citing `DEC-018`/`DEC-028` in the new tests closed their `decision-unguarded` loops — the loop closing on itself.
 
 **Discovered:** the proposal claimed this repository's hand-authored maintainer shape would keep working. It would not have. `openspec/config.yaml` declared `maintainer.roles` but not `maintainer.sections`, so roles stayed `bar/posture/evidence/exposure` while sections fell through to the new seven, which select on `goal`/`strategy` — every maintainer section would have compiled empty. The four sections are now pinned explicitly, and `measure-anatomy` removes the pin when it migrates the records.
+
+**2/10 — `measure-anatomy`** · opsx change `2026-10-09-measure-anatomy`
+
+The measure gained its four parts as optional sub-blocks under `## Measures`, a new `measures.ts` owning that section, and three harvest rules. Both of this repository's bars migrated — `DS-HIGH-IMPACT-OPS` to `integrity-correctness`, `DS-BACKWARD-COMPAT` to `change-quality` — and milestone 1's config pin is gone. The grid now renders with two rows filled and five empty, which is `DS-FULL-COVERAGE` made positional exactly as intended.
+
+`measure-unasserted` and `measure-unexposed` fire on 18 and 17 records respectively. That is not noise: nothing in the repository has been attested, because `/opsp:attest` does not exist until milestone 9. The ex-post half of every measure is genuinely unwritten, and the harvest is now able to say so — which it could not before.
+
+**Discovered:** milestone 1 shipped no hat-level `posture` section, so `DS-SELF-USE-SCOPE` was selected by nothing; and five records written during planning carried no `objective`, so the maintainer view dropped them silently. Both fixed, plus a new `record-without-objective` loop so the second class cannot recur.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
