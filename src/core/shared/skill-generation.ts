@@ -39,6 +39,7 @@ import {
   getOpspProposeSkillTemplate,
   getOpspApplySkillTemplate,
   getOpspArchiveSkillTemplate,
+  getOpspAttestSkillTemplate,
   getOpspReviewSkillTemplate,
   getOpspReexploreSkillTemplate,
   getOpspKnockdownSkillTemplate,
@@ -46,6 +47,7 @@ import {
   getOpspProposeCommandTemplate,
   getOpspApplyCommandTemplate,
   getOpspArchiveCommandTemplate,
+  getOpspAttestCommandTemplate,
   getOpspReviewCommandTemplate,
   getOpspReexploreCommandTemplate,
   getOpspKnockdownCommandTemplate,
@@ -156,7 +158,7 @@ export const OPSP_WORKFLOW_IDS = [
   // Utility commands
   'driver', 'decide', 'tree', 'rebuild-assess',
   // Lifecycle commands
-  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
   // Universe reconciliation commands
   'opsp-rebase', 'opsp-abandon',
   // Surrogate compaction
@@ -177,6 +179,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspExploreSkillTemplate(), dirName: 'opensprint-explore', workflowId: 'opsp-explore' },
     { template: getOpspProposeSkillTemplate(), dirName: 'opensprint-propose', workflowId: 'opsp-propose' },
     { template: getOpspApplySkillTemplate(), dirName: 'opensprint-apply', workflowId: 'opsp-apply' },
+    { template: getOpspAttestSkillTemplate(), dirName: 'opensprint-attest', workflowId: 'opsp-attest' },
     { template: getOpspArchiveSkillTemplate(), dirName: 'opensprint-archive', workflowId: 'opsp-archive' },
     { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
     { template: getOpspReexploreSkillTemplate(), dirName: 'opensprint-reexplore', workflowId: 'opsp-reexplore' },
@@ -203,6 +206,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspExploreCommandTemplate(), id: 'opsp-explore' },
     { template: getOpspProposeCommandTemplate(), id: 'opsp-propose' },
     { template: getOpspApplyCommandTemplate(), id: 'opsp-apply' },
+    { template: getOpspAttestCommandTemplate(), id: 'opsp-attest' },
     { template: getOpspArchiveCommandTemplate(), id: 'opsp-archive' },
     { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
     { template: getOpspReexploreCommandTemplate(), id: 'opsp-reexplore' },

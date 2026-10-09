@@ -30,12 +30,12 @@ vi.mock('../../src/prompts/searchable-multi-select.js', () => ({
 
 describe('OPSP skill generation', () => {
   describe('template functions', () => {
-    it('should return 14 OPSP skill templates (4 utility + 7 lifecycle + 2 reconciliation + 1 compaction)', () => {
+    it('should return 15 OPSP skill templates (4 utility + 8 lifecycle + 2 reconciliation + 1 compaction)', () => {
       const templates = getOpspSkillTemplates();
-      expect(templates).toHaveLength(14);
+      expect(templates).toHaveLength(15);
       expect(templates.map(t => t.workflowId)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
@@ -48,21 +48,21 @@ describe('OPSP skill generation', () => {
       }
     });
 
-    it('should return 14 OPSP command contents (4 utility + 7 lifecycle + 2 reconciliation + 1 compaction)', () => {
+    it('should return 15 OPSP command contents (4 utility + 8 lifecycle + 2 reconciliation + 1 compaction)', () => {
       const contents = getOpspCommandContents();
-      expect(contents).toHaveLength(14);
+      expect(contents).toHaveLength(15);
       expect(contents.map(c => c.id)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
     });
 
-    it('should have correct OPSP workflow IDs (14 total)', () => {
+    it('should have correct OPSP workflow IDs (15 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess',
-        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+        'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
@@ -79,10 +79,10 @@ describe('OPSP skill generation', () => {
     it('should have lifecycle skill templates with correct names', () => {
       const templates = getOpspSkillTemplates();
       const lifecycleNames = templates
-        .filter(t => ['opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown'].includes(t.workflowId))
+        .filter(t => ['opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown'].includes(t.workflowId))
         .map(t => t.template.name);
       expect(lifecycleNames).toEqual([
-        'opensprint-explore', 'opensprint-propose', 'opensprint-apply', 'opensprint-archive', 'opensprint-review', 'opensprint-reexplore', 'opensprint-knockdown',
+        'opensprint-explore', 'opensprint-propose', 'opensprint-apply', 'opensprint-attest', 'opensprint-archive', 'opensprint-review', 'opensprint-reexplore', 'opensprint-knockdown',
       ]);
     });
 

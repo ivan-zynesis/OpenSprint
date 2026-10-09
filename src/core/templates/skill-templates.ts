@@ -29,6 +29,7 @@ export { getRebuildAssessSkillTemplate, getOpspRebuildAssessCommandTemplate } fr
 export { getOpspExploreSkillTemplate, getOpspExploreCommandTemplate } from './workflows/opsp-explore.js';
 export { getOpspProposeSkillTemplate, getOpspProposeCommandTemplate } from './workflows/opsp-propose.js';
 export { getOpspApplySkillTemplate, getOpspApplyCommandTemplate } from './workflows/opsp-apply.js';
+export { getOpspAttestSkillTemplate, getOpspAttestCommandTemplate } from './workflows/opsp-attest.js';
 export { getOpspArchiveSkillTemplate, getOpspArchiveCommandTemplate } from './workflows/opsp-archive.js';
 export { getOpspReviewSkillTemplate, getOpspReviewCommandTemplate } from './workflows/opsp-review.js';
 export { getOpspReexploreSkillTemplate, getOpspReexploreCommandTemplate } from './workflows/opsp-reexplore.js';
