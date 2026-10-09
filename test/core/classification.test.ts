@@ -6,7 +6,17 @@ import {
   DEFAULT_ROLES,
   resolveHatRoles,
   validateRoles,
+  normalizeRole,
+  resolveHatObjectives,
+  validateObjectives,
 } from '../../src/core/hats.js';
+import {
+  MAINTAINER_OBJECTIVES,
+  groupRecordsByHat,
+  resolveSectionInputs,
+  headingOf,
+  DEFAULT_SECTIONS_BY_HAT,
+} from '../../src/core/compact/sections.js';
 import {
   validateDriverSpecEdges,
   EDGE_PROBLEM_KINDS,
@@ -16,6 +26,7 @@ import {
   readSourcedDecisions,
 } from '../../src/core/compact/records.js';
 import { OPEN_LOOP_KINDS, deriveOpenLoops } from '../../src/core/compact/loops.js';
+import { inputMap } from '../../src/core/compact/manifest.js';
 import { buildRuleIndex } from '../../src/core/compact/rules.js';
 
 describe('per-hat classification', () => {
@@ -37,12 +48,16 @@ describe('per-hat classification', () => {
   const config = (body: string) =>
     fs.writeFileSync(path.join(root, 'openspec', 'config.yaml'), `schema: spec-driven\n${body}`);
 
-  const spec = (id: string, opts: { hats?: string; role?: string; deps?: string[] } = {}) => {
-    const { hats = '[product]', role, deps } = opts;
+  const spec = (
+    id: string,
+    opts: { hats?: string; role?: string; deps?: string[]; objective?: string } = {}
+  ) => {
+    const { hats = '[product]', role, deps, objective } = opts;
     fs.writeFileSync(
       path.join(sprint(), 'driver-specs', `${id}.md`),
       `---\nid: ${id}\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: ${hats}` +
         (role ? `\nrole: ${role}` : '') +
+        (objective ? `\nobjective: ${objective}` : '') +
         (deps ? `\ndepends-on:\n${deps.map((d) => `  - ${d}`).join('\n')}` : '') +
         `\n---\n\nBody ${id}\n`
     );
@@ -70,8 +85,13 @@ describe('per-hat classification', () => {
       expect([...DEFAULT_ROLES.product]).not.toContain('measure');
     });
 
-    it('gives every other default hat no roles', () => {
-      for (const hat of ['maintainer', 'dev', 'devops']) {
+    it('gives maintainer goal and strategy, its objectives being sections not records', () => {
+      expect([...DEFAULT_ROLES.maintainer]).toEqual(['goal', 'strategy']);
+      expect([...DEFAULT_ROLES.maintainer]).not.toContain('objective');
+    });
+
+    it('gives dev and devops no roles — they run no framework to classify against', () => {
+      for (const hat of ['dev', 'devops']) {
         expect([...(DEFAULT_ROLES[hat] ?? [])]).toEqual([]);
       }
     });
@@ -102,35 +122,203 @@ describe('per-hat classification', () => {
     });
   });
 
+  // ═══════════════════════════════════════════════════════════
+  // Role as a list (DEC-018)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('normalizeRole', () => {
+    it('accepts both spellings', () => {
+      expect(normalizeRole('strategy')).toEqual(['strategy']);
+      expect(normalizeRole(['goal', 'strategy'])).toEqual(['goal', 'strategy']);
+    });
+
+    it('removes duplicates and preserves order', () => {
+      expect(normalizeRole(['strategy', 'goal', 'strategy'])).toEqual(['strategy', 'goal']);
+    });
+
+    it('returns null for a malformed value, including an empty list', () => {
+      for (const bad of [undefined, null, [], '', ['goal', ''], ['goal', 3], {}, 7]) {
+        expect(normalizeRole(bad)).toBeNull();
+      }
+    });
+
+    it('a record written with a string role still parses', () => {
+      spec('DS-OLD', { role: 'strategy' });
+      expect(specs()[0].role).toEqual(['strategy']);
+    });
+
+    it('a record may declare a goal and its strategy together', () => {
+      spec('DS-BOTH', { role: '[goal, strategy]' });
+      expect(specs()[0].role).toEqual(['goal', 'strategy']);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // Objective as a second selector (DEC-018)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('objective selection', () => {
+    const grouped = () => groupRecordsByHat(specs(), decs(), ['product', 'maintainer', 'dev', 'devops']);
+    const sectionFor = (name: string) =>
+      DEFAULT_SECTIONS_BY_HAT.maintainer.find((s) => s.name === name)!;
+
+    it('a section takes only records declaring its objective', () => {
+      spec('DS-SEC', { hats: '[maintainer]', role: 'goal', objective: 'security-access' });
+      spec('DS-COST', { hats: '[maintainer]', role: 'goal', objective: 'cost-budget' });
+      const ids = resolveSectionInputs('maintainer', sectionFor('security-access'), grouped()).map((r) => r.id);
+      expect(ids).toEqual(['DS-SEC']);
+    });
+
+    it('objective and roles filter independently', () => {
+      spec('DS-GOAL', { hats: '[maintainer]', role: 'goal', objective: 'change-quality' });
+      spec('DS-OTHER', { hats: '[maintainer]', role: 'posture', objective: 'change-quality' });
+      const ids = resolveSectionInputs('maintainer', sectionFor('change-quality'), grouped()).map((r) => r.id);
+      expect(ids).toEqual(['DS-GOAL']);
+    });
+
+    it('a record with no objective is excluded from an objective-filtered section', () => {
+      spec('DS-NONE', { hats: '[maintainer]', role: 'goal' });
+      const ids = resolveSectionInputs('maintainer', sectionFor('security-access'), grouped()).map((r) => r.id);
+      expect(ids).toEqual([]);
+    });
+
+    it('an objective with no records resolves to an empty section rather than vanishing', () => {
+      spec('DS-SEC', { hats: '[maintainer]', role: 'goal', objective: 'security-access' });
+      const g = grouped();
+      for (const objective of MAINTAINER_OBJECTIVES) {
+        expect(() => resolveSectionInputs('maintainer', sectionFor(objective.name), g)).not.toThrow();
+      }
+      expect(resolveSectionInputs('maintainer', sectionFor('cost-budget'), g)).toEqual([]);
+    });
+
+    it('changing a record\'s objective moves it between sections and restages both', () => {
+      spec('DS-M', { hats: '[maintainer]', role: 'goal', objective: 'security-access' });
+      const before = specs()[0];
+      expect(resolveSectionInputs('maintainer', sectionFor('security-access'), grouped()).map((r) => r.id))
+        .toEqual(['DS-M']);
+
+      spec('DS-M', { hats: '[maintainer]', role: 'goal', objective: 'cost-budget' });
+      const after = specs()[0];
+      const g = grouped();
+      expect(resolveSectionInputs('maintainer', sectionFor('security-access'), g)).toEqual([]);
+      expect(resolveSectionInputs('maintainer', sectionFor('cost-budget'), g).map((r) => r.id))
+        .toEqual(['DS-M']);
+
+      // Objective lives in frontmatter, so it is inside the hashed content:
+      // the section input hash changes without objective needing its own term.
+      expect(inputMap([{ id: before.id, path: before.path, content: before.content }])[before.id])
+        .not.toBe(inputMap([{ id: after.id, path: after.path, content: after.content }])[after.id]);
+    });
+
+    it('a record declaring several roles lands in a section accepting either', () => {
+      spec('DS-BOTH', { hats: '[maintainer]', role: '[goal, strategy]', objective: 'integrity-correctness' });
+      const ids = resolveSectionInputs('maintainer', sectionFor('integrity-correctness'), grouped()).map((r) => r.id);
+      expect(ids).toEqual(['DS-BOTH']);
+    });
+  });
+
+  describe('validateObjectives', () => {
+    const objectivesFor = (h: string) =>
+      h === 'maintainer' ? MAINTAINER_OBJECTIVES.map((o) => o.name) : [];
+
+    it('accepts an objective the hat offers', () => {
+      expect(
+        validateObjectives([{ id: 'DS-A', objective: 'cost-budget', hats: ['maintainer'] }], objectivesFor)
+      ).toEqual([]);
+    });
+
+    it('reports an objective no hat of the record offers', () => {
+      const [p] = validateObjectives(
+        [{ id: 'DS-A', objective: 'made-up', hats: ['maintainer'] }],
+        objectivesFor
+      );
+      expect(p.objective).toBe('made-up');
+      expect(p.accepted).toContain('security-access');
+    });
+
+    it('ignores a record declaring no objective', () => {
+      expect(validateObjectives([{ id: 'DS-A', hats: ['maintainer'] }], objectivesFor)).toEqual([]);
+    });
+
+    it('reads a project\'s own eighth objective from its resolved sections', () => {
+      config(
+        'hats:\n  maintainer:\n    sections:\n' +
+          '      - name: accessibility\n        inputs: driver-specs\n        objective: accessibility\n'
+      );
+      expect([...resolveHatObjectives(root, 'maintainer')]).toEqual(['accessibility']);
+    });
+
+    it('resolves the shipped seven when nothing is declared', () => {
+      expect([...resolveHatObjectives(root, 'maintainer')]).toEqual(
+        MAINTAINER_OBJECTIVES.map((o) => o.name)
+      );
+    });
+  });
+
+  describe('section headings', () => {
+    it('a declared heading wins over one derived from the name', () => {
+      expect(headingOf({ name: 'privacy-retention-legal', heading: 'Privacy, Retention & Legal', inputs: 'driver-specs' }))
+        .toBe('Privacy, Retention & Legal');
+    });
+
+    it('absence derives from the name, as before', () => {
+      expect(headingOf({ name: 'open-loops', inputs: 'none' })).toBe('Open Loops');
+    });
+  });
+
   describe('validateRoles', () => {
     const rolesFor = (h: string) => (h === 'product' ? ['objective', 'goal', 'strategy'] : []);
 
     it('accepts a role the hat declares', () => {
-      expect(validateRoles([{ id: 'DS-A', role: 'goal', hats: ['product'] }], rolesFor)).toEqual([]);
+      expect(validateRoles([{ id: 'DS-A', role: ['goal'], hats: ['product'] }], rolesFor)).toEqual([]);
     });
 
     it('reports a role the hat does not declare', () => {
-      const [p] = validateRoles([{ id: 'DS-A', role: 'measure', hats: ['product'] }], rolesFor);
+      const [p] = validateRoles([{ id: 'DS-A', role: ['measure'], hats: ['product'] }], rolesFor);
       expect(p.reason).toBe('not-accepted');
       expect(p.accepted).toEqual(['goal', 'objective', 'strategy']);
     });
 
     it('is case-sensitive', () => {
-      const [p] = validateRoles([{ id: 'DS-A', role: 'Objective', hats: ['product'] }], rolesFor);
+      const [p] = validateRoles([{ id: 'DS-A', role: ['Objective'], hats: ['product'] }], rolesFor);
       expect(p.reason).toBe('not-accepted');
     });
 
     it('reports a role on a record whose hats declare none', () => {
-      const [p] = validateRoles([{ id: 'DEC-1', role: 'goal', hats: ['dev'] }], rolesFor);
+      const [p] = validateRoles([{ id: 'DEC-1', role: ['goal'], hats: ['dev'] }], rolesFor);
       expect(p.reason).toBe('hat-declares-none');
     });
 
     it('accepts a multi-hat record when either hat accepts the role', () => {
-      expect(validateRoles([{ id: 'DS-A', role: 'goal', hats: ['dev', 'product'] }], rolesFor)).toEqual([]);
+      expect(validateRoles([{ id: 'DS-A', role: ['goal'], hats: ['dev', 'product'] }], rolesFor)).toEqual([]);
     });
 
     it('ignores a record with no role', () => {
       expect(validateRoles([{ id: 'DS-A', hats: ['product'] }], rolesFor)).toEqual([]);
+      expect(validateRoles([{ id: 'DS-A', role: [], hats: ['product'] }], rolesFor)).toEqual([]);
+    });
+
+    it('accepts a record declaring several roles the hat allows', () => {
+      expect(
+        validateRoles([{ id: 'DS-A', role: ['goal', 'strategy'], hats: ['product'] }], rolesFor)
+      ).toEqual([]);
+    });
+
+    it('reports each offending role of a multi-role record', () => {
+      const problems = validateRoles(
+        [{ id: 'DS-A', role: ['goal', 'measure', 'bar'], hats: ['product'] }],
+        rolesFor
+      );
+      expect(problems.map((p) => p.role)).toEqual(['measure', 'bar']);
+    });
+
+    it('reports hat-declares-none once, not once per role', () => {
+      const problems = validateRoles(
+        [{ id: 'DEC-1', role: ['goal', 'strategy'], hats: ['dev'] }],
+        rolesFor
+      );
+      expect(problems).toHaveLength(1);
+      expect(problems[0].reason).toBe('hat-declares-none');
     });
   });
 
@@ -258,6 +446,53 @@ describe('per-hat classification', () => {
         '---\nid: DS-OLD\ntype: product\nstatus: superseded\ncreated: 2026-01-01\nhats: [product]\n---\n\nB\n'
       );
       expect(loops().filter((l) => l.kind === 'record-unclassified')).toEqual([]);
+    });
+
+    // DEC-028: role classification is a driver-spec concept. dev and devops
+    // run no framework to classify against, so a decision has nothing to be
+    // classified as — whichever hats it cc's.
+    it('never fires for a decision, even in a role-declaring hat', () => {
+      const withRoles = (h: string) =>
+        h === 'maintainer' ? ['goal', 'strategy'] : h === 'product' ? ['objective', 'goal'] : [];
+      dec('DEC-001', '[dev, maintainer]');
+      dec('DEC-002', '[maintainer]');
+      dec('DEC-003', '[dev, product]');
+      expect(loops(withRoles).filter((l) => l.kind === 'record-unclassified')).toEqual([]);
+    });
+
+    it('still fires for a driver-spec beside an exempt decision', () => {
+      const withRoles = (h: string) => (h === 'maintainer' ? ['goal', 'strategy'] : []);
+      spec('DS-A', { hats: '[maintainer]' });
+      dec('DEC-001', '[maintainer]');
+      const found = loops(withRoles).filter((l) => l.kind === 'record-unclassified');
+      expect(found.map((l) => l.record)).toEqual(['DS-A']);
+    });
+
+    it('does not fire for a record whose role list is present', () => {
+      spec('DS-A', { role: '[goal, strategy]' });
+      expect(loops().filter((l) => l.kind === 'record-unclassified')).toEqual([]);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // constraint-unmeasurable with role lists
+  // ═══════════════════════════════════════════════════════════
+
+  describe('constraint-unmeasurable over role lists', () => {
+    const rolesFor = (h: string) => (h === 'product' ? ['objective', 'goal', 'strategy'] : []);
+    const loops = () =>
+      deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
+
+    it('fires when any role of the record is measurable', () => {
+      spec('DS-A', { role: '[strategy, goal]' });
+      const found = loops().filter((l) => l.kind === 'constraint-unmeasurable');
+      expect(found.map((l) => l.record)).toEqual(['DS-A']);
+    });
+
+    it('reports once per record, not once per measurable role', () => {
+      spec('DS-A', { role: '[goal, objective]' });
+      const found = loops().filter((l) => l.kind === 'constraint-unmeasurable');
+      expect(found).toHaveLength(1);
     });
   });
 });

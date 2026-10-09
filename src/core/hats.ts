@@ -72,7 +72,10 @@ export type DriverSpecType = (typeof DRIVER_SPEC_TYPES)[number];
  */
 export const DEFAULT_ROLES: Readonly<Record<string, readonly string[]>> = {
   product: ['objective', 'goal', 'strategy'],
-  maintainer: [],
+  // Maintainer runs the same OGSM, but its objectives are inherited rather
+  // than discovered, so they are sections rather than records (DEC-018).
+  // `objective` is therefore absent here: nothing is filed as one.
+  maintainer: ['goal', 'strategy'],
   dev: [],
   devops: [],
 };
@@ -180,12 +183,34 @@ export function resolveHatSections(
 
   return sections.map((s) => ({
     name: s.name,
+    ...(s.heading === undefined ? {} : { heading: s.heading }),
     inputs: s.inputs as SectionInputKind,
     ...(s.roles === undefined ? {} : { roles: s.roles as string[] }),
+    ...(s.objective === undefined ? {} : { objective: s.objective }),
     ...(s.observes === undefined
       ? {}
       : { observes: s.observes as typeof OBSERVES_RULES | string[] }),
   }));
+}
+
+/**
+ * Normalises a frontmatter `role` value to a list.
+ *
+ * A record declares one or more roles. Both spellings are accepted —
+ * `role: strategy` and `role: [goal, strategy]` — and normalise to a list
+ * with duplicates removed and order preserved. This mirrors normalizeHats
+ * exactly: DEC-016 settled the shape for one classification axis, and the
+ * other has the same need once a record can state a goal and its strategy
+ * together.
+ *
+ * Returns null for a malformed value, including an empty list: a record that
+ * declares the key must say something with it.
+ */
+export function normalizeRole(value: unknown): string[] | null {
+  const raw = typeof value === 'string' ? [value] : value;
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  if (!raw.every((entry) => typeof entry === 'string' && entry.length > 0)) return null;
+  return [...new Set(raw as string[])];
 }
 
 /**
@@ -343,18 +368,76 @@ export interface RoleProblem {
  * usually means the hat's roles were never configured.
  */
 export function validateRoles(
-  records: readonly { id: string; role?: string; hats?: string[] }[],
+  records: readonly { id: string; role?: string[]; hats?: string[] }[],
   rolesFor: (hat: string) => readonly string[]
 ): RoleProblem[] {
   const problems: RoleProblem[] = [];
   for (const record of records) {
-    if (!record.role) continue;
+    const roles = record.role ?? [];
+    if (roles.length === 0) continue;
     const hats = record.hats ?? [];
     const accepted = [...new Set(hats.flatMap((h) => [...rolesFor(h)]))].sort();
     if (accepted.length === 0) {
-      problems.push({ record: record.id, role: record.role, hats, accepted, reason: 'hat-declares-none' });
-    } else if (!accepted.includes(record.role)) {
-      problems.push({ record: record.id, role: record.role, hats, accepted, reason: 'not-accepted' });
+      // Reported once against the first role: the problem is the hat's
+      // configuration, not any particular role the record chose.
+      problems.push({ record: record.id, role: roles[0], hats, accepted, reason: 'hat-declares-none' });
+      continue;
+    }
+    for (const role of roles) {
+      if (!accepted.includes(role)) {
+        problems.push({ record: record.id, role, hats, accepted, reason: 'not-accepted' });
+      }
+    }
+  }
+  return problems;
+}
+
+/**
+ * The objectives a hat's sections declare, for validating a record's
+ * `objective`.
+ *
+ * Read from the hat's *resolved* sections rather than from a fixed list, so a
+ * project that declared an eighth maintainer objective can use it the moment
+ * it is configured (DEC-018).
+ */
+export function resolveHatObjectives(
+  projectRoot: string,
+  hat: string
+): readonly string[] {
+  const objectives = resolveHatSections(projectRoot, hat)
+    .map((section) => section.objective)
+    .filter((objective): objective is string => objective !== undefined);
+  return [...new Set(objectives)];
+}
+
+/** A record declaring an objective none of its hats offers. */
+export interface ObjectiveProblem {
+  record: string;
+  objective: string;
+  hats: string[];
+  accepted: string[];
+}
+
+/**
+ * Validates each record's objective against the objectives its hats' sections
+ * declare, by explicit membership lookup.
+ *
+ * A record is checked against the union of its hats' objectives, mirroring
+ * validateRoles: a record in two hats is legitimate if either offers it.
+ * A record declaring no objective is not a problem here — it is simply
+ * excluded from objective-filtered sections.
+ */
+export function validateObjectives(
+  records: readonly { id: string; objective?: string; hats?: string[] }[],
+  objectivesFor: (hat: string) => readonly string[]
+): ObjectiveProblem[] {
+  const problems: ObjectiveProblem[] = [];
+  for (const record of records) {
+    if (!record.objective) continue;
+    const hats = record.hats ?? [];
+    const accepted = [...new Set(hats.flatMap((h) => [...objectivesFor(h)]))].sort();
+    if (!accepted.includes(record.objective)) {
+      problems.push({ record: record.id, objective: record.objective, hats, accepted });
     }
   }
   return problems;

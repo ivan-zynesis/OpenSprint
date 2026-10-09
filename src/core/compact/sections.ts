@@ -46,6 +46,14 @@ export const OBSERVES_RULES = 'rules' as const;
  */
 export interface SectionDef {
   name: string;
+  /**
+   * Heading to render, when title-casing the name cannot produce it.
+   *
+   * The maintainer objectives carry commas and ampersands that no
+   * title-casing of a kebab-case name yields, which is the case this field
+   * was reserved for. A section without one derives its heading as before.
+   */
+  heading?: string;
   inputs: SectionInputKind;
   /**
    * Roles this section accepts. Without it a section takes every record of
@@ -54,8 +62,45 @@ export interface SectionDef {
    * for.
    */
   roles?: string[];
+  /**
+   * The objective this section takes records for, filtered independently of
+   * `roles`.
+   *
+   * Roles and objectives are different axes: a record is a goal *about*
+   * security, so collapsing them would make `goal` and `security-access`
+   * mutually exclusive. A section declaring both takes a record only if it
+   * matches on each.
+   */
+  objective?: string;
   observes?: typeof OBSERVES_RULES | string[];
 }
+
+/**
+ * The maintainer hat's inherited objectives (DS-MAINTAINER-INHERITED).
+ *
+ * Unlike product's objective, which each project discovers, these are the
+ * technical concerns present in substantially every software project — which
+ * is why the accountability spun off from product and is held by a
+ * specialist (DEC-018).
+ *
+ * An explicit ordered list rather than anything derived: if we ship them, we
+ * track them by name in a constant. A project adds an eighth by declaring its
+ * own maintainer sections; the list is expected to move, and
+ * `availability & continuity` was itself added on review after being
+ * declined twice.
+ */
+export const MAINTAINER_OBJECTIVES: readonly { name: string; heading: string }[] = [
+  { name: 'security-access', heading: 'Security & Access' },
+  { name: 'isolation-confidentiality', heading: 'Isolation & Confidentiality' },
+  { name: 'privacy-retention-legal', heading: 'Privacy, Retention & Legal' },
+  { name: 'integrity-correctness', heading: 'Integrity & Correctness' },
+  { name: 'change-quality', heading: 'Change & Quality' },
+  { name: 'availability-continuity', heading: 'Availability & Continuity' },
+  { name: 'cost-budget', heading: 'Cost & Budget' },
+];
+
+/** The roles a maintainer objective's records may take. */
+const MAINTAINER_OBJECTIVE_ROLES = ['goal', 'strategy'];
 
 /**
  * Default observation globs, by explicit list per ecosystem.
@@ -157,13 +202,18 @@ export const DEFAULT_SECTIONS_BY_HAT: Readonly<Record<string, readonly SectionDe
     { name: 'measures', inputs: 'driver-specs', roles: ['goal'], observes: OBSERVES_RULES },
     OPEN_LOOPS,
   ],
-  // A bar is a position on a spectrum, not a number. Cost is an axis of every
-  // bar rather than a section of its own.
+  // Seven inherited objectives, each with its own goal and strategy
+  // (DS-MAINTAINER-INHERITED, DEC-018). An objective with no records still
+  // renders: an empty row is the finding, which is DS-FULL-COVERAGE made
+  // positional rather than harvested.
   maintainer: [
-    { name: 'bars', inputs: 'driver-specs', roles: ['bar'] },
-    { name: 'posture', inputs: 'driver-specs', roles: ['posture'] },
-    { name: 'evidence', inputs: 'driver-specs', roles: ['evidence'], observes: OBSERVES_RULES },
-    { name: 'exposure', inputs: 'driver-specs', roles: ['exposure'] },
+    ...MAINTAINER_OBJECTIVES.map((objective) => ({
+      name: objective.name,
+      heading: objective.heading,
+      inputs: 'driver-specs' as SectionInputKind,
+      roles: [...MAINTAINER_OBJECTIVE_ROLES],
+      objective: objective.name,
+    })),
     OPEN_LOOPS,
   ],
   // Describes the system, citing decisions where they explain a choice.
@@ -198,8 +248,15 @@ export function headingFor(name: string): string {
 /** A record contributing to a section, reduced to what the manifest needs. */
 export interface RecordRef {
   id: string;
-  /** Role within the hat, for role-filtered sections. */
-  role?: string;
+  /**
+   * Roles within the hat, for role-filtered sections.
+   *
+   * A list because a record may state both a goal and its strategy — the
+   * treatment DEC-016 gave `hats`, applied to the other classification axis.
+   */
+  role?: string[];
+  /** The objective this record serves, for objective-filtered sections. */
+  objective?: string;
   /** Path relative to the project root, for the renderer to read. */
   path: string;
   content: string;
@@ -251,7 +308,8 @@ export function groupRecordsByHat(
       id: string;
       status: string;
       hats?: string[];
-      role?: string;
+      role?: string[];
+      objective?: string;
       path: string;
       content: string;
     }
@@ -273,6 +331,7 @@ export function groupRecordsByHat(
       target.get(hat)?.push({
         id: entry.id,
         role: entry.role,
+        objective: entry.objective,
         path: entry.path,
         content: entry.content,
       });
@@ -320,10 +379,27 @@ export function resolveSectionInputs(
       return [];
   }
 
+  // Objective and roles filter independently, so a maintainer section takes a
+  // record only when it serves that objective AND holds one of those roles.
+  if (section.objective !== undefined) {
+    candidates = candidates.filter((r) => r.objective === section.objective);
+  }
+
   if (!section.roles || section.roles.length === 0) return candidates;
 
   // A record with no role is excluded from a role-filtered section: it has not
   // been placed in the chain, and record-unclassified already reports it.
   const accepted = new Set(section.roles);
-  return candidates.filter((r) => r.role !== undefined && accepted.has(r.role));
+  return candidates.filter((r) => r.role !== undefined && r.role.some((role) => accepted.has(role)));
+}
+
+/**
+ * The heading a section renders under.
+ *
+ * Declared wins, because some headings cannot be derived: no title-casing of
+ * `privacy-retention-legal` yields "Privacy, Retention & Legal". The name
+ * stays the identifier used in configuration and provenance.
+ */
+export function headingOf(section: SectionDef): string {
+  return section.heading ?? headingFor(section.name);
 }

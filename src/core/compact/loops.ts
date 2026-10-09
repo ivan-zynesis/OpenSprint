@@ -168,14 +168,20 @@ export function deriveOpenLoops(
     }
   }
 
-  // ── a record in a role-declaring hat that carries no role
+  // ── a driver-spec in a role-declaring hat that carries no role
   //
   // Fires only where a hat declares roles. Otherwise a project not using them
   // would see its entire surrogate reported as a backlog on first run, which
   // is noise rather than a gap.
-  for (const record of [...driverSpecs, ...decisions]) {
+  //
+  // Decisions are exempt (DEC-028). Role classification is a driver-spec
+  // concept: product and maintainer run OGSM, dev and devops deliberately do
+  // not, so a decision has nothing to classify against. Before this, an ADR
+  // declaring `maintainer` as a cc hat harvested as unclassified the moment
+  // it was written.
+  for (const record of driverSpecs) {
     if (!isActive(record.status)) continue;
-    if (record.role) continue;
+    if (record.role && record.role.length > 0) continue;
     const hats = record.hats ?? [];
     const declaring = hats.filter((h) => rolesFor(h).length > 0);
     if (declaring.length === 0) continue;
@@ -192,7 +198,9 @@ export function deriveOpenLoops(
   const measurable = new Set<string>(MEASURABLE_ROLES);
   for (const record of driverSpecs) {
     if (!isActive(record.status)) continue;
-    if (!record.role || !measurable.has(record.role)) continue;
+    // Any measurable role qualifies the record, and it is reported once —
+    // a record stating both a goal and its strategy has one set of measures.
+    if (!record.role || !record.role.some((role) => measurable.has(role))) continue;
     if (hasMeasures(record.content)) continue;
     loops.push({
       kind: 'constraint-unmeasurable',

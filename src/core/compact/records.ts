@@ -11,21 +11,31 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { parseFrontmatter } from '../decision-map.js';
 import type { DriverSpecEntry, DecisionEntry } from '../decision-map.js';
-import { normalizeHats } from '../hats.js';
+import { normalizeHats, normalizeRole } from '../hats.js';
 
 export type SourcedDriverSpec = DriverSpecEntry & {
   path: string;
   content: string;
-  /** Role within the hat, when classified. */
-  role?: string;
+  /** Roles within the hat, when classified. */
+  role?: string[];
+  /** The objective this record serves, when declared. */
+  objective?: string;
   /** Other driver-specs this one exists because of. */
   dependsOn: string[];
 };
 export type SourcedDecision = DecisionEntry & {
   path: string;
   content: string;
-  /** Role within the hat, when classified. */
-  role?: string;
+  /**
+   * Roles within the hat, when classified.
+   *
+   * Read for completeness; DEC-028 exempts decisions from role
+   * classification, since dev and devops run no framework to classify
+   * against.
+   */
+  role?: string[];
+  /** The objective this record serves, when declared. */
+  objective?: string;
 };
 
 function readDir(dir: string): Array<{ file: string; content: string }> {
@@ -50,7 +60,8 @@ export function readSourcedDriverSpecs(opensprintDir: string): SourcedDriverSpec
       type: (fm.type as string) || 'unknown',
       status: (fm.status as string) || 'active',
       hats: normalizeHats(fm.hats) ?? undefined,
-      role: typeof fm.role === 'string' ? fm.role : undefined,
+      role: normalizeRole(fm.role) ?? undefined,
+      objective: typeof fm.objective === 'string' ? fm.objective : undefined,
       // The same field name the decision layer uses: the relationship means
       // the same thing, and a second name would mean a second parser.
       dependsOn: Array.isArray(fm['depends-on']) ? (fm['depends-on'] as string[]) : [],
@@ -76,7 +87,8 @@ export function readSourcedDecisions(opensprintDir: string): SourcedDecision[] {
       depth: typeof fm.depth === 'number' ? fm.depth : 0,
       summary: '',
       hats: normalizeHats(fm.hats) ?? undefined,
-      role: typeof fm.role === 'string' ? fm.role : undefined,
+      role: normalizeRole(fm.role) ?? undefined,
+      objective: typeof fm.objective === 'string' ? fm.objective : undefined,
       path: path.join(opensprintDir, 'ADRs', file),
       content,
     });

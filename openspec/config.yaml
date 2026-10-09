@@ -32,5 +32,26 @@ hats:
   product: {}
   dev: {}
   devops: {}
+  # Pinned to the pre-DEC-018 shape. This repository's maintainer records
+  # still carry role: bar / posture, so the shipped seven objectives would
+  # select nothing from them. The `measure-anatomy` milestone migrates the
+  # records and removes this pin, after which the shipped default applies.
   maintainer:
     roles: [bar, posture, evidence, exposure]
+    sections:
+      - name: bars
+        inputs: driver-specs
+        roles: [bar]
+      - name: posture
+        inputs: driver-specs
+        roles: [posture]
+      - name: evidence
+        inputs: driver-specs
+        roles: [evidence]
+        observes: rules
+      - name: exposure
+        inputs: driver-specs
+        roles: [exposure]
+      - name: open-loops
+        inputs: none
+        observes: rules
