@@ -25,7 +25,7 @@ In flight.
 
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | building | 5/9 _(+1 superseded)_ | board-view |
+| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | building | 6/9 _(+1 superseded)_ | attested-authority |
 
 ## Done
 
