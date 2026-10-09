@@ -28,6 +28,16 @@ export interface Milestone {
   name: string;
   description: string;
   done: boolean;
+  /**
+   * Marked `- [~]`: decided against after the initiative was planned, and
+   * neither done nor outstanding.
+   *
+   * A superseded milestone is listed rather than deleted, for the same reason
+   * DEC-035 keeps a declined initiative: why the work was dropped is worth
+   * more than the line. It is excluded from progress, so an initiative is not
+   * held open by work nobody intends to do.
+   */
+  superseded: boolean;
 }
 
 export interface InitiativeEntry {
@@ -91,18 +101,21 @@ export function parseMilestones(content: string): Milestone[] {
 
   const milestones: Milestone[] = [];
   for (const line of body.split('\n')) {
-    const match = line.match(/^\s*[-*]\s*\[([ xX])\]\s*(.+)$/);
+    const match = line.match(/^\s*[-*]\s*\[([ xX~])\]\s*(.+)$/);
     if (!match) continue;
-    const done = match[1].toLowerCase() === 'x';
+    const marker = match[1].toLowerCase();
+    const done = marker === 'x';
+    const superseded = marker === '~';
     const text = match[2].trim();
     const colon = text.indexOf(':');
     if (colon === -1) {
-      milestones.push({ name: '', description: text, done });
+      milestones.push({ name: '', description: text, done, superseded });
     } else {
       milestones.push({
         name: text.slice(0, colon).trim(),
         description: text.slice(colon + 1).trim(),
         done,
+        superseded,
       });
     }
   }
@@ -129,15 +142,16 @@ export function parseOrphanedMilestones(
       continue;
     }
     if (section.toLowerCase() === 'milestones') continue;
-    const match = line.match(/^\s*[-*]\s*\[([ xX])\]\s*(.+)$/);
+    const match = line.match(/^\s*[-*]\s*\[([ xX~])\]\s*(.+)$/);
     if (!match) continue;
-    const done = match[1].toLowerCase() === 'x';
+    const marker = match[1].toLowerCase();
     const text = match[2].trim();
     const colon = text.indexOf(':');
     out.push({
       name: colon === -1 ? '' : text.slice(0, colon).trim(),
       description: colon === -1 ? text : text.slice(colon + 1).trim(),
-      done,
+      done: marker === 'x',
+      superseded: marker === '~',
       section,
     });
   }
@@ -327,8 +341,11 @@ export function checkInitiativeState(entry: InitiativeEntry): StateProblem[] {
   // state look contradictory and are not.
   if (state === 'declined') return problems;
 
-  const total = entry.milestones.length;
-  const done = entry.milestones.filter((m) => m.done).length;
+  // Superseded milestones are neither done nor outstanding, so they must not
+  // hold an initiative open.
+  const live = entry.milestones.filter((m) => !m.superseded);
+  const total = live.length;
+  const done = live.filter((m) => m.done).length;
   const claims =
     entry.driverSpecs.length > 0 || entry.decisions.length > 0 || total > 0;
 

@@ -117,8 +117,8 @@ describe('initiatives', () => {
     it('reads name, description and completion', () => {
       const m = parseMilestones(withMilestones('- [ ] alpha: do the thing\n- [x] beta: done already'));
       expect(m).toEqual([
-        { name: 'alpha', description: 'do the thing', done: false },
-        { name: 'beta', description: 'done already', done: true },
+        { name: 'alpha', description: 'do the thing', done: false, superseded: false },
+        { name: 'beta', description: 'done already', done: true, superseded: false },
       ]);
     });
 
@@ -130,6 +130,13 @@ describe('initiatives', () => {
       const [m] = parseMilestones(withMilestones('- [ ] no colon here'));
       expect(m.name).toBe('');
       expect(m.description).toBe('no colon here');
+    });
+
+    it('reads a superseded milestone, neither done nor outstanding', () => {
+      const [m] = parseMilestones(withMilestones('- [~] dropped: decided against'));
+      expect(m.superseded).toBe(true);
+      expect(m.done).toBe(false);
+      expect(m.name).toBe('dropped');
     });
 
     it('does not read a checkbox outside the section', () => {

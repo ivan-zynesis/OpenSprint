@@ -498,6 +498,20 @@ compactCmd
   });
 
 compactCmd
+  .command('board')
+  .description('Regenerate BOARD.md from the initiatives')
+  .action(async () => {
+    try {
+      const { compactBoardCommand } = await import('../commands/compact.js');
+      await compactBoardCommand();
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+compactCmd
   .command('check')
   .description('Fail when any view section is stale, tampered or unsealed')
   .option('--json', 'Output as JSON')

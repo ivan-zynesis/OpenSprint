@@ -15,6 +15,7 @@ import * as path from 'node:path';
 import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveHatRegistry, resolveHatSections, resolveHatRoles } from '../core/hats.js';
+import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
 import {
   readSourcedDriverSpecs,
   readSourcedDecisions,
@@ -270,12 +271,28 @@ export async function compactSealCommand(): Promise<void> {
   const manifest: Manifest = { version: 1, entries };
   writeManifest(opensprintDir, manifest);
 
+  // The board is part of the same compile pass (DEC-026). It needs no skill,
+  // so it is regenerated here rather than sealed and staleness-gated.
+  regenerateBoard(opensprintDir);
+
   console.log(chalk.green(`Sealed ${entries.length} section(s) across ${registry.length} hat(s).`));
+  console.log(chalk.gray(`  regenerated ${BOARD_FILENAME}`));
   for (const hat of unrendered) {
     console.log(
       chalk.yellow(`  ${hat}: has records but no view at ${relative(projectRoot, viewPath(opensprintDir, hat))}`)
     );
   }
+}
+
+// -----------------------------------------------------------------------------
+// board — regenerate the board alone. Deterministic, so never gated.
+// -----------------------------------------------------------------------------
+
+export async function compactBoardCommand(): Promise<void> {
+  const projectRoot = process.cwd();
+  const { opensprintDir } = scan(projectRoot);
+  regenerateBoard(opensprintDir);
+  console.log(chalk.green(`Regenerated ${relative(projectRoot, path.join(opensprintDir, BOARD_FILENAME))}`));
 }
 
 // -----------------------------------------------------------------------------
