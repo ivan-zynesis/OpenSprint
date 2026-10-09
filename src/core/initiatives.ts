@@ -1,0 +1,239 @@
+/**
+ * Initiatives — the deterministic half
+ *
+ * An initiative is a **container, not a record** (DS-PROGRESSIVE-CRYSTALLIZATION):
+ * it neither constrains nor decides, which is what every driver-spec and ADR
+ * does. It tracks work, and it fills progressively — born at intake, carrying
+ * more of OGSM as the work crystallizes.
+ *
+ * Until now it was the one artifact class with no code behind it. Every
+ * reference to `initiatives/` in src/ was prose inside a skill template, so an
+ * initiative's state, its milestones and its membership were legible to a
+ * model and invisible to code. DEC-024 named that as the obstacle: a state
+ * machine needs a parser first.
+ *
+ * Nothing here writes. Reading is the whole surface.
+ */
+
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { parseFrontmatter } from './decision-map.js';
+
+/** A unit of work inside an initiative: one opsx change cycle. */
+export interface Milestone {
+  /**
+   * The opsx change name, which is what makes a milestone traceable to the
+   * branch that implemented it. Empty when the line carried no colon.
+   */
+  name: string;
+  description: string;
+  done: boolean;
+}
+
+export interface InitiativeEntry {
+  id: string;
+  /** `active` by default, matching how driver-specs default. */
+  status: string;
+  /** How far down OGSM this has crystallized (DEC-024). Absent on older files. */
+  state?: string;
+  created?: string;
+  completed?: string;
+  /** Other initiatives this one builds on. */
+  dependsOn: string[];
+  milestones: Milestone[];
+  /**
+   * Checkbox lines found outside `## Milestones`, with the section holding
+   * them.
+   *
+   * `/opsp:reexplore` appends milestones under a dated heading rather than
+   * into the section, so strict scoping would drop them silently. Reporting
+   * them instead keeps the scoping predictable without losing the work —
+   * the board can surface them, and the real fix belongs in re-exploration's
+   * output format.
+   */
+  orphanedMilestones: Array<Milestone & { section: string }>;
+  /** Driver-specs this initiative claims, from `## Driver Specs`. */
+  driverSpecs: string[];
+  /** Decisions this initiative claims, from `## ADRs`. */
+  decisions: string[];
+  /** Path to the file, so a caller can open it. */
+  path: string;
+  /** Filename without `.md`, which may differ from `id` once DEC-036 lands. */
+  stem: string;
+}
+
+/**
+ * The body of a second-level section, ending at the next one.
+ *
+ * Scoping matters here: a checkbox in `## Description` is prose, not a
+ * milestone, and a list item in `## Open Questions` is not membership.
+ */
+export function sectionBody(content: string, heading: string): string | null {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = content.match(new RegExp(`^##\\s+${escaped}\\s*$`, 'im'));
+  if (!match || match.index === undefined) return null;
+  const after = content.slice(match.index + match[0].length);
+  const next = after.search(/^##\s/m);
+  return next === -1 ? after : after.slice(0, next);
+}
+
+/**
+ * Reads the `## Milestones` section.
+ *
+ * A line with no colon still becomes a milestone, with its whole text as the
+ * description and an empty name: reporting a malformed milestone beats
+ * dropping it silently, which is the failure mode that leaves an initiative
+ * looking complete when it is not.
+ */
+export function parseMilestones(content: string): Milestone[] {
+  const body = sectionBody(content, 'Milestones');
+  if (body === null) return [];
+
+  const milestones: Milestone[] = [];
+  for (const line of body.split('\n')) {
+    const match = line.match(/^\s*[-*]\s*\[([ xX])\]\s*(.+)$/);
+    if (!match) continue;
+    const done = match[1].toLowerCase() === 'x';
+    const text = match[2].trim();
+    const colon = text.indexOf(':');
+    if (colon === -1) {
+      milestones.push({ name: '', description: text, done });
+    } else {
+      milestones.push({
+        name: text.slice(0, colon).trim(),
+        description: text.slice(colon + 1).trim(),
+        done,
+      });
+    }
+  }
+  return milestones;
+}
+
+/**
+ * Checkbox lines living outside `## Milestones`.
+ *
+ * Scoped parsing is right — a checkbox in `## Description` is prose — but a
+ * re-explored initiative keeps real milestones under a dated heading, and
+ * dropping those without a word is the failure that makes an initiative look
+ * complete when it is not.
+ */
+export function parseOrphanedMilestones(
+  content: string
+): Array<Milestone & { section: string }> {
+  const out: Array<Milestone & { section: string }> = [];
+  let section = '';
+  for (const line of content.split('\n')) {
+    const heading = line.match(/^##\s+(.+?)\s*$/);
+    if (heading) {
+      section = heading[1];
+      continue;
+    }
+    if (section.toLowerCase() === 'milestones') continue;
+    const match = line.match(/^\s*[-*]\s*\[([ xX])\]\s*(.+)$/);
+    if (!match) continue;
+    const done = match[1].toLowerCase() === 'x';
+    const text = match[2].trim();
+    const colon = text.indexOf(':');
+    out.push({
+      name: colon === -1 ? '' : text.slice(0, colon).trim(),
+      description: colon === -1 ? text : text.slice(colon + 1).trim(),
+      done,
+      section,
+    });
+  }
+  return out;
+}
+
+/**
+ * Reads the record ids from a list section.
+ *
+ * Both spellings are read by one parser — a bare `- DS-EXAMPLE` and a
+ * `- DEC-018 — the six are the shipped section list` — because two parsers
+ * for two spellings is how the two spellings start to mean different things.
+ */
+function parseMembership(content: string, heading: string): string[] {
+  const body = sectionBody(content, heading);
+  if (body === null) return [];
+
+  const ids: string[] = [];
+  for (const line of body.split('\n')) {
+    const match = line.match(/^\s*[-*]\s+(\S+)/);
+    if (!match) continue;
+    // A checkbox is a milestone, not a member — guards a section that
+    // mixes the two.
+    if (match[1] === '[' || match[1].startsWith('[')) continue;
+    ids.push(match[1]);
+  }
+  return ids;
+}
+
+/**
+ * Reads every initiative, sorted by filename for a stable order.
+ *
+ * A file with no `id` is skipped rather than failing the read: an initiatives
+ * directory may hold a note, and one unparseable file must not blind the
+ * board to every other.
+ */
+export function readInitiatives(opensprintDir: string): InitiativeEntry[] {
+  const dir = path.join(opensprintDir, 'initiatives');
+  if (!fs.existsSync(dir)) return [];
+
+  const entries: InitiativeEntry[] = [];
+  for (const file of fs.readdirSync(dir).sort()) {
+    if (!file.endsWith('.md')) continue;
+    const filePath = path.join(dir, file);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const fm = parseFrontmatter(content);
+    if (!fm || !fm.id) continue;
+
+    const dependsOn = Array.isArray(fm['depends-on'])
+      ? (fm['depends-on'] as string[])
+      : [];
+
+    entries.push({
+      id: fm.id as string,
+      status: (fm.status as string) || 'active',
+      ...(typeof fm.state === 'string' ? { state: fm.state } : {}),
+      ...(fm.created === undefined ? {} : { created: String(fm.created) }),
+      ...(fm.completed === undefined ? {} : { completed: String(fm.completed) }),
+      dependsOn,
+      milestones: parseMilestones(content),
+      orphanedMilestones: parseOrphanedMilestones(content),
+      driverSpecs: parseMembership(content, 'Driver Specs'),
+      decisions: parseMembership(content, 'ADRs'),
+      path: filePath,
+      stem: file.slice(0, -'.md'.length),
+    });
+  }
+  return entries;
+}
+
+/**
+ * Resolves an initiative by `id` first, then by filename stem.
+ *
+ * Id before filename is what lets DEC-036 date-prefix these files without
+ * touching a single skill: every one of them constructs
+ * `initiatives/<name>.md` today, and resolving by frontmatter makes the
+ * filename a view, exactly as it already is for driver-specs and decisions.
+ *
+ * A duplicate id returns the first in directory order and warns, rather than
+ * silently shadowing. A registry would be a stronger guarantee and
+ * DS-PARALLEL-EXEC makes one impossible across worktrees.
+ */
+export function resolveInitiative(
+  opensprintDir: string,
+  nameOrId: string
+): InitiativeEntry | null {
+  const all = readInitiatives(opensprintDir);
+
+  const byId = all.filter((entry) => entry.id === nameOrId);
+  if (byId.length > 1) {
+    console.warn(
+      `More than one initiative declares id '${nameOrId}': ` +
+        `${byId.map((e) => e.stem).join(', ')}. Using the first.`
+    );
+  }
+  if (byId.length > 0) return byId[0];
+
+  return all.find((entry) => entry.stem === nameOrId) ?? null;
+}
