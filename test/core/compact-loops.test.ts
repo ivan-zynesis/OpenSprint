@@ -187,7 +187,7 @@ describe('rule harvesting', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('deriveOpenLoops', () => {
-    it('defines exactly ten kinds, by explicit list', () => {
+    it('defines exactly eleven kinds, by explicit list', () => {
       expect([...OPEN_LOOP_KINDS]).toEqual([
         // properties of the record graph
         'constraint-unanswered',
@@ -203,6 +203,8 @@ describe('rule harvesting', () => {
         'bar-without-neighbour',
         // a record its hat's sections cannot select
         'record-without-objective',
+        // an approach with no decision descending from it
+        'strategy-unimplemented',
       ]);
     });
 

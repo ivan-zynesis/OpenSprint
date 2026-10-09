@@ -31,6 +31,7 @@ export const OPEN_LOOP_KINDS = [
   'measure-unexposed',
   'bar-without-neighbour',
   'record-without-objective',
+  'strategy-unimplemented',
 ] as const;
 
 /**
@@ -66,6 +67,45 @@ export { hasMeasures } from './measures.js';
 
 function isDead(status: string): boolean {
   return status === 'superseded' || status === 'deprecated';
+}
+
+/**
+ * Every driver-spec reachable from an active decision, transitively.
+ *
+ * Descent is transitive for the same reason constraint coverage is: a
+ * strategy is frequently answered by a decision that is itself the parent of
+ * the one doing the work, and requiring direct descent would report gaps
+ * that are not gaps.
+ *
+ * Guards against a malformed `depends-on` cycle with a visited set, and a
+ * dangling reference contributes nothing rather than failing the walk — the
+ * same treatment defaultHatsForDecision gives the equivalent walk.
+ */
+function driverSpecsReachedByDecisions(
+  driverSpecIds: ReadonlySet<string>,
+  activeDecisions: readonly SourcedDecision[]
+): Set<string> {
+  const byDecision = new Map<string, readonly string[]>();
+  for (const decision of activeDecisions) byDecision.set(decision.id, decision.dependsOn);
+
+  const reached = new Set<string>();
+  for (const decision of activeDecisions) {
+    const seen = new Set<string>();
+    const queue = [...decision.dependsOn];
+    while (queue.length > 0) {
+      const id = queue.shift() as string;
+      if (seen.has(id)) continue;
+      seen.add(id);
+
+      if (driverSpecIds.has(id)) {
+        reached.add(id);
+        continue; // driver specs are roots
+      }
+      const parents = byDecision.get(id);
+      if (parents) queue.push(...parents);
+    }
+  }
+  return reached;
 }
 
 /**
@@ -190,6 +230,31 @@ export function deriveOpenLoops(
       record: record.id,
       hats,
       detail: `No role declared. ${declaring.join(', ')} accepts: ${accepted.join(', ')}.`,
+    });
+  }
+
+  // ── a strategy nobody implemented (DS-STRATEGY-ALTITUDE, DEC-020)
+  //
+  // constraint-unanswered is satisfied by any child decision, even one
+  // implementing something else, and fires on every driver-spec so a
+  // strategy is lost among goals and objectives. Only a strategy promises an
+  // approach that something should build.
+  //
+  // No hat is named here. DEC-028 makes every decision owned by dev or
+  // devops, so any descending decision is an implementing one — and
+  // DS-SQUAD-HATS makes the hat set a property of the project, so
+  // hardcoding `maintainer` would exempt a project's own hats.
+  const driverSpecIds = new Set(driverSpecs.map((spec) => spec.id));
+  const implemented = driverSpecsReachedByDecisions(driverSpecIds, activeDecisions);
+  for (const spec of driverSpecs) {
+    if (!isActive(spec.status)) continue;
+    if (!(spec.role ?? []).includes('strategy')) continue;
+    if (implemented.has(spec.id)) continue;
+    loops.push({
+      kind: 'strategy-unimplemented',
+      record: spec.id,
+      hats: spec.hats ?? [],
+      detail: 'States an approach with no decision descending from it. Intent nobody built.',
     });
   }
 

@@ -82,7 +82,7 @@ describe('OPSP compact skill', () => {
     it('names each hat shape rather than one shared set', () => {
       const i = instructions();
       expect(i).toMatch(/objective · goals · strategies · measures/);
-      expect(i).toMatch(/bars · posture · evidence · exposure/);
+      expect(i).toMatch(/posture · security & access/);
       expect(i).toMatch(/tech-stack · runtime-topology · entity-schema/);
       expect(i).toMatch(/infra-architecture · gitops/);
     });

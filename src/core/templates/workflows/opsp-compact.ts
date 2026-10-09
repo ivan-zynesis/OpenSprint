@@ -171,31 +171,73 @@ whether the goals landed.
 There is **no charter and no constraints section**. What a charter would have said is carried by
 the objective; a constraint is either a goal, or a strategy describing how it is worked around.
 
-### maintainer — positions, and what they cost
+### maintainer — seven inherited objectives, and what each costs
 
-\`bars · posture · evidence · exposure · open-loops\`
+\`posture · security & access · isolation & confidentiality · privacy, retention & legal ·
+integrity & correctness · change & quality · availability & continuity · cost & budget ·
+open-loops\`
 
-What this hat controls is always a **position on a spectrum**, and moving along one axis costs
-something on another. So a bar is never just a number:
+This hat is the **technical product manager**: the same OGSM as product, with one difference that
+carries everything — its objectives are **inherited, not discovered**. Every software project
+worries about the same seven things, which is why the accountability spun off from product.
+
+**posture comes first, above the grid.** It is the hat's own statement of what standard the
+project holds itself to at all, which is upstream of every objective rather than one of them. A
+per-measure posture is a deviation from it.
+
+Each objective then carries a **goal**, a **strategy**, and a **measure**:
+
+- **goal** — the outcome committed to in that domain, stated so you could tell whether it landed
+- **strategy** — the position taken. **High level only.**
+- **measure** — the benchmark, standard or clause, with its anatomy beneath it
+
+**An objective with nothing recorded still renders.** An empty row is the most useful cell in the
+view — it says nobody has stated what this system does about that concern. Never omit one.
+
+#### The strategy altitude
+
+A strategy states a **position**, never a **mechanism**. Domain know-how belongs to \`dev\` and
+\`devops\`, and the audience for this view is senior management.
+
+So a strategy cell renders the position **plus a citation** to the \`dev\`/\`devops\` decisions that
+implement it — and never describes what they chose:
 
 \`\`\`
-<dimension>          the axis, and why it is an axis
-  chosen:            the point, and the scope it applies to
-  traded for:        what was given up to sit here
-  neighbour:         what the next point along would cost
+credentials never live in the repository          <- the position
+  → DEC-SECRET-STORE (dev)                        <- where the mechanism lives
+\`\`\`
+
+This needs no new rule to enforce. A mechanism detail belongs to a decision this hat does not own,
+so there is **no record you may cite for it** — and every claim must cite one. If you cannot write
+the sentence with a citation, it does not belong in this view.
+
+Where a strategy has nothing to cite, **say so**. Do not invent an implementation; the harvest
+reports the same gap as \`strategy-unimplemented\`.
+
+#### The measure anatomy
+
+A measure has four parts. The **bar** is written when the work is proposed; **posture**,
+**evidence** and **exposure** are written when it is attested. Render only what the record carries:
+
+\`\`\`
+bar:        dimension — the axis, and why it is an axis
+            chosen    — the point, and the scope it applies to
+            traded for— what was given up to sit here
+            neighbour — what the next point along would cost
+posture:    was the bar met — or, where no bar is set, the honest position
+evidence:   what asserts it
+exposure:   what remains at risk, and what is planned to close it
 \`\`\`
 
 A bar stated without its trade reads like a law of nature when it was a purchase somebody made,
 and the receipt is what a maintainer picking up the hat actually needs. **If the records do not
-say what it cost, say the trade is unrecorded** — do not invent it.
-
-- **posture** — where the project *actually* sits against its bars, including deliberate gaps.
-  A deliberate gap cites the record that makes it deliberate, and its expiry where recorded.
-- **evidence** — what proves each bar, and whether the proof can be trusted.
-- **exposure** — what a breach costs and who it reaches.
+say what it cost, say the trade is unrecorded** — do not invent it. The same applies to a measure
+with no posture: an unattested measure is **decided, not true**, and must not be written in the
+present tense.
 
 **Cost is an axis of every bar, not a section.** A cost section would describe spend; a cost
-dimension describes the decision.
+dimension describes the decision. \`cost & budget\` as an objective is what the system costs to run
+and maintain — the business model belongs to product.
 
 ### dev and devops — describe the system
 
@@ -219,7 +261,7 @@ The boundary exists so an agent working on application code need not load pipeli
 
 ### open-loops — every hat has one
 
-Report **only** what the plan reported. The harvest supplies seven kinds:
+Report **only** what the plan reported. The harvest supplies eleven kinds:
 
 | Kind | Means |
 |---|---|
@@ -229,7 +271,12 @@ Report **only** what the plan reported. The harvest supplies seven kinds:
 | \`decision-unguarded\` | a decision no rule cites |
 | \`rule-guards-dead-record\` | a rule still guarding something superseded |
 | \`decision-on-superseded\` | a decision resting on an ancestor that moved |
-| \`record-unclassified\` | a record with no role, in a hat that declares roles |
+| \`record-unclassified\` | a driver-spec with no role, in a hat that declares roles |
+| \`measure-unasserted\` | a measure with no \`### Evidence\` — an aspiration |
+| \`measure-unexposed\` | a measure with no \`### Exposure\` |
+| \`bar-without-neighbour\` | a bar that does not state the position not taken |
+| \`record-without-objective\` | a record its hat's sections cannot select |
+| \`strategy-unimplemented\` | an approach with no decision descending from it |
 
 **Do not infer a missing decision or a missing test from a record's content.** An invented gap
 costs someone a triage conversation about nothing, and the backlog is only useful while everything

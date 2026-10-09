@@ -559,6 +559,94 @@ describe('per-hat classification', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
+  // strategy-unimplemented (DS-STRATEGY-ALTITUDE, DEC-020)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('strategy-unimplemented', () => {
+    const rolesFor = () => ['goal', 'strategy'];
+    const loops = () =>
+      deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
+    const found = () => loops().filter((l) => l.kind === 'strategy-unimplemented').map((l) => l.record);
+
+    const decWithDeps = (id: string, deps: string[], hats = '[dev]') =>
+      fs.writeFileSync(
+        path.join(sprint(), 'ADRs', `${id}.md`),
+        `---\nid: ${id}\nstatus: accepted\ncreated: 2026-01-01\ndepth: 0\nhats: ${hats}\n` +
+          `depends-on:\n${deps.map((d) => `  - ${d}`).join('\n')}\n---\n\n## Question\n\nQ\n`
+      );
+
+    it('is among the loop kinds', () => {
+      expect([...OPEN_LOOP_KINDS]).toContain('strategy-unimplemented');
+    });
+
+    it('fires for a strategy with nothing descending from it', () => {
+      spec('DS-S', { role: 'strategy' });
+      expect(found()).toEqual(['DS-S']);
+    });
+
+    it('does not fire when a decision names it directly', () => {
+      spec('DS-S', { role: 'strategy' });
+      decWithDeps('DEC-001', ['DS-S']);
+      expect(found()).toEqual([]);
+    });
+
+    it('does not fire when a decision reaches it transitively', () => {
+      spec('DS-S', { role: 'strategy' });
+      decWithDeps('DEC-001', ['DS-S']);
+      decWithDeps('DEC-002', ['DEC-001']);
+      expect(found()).toEqual([]);
+    });
+
+    it('does not fire for a record that is not a strategy', () => {
+      spec('DS-G', { role: 'goal' });
+      expect(found()).toEqual([]);
+    });
+
+    it('fires once for a record declaring strategy among several roles', () => {
+      spec('DS-S', { role: '[goal, strategy]' });
+      expect(found()).toEqual(['DS-S']);
+    });
+
+    it('ignores superseded strategies', () => {
+      fs.writeFileSync(
+        path.join(sprint(), 'driver-specs', 'DS-OLD.md'),
+        '---\nid: DS-OLD\ntype: product\nstatus: superseded\ncreated: 2026-01-01\nhats: [product]\nrole: strategy\n---\n\nB\n'
+      );
+      expect(found()).toEqual([]);
+    });
+
+    it('does not count a superseded decision as an implementation', () => {
+      spec('DS-S', { role: 'strategy' });
+      fs.writeFileSync(
+        path.join(sprint(), 'ADRs', 'DEC-001.md'),
+        '---\nid: DEC-001\nstatus: superseded\ncreated: 2026-01-01\ndepth: 0\nhats: [dev]\ndepends-on:\n  - DS-S\n---\n\n## Question\n\nQ\n'
+      );
+      expect(found()).toEqual(['DS-S']);
+    });
+
+    it('terminates on a depends-on cycle', () => {
+      spec('DS-S', { role: 'strategy' });
+      decWithDeps('DEC-001', ['DEC-002']);
+      decWithDeps('DEC-002', ['DEC-001']);
+      expect(() => found()).not.toThrow();
+      expect(found()).toEqual(['DS-S']);
+    });
+
+    it('survives a dangling depends-on reference', () => {
+      spec('DS-S', { role: 'strategy' });
+      decWithDeps('DEC-001', ['DEC-NOPE', 'DS-S']);
+      expect(found()).toEqual([]);
+    });
+
+    it('names no hat — a strategy in any hat is checked', () => {
+      spec('DS-A', { role: 'strategy', hats: '[product]' });
+      spec('DS-B', { role: 'strategy', hats: '[maintainer]' });
+      spec('DS-C', { role: 'strategy', hats: '[devops]' });
+      expect(found().sort()).toEqual(['DS-A', 'DS-B', 'DS-C']);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
   // record-without-objective
   // ═══════════════════════════════════════════════════════════
 
