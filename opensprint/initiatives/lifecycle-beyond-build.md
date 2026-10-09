@@ -158,7 +158,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] measure-anatomy: Optional `### Bar/Posture/Evidence/Exposure` sub-blocks under `## Measures`; migrate DS-HIGH-IMPACT-OPS and DS-BACKWARD-COMPAT; harvest `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`
 - [x] strategy-altitude: Maintainer strategies render position plus citation; harvest `strategy-unimplemented`
 - [x] initiative-parser: The first deterministic half for initiatives — frontmatter, milestones, membership
-- [ ] initiative-state: The OGSM state machine, plus the state-versus-content check
+- [x] initiative-state: The OGSM state machine, plus the state-versus-content check
 - [ ] explore-persists: `/opsp:explore` creates and updates the initiative at `state: exploring`
 - [ ] board-view: Compile `BOARD.md` — doing, next, roadmap — from record state
 - [ ] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
@@ -194,6 +194,14 @@ Sixteen strategies on this repository, one gap: `DS-BIG-PICTURE`, which `squad/p
 `src/core/initiatives.ts` gives initiatives a deterministic half for the first time: frontmatter, milestones, membership, and resolution by frontmatter `id` before filename — which is what lets `DEC-036` date-prefix these files without touching a single skill. All four initiatives here parse, including the two predating the `state` field.
 
 **Discovered:** `/opsp:reexplore` appends milestones under a dated heading rather than into `## Milestones`. `compact-surrogate` keeps `documentation-rewrite` under `## Added at re-exploration, 2026-09-27`, so strict scoping would have dropped a real milestone silently. Added `orphanedMilestones` carrying the section each was found under; the real fix belongs in re-exploration's output format.
+
+**5/10 — `initiative-state`** · opsx change `2026-10-09-initiative-state`
+
+The OGSM state machine, with `declined` from `DEC-035`. The check reports **contradictions** rather than comparing against a derived state — an initiative legitimately sits between stages, and `DEC-024` rejected full derivation one layer up for the same reason. Four contradiction rules: exploring with work done, attested or completed with work outstanding, proposed with nothing proposed, building with nothing to build.
+
+`attested` and `completed` are deliberately not distinguished from content, because nothing separates "every milestone done" from "every bar attested" until milestone 9. The check records the limitation rather than guessing.
+
+No state problems on this repository — both older initiatives are `completed` and correctly silent. The check was confirmed to fire by test rather than inferred from the quiet result.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
