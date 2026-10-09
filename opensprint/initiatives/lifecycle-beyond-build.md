@@ -157,7 +157,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] maintainer-objectives: Ship the seven as the maintainer hat's default section list; add the `objective` selector; widen `role` to a list; exempt decisions from role classification per DEC-028
 - [x] measure-anatomy: Optional `### Bar/Posture/Evidence/Exposure` sub-blocks under `## Measures`; migrate DS-HIGH-IMPACT-OPS and DS-BACKWARD-COMPAT; harvest `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`
 - [x] strategy-altitude: Maintainer strategies render position plus citation; harvest `strategy-unimplemented`
-- [ ] initiative-parser: The first deterministic half for initiatives — frontmatter, milestones, membership
+- [x] initiative-parser: The first deterministic half for initiatives — frontmatter, milestones, membership
 - [ ] initiative-state: The OGSM state machine, plus the state-versus-content check
 - [ ] explore-persists: `/opsp:explore` creates and updates the initiative at `state: exploring`
 - [ ] board-view: Compile `BOARD.md` — doing, next, roadmap — from record state
@@ -188,6 +188,12 @@ The smallest milestone, because `DEC-020` was right that the altitude needs no n
 Sixteen strategies on this repository, one gap: `DS-BIG-PICTURE`, which `squad/product.md` had already noticed by hand. The rule is not over-reporting.
 
 **Discovered:** the skill template still documented `bars · posture · evidence · exposure` and a seven-kind loop table — milestones 1 and 2 changed the engine and left the rendering contract behind. Rewritten: the grid, the posture preamble, the strategy altitude, the measure anatomy, eleven loop kinds.
+
+**4/10 — `initiative-parser`** · opsx change `2026-10-09-initiative-parser`
+
+`src/core/initiatives.ts` gives initiatives a deterministic half for the first time: frontmatter, milestones, membership, and resolution by frontmatter `id` before filename — which is what lets `DEC-036` date-prefix these files without touching a single skill. All four initiatives here parse, including the two predating the `state` field.
+
+**Discovered:** `/opsp:reexplore` appends milestones under a dated heading rather than into `## Milestones`. `compact-surrogate` keeps `documentation-rewrite` under `## Added at re-exploration, 2026-09-27`, so strict scoping would have dropped a real milestone silently. Added `orphanedMilestones` carrying the section each was found under; the real fix belongs in re-exploration's output format.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
