@@ -8,6 +8,11 @@ import {
   parseMilestones,
   parseOrphanedMilestones,
   sectionBody,
+  INITIATIVE_STATES,
+  isTerminalState,
+  stateIndex,
+  checkInitiativeState,
+  type InitiativeEntry,
 } from '../../src/core/initiatives.js';
 
 /**
@@ -193,6 +198,120 @@ describe('initiatives', () => {
       initiative('dup', { file: 'b-dup.md' });
       expect(resolveInitiative(root, 'dup')?.stem).toBe('a-dup');
       expect(warn.mock.calls.flat().join(' ')).toContain('dup');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // State (DEC-024) — declared by the tool, checked by code
+  // ═══════════════════════════════════════════════════════════
+
+  describe('state vocabulary', () => {
+    it('is an explicit ordered list', () => {
+      expect([...INITIATIVE_STATES]).toEqual([
+        'exploring',
+        'proposed',
+        'building',
+        'attested',
+        'completed',
+        'declined',
+      ]);
+    });
+
+    it('marks completed and declined terminal', () => {
+      expect(isTerminalState('completed')).toBe(true);
+      expect(isTerminalState('declined')).toBe(true);
+      expect(isTerminalState('building')).toBe(false);
+    });
+
+    it('orders the lifecycle but not declined', () => {
+      expect(stateIndex('exploring')).toBeLessThan(stateIndex('proposed'));
+      expect(stateIndex('proposed')).toBeLessThan(stateIndex('building'));
+      expect(stateIndex('declined')).toBe(-1);
+      expect(stateIndex('nonsense')).toBe(-1);
+    });
+  });
+
+  describe('checkInitiativeState', () => {
+    const entry = (over: Partial<InitiativeEntry>): InitiativeEntry => ({
+      id: 'i',
+      status: 'active',
+      dependsOn: [],
+      milestones: [],
+      orphanedMilestones: [],
+      driverSpecs: [],
+      decisions: [],
+      path: '/tmp/i.md',
+      stem: 'i',
+      ...over,
+    });
+    const ms = (done: number, total: number) =>
+      Array.from({ length: total }, (_, k) => ({
+        name: `m${k}`,
+        description: 'd',
+        done: k < done,
+      }));
+    const kinds = (e: InitiativeEntry) => checkInitiativeState(e).map((p) => p.kind);
+
+    it('reports a state outside the vocabulary, naming the accepted values', () => {
+      const [p] = checkInitiativeState(entry({ state: 'halfway' }));
+      expect(p.kind).toBe('state-unknown');
+      expect(p.detail).toContain('exploring');
+    });
+
+    it('reports exploring with work already done', () => {
+      expect(kinds(entry({ state: 'exploring', milestones: ms(1, 3) }))).toEqual(['state-contradicted']);
+    });
+
+    it('allows exploring with nothing done', () => {
+      expect(kinds(entry({ state: 'exploring', milestones: ms(0, 3) }))).toEqual([]);
+    });
+
+    it('reports completed with work outstanding', () => {
+      expect(kinds(entry({ state: 'completed', milestones: ms(2, 3) }))).toEqual(['state-contradicted']);
+    });
+
+    it('reports attested with work outstanding', () => {
+      expect(kinds(entry({ state: 'attested', milestones: ms(2, 3) }))).toEqual(['state-contradicted']);
+    });
+
+    it('does not distinguish attested from completed when all milestones are done', () => {
+      expect(kinds(entry({ state: 'attested', milestones: ms(3, 3) }))).toEqual([]);
+      expect(kinds(entry({ state: 'completed', milestones: ms(3, 3) }))).toEqual([]);
+    });
+
+    it('reports proposed with nothing proposed', () => {
+      expect(kinds(entry({ state: 'proposed' }))).toEqual(['state-contradicted']);
+    });
+
+    it('allows proposed when it claims driver-specs only', () => {
+      expect(kinds(entry({ state: 'proposed', driverSpecs: ['DS-A'] }))).toEqual([]);
+    });
+
+    it('reports building with no milestones', () => {
+      expect(kinds(entry({ state: 'building', decisions: ['DEC-1'] }))).toEqual(['state-contradicted']);
+    });
+
+    it('allows building part-way through', () => {
+      expect(kinds(entry({ state: 'building', milestones: ms(1, 3) }))).toEqual([]);
+    });
+
+    it('never contradicts declined, whatever the content says', () => {
+      expect(kinds(entry({ state: 'declined', milestones: ms(2, 3) }))).toEqual([]);
+      expect(kinds(entry({ state: 'declined' }))).toEqual([]);
+    });
+
+    it('reports an active initiative declaring no state', () => {
+      expect(kinds(entry({}))).toEqual(['state-undeclared']);
+    });
+
+    it('stays silent about a completed initiative declaring no state', () => {
+      expect(kinds(entry({ status: 'completed' }))).toEqual([]);
+    });
+
+    it('reads state from a real file', () => {
+      write('a.md', '---\nid: a\nstatus: active\nstate: exploring\n---\n\n## Milestones\n\n- [x] m: done\n');
+      const [i] = readInitiatives(root);
+      expect(checkInitiativeState(i).map((p) => p.kind)).toEqual(['state-contradicted']);
     });
   });
 });
