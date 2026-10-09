@@ -207,6 +207,11 @@ export const DEFAULT_SECTIONS_BY_HAT: Readonly<Record<string, readonly SectionDe
   // renders: an empty row is the finding, which is DS-FULL-COVERAGE made
   // positional rather than harvested.
   maintainer: [
+    // The hat's own posture, above the grid: what standard we hold ourselves
+    // to at all, which is upstream of every objective rather than one of
+    // them. Per-measure posture is a sub-block under `## Measures`; this is
+    // the hat-level statement those deviate from.
+    { name: 'posture', inputs: 'driver-specs' as SectionInputKind, roles: ['posture'] },
     ...MAINTAINER_OBJECTIVES.map((objective) => ({
       name: objective.name,
       heading: objective.heading,

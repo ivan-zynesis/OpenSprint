@@ -106,8 +106,12 @@ function scan(projectRoot: string): Scan {
 function openLoopsFor(projectRoot: string, s: Scan): OpenLoop[] {
   const ids = [...s.driverSpecs.map((r) => r.id), ...s.decisions.map((r) => r.id)];
   const index = buildRuleIndex(projectRoot, ids, resolveRuleGlobs(projectRoot));
-  return deriveOpenLoops(s.driverSpecs, s.decisions, index, (hat) =>
-    resolveHatRoles(projectRoot, hat)
+  return deriveOpenLoops(
+    s.driverSpecs,
+    s.decisions,
+    index,
+    (hat) => resolveHatRoles(projectRoot, hat),
+    (hat) => resolveHatSections(projectRoot, hat)
   );
 }
 

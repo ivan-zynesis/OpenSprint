@@ -50,16 +50,17 @@ describe('per-hat classification', () => {
 
   const spec = (
     id: string,
-    opts: { hats?: string; role?: string; deps?: string[]; objective?: string } = {}
+    opts: { hats?: string; role?: string; deps?: string[]; objective?: string; body?: string } = {}
   ) => {
-    const { hats = '[product]', role, deps, objective } = opts;
+    const { hats = '[product]', role, deps, objective, body } = opts;
     fs.writeFileSync(
       path.join(sprint(), 'driver-specs', `${id}.md`),
       `---\nid: ${id}\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: ${hats}` +
         (role ? `\nrole: ${role}` : '') +
         (objective ? `\nobjective: ${objective}` : '') +
         (deps ? `\ndepends-on:\n${deps.map((d) => `  - ${d}`).join('\n')}` : '') +
-        `\n---\n\nBody ${id}\n`
+        `\n---\n\nBody ${id}\n` +
+        (body ? `\n${body}\n` : '')
     );
   };
   const dec = (id: string, hats = '[dev]', role?: string) =>
@@ -85,9 +86,14 @@ describe('per-hat classification', () => {
       expect([...DEFAULT_ROLES.product]).not.toContain('measure');
     });
 
-    it('gives maintainer goal and strategy, its objectives being sections not records', () => {
-      expect([...DEFAULT_ROLES.maintainer]).toEqual(['goal', 'strategy']);
+    it('gives maintainer goal, strategy and posture — its objectives being sections not records', () => {
+      expect([...DEFAULT_ROLES.maintainer]).toEqual(['goal', 'strategy', 'posture']);
+      // No `objective` role: the seven are the hat's shape, so nothing is
+      // ever filed as one (DEC-018).
       expect([...DEFAULT_ROLES.maintainer]).not.toContain('objective');
+      // `posture` is the hat-level statement rendered above the grid, not
+      // the per-measure sub-block of the same name.
+      expect([...DEFAULT_ROLES.maintainer]).toContain('posture');
     });
 
     it('gives dev and devops no roles — they run no framework to classify against', () => {
@@ -471,6 +477,139 @@ describe('per-hat classification', () => {
     it('does not fire for a record whose role list is present', () => {
       spec('DS-A', { role: '[goal, strategy]' });
       expect(loops().filter((l) => l.kind === 'record-unclassified')).toEqual([]);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // The ex-post half of a measure (DS-MEASURE-ANATOMY)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('measure anatomy loops', () => {
+    const rolesFor = () => ['goal', 'strategy'];
+    const loops = () =>
+      deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
+    const kinds = (kind: string) => loops().filter((l) => l.kind === kind).map((l) => l.record);
+
+    it('the three kinds are registered', () => {
+      for (const kind of ['measure-unasserted', 'measure-unexposed', 'bar-without-neighbour']) {
+        expect([...OPEN_LOOP_KINDS]).toContain(kind);
+      }
+    });
+
+    it('measure-unasserted fires on measures with no evidence', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
+      expect(kinds('measure-unasserted')).toEqual(['DS-A']);
+    });
+
+    it('measure-unasserted does not fire when evidence is present', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Evidence\n\na coverage report' });
+      expect(kinds('measure-unasserted')).toEqual([]);
+    });
+
+    it('measure-unasserted does not inspect whether the evidence is adequate', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Evidence\n\nvibes' });
+      expect(kinds('measure-unasserted')).toEqual([]);
+    });
+
+    it('neither fires for a record with no measures at all', () => {
+      spec('DS-A', { role: 'goal' });
+      expect(kinds('measure-unasserted')).toEqual([]);
+      expect(kinds('measure-unexposed')).toEqual([]);
+      // constraint-unmeasurable is the loop that covers that case
+      expect(kinds('constraint-unmeasurable')).toEqual(['DS-A']);
+    });
+
+    it('measure-unexposed fires on measures with no exposure', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Evidence\n\ne' });
+      expect(kinds('measure-unexposed')).toEqual(['DS-A']);
+    });
+
+    it('measure-unexposed does not fire when exposure is present', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Exposure\n\nunbounded' });
+      expect(kinds('measure-unexposed')).toEqual([]);
+    });
+
+    it('bar-without-neighbour fires on a bar that omits the label', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: '## Measures\n\n- x\n\n### Bar\n\n- **chosen**: fully manual',
+      });
+      expect(kinds('bar-without-neighbour')).toEqual(['DS-A']);
+    });
+
+    it('a neighbour stated as unrecorded satisfies the rule', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: '## Measures\n\n- x\n\n### Bar\n\n- **chosen**: fully manual\n- **neighbour**: unrecorded',
+      });
+      expect(kinds('bar-without-neighbour')).toEqual([]);
+    });
+
+    it('bar-without-neighbour does not fire for a record with no bar', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
+      expect(kinds('bar-without-neighbour')).toEqual([]);
+    });
+
+    it('a record with measures and no sub-blocks behaves as before, plus the two new gaps', () => {
+      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
+      expect(kinds('constraint-unmeasurable')).toEqual([]);
+      expect(kinds('measure-unasserted')).toEqual(['DS-A']);
+      expect(kinds('measure-unexposed')).toEqual(['DS-A']);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // record-without-objective
+  // ═══════════════════════════════════════════════════════════
+
+  describe('record-without-objective', () => {
+    const rolesFor = () => ['goal', 'strategy', 'posture'];
+    const loops = (sectionsFor: (h: string) => any[]) =>
+      deriveOpenLoops(
+        specs(),
+        decs(),
+        buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)),
+        rolesFor,
+        sectionsFor as never
+      );
+    const kinds = (sectionsFor: (h: string) => any[]) =>
+      loops(sectionsFor).filter((l) => l.kind === 'record-without-objective').map((l) => l.record);
+
+    const objectiveOnly = (h: string) =>
+      h === 'product'
+        ? [{ name: 'security-access', inputs: 'driver-specs', roles: ['goal'], objective: 'security-access' }]
+        : [];
+    const withGeneralSection = (h: string) =>
+      h === 'product'
+        ? [
+            { name: 'posture', inputs: 'driver-specs', roles: ['posture'] },
+            { name: 'security-access', inputs: 'driver-specs', roles: ['goal'], objective: 'security-access' },
+          ]
+        : [];
+
+    it('fires when every section of the hat filters on objective', () => {
+      spec('DS-A', { role: 'goal' });
+      expect(kinds(objectiveOnly)).toEqual(['DS-A']);
+    });
+
+    it('does not fire when the record declares an objective', () => {
+      spec('DS-A', { role: 'goal', objective: 'security-access' });
+      expect(kinds(objectiveOnly)).toEqual([]);
+    });
+
+    it('does not fire when an unfiltered section can take the record', () => {
+      spec('DS-A', { role: 'posture' });
+      expect(kinds(withGeneralSection)).toEqual([]);
+    });
+
+    it('still fires when the unfiltered section\'s roles do not accept the record', () => {
+      spec('DS-A', { role: 'goal' });
+      expect(kinds(withGeneralSection)).toEqual(['DS-A']);
+    });
+
+    it('does not fire when the caller supplies no sections', () => {
+      spec('DS-A', { role: 'goal' });
+      expect(kinds(() => [])).toEqual([]);
     });
   });
 

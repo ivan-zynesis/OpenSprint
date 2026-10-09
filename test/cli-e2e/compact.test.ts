@@ -19,7 +19,7 @@ describe('opensprint compact (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
@@ -80,8 +80,9 @@ describe('opensprint compact (e2e)', () => {
     expect(fs.existsSync(manifest())).toBe(true);
     const parsed = JSON.parse(fs.readFileSync(manifest(), 'utf-8'));
     expect(parsed.version).toBe(1);
-    // Shapes differ per hat now: product 5, maintainer 5, dev 4, devops 3.
-    expect(parsed.entries.length).toBe(17);
+    // Shapes differ per hat: product 5, maintainer 9 (posture + seven
+    // inherited objectives + open-loops, DEC-018), dev 4, devops 3.
+    expect(parsed.entries.length).toBe(21);
   });
 
   it('seal reports a hat that has records but no view', async () => {
@@ -170,7 +171,7 @@ describe('opensprint compact loops (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),

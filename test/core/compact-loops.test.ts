@@ -187,8 +187,9 @@ describe('rule harvesting', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('deriveOpenLoops', () => {
-    it('defines exactly seven kinds, by explicit list', () => {
+    it('defines exactly ten kinds, by explicit list', () => {
       expect([...OPEN_LOOP_KINDS]).toEqual([
+        // properties of the record graph
         'constraint-unanswered',
         'constraint-unasserted',
         'decision-unguarded',
@@ -196,6 +197,12 @@ describe('rule harvesting', () => {
         'decision-on-superseded',
         'record-unclassified',
         'constraint-unmeasurable',
+        // properties of a measure — the ex-post half (DS-MEASURE-ANATOMY)
+        'measure-unasserted',
+        'measure-unexposed',
+        'bar-without-neighbour',
+        // a record its hat's sections cannot select
+        'record-without-objective',
       ]);
     });
 

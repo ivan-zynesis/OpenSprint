@@ -75,7 +75,7 @@ export const DEFAULT_ROLES: Readonly<Record<string, readonly string[]>> = {
   // Maintainer runs the same OGSM, but its objectives are inherited rather
   // than discovered, so they are sections rather than records (DEC-018).
   // `objective` is therefore absent here: nothing is filed as one.
-  maintainer: ['goal', 'strategy'],
+  maintainer: ['goal', 'strategy', 'posture'],
   dev: [],
   devops: [],
 };

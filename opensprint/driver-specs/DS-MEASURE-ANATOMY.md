@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 hats: [product, maintainer]
 role: strategy
+objective: change-quality
 depends-on:
   - DS-FULL-COVERAGE
 ---

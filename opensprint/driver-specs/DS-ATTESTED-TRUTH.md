@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 hats: [product, maintainer]
 role: goal
+objective: integrity-correctness
 depends-on:
   - DS-DOCUMENTATION-AS-OUTPUT
 ---

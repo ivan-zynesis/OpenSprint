@@ -13,6 +13,8 @@
 
 import type { SourcedDriverSpec, SourcedDecision } from './records.js';
 import type { RuleIndex } from './rules.js';
+import { hasMeasures, parseMeasureAnatomy, statesNeighbour } from './measures.js';
+import type { SectionDef } from './sections.js';
 
 export const OPEN_LOOP_KINDS = [
   'constraint-unanswered',
@@ -22,6 +24,13 @@ export const OPEN_LOOP_KINDS = [
   'decision-on-superseded',
   'record-unclassified',
   'constraint-unmeasurable',
+  // The ex-post half of a measure (DS-MEASURE-ANATOMY). Everything above
+  // this line is a property of the record graph; these three are the first
+  // that are properties of a measure.
+  'measure-unasserted',
+  'measure-unexposed',
+  'bar-without-neighbour',
+  'record-without-objective',
 ] as const;
 
 /**
@@ -51,22 +60,9 @@ function isActive(status: string): boolean {
   return status === 'active' || status === 'accepted';
 }
 
-/**
- * Whether a record's body carries a populated `## Measures` section.
- *
- * A heading with nothing beneath it does not count: an empty section is the
- * shape of an answer without the answer, and reporting it is the whole point.
- */
-export function hasMeasures(content: string): boolean {
-  const match = content.match(/^##\s+Measures\s*$/m);
-  if (!match || match.index === undefined) return false;
-  const after = content.slice(match.index + match[0].length);
-  const next = after.search(/^##\s/m);
-  const body = (next === -1 ? after : after.slice(0, next))
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .trim();
-  return body.length > 0;
-}
+// `hasMeasures` now lives in measures.ts, which owns the section and
+// everything beneath it. Re-exported so existing importers are unaffected.
+export { hasMeasures } from './measures.js';
 
 function isDead(status: string): boolean {
   return status === 'superseded' || status === 'deprecated';
@@ -87,7 +83,10 @@ export function deriveOpenLoops(
   driverSpecs: readonly SourcedDriverSpec[],
   decisions: readonly SourcedDecision[],
   index: RuleIndex,
-  rolesFor: (hat: string) => readonly string[] = () => []
+  rolesFor: (hat: string) => readonly string[] = () => [],
+  // Defaults to none, so a caller that does not supply sections sees no
+  // record-without-objective loops rather than spurious ones.
+  sectionsFor: (hat: string) => readonly SectionDef[] = () => []
 ): OpenLoop[] {
   const loops: OpenLoop[] = [];
   const activeDecisions = decisions.filter((d) => isActive(d.status));
@@ -192,6 +191,91 @@ export function deriveOpenLoops(
       hats,
       detail: `No role declared. ${declaring.join(', ')} accepts: ${accepted.join(', ')}.`,
     });
+  }
+
+  // ── a record its hat's sections cannot select
+  //
+  // Where every section of a hat filters on `objective`, a record declaring
+  // none is invisible in that hat's view — not reported, not rendered,
+  // silently dropped. This was found the hard way: five records cc'd to
+  // `maintainer` with valid roles vanished from the grid because they
+  // carried no objective.
+  //
+  // Fires only where the hat leaves no unfiltered section to catch them, so
+  // a hat with a general section (as `maintainer` has in `posture`) only
+  // reports records that section's roles do not accept either.
+  for (const record of driverSpecs) {
+    if (!isActive(record.status)) continue;
+    if (record.objective !== undefined) continue;
+    const roles = record.role ?? [];
+
+    for (const hat of record.hats ?? []) {
+      const sections = sectionsFor(hat);
+      if (sections.length === 0) continue;
+      // A section with no objective filter can still take this record,
+      // provided its roles accept it.
+      const reachable = sections.some(
+        (section) =>
+          section.objective === undefined &&
+          (section.roles === undefined ||
+            section.roles.length === 0 ||
+            roles.some((role) => section.roles?.includes(role)))
+      );
+      if (reachable) continue;
+      loops.push({
+        kind: 'record-without-objective',
+        record: record.id,
+        hats: record.hats ?? [],
+        detail: `No objective declared, and every section of '${hat}' that could take it filters on one. The record is invisible in that view.`,
+      });
+    }
+  }
+
+  // ── the ex-post half of a measure (DS-MEASURE-ANATOMY)
+  //
+  // These three ask about an outcome rather than about the record graph.
+  // Nothing before this point could: the harvest could report that a
+  // constraint had no measure, never that a measure went unanswered.
+  //
+  // Presence is the test, never adequacy. Whether evidence is *good*
+  // evidence is /opsp:attest's judgement, and DEC-032 governs what it must
+  // reference; code can only check that something is there.
+  for (const record of driverSpecs) {
+    if (!isActive(record.status)) continue;
+    if (!hasMeasures(record.content)) continue;
+
+    const anatomy = parseMeasureAnatomy(record.content);
+    const hats = record.hats ?? [];
+
+    if (anatomy.evidence === undefined) {
+      loops.push({
+        kind: 'measure-unasserted',
+        record: record.id,
+        hats,
+        detail: 'States a measure with no `### Evidence`. A measure nothing asserts is an aspiration.',
+      });
+    }
+
+    if (anatomy.exposure === undefined) {
+      loops.push({
+        kind: 'measure-unexposed',
+        record: record.id,
+        hats,
+        detail: 'States a measure with no `### Exposure`. Nothing records what a breach would cost or who it reaches.',
+      });
+    }
+
+    // A value saying "unrecorded" satisfies this: stating the gap is an
+    // honest answer, and punishing it would only train the line away.
+    if (anatomy.bar !== undefined && !statesNeighbour(anatomy.bar)) {
+      loops.push({
+        kind: 'bar-without-neighbour',
+        record: record.id,
+        hats,
+        detail:
+          'States a bar with no `neighbour`. The position not taken is what makes a future trade arguable rather than re-litigated.',
+      });
+    }
   }
 
   // ── a target with no way to tell whether it is met

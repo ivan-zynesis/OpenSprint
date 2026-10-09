@@ -4,7 +4,8 @@ type: reliability
 status: active
 created: 2026-09-26
 hats: [maintainer]
-role: bar
+role: strategy
+objective: change-quality
 ---
 
 # DS-BACKWARD-COMPAT: Best-Effort Backward Compatibility Across Tooling Releases
@@ -22,6 +23,21 @@ Backward compatibility therefore means one specific thing: **a new tooling relea
 The published artifact cannot break retroactively, because it does not change. The only compatibility surface that can break is the one where a newly released version meets a project whose `openspec/` and `opensprint/` directories were written by an older one.
 
 Best-effort rather than guaranteed follows from [[DS-SELF-USE-SCOPE]]: a tool optimised for speed of evolution cannot also promise never to move. Stating the bar as best-effort is honest about the trade-off rather than quietly failing a stronger promise.
+
+## Measures
+
+- **Primary**: a project whose `openspec/` and `opensprint/` directories were written by an earlier release still parses under the current one
+
+### Bar
+
+- **dimension**: guaranteed compatibility ←→ speed of evolution
+- **chosen**: best-effort, scoped to one surface — a new release meeting a project written by an older version
+- **traded for**: the ability to move quickly, which [[DS-SELF-USE-SCOPE]] says is the point
+- **neighbour**: unrecorded — nothing says what a guarantee would cost, or over what window
+
+### Posture
+
+Below what a product sold to strangers would hold, and deliberately so. A published package is static, so nothing can break retroactively; the only surface that can break is a new release meeting an older project.
 
 ## Implications
 

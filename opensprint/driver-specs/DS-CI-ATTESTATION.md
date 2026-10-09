@@ -5,6 +5,7 @@ status: active
 created: 2026-10-09
 hats: [product, maintainer]
 role: strategy
+objective: change-quality
 depends-on:
   - DS-ATTESTED-TRUTH
 ---
