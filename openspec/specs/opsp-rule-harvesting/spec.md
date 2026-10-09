@@ -135,12 +135,18 @@ The system SHALL NOT claim that a cited record is correctly asserted.
 - **AND** SHALL NOT assert that the citing rule tests the decision's substance
 
 ### Requirement: Unclassified records are reported as an open loop
-The system SHALL report a record that carries no role, where the record belongs to a hat that declares roles.
+The system SHALL report a **driver-spec** that carries no role, where the record belongs to a hat that declares roles. Decisions SHALL be exempt from role classification.
 
-#### Scenario: A record with no role in a hat that declares roles
-- **WHEN** a record belongs to a hat declaring roles
-- **AND** the record declares no role
+#### Scenario: A driver-spec with no role in a hat that declares roles
+- **WHEN** an active driver-spec belongs to a hat declaring roles
+- **AND** the driver-spec declares no role
 - **THEN** the system SHALL report a `record-unclassified` loop against that record's hats
+
+#### Scenario: A decision is never unclassified
+- **WHEN** an active decision declares no role
+- **THEN** the system SHALL NOT report `record-unclassified` for it
+- **AND** this SHALL hold whichever hats it declares, including a hat that declares roles
+- **AND** the reason SHALL be that role classification is a driver-spec concept: `dev` and `devops` run no framework to classify against
 
 #### Scenario: A hat that declares no roles
 - **WHEN** a record belongs only to hats declaring no roles
@@ -148,16 +154,17 @@ The system SHALL report a record that carries no role, where the record belongs 
 - **AND** a project not using roles SHALL NOT see its whole surrogate reported as a backlog
 
 #### Scenario: A classified record
-- **WHEN** a record declares a role its hat accepts
+- **WHEN** a driver-spec declares at least one role its hat accepts
 - **THEN** no `record-unclassified` loop SHALL be reported for it
 
 ### Requirement: A target with no measure is reported
 The system SHALL report a record that states a target without a way to tell whether it is met, because a constraint nothing can check is a constraint written badly.
 
 #### Scenario: A goal with no measures
-- **WHEN** an active record's role is among the measurable roles
+- **WHEN** any of an active record's roles is among the measurable roles
 - **AND** its body contains no `## Measures` section
 - **THEN** the system SHALL report a `constraint-unmeasurable` loop against that record's hats
+- **AND** SHALL report it once for that record, not once per measurable role
 
 #### Scenario: Measurable roles
 - **WHEN** the system decides whether a record should carry measures
@@ -173,9 +180,4 @@ The system SHALL report a record that states a target without a way to tell whet
 - **WHEN** a record contains a `## Measures` heading with no content beneath it
 - **THEN** the record SHALL still be reported as unmeasurable
 - **AND** a heading alone SHALL NOT satisfy the requirement
-
-#### Scenario: A record with no role
-- **WHEN** a record carries no role
-- **THEN** `constraint-unmeasurable` SHALL NOT be reported for it
-- **AND** `record-unclassified` SHALL cover it instead
 
