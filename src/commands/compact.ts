@@ -16,6 +16,7 @@ import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveHatRegistry, resolveHatSections, resolveHatRoles } from '../core/hats.js';
 import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
+import { attestationOf } from '../core/compact/measures.js';
 import {
   readSourcedDriverSpecs,
   readSourcedDecisions,
@@ -167,10 +168,20 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
             observedAdded: s.observedAdded,
             observedRemoved: s.observedRemoved,
             observedModified: s.observedModified,
-            inputs: s.inputs.map((r) => ({
-              id: r.id,
-              path: relative(projectRoot, r.path),
-            })),
+            inputs: s.inputs.map((r) => {
+              // DEC-021: the renderer needs to know which authority a claim
+              // about this record may carry, because only `attested`
+              // licenses an unqualified present-tense statement.
+              const attestation = attestationOf(r.content);
+              return {
+                id: r.id,
+                path: relative(projectRoot, r.path),
+                authority: attestation.authority,
+                ...(attestation.verdict === undefined ? {} : { verdict: attestation.verdict }),
+                ...(attestation.by === undefined ? {} : { attestedBy: attestation.by }),
+                ...(attestation.on === undefined ? {} : { attestedOn: attestation.on }),
+              };
+            }),
             observes: Object.keys(s.observed).sort(),
           })),
           unassigned,

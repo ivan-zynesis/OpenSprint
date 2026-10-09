@@ -109,25 +109,40 @@ Citations also make the drill-down affordable. A reader orients on the view and 
 
 ---
 
-## The record and the system are different things
+## Three authorities, and only one licenses the present tense
 
-A view describes **the system**, citing records where they explain it. Those are two sources with
-very different authority, and a reader has to be able to tell them apart:
+A view describes **the system**, citing records where they explain it. A claim can rest on three
+different things, and a reader has to be able to tell which:
 
-- **a decision is binding** — someone chose it, and departing from it is a defect
-- **an observation is a fact** — it is what the code does today, and it may be an accident
-
-So the citation says which:
+| Authority | Cited by | Says | Weakness |
+|---|---|---|---|
+| **decided** | a record id | it binds — departing from it is a defect | **may not be true yet** |
+| **observed** | a path | it is what the code does today | may be an accident |
+| **attested** | evidence · date · attester | asserted true, with an artifact behind it | ages |
 
 \`\`\`
-FROM A RECORD:       The ledger is append-only and entries balance in the
-                     functional currency (\`DEC-047\`).
-
-FROM AN OBSERVATION: The API runs on Node 22 and Fastify
-                     (\`apps/api/package.json\`).
+DECIDED:    Reconciliation is operator-invocable only (\`DS-HIGH-IMPACT-OPS\`).
+OBSERVED:   The API runs on Node 22 and Fastify (\`apps/api/package.json\`).
+ATTESTED:   No credential reaches a log; the scan has failed the build on every
+            attempt since (\`DS-SECRETS\`, attested 2026-10-09 by ivan).
 \`\`\`
 
-Three rules follow.
+**Only \`attested\` licenses an unqualified present-tense claim about a property of the system.**
+
+The plan tells you which: each staged record carries an \`authority\`. A record is \`attested\` only
+where its measure carries both an attestation date and evidence — a verdict with nothing asserting
+it is an opinion, and the harvest reports it as \`measure-unasserted\`.
+
+Four rules follow.
+
+**A decided-but-unattested claim is written as a decision, not as a fact.** Write *"reconciliation
+is operator-invocable only (\`DS-HIGH-IMPACT-OPS\`)"*, never *"reconciliation cannot be automated"*.
+The first is true; the second is a claim about the running system that nothing has checked.
+
+This is the failure this contract exists to prevent. A compiled view once stated *"Operator-only
+reconciliation — absolute, not a preference"* under **Constraints & Non-Negotiables** while another
+view, compiled in the same pass from the same records, admitted the guardrail was instruction text
+no rule read. Neither was wrong; there was no third category.
 
 **An observation no record explains still stands.** Write it, cite its path, and do not invent a
 rationale. Something being undocumented means it was never made explicit — that is reportable, not

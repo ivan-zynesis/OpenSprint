@@ -1,7 +1,13 @@
 # opsp-board Specification
 
 ## Purpose
-TBD - created by archiving change board-view. Update Purpose after archive.
+
+Define `opensprint/BOARD.md`: a compiled view of every initiative by state, with the problems that would otherwise make it quietly wrong.
+
+The board answers "where is everything", which is nobody's hat and everybody's question — so it is a cross-cutting artifact beside `DECISION-MAP.md` rather than a squad view. It derives entirely from initiative state, milestone completion and membership, which means **moving a card is changing a record's state**, never editing this file.
+
+Unlike a hat view it needs no renderer. Structured state rendered as a table is deterministic, so the board is regenerated rather than sealed and staleness-gated: the manifest exists to catch a skill disagreeing with its sources, and there is no skill here to disagree.
+
 ## Requirements
 ### Requirement: The board is compiled, never edited
 The system SHALL compile `opensprint/BOARD.md` from the initiatives, so that moving a card means changing a record's state rather than editing a file.

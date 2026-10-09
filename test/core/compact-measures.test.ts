@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   MEASURE_PARTS,
   BAR_LABELS,
+  POSTURE_LABELS,
+  parsePosture,
+  attestationOf,
   measuresSection,
   hasMeasures,
   parseMeasureAnatomy,
@@ -166,6 +169,80 @@ unbounded blast radius
 
     it('is false when the label is absent', () => {
       expect(statesNeighbour('- **chosen**: fully manual')).toBe(false);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // The third citation authority (DS-ATTESTED-TRUTH, DEC-021)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('posture and attestation', () => {
+    const attested = doc(`## Measures
+
+- **Primary**: no credential reaches a log
+
+### Posture
+
+- **verdict**: met
+- **attested-by**: ivan
+- **attested-on**: 2026-10-09
+
+The scan has failed the build on every attempt since.
+
+### Evidence
+
+ci/secret-scan run 4821
+`);
+
+    it('names the posture labels explicitly', () => {
+      expect([...POSTURE_LABELS]).toEqual(['verdict', 'attested-by', 'attested-on']);
+    });
+
+    it('reads the labelled lines, keeping the prose beneath them', () => {
+      const p = parsePosture('- **verdict**: met\n- **attested-by**: ivan\n\nsome prose');
+      expect(p.verdict).toBe('met');
+      expect(p['attested-by']).toBe('ivan');
+    });
+
+    it('ignores a label outside the vocabulary', () => {
+      expect(Object.keys(parsePosture('- **mood**: good\n- **verdict**: met'))).toEqual(['verdict']);
+    });
+
+    it('reports attested when a date and evidence are both present', () => {
+      const a = attestationOf(attested);
+      expect(a.attested).toBe(true);
+      expect(a.authority).toBe('attested');
+      expect(a.verdict).toBe('met');
+      expect(a.by).toBe('ivan');
+      expect(a.on).toBe('2026-10-09');
+    });
+
+    it('is decided when a verdict has no evidence behind it', () => {
+      const a = attestationOf(doc('## Measures\n\n- x\n\n### Posture\n\n- **verdict**: met\n- **attested-on**: 2026-10-09'));
+      expect(a.attested).toBe(false);
+      expect(a.authority).toBe('decided');
+      expect(a.verdict).toBe('met');
+    });
+
+    it('is decided when evidence exists but nothing was attested', () => {
+      const a = attestationOf(doc('## Measures\n\n- x\n\n### Evidence\n\na report'));
+      expect(a.attested).toBe(false);
+      expect(a.authority).toBe('decided');
+    });
+
+    it('is decided for a record with no posture at all', () => {
+      expect(attestationOf(doc('## Measures\n\n- x')).authority).toBe('decided');
+    });
+
+    it('is decided for a record with no measures at all', () => {
+      expect(attestationOf(doc('## Rationale\n\nwhy')).authority).toBe('decided');
+    });
+
+    it('carries the date without expiring it — attestation ages, nothing judges when', () => {
+      const old = attested.replace('2026-10-09', '1999-01-01');
+      const a = attestationOf(old);
+      expect(a.attested).toBe(true);
+      expect(a.on).toBe('1999-01-01');
     });
   });
 });

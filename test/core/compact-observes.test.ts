@@ -358,14 +358,14 @@ describe('system as source', () => {
     const skill = () =>
       getOpspSkillTemplates().find((s) => s.workflowId === 'opsp-compact')!.template.instructions;
 
-    it('states that a decision binds and an observation may be an accident', () => {
+    it('states the three authorities and which of them binds', () => {
       const i = skill();
-      expect(i).toMatch(/a decision is binding/i);
-      expect(i).toMatch(/an observation is a fact/i);
+      expect(i).toMatch(/\*\*decided\*\*/i);
+      expect(i).toMatch(/\*\*observed\*\*/i);
     });
 
-    it('requires an observation to cite its path', () => {
-      expect(skill()).toMatch(/FROM AN OBSERVATION/);
+    it('shows an observation citing its path', () => {
+      expect(skill()).toMatch(/OBSERVED:/);
     });
 
     it('lets an unexplained observation stand without inventing a rationale', () => {

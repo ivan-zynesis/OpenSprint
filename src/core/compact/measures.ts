@@ -41,6 +41,37 @@ export type BarLabel = (typeof BAR_LABELS)[number];
 
 export type Bar = Partial<Record<BarLabel, string>>;
 
+/**
+ * The labels a posture states, as an explicit list.
+ *
+ * Attestation needs the same three facts every time — what the verdict was,
+ * who asserted it, and when — so they are a closed vocabulary read the same
+ * way a bar's are, rather than a second convention.
+ */
+export const POSTURE_LABELS = ['verdict', 'attested-by', 'attested-on'] as const;
+
+export type PostureLabel = (typeof POSTURE_LABELS)[number];
+
+export type Posture = Partial<Record<PostureLabel, string>>;
+
+/**
+ * The authority a compiled claim about a record may carry (DEC-009, DEC-021).
+ *
+ * Only `attested` licenses an unqualified present-tense claim: a decision
+ * binds but may not be true yet, and an observation is true but may be an
+ * accident.
+ */
+export type CitationAuthority = 'decided' | 'attested';
+
+export interface Attestation {
+  attested: boolean;
+  verdict?: string;
+  by?: string;
+  /** The date asserted. Attestation ages; nothing here expires it. */
+  on?: string;
+  authority: CitationAuthority;
+}
+
 /** Strips HTML comments and surrounding whitespace, the way the old parser did. */
 function clean(body: string): string {
   return body.replace(/<!--[\s\S]*?-->/g, '').trim();
@@ -110,17 +141,70 @@ export function parseMeasureAnatomy(content: string): MeasureAnatomy {
  * is ignored instead of quietly becoming part of the bar.
  */
 export function parseBar(block: string): Bar {
-  const bar: Bar = {};
+  return parseLabelled(block, BAR_LABELS) as Bar;
+}
+
+/**
+ * Reads `- **label**: value` lines against a fixed vocabulary.
+ *
+ * Labels are looked up from the supplied list rather than harvested from the
+ * block, so an unrecognised label is ignored instead of quietly becoming part
+ * of the structure.
+ */
+function parseLabelled(
+  block: string,
+  labels: readonly string[]
+): Record<string, string> {
+  const out: Record<string, string> = {};
   for (const line of block.split('\n')) {
     const match = line.match(/^\s*[-*]\s*\*\*\s*([^*]+?)\s*\*\*\s*:\s*(.+)$/);
     if (!match) continue;
     const label = match[1].trim().toLowerCase();
-    const found = BAR_LABELS.find((candidate) => candidate === label);
-    if (!found) continue;
+    if (!labels.includes(label)) continue;
     const value = match[2].trim();
-    if (value.length > 0) bar[found] = value;
+    if (value.length > 0) out[label] = value;
   }
-  return bar;
+  return out;
+}
+
+/**
+ * Reads a posture's labelled lines.
+ *
+ * Shares parseBar's mechanism rather than repeating it: both read
+ * `- **label**: value` against a fixed vocabulary, and a second
+ * implementation is how the two conventions start to differ.
+ */
+export function parsePosture(block: string): Posture {
+  return parseLabelled(block, POSTURE_LABELS) as Posture;
+}
+
+/**
+ * Whether a record's measure has been attested, and by whom.
+ *
+ * Requires **both** a date and evidence. A posture saying "met" with nothing
+ * asserting it is an opinion, and DS-ATTESTED-TRUTH is precisely about that
+ * difference — so a verdict alone reports `decided`, and the existing
+ * measure-unasserted loop names the missing half.
+ *
+ * Computed from content rather than declared in frontmatter, so it cannot
+ * drift from the evidence — the same reasoning that makes views compiled
+ * rather than authored (DEC-006).
+ */
+export function attestationOf(content: string): Attestation {
+  const anatomy = parseMeasureAnatomy(content);
+  if (anatomy.posture === undefined) return { attested: false, authority: 'decided' };
+
+  const posture = parsePosture(anatomy.posture);
+  const hasEvidence = anatomy.evidence !== undefined;
+  const attested = posture['attested-on'] !== undefined && hasEvidence;
+
+  return {
+    attested,
+    ...(posture.verdict === undefined ? {} : { verdict: posture.verdict }),
+    ...(posture['attested-by'] === undefined ? {} : { by: posture['attested-by'] }),
+    ...(posture['attested-on'] === undefined ? {} : { on: posture['attested-on'] }),
+    authority: attested ? 'attested' : 'decided',
+  };
 }
 
 /**
