@@ -1,7 +1,7 @@
 ---
 id: lifecycle-beyond-build
 status: active
-state: proposed
+state: building
 created: 2026-10-01
 ---
 
@@ -154,7 +154,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 
 ## Milestones
 
-- [ ] maintainer-objectives: Ship the seven as the maintainer hat's default section list; add the `objective` selector; widen `role` to a list; exempt decisions from role classification per DEC-028
+- [x] maintainer-objectives: Ship the seven as the maintainer hat's default section list; add the `objective` selector; widen `role` to a list; exempt decisions from role classification per DEC-028
 - [ ] measure-anatomy: Optional `### Bar/Posture/Evidence/Exposure` sub-blocks under `## Measures`; migrate DS-HIGH-IMPACT-OPS and DS-BACKWARD-COMPAT; harvest `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`
 - [ ] strategy-altitude: Maintainer strategies render position plus citation; harvest `strategy-unimplemented`
 - [ ] initiative-parser: The first deterministic half for initiatives — frontmatter, milestones, membership
@@ -164,6 +164,14 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [ ] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
 - [ ] attest-tool: The `/opsp:attest` skill, with bounded record amendment
 - [ ] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
+
+## Progress
+
+**1/10 — `maintainer-objectives`** · opsx change `2026-10-09-maintainer-objectives` · continuous review mode
+
+Shipped the seven objectives as maintainer's default sections, the `objective` selector, `role` as a list, `heading` on a section, and the `DEC-028` exemption. On this repository `record-unclassified` went 6 → 0, and citing `DEC-018`/`DEC-028` in the new tests closed their `decision-unguarded` loops — the loop closing on itself.
+
+**Discovered:** the proposal claimed this repository's hand-authored maintainer shape would keep working. It would not have. `openspec/config.yaml` declared `maintainer.roles` but not `maintainer.sections`, so roles stayed `bar/posture/evidence/exposure` while sections fell through to the new seven, which select on `goal`/`strategy` — every maintainer section would have compiled empty. The four sections are now pinned explicitly, and `measure-anatomy` removes the pin when it migrates the records.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
