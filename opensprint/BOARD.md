@@ -44,11 +44,13 @@ _Empty._
 
 ## Roadmap
 
-Where every open exposure appears beside the state of the work planned to close it
-(`DS-FORWARD-CLOSURE`). An exposure pointing at nothing is a confession; one pointing at
-an initiative is a managed risk, and the state of that initiative is the assurance level.
+Every open exposure beside the state of the work planned to close it (`DS-FORWARD-CLOSURE`).
+An exposure pointing at nothing is a confession; one pointing at an initiative is a managed
+risk, and **that initiative's state is the assurance level**.
 
-_Not yet compiled — needs `mitigated-by`, which the `forward-closure` milestone adds._
+| Record | Exposure | Mitigated by | Assurance |
+|---|---|---|---|
+| `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
 
 ## Problems
 

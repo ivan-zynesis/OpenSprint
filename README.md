@@ -141,6 +141,7 @@ Different ambition, same premise.
 
 ## Documentation
 
+- [`docs/pillars.md`](docs/pillars.md) — the three ideas the design answers to
 - [`docs/installation.md`](docs/installation.md) — install it, set up a repository
 - [`docs/concepts.md`](docs/concepts.md) — driver-specs, hats, the measure anatomy, attestation
 - [`docs/workflows.md`](docs/workflows.md) — the fifteen workflows, and the CLI beneath them

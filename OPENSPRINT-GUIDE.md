@@ -1,499 +1,444 @@
-# OpenSprint Command Guide
+# The OpenSprint Guide
 
-This is the practical guide to using OpenSprint commands. For design philosophy, see [PHILOSOPHY.md](PHILOSOPHY.md). For product architecture rationale, see [open-sprint-harness-design.md](open-sprint-harness-design.md).
+**How a whole software development lifecycle runs inside a repository — dev, sec and ops — when the
+participants are human, agent, or both.**
 
-OpenSprint orchestrates initiative-level engineering work above OPSX. Think of it as the difference between a tech lead planning milestones and a developer implementing a feature.
-
----
-
-## The Mental Model
-
-### Two-Tier Hierarchy
-
-```
-opsp (initiative / milestone)     ← tech lead / architect layer
-  └── opsx (change / task)        ← squad lead / implementer layer
-```
-
-**OPSP** manages the big picture: initiatives with milestones, architectural decisions, external constraints. **OPSX** manages the execution: individual changes with proposals, specs, designs, and tasks. Each milestone in an initiative maps to one or more opsx change cycles.
-
-### The Surrogate
-
-The surrogate is the agent's accumulated knowledge about your project — what it consults before asking you a question. It lives in `opensprint/` and grows across initiatives:
-
-```
-opensprint/
-├── driver-specs/         External constraints (product, legal, compliance, reliability)
-│   ├── DS-COMPLIANCE.md
-│   └── DS-LATENCY.md
-├── ADRs/                 Architectural decisions with rationale and dependencies
-│   ├── DEC-001.md
-│   └── DEC-002.md
-├── architecture.md       Compiled architectural state (narrative, rewritten per initiative)
-├── DECISION-MAP.md       Visual decision tree with blast radius analysis
-└── initiatives/          Initiative descriptors with milestone plans
-    └── migrate-to-serverless.md
-```
-
-**Driver specs** are external truth — facts about the world the agent doesn't inherently know (SLAs, compliance rules, vendor constraints). **ADRs** capture choices between alternatives with rationale. **architecture.md** synthesizes everything into a readable document. **DECISION-MAP.md** shows how decisions relate to each other and their downstream impact.
-
-When the agent encounters ambiguity during work, it checks the surrogate first. Only if the surrogate can't answer does it escalate to you — and when you answer, that knowledge gets captured back into the surrogate.
+This is the walkthrough. For *why* the tool is shaped this way, read
+[the three pillars](docs/pillars.md). For definitions, [concepts](docs/concepts.md). For the command
+reference, [workflows](docs/workflows.md).
 
 ---
 
-## Command Reference
+## The mental model
 
-| Command | Category | What It Does | When to Use |
-|---------|----------|-------------|-------------|
-| `/opsp:explore` | Lifecycle | Initiative-level brainstorming with full surrogate context | Starting a new initiative, thinking through architecture |
-| `/opsp:propose` | Lifecycle | Classify exploration into driver-specs, ADRs, and milestones | After explore, when ideas are ready to formalize |
-| `/opsp:apply` | Lifecycle | Execute initiative — orchestrate opsx cycles per milestone | When the plan is ready for implementation |
-| `/opsp:archive` | Lifecycle | Compile architecture.md, mark initiative complete | After all milestones are done |
-| `/opsp:review` | Lifecycle | Show commit graph, branch status, diff assistance | During or after apply, for code review |
-| `/opsp:reexplore` | Lifecycle | Re-plan mid-initiative — revise milestones and proposals | When the plan needs to change (proactive) |
-| `/opsp:knockdown` | Lifecycle | Reverse-engineer surrogate from existing codebase | Adopting OpenSprint on a brownfield project |
-| `/opsp:driver` | Utility | Create, edit, or list driver specs | When external constraints need to be recorded |
-| `/opsp:decide` | Utility | Record an ADR when genuine ambiguity requires judgment | When the agent or operator encounters a decision point |
-| `/opsp:tree` | Utility | Visualize decision tree and DECISION-MAP.md | To understand how decisions relate and their blast radius |
-| `/opsp:rebuild-assess` | Utility | Assess cascade impact when driver specs change | When external reality changes (compliance, vendor, SLA) |
+Two hierarchies, and they do not line up by accident.
+
+```
+  WORK                              KNOWLEDGE
+  ────                              ─────────
+  initiative   (an epic)            driver-specs    constraints from outside
+    └ milestone  (a big ticket)     ADRs            decisions that answer them
+        └ change   (a ticket)       ─────────────────────────────────────────
+                                    compiled into one surrogate
+```
+
+Work moves left to right through five stages. Knowledge accumulates and is compiled. The two meet at
+exactly two moments: **a bar is written when work is proposed, and attested before it merges.**
+Everything else is in service of those two.
+
+### The surrogate
+
+The surrogate is what an agent loads instead of asking you. It is the accumulated record —
+constraints, decisions, what was tried, what was rejected and why — condensed to a size that fits in
+a session alongside real work.
+
+It is also why an agent can execute a multi-milestone initiative without a person at every step: when
+it hits ambiguity, it asks the surrogate first. Only when the surrogate cannot answer does it
+escalate — and then the answer becomes part of the surrogate, so the question is never asked twice.
 
 ---
 
-## Greenfield Lifecycle
-
-The standard lifecycle for a new initiative:
+## The five stages
 
 ```
-/opsp:explore ──→ /opsp:propose ──→ /opsp:apply ──→ /opsp:archive
-                                        │
-                                   (per milestone)
-                                   opsx:explore
-                                   opsx:propose
-                                   opsx:apply
-                                   opsx:archive
+   REAL WORLD ── clients · regulators · incidents · cost · the market
+        │
+        │   /opsp:driver  (external truth)    /opsp:knockdown  (brownfield)
+        ▼
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║ 1  IDEATE                         /opsp:explore · /opsp:backlog  ║
+  ║    product / maintainer                                          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+        ▼
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║ 2  TRIAGE · BRAINSTORM · PROPOSE   /opsp:triage · /opsp:propose  ║
+  ║    tech lead · architect · scrum master        >> THE BAR <<     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+        ▼
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║ 3  BUILD                                /opsp:apply → opsx       ║
+  ║    dev / devops                                                  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+        ▼
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║ 4  MEET THE BAR                                  /opsp:attest    ║
+  ║    product / maintainer            >> DID WE ACTUALLY? <<        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+        ▼
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║ 5  COMPILE                      /opsp:archive · /opsp:compact    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+        ▼   compact check — drift fails the build
+        └──► harvested open loops land in the backlog, triaged at (2)
 ```
 
-### Explore
+Most processes have stages 1, 2, 3 and 5. **Stage 4 is the one that is usually missing**, and its
+absence is why "done" is a matter of opinion in most teams.
+
+---
+
+## 1 · Ideate
+
+An idea arrives — a new business need, a trend worth riding, an operation worth optimising, or an
+open loop the last compile reported.
 
 ```
 /opsp:explore
 ```
 
-Enter architect-level brainstorming. The agent loads the full surrogate (if any exists) and acts as a thinking partner for system-wide ideas — architecture direction, strategic decisions, cross-domain trade-offs.
+Architect-level thinking. **It writes nothing.** That is deliberate: most exploration should not
+survive, and a tool that saves everything fills the backlog with noise.
 
-No artifacts are created. This is thinking time. Use ASCII diagrams, compare approaches, challenge assumptions.
-
-When ideas crystallize into identifiable constraints, decisions, and milestones, transition to propose:
-
-> "This feels solid. Want me to create an initiative?"
-
-### Propose
+When something crystallises:
 
 ```
-/opsp:propose <initiative-name>
+/opsp:backlog
 ```
 
-Analyzes the exploration conversation and classifies your inputs:
+This flushes the in-memory brainstorm to disk as an initiative at `state: exploring`, holding an
+**Objective** and a **Goal**. It can fire mid-conversation, as a checkpoint.
 
-- **External constraints** (things you stated as facts) → **driver specs** in `opensprint/driver-specs/`
-- **Architectural decisions** (choices you made between alternatives) → **ADRs** in `opensprint/ADRs/`
-- **Scope and milestones** (the work to be done) → **initiative descriptor** in `opensprint/initiatives/`
+A backlog item is a complete artifact at its own altitude. It may sit for weeks. It may never be
+picked up — and that is a legitimate outcome, not a failure.
 
-Before writing anything, the agent presents the classification for your confirmation:
-
-```
-## Proposed Initiative: migrate-to-serverless
-
-### Driver Specs (2 candidates)
-DS-COMPLIANCE: "PCI-DSS compliance required for payment processing"
-DS-LATENCY: "Sub-200ms API response time for user-facing endpoints"
-
-### ADRs (3 candidates)
-DEC-001: "Use ECS over Lambda for long-running payment processing"
-DEC-002: "PostgreSQL for transactional data, DynamoDB for sessions"
-DEC-003: "Event-driven communication between services via SQS"
-
-### Milestones (3)
-1. extract-auth-service
-2. migrate-payment-endpoints
-3. deprecate-monolith-routes
-```
-
-You confirm, modify, or reject each. Then the agent writes the artifacts and creates the initiative descriptor.
-
-### Apply
-
-```
-/opsp:apply <initiative-name>
-```
-
-The main orchestration command. Executes your initiative by running a full opsx lifecycle for each milestone.
-
-**Phase 1: Setup**
-
-The agent loads the initiative descriptor, loads the full surrogate, creates an initiative branch, and asks you to select a review mode:
-
-```
-Initiative: migrate-to-serverless
-Branch: opsp/migrate-to-serverless
-Review mode: per-milestone
-Progress: 0/3 milestones complete
-
-  → extract-auth-service (next)
-    migrate-payment-endpoints
-    deprecate-monolith-routes
-```
-
-See [Review Modes & Checkpoints](#review-modes--checkpoints) for details on the three modes.
-
-**Phase 2: Milestone Execution**
-
-For each milestone, the agent runs a full opsx cycle inline:
-
-1. **opsx explore** — think through the milestone at feature level
-2. **opsx propose** — create an opsx change with proposal, specs, design, tasks
-3. **Create a change branch** — `opsx/migrate-to-serverless/extract-auth-service`
-4. **opsx apply** — implement the tasks on the change branch
-5. **opsx archive** — archive the completed change
-6. **Merge** — merge the change branch back into the initiative branch
-
-During implementation, the agent resolves ambiguity by checking the surrogate first. Only genuinely unresolvable questions get escalated to you — and they're reformulated at the architectural level, not the implementation level.
-
-**Phase 3: Checkpoint**
-
-After each milestone (or change, depending on review mode), the agent presents a checkpoint:
-
-```
-## Milestone Complete: extract-auth-service
-
-Branch: opsp/migrate-to-serverless
-Changes: extract-auth-service (archived)
-Commits since last checkpoint: 12
-Remaining: 2 milestones
-
-Options:
-1. Approve and continue (default)
-2. Raise change request
-3. Switch review mode
-4. Stop here (resume later)
-```
-
-See [Review Modes & Checkpoints](#review-modes--checkpoints) for what each option does.
-
-**Phase 4: Complete**
-
-When all milestones are done:
-
-```
-## Initiative Complete: migrate-to-serverless
-
-Branch: opsp/migrate-to-serverless
-Milestones: 3/3 completed
-OPSX Changes: extract-auth-service, migrate-payment-endpoints, deprecate-monolith-routes
-
-Review with /opsp:review migrate-to-serverless
-Archive with /opsp:archive migrate-to-serverless
-```
-
-### Archive
-
-```
-/opsp:archive <initiative-name>
-```
-
-Compiles the current architectural state into `opensprint/architecture.md` by synthesizing all active driver-specs, ADRs, and the decision tree into a narrative document. Marks the initiative as completed.
-
-architecture.md is **rewritten, not appended**. ADRs are the version history — architecture.md always reflects the current state.
-
-### Review
-
-```
-/opsp:review <initiative-name>
-```
-
-Shows the commit graph and branch status for an initiative. Can be invoked at any time — during apply, between milestones, or after completion. Read-only.
-
-```
-## Initiative: migrate-to-serverless
-Branch: opsp/migrate-to-serverless
-
-### Milestone 1: Extract Auth Service (completed)
-  merged: opsx/migrate-to-serverless/extract-auth-service
-
-### Milestone 2: Migrate Payment Endpoints (in progress)
-  merged: opsx/migrate-to-serverless/payment-api
-  open:   opsx/migrate-to-serverless/payment-webhooks
-
-Initiative branch is 47 commits ahead of main.
-```
-
-Options: review a specific change (diff), review a full milestone, compare initiative to main.
+> **For a non-technical stakeholder**, this is the entire interaction. They ask their agent to read
+> the board and describe what is in flight, then give it a few sentences of real-world context. The
+> agent drafts the objective and goal on their behalf; they never see OGSM. Everything past this
+> point is an engineer stepping up for accountability.
 
 ---
 
-## Brownfield Path
-
-For existing codebases, bootstrap the surrogate before starting initiatives:
+## 2 · Triage, brainstorm, propose
 
 ```
-/opsp:knockdown ──→ (surrogate ready) ──→ /opsp:explore ──→ /opsp:propose ──→ ...
+/opsp:triage
 ```
 
-### Knockdown
+Pick up a backlog item and decide: advance it, decline it, or send it back for more exploration.
+
+Declining is first-class. A declined initiative keeps its objective and records **why** — because
+the same proposal returns in six months, and one recorded line ends that conversation in a minute.
+
+Where it advances, triage is also the **strategy brainstorming**: how we would go about it, what the
+alternatives are, what each would cost.
+
+```
+/opsp:propose
+```
+
+Formalise it. This is where the conversation becomes artifacts:
+
+```
+## Proposed Initiative: multi-region-failover
+
+### Driver Specs (external truth)
+- DS-RTO: recovery time objective of 15 minutes, contractual
+- DS-DATA-RESIDENCY: EU customer data must not leave the EU
+
+### ADRs (decisions)
+- DEC-ACTIVE-PASSIVE: active-passive over active-active (depends on DS-RTO)
+  Rationale: active-active doubles the consistency surface for a 15-minute RTO
+             that passive already meets
+- DEC-REGION-PAIR: eu-west-1 / eu-central-1 (depends on DEC-ACTIVE-PASSIVE,
+                                             DS-DATA-RESIDENCY)
+
+### Milestones
+1. replicate-datastore
+2. standby-infrastructure
+3. failover-runbook-and-drill
+
+Does this look right?
+```
+
+**The bar is written here, ex ante.** Each driver-spec gets a `## Measures` section stating its
+acceptance criterion in BDD form — `given / when / then` for a maintainer bar, `as-a / I-want / for`
+for a product one — so that a pipeline can be pointed at it later.
+
+Nothing is written until you confirm.
+
+### The two hierarchies meet
+
+The initiative now carries O, G, S and M. State advances to `proposed`. What the engineer receives is
+**the bar and nothing else** — not the discussion, not the alternatives weighed. That is progressive
+discovery working: they can open any record they need, and they are not made to.
+
+---
+
+## 3 · Build
+
+```
+/opsp:apply multi-region-failover
+```
+
+The agent loads the full surrogate, creates the initiative worktree if the planning stage has not
+already, and runs one complete change cycle per milestone:
+
+```
+opsx:explore → opsx:propose → opsx:apply → opsx:verify → opsx:archive
+```
+
+Each change gets its own worktree, merges back into the initiative branch, and is pruned. The branch
+ref is kept, so detail survives a squash merge.
+
+### Surrogate resolution — the part that matters
+
+When the agent hits ambiguity mid-implementation, it does **not** ask you first. It asks the
+surrogate:
+
+```
+  Can a driver-spec answer this?      an external constraint
+  Can an existing ADR answer this?    a decision already made
+  Can architecture.md answer this?    current state
+```
+
+Resolved silently where the answer exists, noting *"resolved via DEC-REGION-PAIR"*.
+
+Where it does not, the agent escalates — and it reformulates the question so the answer is worth
+keeping:
+
+```
+BAD:   "Should I use pgBouncer or RDS Proxy for the standby?"
+
+GOOD:  "Standby needs connection pooling. The primary uses pgBouncer on EC2.
+        Should we standardise on pgBouncer across both regions, or use the
+        managed proxy in the standby to reduce what we operate during a
+        failover? This affects the runbook milestone and any future region."
+```
+
+The answer becomes an ADR. The surrogate grows. The question is never asked again.
+
+### Review modes
+
+| Mode | Pauses |
+|---|---|
+| per-milestone | after each milestone (default) |
+| per-change | after each opsx change is archived |
+| continuous | only for escalations |
+
+At a checkpoint you can approve, raise a change request, switch mode, or stop and resume later. A
+change request is not just a code fix — it traces back to **why the agent decided wrongly**, which
+is usually a missing or incorrect record. Corrective changes update the root cause, then the
+surrogate is reloaded before returning to the checkpoint.
+
+---
+
+## 4 · Meet the bar
+
+Every milestone is done. The initiative's state advances to **ready for attestation**.
+
+```
+/opsp:attest multi-region-failover
+```
+
+This runs **on the open pull request, before the merge** — not after, on staging.
+
+### Clear your context first
+
+In most teams today the same engineer wore every hat on the way here. Attestation is therefore
+usually self-assessment, and an agent that just wrote the code has every argument for why it works
+already in context.
+
+So the tool arrives narrow and stays narrow:
+
+```
+  LOADS                                DOES NOT LOAD
+  ──────────────────────────────       ─────────────────────────────
+  the objective and goals              the implementation diff
+  the bars (given / when / then)       the design discussion
+  the maintainer rows in scope         the ADR rationales
+  the CI evidence artifacts            the conversation that built it
+```
+
+Excluding the ADR rationales is the part that feels wrong and is right. **The bar is the contract.**
+A rationale is an argument for the thing that was built.
+
+Invoked in the session that wrote the implementation, it says so and stops.
+
+### Evidence is a CI artifact
+
+A coverage report. A recorded end-to-end run. A `terraform plan`. A cost diff. A scan result.
+Something the pipeline produced, addressable from the pull request.
+
+Prose describing a belief is not evidence. Neither is reading the code — it may not.
+
+```markdown
+### Posture
+- **verdict**: met
+- **attested-by**: ivan
+- **attested-on**: 2026-10-09
+
+Failover drill completed in 11m42s against the 15m objective.
+
+### Evidence
+ci/dr-drill run 118 — recording and timings attached
+
+### Exposure
+The drill ran against synthetic load, not production traffic shape.
+mitigated-by: production-shadow-traffic
+```
+
+**If the evidence cannot answer the bar, that is a finding about the evidence** — record
+`cannot assess`, name what is missing, and stop looking. That is a complete attestation, and it
+produces exactly the backlog item that makes the next one possible.
+
+### It never gates
+
+It always exits zero. An unmet bar is recorded as an exposure with a forward pointer, never as a
+failure. The moment it gained a pass/fail exit it would be **certification** — and certification
+drags change management and release management in behind it.
+
+The system insists you answer. It never grades the answer.
+
+---
+
+## 5 · Compile and close
+
+```
+/opsp:archive multi-region-failover
+```
+
+Archive consumes the compile. The views regenerate from the records — one hop, never from each
+other — and the initiative closes.
+
+```
+opensprint/
+  squad/product.md       objective · goals · strategies · measures
+  squad/maintainer.md    posture + seven inherited objectives
+  squad/dev.md           tech-stack · runtime-topology · entity-schema
+  squad/devops.md        infra-architecture · gitops
+  architecture.md        the whole system
+  DECISION-MAP.md        the decision tree, with blast radius
+  BOARD.md               every initiative by state, and the roadmap
+```
+
+**Nothing here is hand-edited.** If a view is wrong, the system is wrong — change a record and
+recompile. `opensprint compact check` fails the build when a view disagrees with its sources.
+
+Then the single pull request merges, in this order:
+
+```
+  opsp/<initiative> ──rebase──●──attest──●──archive──●──▶ main
+```
+
+See [git workflow](docs/git-workflow.md) for why that order is forced.
+
+---
+
+## Covering dev, sec and ops
+
+The claim in the first line of this guide is that the whole lifecycle fits here. Here is where each
+part actually lands.
+
+| Concern | Where it lives | Who owns it |
+|---|---|---|
+| what it must do | product objective, goals, strategies | product |
+| security & access | maintainer objective i | maintainer |
+| isolation & confidentiality | maintainer objective ii | maintainer |
+| privacy, retention & legal | maintainer objective iii | maintainer |
+| integrity & correctness | maintainer objective iv | maintainer |
+| change & quality | maintainer objective v | maintainer |
+| availability & continuity | maintainer objective vi | maintainer |
+| cost & budget | maintainer objective vii | maintainer |
+| how it is built | dev: tech-stack, topology, schema | dev |
+| how it is run | devops: infra, gitops | devops |
+| was any of it true | attestation, against every bar | product / maintainer |
+
+**The seven maintainer objectives are inherited, not discovered.** Every software project worries
+about the same seven things, which is why that accountability was split off from product and given
+to a specialist. An objective with nothing recorded against it **still renders** — and an empty row
+is the most useful cell in the view, because it says nobody has stated what this system does about
+that concern.
+
+That is how "sec" and "ops" stop being someone else's problem: they are rows that cannot be hidden.
+
+---
+
+## Brownfield
+
+An existing codebase has decisions in it that nobody wrote down.
 
 ```
 /opsp:knockdown
 ```
 
-Reverse-engineers surrogate artifacts from your existing codebase. This is **reverse system design**: implementation → tech stack → architecture → requirements.
+Progressive compaction over the real code, producing inferred driver-specs, ADRs and an
+`architecture.md`.
 
-**Important**: Knockdown requires an advanced model with extended thinking enabled and the largest available context window.
+**What it produces is `observed`, not `decided` and not `attested`** — an account of what the code
+does, not of what anyone chose. That is an accurate description of what reverse-engineering can
+yield, and the distinction is load-bearing: a knocked-down surrogate makes no claim that anything is
+intentional.
 
-**Phase 1: TOC Build** — Walk the file system using directory and file names only (no content read). Build a table of contents in `opensprint/knockdown/toc.yaml`. Categorize files as architectural (always scan), scan-structure (sample), or skip (node_modules, dist, etc.).
-
-**Phase 2: File Scan** — For each file, infer a summary from the filename first. Read content only when the filename is ambiguous (`utils.ts`, `index.ts`, `app.ts`). Classify each summary with the three-question classifier:
-
-1. Is this a **driver-spec**? (external constraint) → Extract
-2. Is this an **ADR**? (significant decision) → Extract
-3. Will this **affect an ADR**? (traces to a decision) → Keep for compaction
-4. None → Drop
-
-**Phase 3: Bottom-Up Compaction** — Merge related sibling summaries at each directory level. Don't force unrelated merges — unrelated summaries float up unchanged. Extract ADRs and driver-specs as they emerge. Continue up the tree until the root.
-
-**Phase 4: Architecture Extraction** — Read all findings and surviving summaries. Fill the architecture.md template using reverse system design (tech stack → architecture → requirements). Interactively confirm ADRs and driver-specs with the operator, batched by area. Generate DECISION-MAP.md.
-
-**Small codebase escape hatch**: If the codebase is small enough to fit in context, skip phases 2-3 and analyze directly.
-
-**Pause/resume**: All progress is persisted in `opensprint/knockdown/` (toc.yaml, summaries/, findings.md). Resume where you left off in a new session.
-
-### After Knockdown
-
-The surrogate is populated. Proceed with `/opsp:explore` and `/opsp:propose` as in the greenfield path. Knockdown never modifies the codebase — it only writes to `opensprint/`.
+Review it, correct it, promote the inferences that were real decisions into proper ADRs, then
+proceed as greenfield. Compaction is deliberately **not** run automatically at the end, because
+whether you are satisfied with an inferred surrogate is a judgement call, and judgement calls do not
+belong inside a compile.
 
 ---
 
-## Utility Commands
+## Mid-lifecycle interventions
 
-These commands manage individual surrogate artifacts outside the initiative lifecycle.
-
-### Driver Specs (`/opsp:driver`)
-
-Create, edit, or list driver specs — external constraints that the agent can't infer from code.
+**The plan was wrong.**
 
 ```
-/opsp:driver add          # Create a new driver spec
-/opsp:driver edit DS-001  # Edit an existing driver spec
-/opsp:driver list         # List all active driver specs
+/opsp:reexplore multi-region-failover
 ```
 
-Driver specs are operator-authored. The agent acts as a scribe — it never autonomously creates or modifies driver specs. When a driver spec is fundamentally wrong, it gets superseded (not edited), preserving the history.
+Re-brainstorm at initiative level and revise the milestone plan. Completed milestones are preserved.
 
-Examples of driver specs: "PCI-DSS compliance required", "API latency < 200ms", "Must run on AWS (vendor contract)", "Team has no Go expertise".
-
-### Decide (`/opsp:decide`)
-
-Record an ADR when genuine ambiguity requires operator judgment.
-
-The agent should only create ADRs when it encounters a real choice between alternatives that can't be resolved from driver specs or existing decisions. Each ADR captures: the question, your decision, consideration factors, rationale, and what would invalidate the decision.
-
-ADRs track dependencies on driver specs and other ADRs. When you supersede a decision, downstream decisions may need re-evaluation.
-
-### Decision Tree (`/opsp:tree`)
-
-Visualize the decision tree showing driver specs as roots, decisions as nodes, with dependency edges and blast radius annotations.
+**A decision is needed outside a cycle.**
 
 ```
-/opsp:tree show           # Display current decision tree
-/opsp:tree regenerate     # Rebuild DECISION-MAP.md from records
-/opsp:tree impact DEC-003 # Analyze blast radius of a specific decision
+/opsp:decide
 ```
 
-### Rebuild Assessment (`/opsp:rebuild-assess`)
+Records an ADR with its tradeoff analysis and invalidation trigger.
 
-When a driver spec changes (external reality shifted), assess which decisions are affected.
+**A constraint changed.**
 
 ```
-/opsp:rebuild-assess DS-COMPLIANCE
+/opsp:rebuild-assess DS-RTO
 ```
 
-Traces all decisions that depend on the changed driver spec (directly and transitively). Walks through each affected decision depth-first, asking you to reaffirm or change. Reaffirmed decisions skip downstream re-evaluation. Changed decisions cascade re-evaluation to dependents.
+Walks the decision tree from that driver-spec, finds every decision that depended on it, and
+minimises what you are asked by reusing decisions the change did not touch.
+
+**Two initiatives diverged.**
+
+Each initiative is a worktree with its own surrogate, so two can run concurrently and disagree.
+
+```
+/opsp:rebase     bring one universe's work into another — soft fork, consensus
+/opsp:abandon    declare a winner, migrate what is compatible, archive the loser
+```
+
+Both are **operator-invocable only** — never from a pipeline, a sub-agent, or another skill. A
+corrupted surrogate degrades every downstream agent operation and the damage is unbounded, so a
+false escalation costs one prompt while a false auto-accept costs the surrogate.
 
 ---
 
-## Mid-Lifecycle Interventions
+## What the system does that a PM would
 
-### Reexplore (`/opsp:reexplore`)
+| A PM would | The system does |
+|---|---|
+| keep the backlog | `BOARD.md`, compiled from initiative state |
+| chase what is blocked | open loops, harvested from the record graph |
+| ask "is this done?" | `/opsp:attest`, against the bar, with evidence |
+| track known risks | the roadmap — each exposure beside its mitigation's state |
+| notice drift | `compact check`, as a build failure |
 
-```
-/opsp:reexplore <initiative-name>
-```
-
-Proactive, initiative-scoped re-planning. Use when:
-- Between milestones, you realize the plan needs adjusting
-- Mid-implementation, new information changes the approach
-- Returning with fresh perspective after stepping away
-
-The agent loads the full initiative context (completed milestones, pending plan, surrogate, active changes), presents a state-of-the-initiative briefing, and enters explore mode at initiative level.
-
-After exploration, plan revisions are orchestrated through existing opsx workflows:
-- **Modify a pending milestone**: archive the old opsx change, repropose with revised scope
-- **Add a corrective milestone**: for completed work that needs fixing (immutable history — don't modify archives)
-- **Add a new milestone**: entirely new work identified
-- **Reorder milestones**: update the plan sequence
-
-Reexplore stops at propose — it creates/revises proposals but does NOT implement them. Run `/opsp:apply` to continue execution with the revised plan.
-
-### Checkpoint Change Requests (within Apply)
-
-Reactive corrections during `/opsp:apply`. When you select "Raise change request" at a checkpoint, you choose between:
-
-1. **"I know what needs to change"** — describe the fix, the agent runs `/opsx:propose` inline, executes the corrective change, reloads the surrogate, and returns to the checkpoint
-2. **"I need to explore this first"** — enter `/opsx:explore` inline to think through the issue, then either return to approve (no changes needed) or proceed to propose
-
-After any correction, the surrogate is reloaded and you're back at the checkpoint — you can approve, raise another change request, or take any other action.
-
-**Reexplore vs checkpoint change requests**: Reexplore is proactive and initiative-scoped (you're rethinking the plan). Checkpoint change requests are reactive and milestone-scoped (something went wrong with the current output).
-
-### Review During Execution
-
-`/opsp:review` can be invoked at any time in a separate conversation — it's read-only and doesn't interfere with an active apply session.
+What is deliberately not automated is judgement. The board reports; you decide. See
+[pillar three](docs/pillars.md#3--the-sdlc-lives-in-the-repository).
 
 ---
 
-## Git Branching Model
+## Where to go next
 
-```
-main
- └── opsp/migrate-to-serverless                 (initiative branch + worktree)
-      ├── opsx/migrate-to-serverless/extract-auth     (change branch, merged)
-      ├── opsx/migrate-to-serverless/payment-api      (change branch, merged)
-      └── opsx/migrate-to-serverless/payment-webhooks (change branch, open)
-```
-
-**Initiative branch** (`opsp/<initiative-name>`): created by whichever planning workflow runs first
-— `/opsp:backlog` on a fresh idea, or `/opsp:propose`. The initiative lives on it from its first
-persisted thought to its merge, so the records that plan the work sit on the branch that implements
-them.
-
-**Change branch** (`opsx/<initiative-name>/<change-name>`): created before each opsx apply step.
-Implementation happens here, and it merges into the initiative branch after opsx archive. The
-worktree is pruned; the branch ref is kept, so detail survives a squash merge.
-
-**Closing an initiative** — the order is forced:
-
-```
-  opsp/<initiative>  ──rebase──●──attest──●──archive──●──▶ main
-```
-
-Rebase first, because `archive` compiles against whatever records it can see — compile before
-rebasing and the artifact is wrong the instant it merges. Attest before merging, not after: a second
-pull request carrying only attestation adds history noise, and in practice is the one that never
-happens.
-
-**One pull request per initiative.** Change branches merging into the initiative branch are
-engineering-internal. The single `opsp/* → main` pull request is where every other hat arrives.
-
-**Conflict handling**: the agent pauses and presents the conflict. It never auto-resolves. A
-conflict in a *compiled* artifact — `squad/*.md`, `architecture.md`, `DECISION-MAP.md`, `BOARD.md` —
-is resolved by rebasing and recompiling, never by hand-merging.
-
-Branch names use forward slashes on all platforms; worktree paths use hyphens, because Windows
-rejects slashes in paths.
-
-Full recommendation, including CI and how to adapt this to trunk-based, gitflow or release trains:
-[`docs/git-workflow.md`](docs/git-workflow.md).
-
----
-
-## Review Modes & Checkpoints
-
-Selected at the start of `/opsp:apply`, changeable at any checkpoint.
-
-### Three Modes
-
-| Mode | Pauses After | Best For |
-|------|-------------|----------|
-| **Per-milestone** (default) | Each milestone completes | Most initiatives — review at natural boundaries |
-| **Per-change** | Each opsx change is archived | High-scrutiny work — review every change |
-| **Continuous** | Only for surrogate escalations | Trusted execution with well-established surrogate |
-
-### Checkpoint Actions
-
-At each checkpoint, the operator chooses:
-
-1. **Approve and continue** (default) — Confirm the work is good. Approval is logged in the initiative descriptor with timestamp and optional note for audit trail.
-2. **Raise change request** — Something needs correction. Fork into "I know the fix" (direct propose) or "I need to explore" (explore first). See [Mid-Lifecycle Interventions](#checkpoint-change-requests-within-apply).
-3. **Switch review mode** — Change the pause granularity going forward.
-4. **Stop here (resume later)** — Pause the initiative. Resume by running `/opsp:apply` again.
-
----
-
-## Power User Scenarios
-
-### Brownfield to Greenfield Transition
-
-You have an existing codebase with no documentation. You want to adopt OpenSprint and start working on a major initiative.
-
-```
-opensprint init --tools claude       # Set up agent skills
-/opsp:knockdown                      # Reverse-engineer surrogate from codebase
-/opsp:explore                        # Brainstorm the initiative with surrogate context
-/opsp:propose migrate-to-serverless  # Formalize into driver-specs, ADRs, milestones
-/opsp:apply migrate-to-serverless    # Execute with full surrogate backing
-/opsp:archive migrate-to-serverless  # Compile final architecture state
-```
-
-### Mid-Initiative Course Correction
-
-After completing 2 of 5 milestones, you realize the authentication approach needs rethinking.
-
-```
-# Stop the current apply (select "Stop here" at checkpoint)
-/opsp:reexplore migrate-to-serverless
-# Explore presents: 2 completed, 3 pending, current surrogate state
-# Discussion leads to: add corrective milestone, revise milestone 3
-# Agent archives the old milestone 3 proposal, creates a new one
-/opsp:apply migrate-to-serverless
-# Resume execution with the revised plan
-```
-
-### Driver Spec Changed by External Force
-
-A new compliance requirement drops: GDPR now requires data residency in the EU.
-
-```
-/opsp:driver add
-# "DS-GDPR: All user PII must be stored in EU data centers"
-/opsp:rebuild-assess DS-GDPR
-# Traces impact: DEC-002 (DynamoDB for sessions) is affected
-# DynamoDB global tables might need reconfiguration
-# Operator reaffirms or supersedes each affected decision
-# DECISION-MAP.md is regenerated
-```
-
-### Continuous Mode for Trusted Execution
-
-Your surrogate is well-established (many driver specs, solid ADRs). You trust the agent to execute autonomously.
-
-```
-/opsp:apply migrate-to-serverless
-# Select "Continuous" review mode
-# Agent executes all milestones without pausing
-# Only stops for genuine ambiguity the surrogate can't resolve
-# Review the complete work afterwards with /opsp:review
-```
-
----
-
-## Artifact Reference
-
-| Path | Created By | Purpose |
-|------|-----------|---------|
-| `opensprint/driver-specs/DS-*.md` | `/opsp:driver`, `/opsp:propose`, `/opsp:knockdown` | External constraints |
-| `opensprint/ADRs/DEC-*.md` | `/opsp:decide`, `/opsp:propose`, `/opsp:knockdown` | Architectural decisions with rationale |
-| `opensprint/DECISION-MAP.md` | `/opsp:tree` (auto-regenerated) | Decision tree with blast radius |
-| `opensprint/architecture.md` | `/opsp:archive`, `/opsp:knockdown` | Compiled architectural state |
-| `opensprint/initiatives/<name>.md` | `/opsp:propose` | Initiative descriptor with milestones |
-| `opensprint/knockdown/toc.yaml` | `/opsp:knockdown` | File scan progress (resumable) |
-| `opensprint/knockdown/summaries/` | `/opsp:knockdown` | Compacted file/directory metadata |
-| `opensprint/knockdown/findings.md` | `/opsp:knockdown` | Candidate ADRs and driver-specs |
+| | |
+|---|---|
+| [Three pillars](docs/pillars.md) | why the tool is shaped this way |
+| [Concepts](docs/concepts.md) | driver-specs, hats, measures, authorities, states |
+| [Workflows](docs/workflows.md) | all fifteen, and the CLI beneath them |
+| [Git workflow](docs/git-workflow.md) | fitting this to your branching and CI |
+| [Installation](docs/installation.md) | setting it up |

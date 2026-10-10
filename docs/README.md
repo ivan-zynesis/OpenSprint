@@ -5,6 +5,7 @@ participants may be human, agent, or both.
 
 | Page | Read it when |
 |---|---|
+| [Three pillars](pillars.md) | you want the reasoning the whole design answers to |
 | [Installation](installation.md) | setting the tool up in a repository |
 | [Concepts](concepts.md) | you want to know what a driver-spec, a hat or an attestation actually is |
 | [Workflows](workflows.md) | you want the command reference and the order things run in |

@@ -1,92 +1,109 @@
 # dev — how is it built?
 
+Describes **the system**, citing decisions where they explain a choice and paths where they were
+observed. Thirty-seven decisions feed this hat; none of them are enumerated here, because a list of
+condensed ADRs tells a reader nothing about what was built (`DS-BIG-PICTURE`).
+
+**Nothing below is attested.** Claims citing a path are *observed* — true of the code today, and
+possibly accidental. Claims citing a record are *decided* — binding, and not necessarily true yet
+(`DS-ATTESTED-TRUTH`).
+
 ## Tech Stack
 
-A **TypeScript CLI on Node**, distributed through npm. Node `>=20.19.0`, ESM modules, compiled
-with `tsc` (`package.json`, `tsconfig.json`). The toolchain choice is not recorded as a decision
-in this repository — it predates the surrogate.
+**TypeScript on Node ≥20.19.0, ESM, distributed via npm as `@ivan-lee/opensprint`**
+(`package.json`, `tsconfig.json`). The binary is `opensprint`.
 
-Nine runtime dependencies, each doing one job (`package.json`):
+Commander.js for the CLI, Zod for validation, chalk and ora for terminal output, fast-glob for file
+matching, `yaml` for parsing (`package.json`). Vitest for tests, with `pool: 'forks'` for process
+isolation and at most four workers (`vitest.config.ts`).
 
-| | |
-|---|---|
-| `commander` | the CLI surface — every command registers here |
-| `zod` | schema validation, used for both project config and record shapes |
-| `yaml` | frontmatter and schema parsing |
-| `fast-glob` | rule discovery and observation, with directory pruning (`DEC-013`) |
-| `chalk` · `ora` | terminal output |
-| `@inquirer/*` | prompts, imported dynamically — static imports hang the pre-commit hook |
-| `posthog-node` | command-name telemetry |
+**No server and no persistent store.** The CLI runs once per invocation; durable state is markdown
+with YAML frontmatter, read from the working tree. That is what makes the surrogate diffable,
+mergeable and reviewable by the same tools as the code (`DEC-001`).
 
-`pnpm` is the package manager, pinned by `pnpm-lock.yaml`. Both a `pnpm-lock.yaml` and a
-`package-lock.json` are present, which is a small inconsistency rather than a decision.
+Two GitHub Actions workflows: a full gate on pull request and push, and changesets release
+preparation (`.github/workflows/`).
 
 ## Runtime Topology
 
-There is no server. The CLI runs once per invocation and exits; everything else is files on disk.
+**The deterministic/synthetic split is the load-bearing structure.** Grouping, hashing, staleness,
+gating and harvesting live in code so they can be verified without a model; condensing prose lives
+in a skill. Neither half computes the other's answer (`DEC-010`, `DEC-014`).
 
 ```
-   operator / agent
-         │
-         ▼
-   bin/openspec.js ──► dist/cli/index.js        commander registers every command
-         │
-         ├──► commands/          change · spec · validate · compact · workflow
-         │
-         └──► core/
-                ├─ compact/      sections · records · manifest · status · rules · loops · edges
-                ├─ hats.ts       registry, roles, validation
-                ├─ decision-map  tree, blast radius
-                └─ templates/    14 OPSP workflow templates, compiled into skills at init
-
-   reads                          writes
-   ─────                          ──────
-   opensprint/driver-specs/       opensprint/squad/*.md        via the skill
-   opensprint/ADRs/               opensprint/squad/.manifest.json  via `compact seal`
-   openspec/config.yaml           opensprint/architecture.md   via the skill
-   the project's source           (nothing else)
+  RECORDS                     src/core/
+  driver-specs/ ADRs/           decision-map.ts      parses records, builds the tree
+  initiatives/                  initiatives.ts       parses initiatives and their state
+        │                       hats.ts              registry, roles, objectives, validation
+        │
+        ▼                     src/core/compact/
+  DETERMINISTIC                 records.ts   sections.ts   measures.ts
+  stage · hash · gate           manifest.ts  status.ts     rules.ts
+        │                       loops.ts     edges.ts      amend.ts
+        │                     src/core/board.ts            renders BOARD.md
+        ▼
+  SYNTHETIC                   src/core/templates/workflows/
+  condense prose                15 OPSP workflows + the opsx cycle
+        │
+        ▼
+  COMPILED ARTIFACTS          squad/*.md  architecture.md  DECISION-MAP.md  BOARD.md
 ```
 
-**The split that matters is deterministic versus synthetic.** Grouping, hashing, staleness and
-gating live in code so they can be verified without a model in the loop; writing condensed prose
-lives in a skill. `compact plan` reports what is stale, the skill renders, `compact seal` records,
-`compact check` gates — and neither half computes the other's answer (`DEC-010`, `DEC-014`).
+`DECISION-MAP.md` and `BOARD.md` are generated entirely by code — no skill in the loop — which is
+why they are regenerated rather than sealed and staleness-gated (`DEC-026`). The hat views and
+`architecture.md` are rendered by a skill and therefore carry a provenance manifest that fails the
+build on drift (`DEC-010`).
 
-Universes are git worktrees, so concurrency needs no runtime of its own: `git worktree add`
-produces an independent tree and the surrogate travels in the branch (`DEC-001`).
+**One compile engine.** `/opsp:compact` is the only thing that compiles a view, and `/opsp:archive`
+consumes it rather than reimplementing it (`DEC-014`, `DEC-031`). A compacted view is always **one
+hop from the record** — no derived artifact compiles from another (`DEC-011`).
+
+**Three write modes** (`DEC-027`): *create* a record (`/opsp:decide`, `/opsp:driver`,
+`/opsp:propose`), *derive* an artifact (`/opsp:compact`, `/opsp:archive` — which never write a
+record, `DEC-006`), and *amend* one named section (`/opsp:attest`, bounded to `## Measures` and
+checked by `amend.ts`).
+
+**Parallelism is git.** An initiative is a worktree with its own copy of `opensprint/`, so two can
+run concurrently and disagree; reconciliation traverses depth-first with the initiative as the unit
+of commitment, behind a mandatory read-only planning phase (`DEC-001`, `DEC-003`, `DEC-004`).
 
 ## Entity Schema
 
-**No persistent data store.** The durable state is markdown files with YAML frontmatter, and the
-only structured schemas are Zod validators over parsed content (`src/core/schemas/*.schema.ts`) —
-scenario, requirement, spec and change shapes.
+No database. The durable entities are files, and their schema is frontmatter plus named sections.
 
-The one machine-written file is `opensprint/squad/.manifest.json`: per hat and per section, the
-record ids and content hashes a section was compiled from, the observed files with theirs, the
-combined input hash, and the rendered output hash (`DEC-010`).
+| Entity | Lives in | Identified by | Carries |
+|---|---|---|---|
+| driver-spec | `driver-specs/*.md` | `id`, semantic | `type`, `status`, `hats`, `role` (list), `objective`, `depends-on` |
+| decision | `ADRs/*.md` | `id` | `status`, `depth`, `depends-on`, `supersedes`, `hats` — **never a role** (`DEC-028`) |
+| initiative | `initiatives/*.md` | `id`, resolved before filename | `status`, `state`, `depends-on`, milestones, membership |
+| measure | a record's `## Measures` | — | `### Bar` · `### Posture` · `### Evidence` · `### Exposure` |
 
-The record graph is the real data model, and it has two layers that do not mix:
+**The relationships are the schema.** `depends-on` forms the decision tree, which is what makes
+blast radius computable (`DEC-009`). A record declares one or more hats (`DEC-016`); a decision is
+*owned* by `dev` or `devops` and may cc others (`DEC-028`).
 
-```
-   driver-specs      depends-on ──► driver-specs        the OGSM layer (DEC-016)
-        ▲
-        │ depends-on
-   ADRs ─────────────────────────► ADRs                 the decision layer
+**Identity is deliberately decoupled from filename.** Both readers take `id` from frontmatter and
+use the filename only to sort — which is what lets decisions adopt semantic ids and initiatives
+carry date prefixes without touching a single caller (`DEC-036`). Existing `DEC-001`–`DEC-039` keep
+their numbers permanently; an id that changes is not an id.
 
-   DECISION-MAP.md builds from ADR edges only; driver-spec edges never appear in it.
-```
+**Everything optional is additive.** `role` accepts a string or a list; `objective`, `heading` and
+every measure sub-block may be absent. A record written by an earlier release still parses
+(`DS-BACKWARD-COMPAT`).
 
 ## Open Loops
 
-**Harvested** (`DEC-013`): five of sixteen active decisions have no rule citing them —
-`DEC-005`, `DEC-008`, `DEC-013`, `DEC-015`, `DEC-017`.
-
-`DEC-013` is worth noticing: the decision that harvests rule links is not itself named by one.
+**Harvested:** `decision-unguarded` — **DEC-005**, **DEC-008**, **DEC-013**, **DEC-015**,
+**DEC-017**, **DEC-029**, **DEC-030**, **DEC-031**, **DEC-032**, **DEC-034**, **DEC-035**,
+**DEC-037**, **DEC-038**, **DEC-039**. Fourteen decisions no rule cites.
 
 **Structural:**
 
-- **The toolchain is undocumented as a decision.** TypeScript, Node, ESM, pnpm and the nine
-  dependencies are all observed from manifests, and no ADR explains any of them. Not wrong — they
-  predate the surrogate — but the tech stack above is almost entirely observation with nothing
-  decided behind it.
-- **Two lockfiles.** `pnpm-lock.yaml` and `package-lock.json` both present.
+- **Eleven of the fourteen unguarded decisions were written in one initiative.** They describe
+  behaviour that was built, but no test cites them by id — so the loop that would catch their
+  implementation being removed is open.
+- **Every decision in the project routes here or to `devops`.** That is `DEC-028` working as
+  intended, and it means this hat answers questions it did not ask.
+- **The three sections share an input set.** `tech-stack`, `runtime-topology` and `entity-schema`
+  all take every decision this hat owns, so any new ADR restages all three. Granularity that
+  `DEC-010` exists to provide is not being used here.

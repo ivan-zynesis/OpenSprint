@@ -5,7 +5,8 @@
 > It records what the project set out to do and why, written before any of it was built. Its
 > claims are left standing as what was believed at the time, including the ones that later moved.
 >
-> **For what OpenSprint is now**, read [`opensprint/squad/index.md`](opensprint/squad/index.md) —
+> **For the design philosophy as it stands now**, read [`docs/pillars.md`](docs/pillars.md).
+> **For what OpenSprint is**, read [`opensprint/squad/index.md`](opensprint/squad/index.md) —
 > compiled from the records, and unable to drift from them.
 
 ---
