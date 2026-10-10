@@ -84,12 +84,12 @@ The step function from idea to proposal splits, and both paths stay open:
 - [ ] git-contract: worktree at apply; rebase → attest → archive → merge; the PR-time state gate; git as a third input to the state check
 - [ ] compact-in-archive: archive consumes compact
 - [ ] attest-context: the narrow-context attest skill; evidence as a CI artifact reference, with a harvest rule for references that do not resolve
-- [ ] record-naming: widen `RECORD_ID_PATTERN`, then stop allocating decision numbers; date-prefix initiative filenames once `initiative-parser` resolves by frontmatter `id:`
+- [ ] record-naming: **half done** — `RECORD_ID_PATTERN` was widened ahead of this milestone, as a prerequisite to naming `surrogate-currency`'s decisions semantically; see that initiative. Remaining: stop allocating decision numbers in the tooling, and date-prefix initiative filenames once `initiative-parser` resolves by frontmatter `id:`
 - [ ] sub-frameworks: SWOT-like strategy rendering compiled from cited ADRs; BDD bar forms split by hat
 
 **This initiative depends on [[lifecycle-beyond-build]]** and cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist — attest has nothing to write into, and `declined` has no state machine to join, until they do.
 
-`record-naming` carries two ordering constraints that cannot be taken on trust. `RECORD_ID_PATTERN` must widen **before** the first semantic decision id is written, or the rule harvest goes silently blind to every new decision. Initiative filenames must stay unprefixed until `initiative-parser` resolves by frontmatter `id:`, because skills construct `initiatives/<name>.md` directly today.
+`record-naming` carries two ordering constraints that cannot be taken on trust. `RECORD_ID_PATTERN` had to widen **before** the first semantic decision id was written, or the rule harvest would have gone silently blind to every new decision — so that half was pulled forward and landed with [[surrogate-currency]], stopping the numbered era at `DEC-044`. Initiative filenames must stay unprefixed until `initiative-parser` resolves by frontmatter `id:`, because skills construct `initiatives/<name>.md` directly today.
 
 This initiative's own file is unprefixed for that reason — the convention it establishes cannot apply to it until it ships.
 

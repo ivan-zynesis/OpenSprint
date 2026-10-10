@@ -55,8 +55,21 @@ export const EXCLUDED_DIRS = [
   '.git',
 ] as const;
 
-/** Shape of a record id: DS-KEBAB-NAME or DEC-NNN. */
-const RECORD_ID_PATTERN = /\b(?:DEC-\d{3}|DS-[A-Z][A-Z0-9-]*[A-Z0-9])\b/g;
+/**
+ * Shape of a record id: `DS-KEBAB-NAME`, `DEC-KEBAB-NAME`, or legacy `DEC-NNN`.
+ *
+ * DEC-036 moves decisions to semantic ids and keeps `DEC-001`-`DEC-044`
+ * numbered permanently, because an id that changes is not an id. Both forms
+ * must therefore match forever — this is not a migration window.
+ *
+ * Widening this is the prerequisite DEC-036 recorded: a semantic id written
+ * before it lands is invisible to the harvest, reported `decision-unguarded`
+ * forever and missed by `rule-guards-dead-record`. The numeric branch is
+ * listed first and cannot be folded into the semantic one, since `0` is not
+ * `[A-Z]`.
+ */
+const RECORD_ID_PATTERN =
+  /\b(?:DEC-\d{3}|DEC-[A-Z][A-Z0-9-]*[A-Z0-9]|DS-[A-Z][A-Z0-9-]*[A-Z0-9])\b/g;
 
 export interface RuleIndex {
   /** Record id to the project-relative paths of rule files citing it. */
