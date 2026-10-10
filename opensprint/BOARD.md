@@ -18,6 +18,7 @@ Proposed — a bar is set, no work started.
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
 | [sdlc-operating-contract](initiatives/sdlc-operating-contract.md) | proposed | 0/6 | backlog-and-triage |
+| [surrogate-currency](initiatives/surrogate-currency.md) | proposed | 0/5 | scoped-seal |
 
 ## Doing
 
@@ -52,6 +53,7 @@ risk, and **that initiative's state is the assurance level**.
 |---|---|---|---|
 | `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | in flight |
 | `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | in flight |
+| `DS-ESCALATION-HANDOFF` | Inference can be wrong, and an operator approving quickly may accept a misclassified record. | [surrogate-currency](initiatives/surrogate-currency.md) | committed, with a bar |
 | `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
 
 ## Problems
