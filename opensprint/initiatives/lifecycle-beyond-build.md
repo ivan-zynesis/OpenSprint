@@ -1,7 +1,7 @@
 ---
 id: lifecycle-beyond-build
 status: active
-state: attested
+state: building
 created: 2026-10-01
 ---
 
@@ -134,6 +134,8 @@ The assurance gradient this produces is the reason exposures are worth recording
 
 ## Driver Specs
 
+- DS-ATTEST-AS-REVIEW
+- DS-DOCUMENTATION-REVIEWED
 - DS-MAINTAINER-INHERITED
 - DS-MEASURE-ANATOMY
 - DS-STRATEGY-ALTITUDE
@@ -154,6 +156,11 @@ The assurance gradient this produces is the reason exposures are worth recording
 - DEC-026 — `BOARD.md` as a compiled sibling of `DECISION-MAP.md`
 - DEC-027 — record amendment as a third write mode
 - DEC-028 — a decision is owned by dev/devops, carries no role, and may cc other hats
+- DEC-040 — attest reads the tests; source, design and rationales stay out (supersedes DEC-033)
+- DEC-041 — posture is the judgement; evidence and exposure are conditional on it
+- DEC-042 — the three review questions live on the initiative; RACI is the residue after automation
+- DEC-043 — the agent that wrote the tests may not attest them
+- DEC-044 — a second write target: the configurable documentation directory
 
 ## Milestones
 
@@ -167,6 +174,8 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
 - [x] attest-tool: The `/opsp:attest` skill, with bounded record amendment
 - [x] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
+- [ ] attest-as-review: Reading scope superseded — test files in, source and ADR rationales out ([[DEC-040]]); posture-conditional evidence and exposure plus `measure-unattested` ([[DEC-041]]); the three review questions on the initiative, with RACI as the residue after automation ([[DEC-042]]); the same agent may not write the tests and attest them ([[DEC-043]])
+- [ ] attest-documentation: A second write target — the configurable documentation directory ([[DEC-044]]); documentation adequacy as a review question ([[DS-DOCUMENTATION-REVIEWED]]); harvest `reversibility-unstated`, `blast-radius-unstated`, `raci-unassigned`
 
 ## Progress
 
