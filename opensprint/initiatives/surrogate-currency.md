@@ -89,7 +89,7 @@ across two milestones of `lifecycle-beyond-build`.
 - [x] render-on-milestone: `/opsp:apply` compiles stale `dev` and `devops` sections at each milestone boundary, after the change branch merges
 - [x] escalation-handoff: the visible pause; inferred classification carried in the question with a draft record and blast radius; explicit approval; the affected hat's view compiled on approval
 - [x] knockdown-views: `/opsp:knockdown` produces all five views, empty `product` and `maintainer` rendered as a first-class finding
-- [ ] migrate-tool: `/opsp:migrate` — detect records the current shapes cannot select, grill the operator one record at a time, backfill on confirmation. **Validated against this repository's own stale state** (see below)
+- [x] migrate-tool: `/opsp:migrate` — detect records the current shapes cannot select, grill the operator one record at a time, backfill on confirmation. **Validated against this repository's own stale state** (see below)
 
 `scoped-seal` genuinely blocks the two after it. `knockdown-views` and `migrate-tool` are
 independent of the rest and of each other.
@@ -128,18 +128,29 @@ Knockdown now explicitly refuses to assign a `role` or `objective` to an inferre
 
 The summary names the seven maintainer objectives with nothing against them, framed as the starting backlog rather than as four-of-five-views-incomplete.
 
+**5/5 — `migrate-tool`** · opsx change `2026-10-10-migrate-tool`
+
+`findMigrations` detects four kinds as data — a role no hat accepts, a record no section can select, a bar predating the anatomy, and a hat whose every section selects nothing. The last is the only finding that is a property of the *view* rather than of a record, and it is how a shape change nobody noticed surfaces.
+
+**It found a bug in shipped code.** `record-without-objective` has silently never fired in production since `lifecycle-beyond-build` milestone 2: `open-loops` declares `inputs: 'none'` and no roles, and treating "declares no roles" as "takes anything" made every record look reachable. Its tests passed only because the fixtures had no `open-loops` section — exactly the validated-against-your-own-fixtures risk this change's design had named. Fixed in both call sites.
+
 ## Notes
 
-**This repository's views are deliberately left stale — do not recompile them.**
+**Corrected: the stale views were never a migration fixture.**
 
-Twelve sections are stale and `compact check` fails. That is not an oversight waiting to be tidied: it
-is a **live migration fixture**, and the only real one anybody has. It was produced honestly, by
-three milestones of shape changes landing on records written against the old shapes, which is
-exactly the situation `/opsp:migrate` exists for.
+This was recorded at proposal as a live test case for `/opsp:migrate`, and building that tool showed
+it was two different things conflated. The stale sections are **ordinary staleness** — records were
+*added* during these sessions, which is what archive clears. A migration case is a record the
+current shapes **cannot select**, and this repository has zero: `validateRoles`,
+`record-without-objective` and `record-unclassified` all agree.
 
-Recompiling to make the gate green destroys the test case and leaves the tool validated against
-synthetic fixtures only. The views are compiled at the **end** of this initiative, as the final
-check on whether migrate actually works — not before.
+The only two genuine cases — `DS-HIGH-IMPACT-OPS` and `DS-BACKWARD-COMPAT` at `role: bar` — were
+hand-migrated in `lifecycle-beyond-build` milestone 2. **The fixture that motivated the tool was
+consumed by the work that proved the need.**
+
+So `/opsp:migrate` ships validated against the historical case reconstructed in tests, and nothing
+else. The next real shape change is its first true validation. That is stated in the milestone's
+tasks rather than left to be discovered.
 
 **Decision ids are semantic from here.** [[DEC-036]] decided this and recorded a prerequisite — the
 rule harvest matched `DEC-\d{3}` only, so a semantic id written before widening it would have been
