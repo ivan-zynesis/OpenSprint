@@ -137,24 +137,100 @@ When you encounter ambiguity during implementation:
 
 2. **If YES** → resolve it silently, continue working. Note: "Resolved via DEC-001" or "Resolved via DS-PRICING" in your reasoning.
 
-3. **If NO** → this is an escalation point. **PAUSE and ask the operator.**
+3. **If NO** → **this is a hat handoff, not an interruption.**
 
-   But do NOT ask the raw implementation question. Reformulate it as a higher-level question whose answer enriches the surrogate:
+   A specification that does not cover everything a developer needs is the **normal case**. You have
+   not hit an obstacle; you have found that product or maintainer left something unsaid
+   (\`DS-ESCALATION-HANDOFF\`). Hand back, visibly.
 
-   \`\`\`
-   BAD:  "Should I use Express or Fastify for this endpoint?"
-   GOOD: "The initiative requires API endpoints for payment processing.
-          Current architecture uses Express (from the monolith).
-          Should we standardize on Express for all new services,
-          or adopt a different framework for serverless functions?
-          This decision will affect all future service milestones."
-   \`\`\`
+#### Set the dev hat down
 
-   When the operator answers:
-   - Classify the answer: new ADR? new driver-spec? update to existing?
-   - Write the appropriate opensprint artifact
-   - Regenerate DECISION-MAP.md if ADRs changed
-   - Resume the opsx cycle with the new knowledge
+Say so plainly. Apply is **paused**, at this milestone, awaiting a named hat:
+
+\`\`\`
+══ PAUSED — milestone 2 of multi-region-failover ════════════════
+   setting down the dev hat
+   this question needs: product
+\`\`\`
+
+The operator has the diff in their head too. Unless something tells them which accountability they
+are exercising, they will answer as a developer — and *"what should the timeout be?"* answered by
+someone thinking about retries is a different answer from the same question considered against what
+the business promised.
+
+#### Ask with the classification already in it
+
+Do **not** ask an open question and classify afterwards. You already know what you need and what
+shape the answer must take, and withholding that makes the operator compose prose against a schema
+they cannot see.
+
+Infer the hat — never ask which one it is. A driver-spec's \`type\` maps to its hat, and every
+decision is owned by \`dev\` or \`devops\` (\`DEC-028\`). Carry the inference *in the question*:
+
+\`\`\`
+  I need to know:    Settlement must complete within some window, and nothing
+                     states it. The retry budget depends on it.
+
+  I believe this is: product · a goal
+                     inferred from: it constrains what the system must do,
+                     not how it is built
+
+  Proposed record:   DS-SETTLEMENT-WINDOW   (type: product, role: goal)
+
+      Settlement completes within <window> of the originating transaction.
+
+      ## Measures
+      - **Primary**: <how this is known to be met>
+      ### Bar
+      - **dimension**: <axis>
+      - **chosen**: <position>
+      - **traded for**: <cost>
+      - **neighbour**: <position not taken, or 'unrecorded'>
+
+  If you confirm, this changes:
+      · DEC-RETRY-BUDGET depends on DS-RTO and may need re-evaluation
+      · milestone 3 (failover-runbook) is scoped against it
+      · product/goals and product/measures go stale
+
+  [1] Approve   [2] Correct the classification   [3] Answer differently
+\`\`\`
+
+**The blast radius is part of the question, not a footnote.** Nobody can consent to a change whose
+cost is not shown, and a driver-spec can invalidate decisions already made — which is the entire
+premise of \`/opsp:rebuild-assess\`.
+
+**Correcting the classification is an offered action**, which is how the inference stays falsifiable
+without a second prompt. Confirming it happens by approving the record.
+
+#### On approval
+
+Write the record. Regenerate \`DECISION-MAP.md\` if decisions changed.
+
+Then — and only then — you may compile that hat's view (\`DEC-COMPILE-ON-APPROVAL\`). The accountable
+author is present and has just approved, which is the only condition \`DS-VIEW-AUTHORSHIP\` requires:
+
+\`\`\`bash
+openspec compact plan --hat product
+# render the stale sections
+openspec compact seal --hat product
+\`\`\`
+
+**Only the hat the escalation was classified into.** A product escalation says nothing about
+maintainer's bars and licenses nothing there.
+
+**If the operator declines or answers differently**, write nothing and compile nothing.
+
+#### Pick the dev hat back up
+
+Resuming is its own step, said out loud:
+
+\`\`\`
+══ RESUMING — milestone 2 ═══════════════════════════════════════
+   picking the dev hat back up
+   now resolved by: DS-SETTLEMENT-WINDOW
+\`\`\`
+
+The surrogate has grown. The question is never asked again.
 
 ### Step 2d: OPSX Archive, Merge & Prune
 After all tasks are complete:
