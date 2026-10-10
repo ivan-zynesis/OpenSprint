@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OpenSprint (package: `@ivan-zynesis/opensprint`) is an AI-native engineering harness for sprint and milestone orchestration, forked from Fission AI's OpenSpec. It's a TypeScript/Node.js CLI tool.
+OpenSprint (package: `@ivan-lee/opensprint`) is an AI-native engineering harness for sprint and milestone orchestration, forked from Fission AI's OpenSpec. It's a TypeScript/Node.js CLI tool.
 
 ## Common Commands
 

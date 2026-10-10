@@ -1,628 +1,256 @@
 # Concepts
 
-This guide explains the core ideas behind OpenSpec and how they fit together. For practical usage, see [Getting Started](getting-started.md) and [Workflows](workflows.md).
+Everything here exists to answer one question: **when an agent or a new engineer asks "why is it
+like this?", is there an answer, and can it be trusted?**
 
-## Philosophy
+---
 
-OpenSpec is built around four principles:
-
-```
-fluid not rigid         — no phase gates, work on what makes sense
-iterative not waterfall — learn as you build, refine as you go
-easy not complex        — lightweight setup, minimal ceremony
-brownfield-first        — works with existing codebases, not just greenfield
-```
-
-### Why These Principles Matter
-
-**Fluid not rigid.** Traditional spec systems lock you into phases: first you plan, then you implement, then you're done. OpenSpec is more flexible — you can create artifacts in any order that makes sense for your work.
-
-**Iterative not waterfall.** Requirements change. Understanding deepens. What seemed like a good approach at the start might not hold up after you see the codebase. OpenSpec embraces this reality.
-
-**Easy not complex.** Some spec frameworks require extensive setup, rigid formats, or heavyweight processes. OpenSpec stays out of your way. Initialize in seconds, start working immediately, customize only if you need to.
-
-**Brownfield-first.** Most software work isn't building from scratch — it's modifying existing systems. OpenSpec's delta-based approach makes it easy to specify changes to existing behavior, not just describe new systems.
-
-## The Big Picture
-
-OpenSpec organizes your work into two main areas:
+## The record and the views
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│                        openspec/                                   │
-│                                                                    │
-│   ┌─────────────────────┐      ┌───────────────────────────────┐   │
-│   │       specs/        │      │         changes/              │   │
-│   │                     │      │                               │   │
-│   │  Source of truth    │◄─────│  Proposed modifications       │   │
-│   │  How your system    │ merge│  Each change = one folder     │   │
-│   │  currently works    │      │  Contains artifacts + deltas  │   │
-│   │                     │      │                               │   │
-│   └─────────────────────┘      └───────────────────────────────┘   │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
+   THE RECORD                  what a team decided, and why
+   ──────────                  hand-written, source of truth
+   driver-specs/               constraints — functional and non-functional
+   ADRs/                       decisions, each tracing to the constraint it answers
+   initiatives/                work, as containers that fill over time
+        │
+        │   opensprint compact
+        ▼
+   THE VIEWS                   what a team needs to read
+   ─────────                   compiled, never hand-edited
+   squad/*.md                  one per hat
+   architecture.md             the whole system
+   DECISION-MAP.md             the decision tree, with blast radius
+   BOARD.md                    every initiative by state
 ```
 
-**Specs** are the source of truth — they describe how your system currently behaves.
+**If a view is wrong, the system is wrong.** The fix is to change a record, never the view —
+`opensprint compact check` fails the build when a view disagrees with what it was compiled from.
 
-**Changes** are proposed modifications — they live in separate folders until you're ready to merge them.
+That is also why documentation is not a second effort here. The records are written *during* the
+work, because the work cannot proceed without them; rendering them costs nothing extra.
 
-This separation is key. You can work on multiple changes in parallel without conflicts. You can review a change before it affects the main specs. And when you archive a change, its deltas merge cleanly into the source of truth.
+---
 
-## Specs
+## Driver specs and decisions
 
-Specs describe your system's behavior using structured requirements and scenarios.
+A **driver-spec** is a constraint that comes from outside the code: a product requirement, a legal
+obligation, a reliability target, a business reality. It states what must be true, not how.
 
-### Structure
+An **ADR** is a decision that answers one. It records the question, the options weighed, the choice,
+and — importantly — **an invalidation trigger**: what would have to change for this to be
+reconsidered.
 
 ```
-openspec/specs/
-├── auth/
-│   └── spec.md           # Authentication behavior
-├── payments/
-│   └── spec.md           # Payment processing
-├── notifications/
-│   └── spec.md           # Notification system
-└── ui/
-    └── spec.md           # UI behavior and themes
+DS-SOME-CONSTRAINT          "payments must settle within 2 seconds"
+      ▲
+      │ depends-on
+DEC-QUEUE-BACKEND           "we use X, because …"   ← owned by dev or devops
 ```
 
-Organize specs by domain — logical groupings that make sense for your system. Common patterns:
+A decision is owned by **dev** or **devops** — never by product or maintainer. Something that
+genuinely belongs to those hats is a *constraint*, so it is a driver-spec. Other hats may be listed
+on a decision, but that is cc, not ownership.
 
-- **By feature area**: `auth/`, `payments/`, `search/`
-- **By component**: `api/`, `frontend/`, `workers/`
-- **By bounded context**: `ordering/`, `fulfillment/`, `inventory/`
+---
 
-### Spec Format
+## Four hats
 
-A spec contains requirements, and each requirement has scenarios:
+Accountability splits four ways. One person may wear all four; an agent must be told which it is
+wearing. A hat is a **context boundary** — in practice, it is *what you load*.
+
+| Hat | Owns the question | Shape of its view |
+|---|---|---|
+| **product** | what must it **do**? | objective · goals · strategies · measures |
+| **maintainer** | what must be **true of it** while it does that? | seven objectives, each with a goal, strategy and measure |
+| **dev** | how is it **built**? | tech-stack · runtime-topology · entity-schema |
+| **devops** | how is it **stood up and kept running**? | infra-architecture · gitops |
+
+### Why maintainer is different
+
+Maintainer is the **technical product manager** — the same OGSM framework as product, with one
+difference that carries everything: **its objectives are inherited, not discovered.** Every software
+project worries about the same seven things, which is why the accountability was split off and given
+to a specialist.
+
+```
+                          | Goal        | Strategy          | Measure
+ -------------------------+-------------+-------------------+------------------
+  security & access       |             |                   |
+  isolation & confidential|             |                   |
+  privacy, retention&legal|             |                   |
+  integrity & correctness |             |                   |
+  change & quality        |             |                   |
+  availability&continuity |             |                   |
+  cost & budget           |             |                   |
+```
+
+**An empty row is the most useful cell in the table.** It says nobody has stated what this system
+does about that concern. The list is extensible — a project adds an eighth objective in
+`openspec/config.yaml`.
+
+`cost & budget` is what the system costs to run and maintain. The business model — pricing, margin —
+belongs to product.
+
+A maintainer **strategy** states a position and cites the dev/devops decisions implementing it. It
+never describes the mechanism: that belongs to another hat, and the citation requirement is what
+enforces it — there is no record in this hat you could cite for a mechanism claim.
+
+---
+
+## A measure has four parts
+
+The same four, for every hat. They split across time, and that split is the point:
+
+```
+      ex ante — when the work is proposed        ex post — when it is attested
+   ┌───────────────────────────┐              ┌──────────────────────────────┐
+   │ BAR                       │              │ POSTURE   met? or, where no  │
+   │   the acceptance criterion│              │           bar is set, the    │
+   │   handed to the engineer  │              │           honest position    │
+   │   without other detail    │              │ EVIDENCE  what asserts it    │
+   │                           │              │ EXPOSURE  what remains at    │
+   │                           │              │           risk, and the plan │
+   └───────────────────────────┘              └──────────────────────────────┘
+```
+
+Written inside a record's `## Measures` section:
 
 ```markdown
-# Auth Specification
+## Measures
 
-## Purpose
-Authentication and session management for the application.
+- **Primary**: no credential reaches a log
 
-## Requirements
+### Bar
 
-### Requirement: User Authentication
-The system SHALL issue a JWT token upon successful login.
+- **dimension**: convenience ←→ secret hygiene
+- **chosen**: scanned on every push, build fails on a hit
+- **traded for**: a slower pipeline, and occasional false positives
+- **neighbour**: unrecorded — nothing says what pre-commit scanning would cost
 
-#### Scenario: Valid credentials
-- GIVEN a user with valid credentials
-- WHEN the user submits login form
-- THEN a JWT token is returned
-- AND the user is redirected to dashboard
+### Posture
 
-#### Scenario: Invalid credentials
-- GIVEN invalid credentials
-- WHEN the user submits login form
-- THEN an error message is displayed
-- AND no token is issued
+- **verdict**: met
+- **attested-by**: ivan
+- **attested-on**: 2026-10-09
 
-### Requirement: Session Expiration
-The system MUST expire sessions after 30 minutes of inactivity.
+### Evidence
 
-#### Scenario: Idle timeout
-- GIVEN an authenticated session
-- WHEN 30 minutes pass without activity
-- THEN the session is invalidated
-- AND the user must re-authenticate
+ci/secret-scan run 4821
+
+### Exposure
+
+Historical commits were never scanned.
+mitigated-by: history-rewrite
 ```
 
-**Key elements:**
+**Posture is not a weaker bar.** It is the honest statement in a cell where no bar exists — because
+none was set, and nothing answers where it should sit.
 
-| Element | Purpose |
-|---------|---------|
-| `## Purpose` | High-level description of this spec's domain |
-| `### Requirement:` | A specific behavior the system must have |
-| `#### Scenario:` | A concrete example of the requirement in action |
-| SHALL/MUST/SHOULD | RFC 2119 keywords indicating requirement strength |
+A `### Bar` states its **neighbour** — the position not taken. A bar stated without its trade reads
+like a law of nature when it was a purchase somebody made, and the receipt is what the next
+maintainer actually needs. Saying `unrecorded` is a valid answer; saying nothing is not.
 
-### Why Structure Specs This Way
+---
 
-**Requirements are the "what"** — they state what the system should do without specifying implementation.
+## Three authorities
 
-**Scenarios are the "when"** — they provide concrete examples that can be verified. Good scenarios:
-- Are testable (you could write an automated test for them)
-- Cover both happy path and edge cases
-- Use Given/When/Then or similar structured format
+A compiled claim can rest on three different things, and a reader has to be able to tell which:
 
-**RFC 2119 keywords** (SHALL, MUST, SHOULD, MAY) communicate intent:
-- **MUST/SHALL** — absolute requirement
-- **SHOULD** — recommended, but exceptions exist
-- **MAY** — optional
+| Authority | Cited by | Says | Weakness |
+|---|---|---|---|
+| **decided** | a record id | it binds — departing from it is a defect | **may not be true yet** |
+| **observed** | a path | it is what the code does today | may be an accident |
+| **attested** | evidence · date · attester | asserted true, with an artifact behind it | ages |
 
-### What a Spec Is (and Is Not)
+**Only `attested` licenses an unqualified present-tense claim about the system.**
 
-A spec is a **behavior contract**, not an implementation plan.
+This distinction exists because of a real failure. A compiled view once stated *"operator-only
+reconciliation — absolute, not a preference"* under **Constraints & Non-Negotiables**, while another
+view, compiled in the same pass from the same records, admitted the guardrail was instruction text
+no rule read. Neither was wrong. There was no third category.
 
-Good spec content:
-- Observable behavior users or downstream systems rely on
-- Inputs, outputs, and error conditions
-- External constraints (security, privacy, reliability, compatibility)
-- Scenarios that can be tested or explicitly validated
+A record is **attested** only when it carries both an attestation date and evidence. A verdict with
+nothing asserting it is an opinion.
 
-Avoid in specs:
-- Internal class/function names
-- Library or framework choices
-- Step-by-step implementation details
-- Detailed execution plans (those belong in `design.md` or `tasks.md`)
+---
 
-Quick test:
-- If implementation can change without changing externally visible behavior, it likely does not belong in the spec.
+## Initiatives
 
-### Keep It Lightweight: Progressive Rigor
-
-OpenSpec aims to avoid bureaucracy. Use the lightest level that still makes the change verifiable.
-
-**Lite spec (default):**
-- Short behavior-first requirements
-- Clear scope and non-goals
-- A few concrete acceptance checks
-
-**Full spec (for higher risk):**
-- Cross-team or cross-repo changes
-- API/contract changes, migrations, security/privacy concerns
-- Changes where ambiguity is likely to cause expensive rework
-
-Most changes should stay in Lite mode.
-
-### Human + Agent Collaboration
-
-In many teams, humans explore and agents draft artifacts. The intended loop is:
-
-1. Human provides intent, context, and constraints.
-2. Agent converts this into behavior-first requirements and scenarios.
-3. Agent keeps implementation detail in `design.md` and `tasks.md`, not `spec.md`.
-4. Validation confirms structure and clarity before implementation.
-
-This keeps specs readable for humans and consistent for agents.
-
-## Changes
-
-A change is a proposed modification to your system, packaged as a folder with everything needed to understand and implement it.
-
-### Change Structure
+An initiative is a **container, not a record** — it neither constrains nor decides. It is born at
+intake and fills as the work crystallizes, which is why its state is simply how far down OGSM it
+has got:
 
 ```
-openspec/changes/add-dark-mode/
-├── proposal.md           # Why and what
-├── design.md             # How (technical approach)
-├── tasks.md              # Implementation checklist
-├── .openspec.yaml        # Change metadata (optional)
-└── specs/                # Delta specs
-    └── ui/
-        └── spec.md       # What's changing in ui/spec.md
+  /opsp:backlog    /opsp:propose     /opsp:apply   /opsp:attest   /opsp:archive
+       │                │                 │             │              │
+       ▼                ▼                 ▼             ▼              ▼
+  ┌──────────┬─────────────────┬────────────┬───────────────┬───────────┐
+  │OBJECTIVE │ STRATEGY        │ milestones │ POSTURE       │ compiled  │
+  │GOAL      │ MEASURE (bar)   │ executing  │ EVIDENCE      │ into      │
+  │          │                 │            │ EXPOSURE      │ views     │
+  └──────────┴─────────────────┴────────────┴───────────────┴───────────┘
+   exploring  proposed          building     attested        completed
 ```
 
-Each change is self-contained. It has:
-- **Artifacts** — documents that capture intent, design, and tasks
-- **Delta specs** — specifications for what's being added, modified, or removed
-- **Metadata** — optional configuration for this specific change
+Plus `declined` — terminal, for a candidate considered and dropped. It is kept rather than deleted,
+because **why something was declined is worth more than the idea**: the same proposal returns six
+months later, and one line ends the conversation.
 
-### Why Changes Are Folders
+The hierarchy: an **initiative** is an epic, a **milestone** is a group of tickets or one large
+ticket, and an **openspec change** is a ticket.
 
-Packaging a change as a folder has several benefits:
+State is **declared by the tool and checked by code** — the check reports where a declared state is
+*impossible* given the content, rather than deriving a state and demanding it match. An initiative
+legitimately sits between states.
 
-1. **Everything together.** Proposal, design, tasks, and specs live in one place. No hunting through different locations.
+---
 
-2. **Parallel work.** Multiple changes can exist simultaneously without conflicting. Work on `add-dark-mode` while `fix-auth-bug` is also in progress.
+## Closing the loop, both ways
 
-3. **Clean history.** When archived, changes move to `changes/archive/` with their full context preserved. You can look back and understand not just what changed, but why.
+**Backward** — a rule fails, so you revisit the decision behind it. `driver-spec → ADR →
+implementation → rule`, and back. Without that last arrow a process produces documents; with it,
+drift becomes a build failure.
 
-4. **Review-friendly.** A change folder is easy to review — open it, read the proposal, check the design, see the spec deltas.
-
-## Artifacts
-
-Artifacts are the documents within a change that guide the work.
-
-### The Artifact Flow
+**Forward** — an exposure found at attestation has no backward target. Nothing went wrong upstream:
+the constraint was right, the decision was right, the bar simply was not met. The only honest
+response points at work not yet done:
 
 ```
-proposal ──────► specs ──────► design ──────► tasks ──────► implement
-    │               │             │              │
-   why            what           how          steps
- + scope        changes       approach      to take
+  exposure ──► nothing                     a confession
+  exposure ──► initiative (exploring)      we know, we are thinking
+  exposure ──► initiative (proposed)       committed, with a bar
+  exposure ──► initiative (building)       in flight
+  exposure ──► initiative (declined)       dropped — the exposure stands
 ```
 
-Artifacts build on each other. Each artifact provides context for the next.
-
-### Artifact Types
-
-#### Proposal (`proposal.md`)
-
-The proposal captures **intent**, **scope**, and **approach** at a high level.
-
-```markdown
-# Proposal: Add Dark Mode
-
-## Intent
-Users have requested a dark mode option to reduce eye strain
-during nighttime usage and match system preferences.
-
-## Scope
-In scope:
-- Theme toggle in settings
-- System preference detection
-- Persist preference in localStorage
-
-Out of scope:
-- Custom color themes (future work)
-- Per-page theme overrides
-
-## Approach
-Use CSS custom properties for theming with a React context
-for state management. Detect system preference on first load,
-allow manual override.
-```
-
-**When to update the proposal:**
-- Scope changes (narrowing or expanding)
-- Intent clarifies (better understanding of the problem)
-- Approach fundamentally shifts
-
-#### Specs (delta specs in `specs/`)
-
-Delta specs describe **what's changing** relative to the current specs. See [Delta Specs](#delta-specs) below.
-
-#### Design (`design.md`)
-
-The design captures **technical approach** and **architecture decisions**.
-
-````markdown
-# Design: Add Dark Mode
-
-## Technical Approach
-Theme state managed via React Context to avoid prop drilling.
-CSS custom properties enable runtime switching without class toggling.
-
-## Architecture Decisions
-
-### Decision: Context over Redux
-Using React Context for theme state because:
-- Simple binary state (light/dark)
-- No complex state transitions
-- Avoids adding Redux dependency
-
-### Decision: CSS Custom Properties
-Using CSS variables instead of CSS-in-JS because:
-- Works with existing stylesheet
-- No runtime overhead
-- Browser-native solution
-
-## Data Flow
-```
-ThemeProvider (context)
-       │
-       ▼
-ThemeToggle ◄──► localStorage
-       │
-       ▼
-CSS Variables (applied to :root)
-```
-
-## File Changes
-- `src/contexts/ThemeContext.tsx` (new)
-- `src/components/ThemeToggle.tsx` (new)
-- `src/styles/globals.css` (modified)
-````
-
-**When to update the design:**
-- Implementation reveals the approach won't work
-- Better solution discovered
-- Dependencies or constraints change
-
-#### Tasks (`tasks.md`)
-
-Tasks are the **implementation checklist** — concrete steps with checkboxes.
-
-```markdown
-# Tasks
-
-## 1. Theme Infrastructure
-- [ ] 1.1 Create ThemeContext with light/dark state
-- [ ] 1.2 Add CSS custom properties for colors
-- [ ] 1.3 Implement localStorage persistence
-- [ ] 1.4 Add system preference detection
-
-## 2. UI Components
-- [ ] 2.1 Create ThemeToggle component
-- [ ] 2.2 Add toggle to settings page
-- [ ] 2.3 Update Header to include quick toggle
-
-## 3. Styling
-- [ ] 3.1 Define dark theme color palette
-- [ ] 3.2 Update components to use CSS variables
-- [ ] 3.3 Test contrast ratios for accessibility
-```
-
-**Task best practices:**
-- Group related tasks under headings
-- Use hierarchical numbering (1.1, 1.2, etc.)
-- Keep tasks small enough to complete in one session
-- Check tasks off as you complete them
-
-## Delta Specs
-
-Delta specs are the key concept that makes OpenSpec work for brownfield development. They describe **what's changing** rather than restating the entire spec.
-
-### The Format
-
-```markdown
-# Delta for Auth
-
-## ADDED Requirements
-
-### Requirement: Two-Factor Authentication
-The system MUST support TOTP-based two-factor authentication.
-
-#### Scenario: 2FA enrollment
-- GIVEN a user without 2FA enabled
-- WHEN the user enables 2FA in settings
-- THEN a QR code is displayed for authenticator app setup
-- AND the user must verify with a code before activation
-
-#### Scenario: 2FA login
-- GIVEN a user with 2FA enabled
-- WHEN the user submits valid credentials
-- THEN an OTP challenge is presented
-- AND login completes only after valid OTP
-
-## MODIFIED Requirements
-
-### Requirement: Session Expiration
-The system MUST expire sessions after 15 minutes of inactivity.
-(Previously: 30 minutes)
-
-#### Scenario: Idle timeout
-- GIVEN an authenticated session
-- WHEN 15 minutes pass without activity
-- THEN the session is invalidated
-
-## REMOVED Requirements
-
-### Requirement: Remember Me
-(Deprecated in favor of 2FA. Users should re-authenticate each session.)
-```
-
-### Delta Sections
-
-| Section | Meaning | What Happens on Archive |
-|---------|---------|------------------------|
-| `## ADDED Requirements` | New behavior | Appended to main spec |
-| `## MODIFIED Requirements` | Changed behavior | Replaces existing requirement |
-| `## REMOVED Requirements` | Deprecated behavior | Deleted from main spec |
-
-### Why Deltas Instead of Full Specs
-
-**Clarity.** A delta shows exactly what's changing. Reading a full spec, you'd have to diff it mentally against the current version.
-
-**Conflict avoidance.** Two changes can touch the same spec file without conflicting, as long as they modify different requirements.
-
-**Review efficiency.** Reviewers see the change, not the unchanged context. Focus on what matters.
-
-**Brownfield fit.** Most work modifies existing behavior. Deltas make modifications first-class, not an afterthought.
-
-## Schemas
-
-Schemas define the artifact types and their dependencies for a workflow.
-
-### How Schemas Work
-
-```yaml
-# openspec/schemas/spec-driven/schema.yaml
-name: spec-driven
-artifacts:
-  - id: proposal
-    generates: proposal.md
-    requires: []              # No dependencies, can create first
-
-  - id: specs
-    generates: specs/**/*.md
-    requires: [proposal]      # Needs proposal before creating
-
-  - id: design
-    generates: design.md
-    requires: [proposal]      # Can create in parallel with specs
-
-  - id: tasks
-    generates: tasks.md
-    requires: [specs, design] # Needs both specs and design first
-```
-
-**Artifacts form a dependency graph:**
-
-```
-                    proposal
-                   (root node)
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-         ▼                           ▼
-      specs                       design
-   (requires:                  (requires:
-    proposal)                   proposal)
-         │                           │
-         └─────────────┬─────────────┘
-                       │
-                       ▼
-                    tasks
-                (requires:
-                specs, design)
-```
-
-**Dependencies are enablers, not gates.** They show what's possible to create, not what you must create next. You can skip design if you don't need it. You can create specs before or after design — both depend only on proposal.
-
-### Built-in Schemas
-
-**spec-driven** (default)
-
-The standard workflow for spec-driven development:
-
-```
-proposal → specs → design → tasks → implement
-```
-
-Best for: Most feature work where you want to agree on specs before implementation.
-
-### Custom Schemas
-
-Create custom schemas for your team's workflow:
-
-```bash
-# Create from scratch
-openspec schema init research-first
-
-# Or fork an existing one
-openspec schema fork spec-driven research-first
-```
-
-**Example custom schema:**
-
-```yaml
-# openspec/schemas/research-first/schema.yaml
-name: research-first
-artifacts:
-  - id: research
-    generates: research.md
-    requires: []           # Do research first
-
-  - id: proposal
-    generates: proposal.md
-    requires: [research]   # Proposal informed by research
-
-  - id: tasks
-    generates: tasks.md
-    requires: [proposal]   # Skip specs/design, go straight to tasks
-```
-
-See [Customization](customization.md) for full details on creating and using custom schemas.
-
-## Archive
-
-Archiving completes a change by merging its delta specs into the main specs and preserving the change for history.
-
-### What Happens When You Archive
-
-```
-Before archive:
-
-openspec/
-├── specs/
-│   └── auth/
-│       └── spec.md ◄────────────────┐
-└── changes/                         │
-    └── add-2fa/                     │
-        ├── proposal.md              │
-        ├── design.md                │ merge
-        ├── tasks.md                 │
-        └── specs/                   │
-            └── auth/                │
-                └── spec.md ─────────┘
-
-
-After archive:
-
-openspec/
-├── specs/
-│   └── auth/
-│       └── spec.md        # Now includes 2FA requirements
-└── changes/
-    └── archive/
-        └── 2025-01-24-add-2fa/    # Preserved for history
-            ├── proposal.md
-            ├── design.md
-            ├── tasks.md
-            └── specs/
-                └── auth/
-                    └── spec.md
-```
-
-### The Archive Process
-
-1. **Merge deltas.** Each delta spec section (ADDED/MODIFIED/REMOVED) is applied to the corresponding main spec.
-
-2. **Move to archive.** The change folder moves to `changes/archive/` with a date prefix for chronological ordering.
-
-3. **Preserve context.** All artifacts remain intact in the archive. You can always look back to understand why a change was made.
-
-### Why Archive Matters
-
-**Clean state.** Active changes (`changes/`) shows only work in progress. Completed work moves out of the way.
-
-**Audit trail.** The archive preserves the full context of every change — not just what changed, but the proposal explaining why, the design explaining how, and the tasks showing the work done.
-
-**Spec evolution.** Specs grow organically as changes are archived. Each archive merges its deltas, building up a comprehensive specification over time.
-
-## How It All Fits Together
-
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              OPENSPEC FLOW                                   │
-│                                                                              │
-│   ┌────────────────┐                                                         │
-│   │  1. START      │  /opsx:propose (core) or /opsx:new (expanded)           │
-│   │     CHANGE     │                                                         │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐                                                         │
-│   │  2. CREATE     │  /opsx:ff or /opsx:continue (expanded workflow)         │
-│   │     ARTIFACTS  │  Creates proposal → specs → design → tasks              │
-│   │                │  (based on schema dependencies)                         │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐                                                         │
-│   │  3. IMPLEMENT  │  /opsx:apply                                            │
-│   │     TASKS      │  Work through tasks, checking them off                  │
-│   │                │◄──── Update artifacts as you learn                      │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐                                                         │
-│   │  4. VERIFY     │  /opsx:verify (optional)                                │
-│   │     WORK       │  Check implementation matches specs                     │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐     ┌──────────────────────────────────────────────┐    │
-│   │  5. ARCHIVE    │────►│  Delta specs merge into main specs           │    │
-│   │     CHANGE     │     │  Change folder moves to archive/             │    │
-│   └────────────────┘     │  Specs are now the updated source of truth   │    │
-│                          └──────────────────────────────────────────────┘    │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-**The virtuous cycle:**
-
-1. Specs describe current behavior
-2. Changes propose modifications (as deltas)
-3. Implementation makes the changes real
-4. Archive merges deltas into specs
-5. Specs now describe the new behavior
-6. Next change builds on updated specs
-
-## Glossary
-
-| Term | Definition |
-|------|------------|
-| **Artifact** | A document within a change (proposal, design, tasks, or delta specs) |
-| **Archive** | The process of completing a change and merging its deltas into main specs |
-| **Change** | A proposed modification to the system, packaged as a folder with artifacts |
-| **Delta spec** | A spec that describes changes (ADDED/MODIFIED/REMOVED) relative to current specs |
-| **Domain** | A logical grouping for specs (e.g., `auth/`, `payments/`) |
-| **Requirement** | A specific behavior the system must have |
-| **Scenario** | A concrete example of a requirement, typically in Given/When/Then format |
-| **Schema** | A definition of artifact types and their dependencies |
-| **Spec** | A specification describing system behavior, containing requirements and scenarios |
-| **Source of truth** | The `openspec/specs/` directory, containing the current agreed-upon behavior |
-
-## Next Steps
-
-- [Getting Started](getting-started.md) - Practical first steps
-- [Workflows](workflows.md) - Common patterns and when to use each
-- [Commands](commands.md) - Full command reference
-- [Customization](customization.md) - Create custom schemas and configure your project
+`BOARD.md` renders that gradient, resolving each initiative's **current** state at compile time. A
+pointer at an initiative that does not exist renders as *points nowhere real*, never as mitigated —
+false assurance about a known risk is worse than none.
+
+---
+
+## Open loops
+
+The harvest reports twelve kinds of gap. Nothing gates on them; they are a backlog, and triage is a
+judgement call:
+
+| Kind | Means |
+|---|---|
+| `constraint-unanswered` | a constraint no decision answers |
+| `constraint-unasserted` | answered, but no rule guards any answering decision |
+| `constraint-unmeasurable` | a target with no populated `## Measures` |
+| `decision-unguarded` | a decision no rule cites |
+| `rule-guards-dead-record` | a rule still guarding something superseded |
+| `decision-on-superseded` | a decision resting on an ancestor that moved |
+| `record-unclassified` | a driver-spec with no role, in a hat that uses them |
+| `record-without-objective` | a record its hat's sections cannot select |
+| `measure-unasserted` | a measure with no evidence — an aspiration |
+| `measure-unexposed` | a measure with no stated exposure |
+| `bar-without-neighbour` | a bar that does not state the position not taken |
+| `strategy-unimplemented` | an approach with no decision descending from it |
+| `exposure-unmitigated` | a risk with no planned work behind it |
+
+The first seven are properties of the **record graph**. The rest are properties of an **outcome** —
+and a process that only reports the first kind can tell you a constraint has no measure, never that
+a measure went unmet.

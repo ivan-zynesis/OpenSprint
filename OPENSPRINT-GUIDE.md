@@ -364,21 +364,44 @@ After any correction, the surrogate is reloaded and you're back at the checkpoin
 
 ```
 main
- └── opsp/migrate-to-serverless                 (initiative branch)
+ └── opsp/migrate-to-serverless                 (initiative branch + worktree)
       ├── opsx/migrate-to-serverless/extract-auth     (change branch, merged)
       ├── opsx/migrate-to-serverless/payment-api      (change branch, merged)
       └── opsx/migrate-to-serverless/payment-webhooks (change branch, open)
 ```
 
-**Initiative branch** (`opsp/<initiative-name>`): Created at the start of `/opsp:apply`. All milestone work happens on this branch or its sub-branches.
+**Initiative branch** (`opsp/<initiative-name>`): created by whichever planning workflow runs first
+— `/opsp:backlog` on a fresh idea, or `/opsp:propose`. The initiative lives on it from its first
+persisted thought to its merge, so the records that plan the work sit on the branch that implements
+them.
 
-**Change branch** (`opsx/<initiative-name>/<change-name>`): Created before each opsx apply step. Implementation happens here. Merged into the initiative branch after opsx archive.
+**Change branch** (`opsx/<initiative-name>/<change-name>`): created before each opsx apply step.
+Implementation happens here, and it merges into the initiative branch after opsx archive. The
+worktree is pruned; the branch ref is kept, so detail survives a squash merge.
 
-**Merge flow**: Change branches merge into the initiative branch after each opsx archive. The operator decides when to merge the initiative branch to main.
+**Closing an initiative** — the order is forced:
 
-**Conflict handling**: If a merge conflict occurs, the agent pauses and presents the conflict to the operator. It never auto-resolves.
+```
+  opsp/<initiative>  ──rebase──●──attest──●──archive──●──▶ main
+```
 
-Branch names use forward slashes on all platforms (git handles this regardless of OS).
+Rebase first, because `archive` compiles against whatever records it can see — compile before
+rebasing and the artifact is wrong the instant it merges. Attest before merging, not after: a second
+pull request carrying only attestation adds history noise, and in practice is the one that never
+happens.
+
+**One pull request per initiative.** Change branches merging into the initiative branch are
+engineering-internal. The single `opsp/* → main` pull request is where every other hat arrives.
+
+**Conflict handling**: the agent pauses and presents the conflict. It never auto-resolves. A
+conflict in a *compiled* artifact — `squad/*.md`, `architecture.md`, `DECISION-MAP.md`, `BOARD.md` —
+is resolved by rebasing and recompiling, never by hand-merging.
+
+Branch names use forward slashes on all platforms; worktree paths use hyphens, because Windows
+rejects slashes in paths.
+
+Full recommendation, including CI and how to adapt this to trunk-based, gitflow or release trains:
+[`docs/git-workflow.md`](docs/git-workflow.md).
 
 ---
 

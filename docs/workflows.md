@@ -1,451 +1,166 @@
 # Workflows
 
-This guide covers common workflow patterns for OpenSpec and when to use each one. For basic setup, see [Getting Started](getting-started.md). For command reference, see [Commands](commands.md).
+OpenSprint ships fifteen agent workflows. They are invoked by name in your agent
+(`/opsp:propose`), not from the shell — the CLI underneath them is in the
+[reference](#cli-reference) at the bottom.
 
-## Philosophy: Actions, Not Phases
+## The spine
 
-Traditional workflows force you through phases: planning, then implementation, then done. But real work doesn't fit neatly into boxes.
-
-OPSX takes a different approach:
-
-```text
-Traditional (phase-locked):
-
-  PLANNING ────────► IMPLEMENTING ────────► DONE
-      │                    │
-      │   "Can't go back"  │
-      └────────────────────┘
-
-OPSX (fluid actions):
-
-  proposal ──► specs ──► design ──► tasks ──► implement
+```
+   REAL WORLD ── clients · regulators · incidents · cost · the market
+        │
+        │   /opsp:driver  (external truth)    /opsp:knockdown  (brownfield)
+        ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ 1  IDEATE                         /opsp:explore · /opsp:backlog  │
+  │    high-level ideation — what and why                            │
+  │    explore writes nothing; backlog flushes the brainstorm        │
+  │    PRODUCES  the initiative, at state: exploring   (O + G)       │
+  └──────────────────────────────────────────────────────────────────┘
+        ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ 2  TRIAGE · BRAINSTORM · PROPOSE   /opsp:triage · /opsp:propose  │
+  │    pick up a backlog item, brainstorm strategy, then formalize   │
+  │    PRODUCES  driver-specs · ADRs · milestones   (S + M)          │
+  │    >> the BAR is written here. ex ante. <<                       │
+  └──────────────────────────────────────────────────────────────────┘
+        ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ 3  BUILD                                /opsp:apply → opsx       │
+  │    per milestone: explore → propose → apply → verify → archive   │
+  │    PRODUCES  code · tests · rules · more ADRs                    │
+  └──────────────────────────────────────────────────────────────────┘
+        ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ 4  MEET THE BAR                                  /opsp:attest    │
+  │    posture · evidence · exposure, against each bar               │
+  │    ex post · human in the loop · writes a record, never gates    │
+  └──────────────────────────────────────────────────────────────────┘
+        ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ 5  COMPILE                      /opsp:archive · /opsp:compact    │
+  │    PRODUCES  squad/*.md · architecture.md · BOARD.md             │
+  └──────────────────────────────────────────────────────────────────┘
+        ▼   compact check — drift fails the build
+        └──► harvested open loops land in the backlog, triaged at (2)
 ```
 
-**Key principles:**
+Stages 1 and 2 are each a **think, then persist** pair. `explore` is to `backlog` as `triage` is to
+`propose` — the thinking tool writes nothing, and the persisting tool is where you commit.
 
-- **Actions, not phases** - Commands are things you can do, not stages you're stuck in
-- **Dependencies are enablers** - They show what's possible, not what's required next
+You can also go straight through: `explore → propose`, skipping the backlog, for work that never
+needs to rest.
 
-> **Customization:** OPSX workflows are driven by schemas that define artifact sequences. See [Customization](customization.md) for details on creating custom schemas.
+## Who owns what
 
-## Two Modes
+| Stage | Owns it | Produces |
+|---|---|---|
+| ideate | product / maintainer | the initiative — objective and goal |
+| triage · propose | tech lead · architect · scrum master | driver-specs, ADRs, milestones, the bar |
+| build | dev / devops | code, and the decisions made while writing it |
+| attest | product / maintainer | posture, evidence, exposure |
+| archive | everyone | the compiled views |
 
-### Default Quick Path (`core` profile)
+Most of these hats are worn by the same engineer. That is expected — the boundary is what you load,
+not who you are, and `/opsp:attest` takes it seriously enough to refuse a context that wrote the
+code.
 
-New installs default to `core`, which provides:
-- `/opsx:propose`
-- `/opsx:explore`
-- `/opsx:apply`
-- `/opsx:archive`
+## The workflows
 
-Typical flow:
+### Lifecycle
 
-```text
-/opsx:propose ──► /opsx:apply ──► /opsx:archive
+| Workflow | Does |
+|---|---|
+| `/opsp:explore` | architect-level thinking. **Writes nothing.** |
+| `/opsp:backlog` | flush the in-memory brainstorm to disk as an initiative |
+| `/opsp:triage` | pick up a backlog item: advance, decline, or send back |
+| `/opsp:propose` | formalize into driver-specs, ADRs and milestones |
+| `/opsp:apply` | execute milestones, orchestrating one opsx cycle each |
+| `/opsp:attest` | assess each bar against evidence — the half most processes skip |
+| `/opsp:archive` | compile the surrogate and close the initiative |
+| `/opsp:review` | commit graph, branch status, code review assistance |
+
+### Utility
+
+| Workflow | Does |
+|---|---|
+| `/opsp:driver` | create or edit a driver-spec directly |
+| `/opsp:decide` | record an ADR when ambiguity needs operator judgement |
+| `/opsp:tree` | visualize the decision tree with blast radius |
+| `/opsp:rebuild-assess` | a driver-spec changed — cascade the re-evaluation |
+| `/opsp:compact` | recompile the views |
+
+### Intervention
+
+| Workflow | Does |
+|---|---|
+| `/opsp:reexplore` | revise an initiative's plan mid-flight |
+| `/opsp:knockdown` | reverse-engineer a surrogate from an existing codebase |
+
+### Parallel universes
+
+Each initiative is a worktree with its own copy of the surrogate, so two can run at once and
+disagree.
+
+| Workflow | Does |
+|---|---|
+| `/opsp:rebase` | bring one universe's work into another — soft fork, consensus |
+| `/opsp:abandon` | declare a winner, migrate what is compatible, archive the loser |
+
+Both are **operator-invocable only** — never from a pipeline, a sub-agent, or another skill. A
+corrupted surrogate degrades every downstream agent operation, and the damage is unbounded, so a
+false escalation costs one prompt while a false auto-accept costs the surrogate.
+
+## Attestation, specifically
+
+This is the workflow that distinguishes OpenSprint, so it is worth stating what it will refuse.
+
+**It reads narrowly.** It loads the objective, the goals, the bars and the CI evidence — and *not*
+the implementation diff, the design discussion, or the ADR rationales. Excluding the rationales is
+the part that feels wrong and is right: a rationale is an argument for the thing that was built, so
+loading it biases you toward accepting.
+
+**It will not self-assess.** Asked to attest in the session that wrote the implementation, it says
+so and stops. A narrow context arrived at by forgetting is not a narrow context.
+
+**It will not read the code to fill a gap.** If the evidence cannot answer the bar, that is a
+finding *about the evidence*:
+
+```markdown
+### Posture
+- **verdict**: cannot assess — no e2e coverage for the checkout path
 ```
 
-### Expanded/Full Workflow (custom selection)
+…with an exposure naming what is missing. That is a complete attestation, and it generates exactly
+the backlog item that makes the next one possible.
 
-If you want explicit scaffold-and-build commands (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`), enable them with:
+**It never gates.** It always exits zero. It does not block archive, a merge, or a release, and it
+does not mark anything approved. An unmet bar is recorded as an exposure with a forward pointer. The
+moment it gained a pass/fail exit it would be **certification**, which is deliberately out of scope —
+certification drags change management and release management in behind it.
+
+## CLI reference
+
+The workflows above drive these. You rarely need them directly.
 
 ```bash
-openspec config profile
-openspec update
+opensprint init                    # set up a repository
+opensprint update                  # refresh generated agent instructions
+opensprint config                  # global configuration: tools, delivery mode
+
+opensprint compact plan            # which view sections need recompiling, and from what
+opensprint compact plan --json     #   …as JSON, including each record's citation authority
+opensprint compact seal            # record the current views in the provenance manifest
+opensprint compact check           # fail when a view is stale, tampered or unsealed
+opensprint compact loops           # report open loops
+opensprint compact board           # regenerate BOARD.md
+
+opensprint list                    # changes, or --specs
+opensprint show <item>             # a change or a spec
+opensprint validate <item>         # validate a change or spec
+opensprint archive <change>        # archive a change and sync its specs
+opensprint status                  # artifact completion for a change
 ```
 
-## Workflow Patterns (Expanded Mode)
-
-### Quick Feature
-
-When you know what you want to build and just need to execute:
-
-```text
-/opsx:new ──► /opsx:ff ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
-```
-
-**Example conversation:**
-
-```text
-You: /opsx:new add-logout-button
-
-AI:  Created openspec/changes/add-logout-button/
-     Ready to create: proposal
-
-You: /opsx:ff
-
-AI:  Creating all planning artifacts...
-     ✓ proposal.md
-     ✓ specs/
-     ✓ design.md
-     ✓ tasks.md
-     Ready for implementation!
-
-You: /opsx:apply
-
-AI:  Working through tasks...
-     ✓ Added logout button to header
-     ✓ Implemented session clearing
-     ✓ Added confirmation dialog
-     All tasks complete!
-
-You: /opsx:archive
-
-AI:  ✓ Merged specs
-     ✓ Archived change
-```
-
-**Best for:** Small to medium features, bug fixes, straightforward changes.
-
-### Exploratory
-
-When requirements are unclear or you need to investigate first:
-
-```text
-/opsx:explore ──► /opsx:new ──► /opsx:continue ──► ... ──► /opsx:apply
-```
-
-**Example conversation:**
-
-```text
-You: /opsx:explore
-
-AI:  What would you like to explore?
-
-You: I want to improve page load performance but I'm not sure
-     where the bottlenecks are.
-
-AI:  Let me help investigate...
-     [Analyzes bundle sizes, identifies slow queries, reviews
-     component render patterns]
-
-     I found three main bottlenecks:
-     1. Large unoptimized images
-     2. Synchronous data fetching in ProductList
-     3. Re-renders from context changes
-
-     Which would you like to address first?
-
-You: Let's tackle the data fetching issue.
-
-You: /opsx:new optimize-product-list-fetching
-
-AI:  Created change. Ready to create: proposal
-
-You: /opsx:continue
-
-AI:  Creating proposal based on our exploration...
-     [Writes proposal incorporating investigation insights]
-
-     Ready to create: specs, design
-     Which would you like next?
-
-You: /opsx:continue
-
-AI:  Creating specs...
-```
-
-**Best for:** Performance optimization, debugging, architectural decisions, unclear requirements.
-
-### Parallel Changes
-
-Work on multiple changes at once:
-
-```text
-Change A: /opsx:new ──► /opsx:ff ──► /opsx:apply (in progress)
-                                         │
-                                    context switch
-                                         │
-Change B: /opsx:new ──► /opsx:ff ──────► /opsx:apply
-```
-
-**Example conversation:**
-
-```text
-You: I'm working on add-dark-mode but got pulled into a bug fix
-
-You: /opsx:new fix-login-redirect
-
-AI:  Created openspec/changes/fix-login-redirect/
-
-You: /opsx:ff
-
-AI:  ✓ Created planning artifacts
-
-You: /opsx:apply
-
-AI:  Working on fix-login-redirect...
-     [Implements the fix]
-     All tasks complete!
-
-You: /opsx:archive
-
-AI:  ✓ Archived fix-login-redirect
-
-You: Let's get back to dark mode
-
-You: /opsx:apply add-dark-mode
-
-AI:  Resuming add-dark-mode...
-     Picking up at task 2.3: Update Header...
-```
-
-**Best for:** Parallel work streams, urgent interrupts, team collaboration.
-
-When you have multiple completed changes, use `/opsx:bulk-archive`:
-
-```text
-You: /opsx:bulk-archive
-
-AI:  Found 3 completed changes:
-     - add-dark-mode (all tasks done)
-     - fix-login-redirect (all tasks done)
-     - update-footer (all tasks done)
-
-     Checking for spec conflicts...
-     ⚠ add-dark-mode and update-footer both touch specs/ui/
-
-     Inspecting codebase to resolve...
-     Both changes are implemented. Will apply in chronological order.
-
-     Archive all 3 changes?
-
-You: Yes
-
-AI:  ✓ Archived add-dark-mode
-     ✓ Archived fix-login-redirect
-     ✓ Archived update-footer
-     Specs merged in order: add-dark-mode → update-footer
-```
-
-Bulk archive detects when multiple changes touch the same specs and resolves conflicts by checking what's actually implemented.
-
-### Completing a Change
-
-The recommended completion flow:
-
-```text
-/opsx:apply ──► /opsx:verify ──► /opsx:archive
-                    │                 │
-              validates          prompts to sync
-              implementation     if needed
-```
-
-#### Verify: Check Your Work
-
-`/opsx:verify` validates implementation against your artifacts across three dimensions:
-
-```text
-You: /opsx:verify
-
-AI:  Verifying add-auth...
-
-     COMPLETENESS
-     ✓ All 12 tasks in tasks.md are checked
-     ✓ All requirements in specs have corresponding code
-     ⚠ Scenario "Session timeout after inactivity" not tested
-
-     CORRECTNESS
-     ✓ Implementation matches spec intent
-     ✓ Edge cases from scenarios are handled
-     ✓ Error states match spec definitions
-
-     COHERENCE
-     ✓ Design decisions reflected in code structure
-     ✓ Naming conventions consistent with design.md
-     ⚠ Design mentions "event-driven" but implementation uses polling
-
-     SUMMARY
-     ─────────────────────────────
-     Critical issues: 0
-     Warnings: 2
-     Ready to archive: Yes (with warnings)
-
-     Recommendations:
-     1. Add test for session timeout scenario
-     2. Consider refactoring to event-driven as designed, or update design.md
-```
-
-**What verify checks:**
-
-| Dimension | What it validates |
-|-----------|------------------|
-| Completeness | All tasks done, all requirements implemented, scenarios covered |
-| Correctness | Implementation matches spec intent, edge cases handled |
-| Coherence | Design decisions reflected in code, patterns consistent |
-
-Verify won't block archive, but it surfaces issues you might want to address first.
-
-#### Archive: Finalize the Change
-
-`/opsx:archive` completes the change and moves it to the archive:
-
-```text
-You: /opsx:archive
-
-AI:  Archiving add-auth...
-
-     Artifact status:
-     ✓ proposal.md exists
-     ✓ specs/ exists
-     ✓ design.md exists
-     ✓ tasks.md exists (12/12 tasks complete)
-
-     Delta specs: Not yet synced to main
-     → Would you like to sync now?
-
-You: Yes
-
-AI:  ✓ Synced specs to openspec/specs/auth/spec.md
-     ✓ Moved to openspec/changes/archive/2025-01-24-add-auth/
-
-     Change archived successfully.
-```
-
-Archive will prompt if specs aren't synced. It won't block on incomplete tasks, but it will warn you.
-
-## When to Use What
-
-### `/opsx:ff` vs `/opsx:continue`
-
-| Situation | Use |
-|-----------|-----|
-| Clear requirements, ready to build | `/opsx:ff` |
-| Exploring, want to review each step | `/opsx:continue` |
-| Want to iterate on proposal before specs | `/opsx:continue` |
-| Time pressure, need to move fast | `/opsx:ff` |
-| Complex change, want control | `/opsx:continue` |
-
-**Rule of thumb:** If you can describe the full scope upfront, use `/opsx:ff`. If you're figuring it out as you go, use `/opsx:continue`.
-
-### When to Update vs Start Fresh
-
-A common question: when is updating an existing change okay, and when should you start a new one?
-
-**Update the existing change when:**
-
-- Same intent, refined execution
-- Scope narrows (MVP first, rest later)
-- Learning-driven corrections (codebase isn't what you expected)
-- Design tweaks based on implementation discoveries
-
-**Start a new change when:**
-
-- Intent fundamentally changed
-- Scope exploded to different work entirely
-- Original change can be marked "done" standalone
-- Patches would confuse more than clarify
-
-```text
-                     ┌─────────────────────────────────────┐
-                     │     Is this the same work?          │
-                     └──────────────┬──────────────────────┘
-                                    │
-                 ┌──────────────────┼──────────────────┐
-                 │                  │                  │
-                 ▼                  ▼                  ▼
-          Same intent?      >50% overlap?      Can original
-          Same problem?     Same scope?        be "done" without
-                 │                  │          these changes?
-                 │                  │                  │
-       ┌────────┴────────┐  ┌──────┴──────┐   ┌───────┴───────┐
-       │                 │  │             │   │               │
-      YES               NO YES           NO  NO              YES
-       │                 │  │             │   │               │
-       ▼                 ▼  ▼             ▼   ▼               ▼
-    UPDATE            NEW  UPDATE       NEW  UPDATE          NEW
-```
-
-**Example: "Add dark mode"**
-
-- "Need to also support custom themes" → New change (scope exploded)
-- "System preference detection is harder than expected" → Update (same intent)
-- "Let's ship toggle first, add preferences later" → Update then archive, then new change
-
-## Best Practices
-
-### Keep Changes Focused
-
-One logical unit of work per change. If you're doing "add feature X and also refactor Y", consider two separate changes.
-
-**Why it matters:**
-- Easier to review and understand
-- Cleaner archive history
-- Can ship independently
-- Simpler rollback if needed
-
-### Use `/opsx:explore` for Unclear Requirements
-
-Before committing to a change, explore the problem space:
-
-```text
-You: /opsx:explore
-
-AI:  What would you like to explore?
-
-You: How should we handle rate limiting for our API?
-
-AI:  Let me investigate your current setup and options...
-     [Researches codebase, considers patterns]
-
-     I see three approaches we could take:
-     1. Middleware-based (simple, per-endpoint)
-     2. Redis-backed (scalable, shared state)
-     3. Token bucket per user (fair, complex)
-
-     Your current stack suggests #1 or #2. What's your scale?
-```
-
-Exploration clarifies thinking before you create artifacts.
-
-### Verify Before Archiving
-
-Use `/opsx:verify` to check implementation matches artifacts:
-
-```text
-You: /opsx:verify
-
-AI:  Verifying add-dark-mode...
-
-     ✓ All tasks in tasks.md are checked
-     ✓ Requirements in specs have corresponding code
-     ✓ Design decisions are reflected in implementation
-
-     Ready to archive!
-```
-
-Catches mismatches before you close out the change.
-
-### Name Changes Clearly
-
-Good names make `openspec list` useful:
-
-```text
-Good:                          Avoid:
-add-dark-mode                  feature-1
-fix-login-redirect             update
-optimize-product-query         changes
-implement-2fa                  wip
-```
-
-## Command Quick Reference
-
-For full command details and options, see [Commands](commands.md).
-
-| Command | Purpose | When to Use |
-|---------|---------|-------------|
-| `/opsx:propose` | Create change + planning artifacts | Fast default path (`core` profile) |
-| `/opsx:explore` | Think through ideas | Unclear requirements, investigation |
-| `/opsx:new` | Start a change scaffold | Expanded mode, explicit artifact control |
-| `/opsx:continue` | Create next artifact | Expanded mode, step-by-step artifact creation |
-| `/opsx:ff` | Create all planning artifacts | Expanded mode, clear scope |
-| `/opsx:apply` | Implement tasks | Ready to write code |
-| `/opsx:verify` | Validate implementation | Expanded mode, before archiving |
-| `/opsx:sync` | Merge delta specs | Expanded mode, optional |
-| `/opsx:archive` | Complete the change | All work finished |
-| `/opsx:bulk-archive` | Archive multiple changes | Expanded mode, parallel work |
-
-## Next Steps
-
-- [Commands](commands.md) - Full command reference with options
-- [Concepts](concepts.md) - Deep dive into specs, artifacts, and schemas
-- [Customization](customization.md) - Create custom workflows
+`opensprint compact check` is the one to put in CI. It is the gate that makes the compiled views
+trustworthy — see [Git workflow](git-workflow.md).

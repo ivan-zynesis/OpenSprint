@@ -25,7 +25,7 @@ what is true; it does not restate it.
    THE VIEWS                     what a team needs to read
    ─────────
    squad/product.md        objective · goals · strategies · measures
-   squad/maintainer.md     bars · posture · evidence · exposure
+   squad/maintainer.md     seven inherited objectives · goal · strategy · measure
    squad/dev.md            tech-stack · runtime-topology · entity-schema
    squad/devops.md         infra-architecture · gitops
    architecture.md         the whole system, one hop from the record
@@ -75,7 +75,7 @@ nothing guards, a rule still guarding something superseded.
 
 ```bash
 # in your project
-npx @ivan-zynesis/opensprint init
+npx @ivan-lee/opensprint init
 
 # existing codebase? reverse-engineer a surrogate from it first
 /opsp:knockdown
@@ -141,9 +141,13 @@ Different ambition, same premise.
 
 ## Documentation
 
+- [`docs/installation.md`](docs/installation.md) — install it, set up a repository
+- [`docs/concepts.md`](docs/concepts.md) — driver-specs, hats, the measure anatomy, attestation
+- [`docs/workflows.md`](docs/workflows.md) — the fifteen workflows, and the CLI beneath them
+- [`docs/git-workflow.md`](docs/git-workflow.md) — how we recommend fitting this to your branching and CI
+- [`OPENSPRINT-GUIDE.md`](OPENSPRINT-GUIDE.md) — a worked walkthrough, greenfield and brownfield
 - [`opensprint/squad/index.md`](opensprint/squad/index.md) — what this project is, by hat
 - [`PHILOSOPHY.md`](PHILOSOPHY.md) — where it came from
-- [`docs/`](docs/) — CLI reference, configuration, supported tools
 
 ## License
 
