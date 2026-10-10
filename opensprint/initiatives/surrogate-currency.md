@@ -87,7 +87,7 @@ across two milestones of `lifecycle-beyond-build`.
 
 - [x] scoped-seal: `compact seal --hat <name>…`; sealing never blesses a section it did not just render. **Blocks everything else** — without it, compiling two hats marks four fresh, which this project already did once by accident
 - [x] render-on-milestone: `/opsp:apply` compiles stale `dev` and `devops` sections at each milestone boundary, after the change branch merges
-- [ ] escalation-handoff: the visible pause; inferred classification carried in the question with a draft record and blast radius; explicit approval; the affected hat's view compiled on approval
+- [x] escalation-handoff: the visible pause; inferred classification carried in the question with a draft record and blast radius; explicit approval; the affected hat's view compiled on approval
 - [ ] knockdown-views: `/opsp:knockdown` produces all five views, empty `product` and `maintainer` rendered as a first-class finding
 - [ ] migrate-tool: `/opsp:migrate` — detect records the current shapes cannot select, grill the operator one record at a time, backfill on confirmation. **Validated against this repository's own stale state** (see below)
 
@@ -111,6 +111,14 @@ Verified against the original failure. With twelve sections stale and nothing re
 Product and maintainer are **offered**, with the line that carries the whole decision: compiling while still holding the implementation is *worse than leaving the view stale*, because staleness is reported and that is not.
 
 Open loops are deliberately not filtered by `--hat` — a loop belongs to the records, not to a view section.
+
+**3/5 — `escalation-handoff`** · opsx change `2026-10-10-escalation-handoff`
+
+The pause renders as a stage boundary — `PAUSED`, at this milestone, needing this hat — with the dev hat set down explicitly and picked back up as its own step. Classification moved into the question: the inferred hat with its reasoning, a draft record including a BDD bar, and the blast radius stated before approval is sought.
+
+Naming the hat is the whole intervention. The operator has the diff in their head too, and *"what should the timeout be?"* answered by someone thinking about retries is a different answer from the same question considered against what the business promised.
+
+Entirely a workflow change — the inference machinery already existed.
 
 ## Notes
 
