@@ -156,6 +156,62 @@ things that are simply true of the repository:
   an exposure with no plan                       →  rendered on the board as a confession
 ```
 
+### Many venues, one repository
+
+A team's reasoning is normally scattered across tools that do not know about each other. Putting
+the lifecycle in the repository consolidates the venues:
+
+```
+   WHAT A TEAM USUALLY HAS              WHERE IT LIVES HERE
+   ───────────────────────              ───────────────────
+   Jira · GitHub Projects        ──►    opensprint/initiatives/
+   sprint board                         openspec/changes/
+                                        BOARD.md  (compiled)
+
+   Confluence · GitHub Pages     ──►    docs/   (or wherever you configure)
+   published documentation              reviewed at attestation
+
+   an ADR wiki · design docs     ──►    opensprint/ADRs/
+                                        DECISION-MAP.md  (compiled)
+
+   a risk register               ──►    the roadmap — every exposure beside
+                                        the state of its mitigation
+
+   runbook ownership             ──►    the RACI table on an initiative
+   "who do we call"                     written when the change hands off
+```
+
+None of these are integrations. There is nothing to sync, nothing to fall out of date, and no tool
+that holds half the story. A pull request contains the work, the reasoning behind it, the bar it was
+held to, and the account written for people who will never open the repository.
+
+### Project management as code. Documentation as code.
+
+Infrastructure-as-code made a claim that sounded extreme and is now unremarkable: **the thing that
+describes your system should live beside it, be reviewed like it, and be versioned with it.**
+
+That claim was never specific to infrastructure. It was about what happens when a description lives
+somewhere the work does not — it drifts, nobody notices, and eventually nobody trusts it. Which is
+equally true of a sprint board, a design decision, a risk register and a published document.
+
+```
+   infrastructure-as-code          terraform · pulumi                 ✓ solved
+   ────────────────────────────────────────────────────────────────────────
+   project-management-as-code      initiatives · milestones · board   ← this
+   document-as-code                docs, reviewed at attestation      ← this
+   decisions-as-code               driver-specs · ADRs · the map      ← this
+   ────────────────────────────────────────────────────────────────────────
+                     DevSecOps-as-Code
+```
+
+Each row gets the same four properties for the same reason: **versioned, reviewed, diffable, and
+unable to drift silently.** A board compiled from record state cannot disagree with reality the way
+a Jira column can. A document reviewed at attestation cannot describe a release that never shipped.
+A decision superseded in the repository takes its blast radius with it.
+
+That is the whole bet of the third pillar, and it is deliberately unoriginal in form — it is the IaC
+argument, applied to everything else a team writes down.
+
 ### The system is the project manager
 
 That is the claim this pillar builds to, and it is meant literally.

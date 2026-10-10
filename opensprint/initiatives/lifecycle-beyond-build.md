@@ -175,7 +175,7 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] attest-tool: The `/opsp:attest` skill, with bounded record amendment
 - [x] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
 - [ ] attest-as-review: Reading scope superseded — test files in, source and ADR rationales out ([[DEC-040]]); posture-conditional evidence and exposure plus `measure-unattested` ([[DEC-041]]); the three review questions on the initiative, with RACI as the residue after automation ([[DEC-042]]); the same agent may not write the tests and attest them ([[DEC-043]])
-- [ ] attest-documentation: A second write target — the configurable documentation directory ([[DEC-044]]); documentation adequacy as a review question ([[DS-DOCUMENTATION-REVIEWED]]); harvest `reversibility-unstated`, `blast-radius-unstated`, `raci-unassigned`
+- [ ] attest-documentation: Bring the published-documentation venue under the lifecycle. A second write target — the configurable documentation directory, `docs/` by default ([[DEC-044]]); documentation adequacy reviewed at attestation rather than assumed ([[DS-DOCUMENTATION-REVIEWED]]); harvest `reversibility-unstated`, `blast-radius-unstated`, `raci-unassigned`
 
 ## Progress
 
@@ -258,6 +258,26 @@ One exposure on this repository, pointing nowhere: `DS-HIGH-IMPACT-OPS`. The boa
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
 **Continues in [[sdlc-operating-contract]]**, which carries the process and git contract built on this shape. That initiative depends on this one — it cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist.
+
+## Venues This Initiative Brings In
+
+The third pillar's claim is that the lifecycle consolidates work venues that normally live in
+separate tools. Before this initiative, three of them were covered and two were not:
+
+| Venue | Usually | Here | Covered by |
+|---|---|---|---|
+| sprint board | Jira · GitHub Projects | `initiatives/`, `changes/`, `BOARD.md` | milestones 4–7 |
+| decision record | an ADR wiki | `ADRs/`, `DECISION-MAP.md` | already existed |
+| risk register | a spreadsheet nobody opens | the roadmap, each exposure beside its mitigation | milestone 10 |
+| **published docs** | **Confluence · GitHub Pages** | **`docs/`, reviewed at attestation** | **milestone 12** |
+| **runbook ownership** | **tribal knowledge** | **the RACI table on an initiative** | **milestone 11** |
+
+The last two are what milestones 11 and 12 add, and they are the two that were least likely to exist
+anywhere at all. Documentation drifts because nothing checks it; "who do we call" is usually not
+written down until the first incident.
+
+That is project-management-as-code, document-as-code and decisions-as-code arriving at the same
+place — one repository, versioned, reviewed, diffable, unable to drift silently.
 
 ## Open Questions
 

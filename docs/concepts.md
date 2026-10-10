@@ -52,6 +52,39 @@ A decision is owned by **dev** or **devops** — never by product or maintainer.
 genuinely belongs to those hats is a *constraint*, so it is a driver-spec. Other hats may be listed
 on a decision, but that is cc, not ownership.
 
+### They change differently, and that matters
+
+A driver-spec and an ADR look alike on disk and have opposite relationships to time.
+
+| | Driver-spec | ADR |
+|---|---|---|
+| what it is | **real-world, real-time context** | **a decision, once made** |
+| when the world moves | it is edited to match | it is not edited |
+| how change is recorded | in place | a **new** ADR supersedes it |
+| what carries the history | the record's own revisions | `DECISION-MAP.md` and the supersedes chain |
+
+**A driver-spec tracks reality.** A contractual RTO changes, a regulation lands, a client moves — the
+constraint is now different, so the record is now different. Editing it is correct; it is supposed
+to describe what is true now.
+
+**An ADR is history, and history does not get rewritten.** This follows directly from
+[pillar one](pillars.md#1--code-is-a-side-product): if the decisions are the north star that
+universes are rebuilt from, then quietly editing one changes what a past universe was built against
+— and the reasoning that *was* used becomes unrecoverable. So an ADR that no longer holds is
+**superseded by a new ADR**, with both left standing and the chain recorded.
+
+```
+   DS-SOME-CONSTRAINT        edited in place as the world changes
+         │
+         ▼
+   DEC-FIRST-ANSWER   ──superseded-by──▶   DEC-BETTER-ANSWER
+   status: superseded                      status: active
+   (left standing, still readable)
+```
+
+That is why `supersedes` exists, why a superseded record keeps its id permanently, and why the
+harvest reports `decision-on-superseded` when something still rests on an ancestor that moved.
+
 ---
 
 ## Four hats

@@ -342,6 +342,10 @@ part actually lands.
 | how it is built | dev: tech-stack, topology, schema | dev |
 | how it is run | devops: infra, gitops | devops |
 | was any of it true | attestation, against every bar | product / maintainer |
+| can we roll it back | attestation — one-way or two-way door | product / maintainer |
+| what does it affect | attestation — blast radius | product / maintainer |
+| who holds it after merge | attestation — RACI, where no system handles it | product / maintainer |
+| what outsiders are told | attestation — documentation reviewed, not assumed | product / maintainer |
 
 **The seven maintainer objectives are inherited, not discovered.** Every software project worries
 about the same seven things, which is why that accountability was split off from product and given
@@ -350,6 +354,10 @@ is the most useful cell in the view, because it says nobody has stated what this
 that concern.
 
 That is how "sec" and "ops" stop being someone else's problem: they are rows that cannot be hidden.
+
+The last four rows are the handoff. A pull request closing ends `dev`'s accountability — past that
+point the change lives in security and operations, and attestation is where it is handed over
+rather than assumed. For anything no system handles automatically, a human is named.
 
 ---
 
