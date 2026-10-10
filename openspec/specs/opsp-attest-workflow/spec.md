@@ -9,25 +9,29 @@ Everything upstream sets bars. `/opsp:propose` writes the acceptance criterion a
 Two bounds make this stage mean something. It reads narrowly: the objective, the goals, the bars and the CI evidence, never the implementation — because attestation is usually self-assessment, and an agent holding the diff has every argument for why the code works. It writes narrowly: only the record's `## Measures` section, so a claim never changes under a reader who cited it.
 
 It records what is true and never decides whether that is good enough. The moment it gains a pass/fail exit it has become certification, which `DS-SURROGATE-SCOPE` places out of scope precisely because change management and release management follow it in.
-
 ## Requirements
 ### Requirement: Attestation runs on a narrow context
-The workflow SHALL load the initiative's objective, goals, bars and CI evidence, and SHALL NOT load the implementation diff, the design discussion or the decision rationales, because attestation is usually self-assessment and self-assessment at zero distance is not assessment.
+The workflow SHALL load the initiative's objective, goals, bars, **test files** and CI evidence, and SHALL NOT load the implementation source, the design discussion or the decision rationales.
 
 #### Scenario: What is loaded
 - **WHEN** the workflow begins
-- **THEN** it SHALL load the objective, the goals, the bars and the evidence artifacts
-- **AND** it SHALL NOT load the diff, the design discussion or the ADR rationales
+- **THEN** it SHALL load the objective, the goals, the bars, the test files and the evidence artifacts
+- **AND** it SHALL NOT load the implementation source, the design discussion or the ADR rationales
+
+#### Scenario: Why tests and not source
+- **WHEN** the workflow explains its reading scope
+- **THEN** it SHALL state that a test is the implementation's own restatement of a bar
+- **AND** that comparing a bar to its tests compares two statements at the same altitude
+
+#### Scenario: A test that does not assert the bar
+- **WHEN** the tests covering a bar do not assert it
+- **THEN** the workflow SHALL record that as a finding
+- **AND** it SHALL NOT read the implementation source to determine whether the bar holds anyway
 
 #### Scenario: Continuing an authoring session
-- **WHEN** the workflow is invoked in a session that wrote the implementation
+- **WHEN** the workflow is invoked in a session that wrote the implementation **or its tests**
 - **THEN** it SHALL say so and stop
-- **AND** it SHALL ask for a fresh session
-
-#### Scenario: Evidence that cannot answer the bar
-- **WHEN** the evidence does not answer the bar
-- **THEN** the workflow SHALL record `cannot assess` with an exposure naming what is missing
-- **AND** it SHALL NOT read the implementation to work it out
+- **AND** it SHALL require a fresh session rather than accepting an assertion that the context was set aside
 
 ### Requirement: Attestation writes the three ex-post parts
 The workflow SHALL write posture, evidence and exposure into the record's `## Measures` section.
@@ -78,4 +82,28 @@ The workflow SHALL record what is true and SHALL NOT decide whether it is good e
 - **WHEN** the workflow describes what it must never do
 - **THEN** it SHALL name certification and `DS-SURROGATE-SCOPE`
 - **AND** SHALL state that a pass/fail exit would cross that boundary
+
+### Requirement: Attestation answers three review questions
+The workflow SHALL answer reversibility, blast radius and accountability for every initiative it attests, and SHALL record them on the initiative.
+
+#### Scenario: Reversibility
+- **WHEN** an initiative is attested
+- **THEN** the workflow SHALL record whether it is a one-way or two-way door
+- **AND** a two-way door SHALL state what makes the rollback safe
+
+#### Scenario: Blast radius
+- **WHEN** an initiative is attested
+- **THEN** the workflow SHALL record what the change affects
+- **AND** it SHALL do so particularly where an exposure is being accepted
+
+#### Scenario: RACI is the residue after automation
+- **WHEN** the workflow records accountability
+- **THEN** a concern handled automatically SHALL name the system and need no human names
+- **AND** a concern not handled automatically SHALL name at least Responsible and Accountable
+- **AND** the scope SHALL be follow-up as security and operations matters, after the pull request closes
+
+#### Scenario: The questions never gate
+- **WHEN** a question is unanswered
+- **THEN** it SHALL be reported as an open loop
+- **AND** the workflow SHALL still exit zero
 
