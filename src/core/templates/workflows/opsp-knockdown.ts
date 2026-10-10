@@ -1,7 +1,7 @@
 /**
  * OPSP Knockdown Workflow Template
  *
- * Reverse-engineer a surrogate (architecture.md, ADRs, driver-specs) from
+ * Reverse-engineer a surrogate (driver-specs, ADRs, and all five views) from
  * an existing brownfield codebase using progressive compaction.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
@@ -9,7 +9,7 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 export function getOpspKnockdownSkillTemplate(): SkillTemplate {
   return {
     name: 'opensprint-knockdown',
-    description: 'Knockdown a brownfield codebase — reverse-engineer architecture.md, ADRs, and driver-specs from existing code using progressive compaction.',
+    description: 'Knockdown a brownfield codebase — reverse-engineer driver-specs, ADRs and all five compiled views from existing code. What it produces is observed, never decided, and the empty views are the finding.',
     instructions: OPSP_KNOCKDOWN_INSTRUCTIONS,
     license: 'MIT',
     compatibility: 'Requires openspec CLI.',
@@ -271,20 +271,73 @@ The architecture.md drafted in Step 1 was scaffolding for the interview — it l
 opensprint compact check
 \`\`\`
 
+**All five views are produced** — \`architecture.md\` and each hat — and you should expect two of them
+to be empty:
+
+| View | After knockdown |
+|---|---|
+| \`dev\` | **populated** — observed from the code, which is what you have |
+| \`devops\` | **populated** — observed from pipelines and infrastructure |
+| \`product\` | **empty** — nothing has been classified as an objective, goal or strategy |
+| \`maintainer\` | **empty** — seven objectives, nothing recorded against any of them |
+
+#### Do not assign a role or an objective
+
+An inferred driver-spec says what the code does. A \`role\` — objective, goal, strategy — and an
+\`objective\` say what somebody *intended*, and no amount of reading source reveals that.
+
+So leave both unset. The role-filtered sections then select nothing and those views render empty,
+which is correct. **A guessed role produces a product view that looks populated and is fiction** —
+worse than an empty one, because it reads as decided when nothing was decided.
+
+#### The empty views are the finding
+
+This is the most useful thing a reverse-engineered surrogate can say, and it only says it if you
+frame it that way:
+
+> We worked out how this is built. **Nobody has stated what it must do, or what must stay true of it
+> while it does.**
+
+Seven empty maintainer objectives on day one is a better onboarding document than any prose summary,
+because it is a list of questions nobody has answered rather than a description of what exists.
+
+Report it as that. "Four of five views are incomplete" describes a tool that half-worked; the
+sentence above describes a project that has never written its intent down.
+
 ### Step 6: Final Summary
 
 Display:
 \`\`\`
 ## Knockdown Complete
 
-architecture.md: ✓ Written
-ADRs: 8 confirmed, written to opensprint/ADRs/
-Driver-specs: 4 confirmed, written to opensprint/driver-specs/
-DECISION-MAP.md: ✓ Generated
+RECORDS
+  ADRs:             8 confirmed      → opensprint/ADRs/
+  Driver-specs:     4 confirmed      → opensprint/driver-specs/
+  DECISION-MAP.md:  ✓ generated
 
-Surrogate is ready. You can now:
-- /opsp:explore <initiative> — brainstorm with full context
-- /opsp:propose <initiative> — plan work on this codebase
+VIEWS
+  architecture.md   ✓ compiled
+  squad/dev.md      ✓ compiled
+  squad/devops.md   ✓ compiled
+  squad/product.md    empty
+  squad/maintainer.md empty
+
+Everything here is OBSERVED — an account of what the code does. Nothing is
+decided, and nothing is attested.
+
+Nobody has stated what this system must do, or what must stay true of it.
+These seven have nothing recorded against them:
+
+  security & access · isolation & confidentiality · privacy, retention &
+  legal · integrity & correctness · change & quality · availability &
+  continuity · cost & budget
+
+That is your starting backlog.
+
+Next:
+- /opsp:explore — think through any of the above
+- /opsp:driver  — record one as a constraint
+- /opsp:propose — plan work on this codebase
 \`\`\`
 
 ---
