@@ -55,6 +55,35 @@ export type PostureLabel = (typeof POSTURE_LABELS)[number];
 export type Posture = Partial<Record<PostureLabel, string>>;
 
 /**
+ * The verdicts a posture may state, as an explicit list.
+ *
+ * The whole conditional rests on which branch a verdict takes (DEC-041), so a
+ * value outside this list is reported rather than guessed at. `met` is the
+ * only one claiming success, and therefore the only one owing evidence;
+ * everything else owes an exposure — including `cannot assess`, which is a
+ * complete attestation naming what the evidence could not answer.
+ */
+export const POSTURE_VERDICTS = ['met', 'partially met', 'not met', 'cannot assess'] as const;
+
+export type PostureVerdict = (typeof POSTURE_VERDICTS)[number];
+
+/**
+ * Normalises a stated verdict, or null when it is outside the vocabulary.
+ *
+ * Case and surrounding whitespace are ignored; nothing else is interpreted.
+ */
+export function normalizeVerdict(value: string | undefined): PostureVerdict | null {
+  if (value === undefined) return null;
+  const v = value.trim().toLowerCase();
+  return POSTURE_VERDICTS.find((candidate) => candidate === v) ?? null;
+}
+
+/** What a verdict obliges the measure to carry. */
+export function verdictRequires(verdict: PostureVerdict): 'evidence' | 'exposure' {
+  return verdict === 'met' ? 'evidence' : 'exposure';
+}
+
+/**
  * The authority a compiled claim about a record may carry (DEC-009, DEC-021).
  *
  * Only `attested` licenses an unqualified present-tense claim: a decision

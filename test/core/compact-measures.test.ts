@@ -6,6 +6,9 @@ import {
   parsePosture,
   attestationOf,
   mitigatedBy,
+  POSTURE_VERDICTS,
+  normalizeVerdict,
+  verdictRequires,
   measuresSection,
   hasMeasures,
   parseMeasureAnatomy,
@@ -274,6 +277,34 @@ ci/secret-scan run 4821
 
     it('returns null for an empty block', () => {
       expect(mitigatedBy('')).toBeNull();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // The verdict decides what else is owed (DEC-041)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('posture verdicts', () => {
+    it('is an explicit list of four', () => {
+      expect([...POSTURE_VERDICTS]).toEqual(['met', 'partially met', 'not met', 'cannot assess']);
+    });
+
+    it('normalises case and whitespace', () => {
+      expect(normalizeVerdict('  Met ')).toBe('met');
+      expect(normalizeVerdict('CANNOT ASSESS')).toBe('cannot assess');
+    });
+
+    it('returns null for anything outside the vocabulary', () => {
+      for (const bad of [undefined, '', 'mostly', 'passed', 'ok', 'yes']) {
+        expect(normalizeVerdict(bad as string | undefined)).toBeNull();
+      }
+    });
+
+    it('only a claim of success owes evidence', () => {
+      expect(verdictRequires('met')).toBe('evidence');
+      for (const v of ['partially met', 'not met', 'cannot assess'] as const) {
+        expect(verdictRequires(v)).toBe('exposure');
+      }
     });
   });
 });

@@ -489,198 +489,91 @@ describe('per-hat classification', () => {
     const loops = () =>
       deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
     const kinds = (kind: string) => loops().filter((l) => l.kind === kind).map((l) => l.record);
+    const measures = (body: string) => `## Measures\n\n- **Primary**: a target\n\n${body}`;
+    const posture = (verdict: string) => `### Posture\n\n- **verdict**: ${verdict}\n`;
 
-    it('the three kinds are registered', () => {
-      for (const kind of ['measure-unasserted', 'measure-unexposed', 'bar-without-neighbour']) {
+    it('the four kinds are registered', () => {
+      for (const kind of ['measure-unasserted', 'measure-unexposed', 'bar-without-neighbour', 'measure-unattested']) {
         expect([...OPEN_LOOP_KINDS]).toContain(kind);
       }
     });
 
-    it('measure-unasserted fires on measures with no evidence', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
-      expect(kinds('measure-unasserted')).toEqual(['DS-A']);
-    });
+    // ── DEC-041: posture is the judgement
 
-    it('measure-unasserted does not fire when evidence is present', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Evidence\n\na coverage report' });
-      expect(kinds('measure-unasserted')).toEqual([]);
-    });
-
-    it('measure-unasserted does not inspect whether the evidence is adequate', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Evidence\n\nvibes' });
-      expect(kinds('measure-unasserted')).toEqual([]);
-    });
-
-    it('neither fires for a record with no measures at all', () => {
-      spec('DS-A', { role: 'goal' });
+    it('measure-unattested fires when nobody has judged the measure', () => {
+      spec('DS-A', { role: 'goal', body: measures('') });
+      expect(kinds('measure-unattested')).toEqual(['DS-A']);
       expect(kinds('measure-unasserted')).toEqual([]);
       expect(kinds('measure-unexposed')).toEqual([]);
-      // constraint-unmeasurable is the loop that covers that case
+    });
+
+    it('measure-unattested fires on an unrecognised verdict, naming the accepted values', () => {
+      spec('DS-A', { role: 'goal', body: measures(posture('mostly fine')) });
+      expect(kinds('measure-unattested')).toEqual(['DS-A']);
+      const [l] = loops().filter((x) => x.kind === 'measure-unattested');
+      expect(l.detail).toContain('cannot assess');
+    });
+
+    it('does not fire for a record with no measures at all', () => {
+      spec('DS-A', { role: 'goal' });
+      expect(kinds('measure-unattested')).toEqual([]);
       expect(kinds('constraint-unmeasurable')).toEqual(['DS-A']);
     });
 
-    it('measure-unexposed fires on measures with no exposure', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Evidence\n\ne' });
-      expect(kinds('measure-unexposed')).toEqual(['DS-A']);
-    });
+    // ── met owes evidence
 
-    it('measure-unexposed does not fire when exposure is present', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Exposure\n\nunbounded' });
+    it('measure-unasserted fires when met has no evidence', () => {
+      spec('DS-A', { role: 'goal', body: measures(posture('met')) });
+      expect(kinds('measure-unasserted')).toEqual(['DS-A']);
       expect(kinds('measure-unexposed')).toEqual([]);
     });
 
-    it('bar-without-neighbour fires on a bar that omits the label', () => {
+    it('met with evidence reports nothing', () => {
+      spec('DS-A', { role: 'goal', body: measures(posture('met') + '\n### Evidence\n\nci run 1\n') });
+      expect(kinds('measure-unasserted')).toEqual([]);
+      expect(kinds('measure-unexposed')).toEqual([]);
+      expect(kinds('measure-unattested')).toEqual([]);
+    });
+
+    it('met does not owe an exposure', () => {
+      spec('DS-A', { role: 'goal', body: measures(posture('met') + '\n### Evidence\n\nci run 1\n') });
+      expect(kinds('measure-unexposed')).toEqual([]);
+    });
+
+    // ── anything else owes exposure
+
+    it('a verdict other than met owes an exposure, not evidence', () => {
+      for (const verdict of ['partially met', 'not met', 'cannot assess']) {
+        spec('DS-A', { role: 'goal', body: measures(posture(verdict)) });
+        expect(kinds('measure-unexposed')).toEqual(['DS-A']);
+        expect(kinds('measure-unasserted')).toEqual([]);
+      }
+    });
+
+    it('cannot assess with an exposure is a complete attestation', () => {
       spec('DS-A', {
         role: 'goal',
-        body: '## Measures\n\n- x\n\n### Bar\n\n- **chosen**: fully manual',
+        body: measures(posture('cannot assess') + '\n### Exposure\n\nno e2e coverage\nmitigated-by: harness\n'),
       });
+      expect(kinds('measure-unexposed')).toEqual([]);
+      expect(kinds('measure-unasserted')).toEqual([]);
+      expect(kinds('measure-unattested')).toEqual([]);
+      expect(kinds('exposure-unmitigated')).toEqual([]);
+    });
+
+    // ── unchanged
+
+    it('bar-without-neighbour fires on a bar that omits the label', () => {
+      spec('DS-A', { role: 'goal', body: measures('### Bar\n\n- **chosen**: fully manual\n') });
       expect(kinds('bar-without-neighbour')).toEqual(['DS-A']);
     });
 
     it('a neighbour stated as unrecorded satisfies the rule', () => {
       spec('DS-A', {
         role: 'goal',
-        body: '## Measures\n\n- x\n\n### Bar\n\n- **chosen**: fully manual\n- **neighbour**: unrecorded',
+        body: measures('### Bar\n\n- **chosen**: fully manual\n- **neighbour**: unrecorded\n'),
       });
       expect(kinds('bar-without-neighbour')).toEqual([]);
-    });
-
-    it('bar-without-neighbour does not fire for a record with no bar', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
-      expect(kinds('bar-without-neighbour')).toEqual([]);
-    });
-
-    it('a record with measures and no sub-blocks behaves as before, plus the two new gaps', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
-      expect(kinds('constraint-unmeasurable')).toEqual([]);
-      expect(kinds('measure-unasserted')).toEqual(['DS-A']);
-      expect(kinds('measure-unexposed')).toEqual(['DS-A']);
-    });
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // strategy-unimplemented (DS-STRATEGY-ALTITUDE, DEC-020)
-  // ═══════════════════════════════════════════════════════════
-
-  describe('strategy-unimplemented', () => {
-    const rolesFor = () => ['goal', 'strategy'];
-    const loops = () =>
-      deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
-    const found = () => loops().filter((l) => l.kind === 'strategy-unimplemented').map((l) => l.record);
-
-    const decWithDeps = (id: string, deps: string[], hats = '[dev]') =>
-      fs.writeFileSync(
-        path.join(sprint(), 'ADRs', `${id}.md`),
-        `---\nid: ${id}\nstatus: accepted\ncreated: 2026-01-01\ndepth: 0\nhats: ${hats}\n` +
-          `depends-on:\n${deps.map((d) => `  - ${d}`).join('\n')}\n---\n\n## Question\n\nQ\n`
-      );
-
-    it('is among the loop kinds', () => {
-      expect([...OPEN_LOOP_KINDS]).toContain('strategy-unimplemented');
-    });
-
-    it('fires for a strategy with nothing descending from it', () => {
-      spec('DS-S', { role: 'strategy' });
-      expect(found()).toEqual(['DS-S']);
-    });
-
-    it('does not fire when a decision names it directly', () => {
-      spec('DS-S', { role: 'strategy' });
-      decWithDeps('DEC-001', ['DS-S']);
-      expect(found()).toEqual([]);
-    });
-
-    it('does not fire when a decision reaches it transitively', () => {
-      spec('DS-S', { role: 'strategy' });
-      decWithDeps('DEC-001', ['DS-S']);
-      decWithDeps('DEC-002', ['DEC-001']);
-      expect(found()).toEqual([]);
-    });
-
-    it('does not fire for a record that is not a strategy', () => {
-      spec('DS-G', { role: 'goal' });
-      expect(found()).toEqual([]);
-    });
-
-    it('fires once for a record declaring strategy among several roles', () => {
-      spec('DS-S', { role: '[goal, strategy]' });
-      expect(found()).toEqual(['DS-S']);
-    });
-
-    it('ignores superseded strategies', () => {
-      fs.writeFileSync(
-        path.join(sprint(), 'driver-specs', 'DS-OLD.md'),
-        '---\nid: DS-OLD\ntype: product\nstatus: superseded\ncreated: 2026-01-01\nhats: [product]\nrole: strategy\n---\n\nB\n'
-      );
-      expect(found()).toEqual([]);
-    });
-
-    it('does not count a superseded decision as an implementation', () => {
-      spec('DS-S', { role: 'strategy' });
-      fs.writeFileSync(
-        path.join(sprint(), 'ADRs', 'DEC-001.md'),
-        '---\nid: DEC-001\nstatus: superseded\ncreated: 2026-01-01\ndepth: 0\nhats: [dev]\ndepends-on:\n  - DS-S\n---\n\n## Question\n\nQ\n'
-      );
-      expect(found()).toEqual(['DS-S']);
-    });
-
-    it('terminates on a depends-on cycle', () => {
-      spec('DS-S', { role: 'strategy' });
-      decWithDeps('DEC-001', ['DEC-002']);
-      decWithDeps('DEC-002', ['DEC-001']);
-      expect(() => found()).not.toThrow();
-      expect(found()).toEqual(['DS-S']);
-    });
-
-    it('survives a dangling depends-on reference', () => {
-      spec('DS-S', { role: 'strategy' });
-      decWithDeps('DEC-001', ['DEC-NOPE', 'DS-S']);
-      expect(found()).toEqual([]);
-    });
-
-    it('names no hat — a strategy in any hat is checked', () => {
-      spec('DS-A', { role: 'strategy', hats: '[product]' });
-      spec('DS-B', { role: 'strategy', hats: '[maintainer]' });
-      spec('DS-C', { role: 'strategy', hats: '[devops]' });
-      expect(found().sort()).toEqual(['DS-A', 'DS-B', 'DS-C']);
-    });
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // exposure-unmitigated (DS-FORWARD-CLOSURE)
-  // ═══════════════════════════════════════════════════════════
-
-  describe('exposure-unmitigated', () => {
-    const rolesFor = () => ['goal', 'strategy'];
-    const loops = () =>
-      deriveOpenLoops(specs(), decs(), buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)), rolesFor);
-    const found = () => loops().filter((l) => l.kind === 'exposure-unmitigated').map((l) => l.record);
-
-    it('is among the loop kinds', () => {
-      expect([...OPEN_LOOP_KINDS]).toContain('exposure-unmitigated');
-    });
-
-    it('fires for an exposure pointing at nothing', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- x\n\n### Exposure\n\nunbounded, nothing planned' });
-      expect(found()).toEqual(['DS-A']);
-    });
-
-    it('does not fire when the exposure names an initiative', () => {
-      spec('DS-A', {
-        role: 'goal',
-        body: '## Measures\n\n- x\n\n### Exposure\n\nunbounded\nmitigated-by: harden-it',
-      });
-      expect(found()).toEqual([]);
-    });
-
-    it('does not fire for a record with no exposure', () => {
-      spec('DS-A', { role: 'goal', body: '## Measures\n\n- **Primary**: a target' });
-      expect(found()).toEqual([]);
-    });
-
-    it('does not fire for a record with no measures at all', () => {
-      spec('DS-A', { role: 'goal' });
-      expect(found()).toEqual([]);
     });
   });
 

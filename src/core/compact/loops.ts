@@ -13,7 +13,16 @@
 
 import type { SourcedDriverSpec, SourcedDecision } from './records.js';
 import type { RuleIndex } from './rules.js';
-import { hasMeasures, parseMeasureAnatomy, statesNeighbour, mitigatedBy } from './measures.js';
+import {
+  hasMeasures,
+  parseMeasureAnatomy,
+  statesNeighbour,
+  mitigatedBy,
+  parsePosture,
+  normalizeVerdict,
+  verdictRequires,
+  POSTURE_VERDICTS,
+} from './measures.js';
 import type { SectionDef } from './sections.js';
 
 export const OPEN_LOOP_KINDS = [
@@ -33,6 +42,7 @@ export const OPEN_LOOP_KINDS = [
   'record-without-objective',
   'strategy-unimplemented',
   'exposure-unmitigated',
+  'measure-unattested',
 ] as const;
 
 /**
@@ -313,21 +323,45 @@ export function deriveOpenLoops(
     const anatomy = parseMeasureAnatomy(record.content);
     const hats = record.hats ?? [];
 
-    if (anatomy.evidence === undefined) {
+    // DEC-041: posture is the judgement, and evidence and exposure are what
+    // that judgement requires. They were never peers — evidence is cited when
+    // claiming the bar held, exposure is recorded when it did not. Demanding
+    // both regardless reported a passing measure as deficient for not
+    // documenting a failure that did not happen.
+    const stated = anatomy.posture === undefined ? undefined : parsePosture(anatomy.posture).verdict;
+    const verdict = normalizeVerdict(stated);
+
+    if (anatomy.posture === undefined) {
+      // "Nobody has judged this" is a different and more urgent finding than
+      // "this lacks evidence", and the old rules could not make it.
+      loops.push({
+        kind: 'measure-unattested',
+        record: record.id,
+        hats,
+        detail: 'States a measure with no `### Posture`. Nobody has judged whether the bar was met.',
+      });
+    } else if (verdict === null) {
+      loops.push({
+        kind: 'measure-unattested',
+        record: record.id,
+        hats,
+        detail:
+          `States a posture with an unrecognised verdict${stated ? ` ('${stated}')` : ''}. ` +
+          `Accepted: ${POSTURE_VERDICTS.join(', ')}.`,
+      });
+    } else if (verdictRequires(verdict) === 'evidence' && anatomy.evidence === undefined) {
       loops.push({
         kind: 'measure-unasserted',
         record: record.id,
         hats,
-        detail: 'States a measure with no `### Evidence`. A measure nothing asserts is an aspiration.',
+        detail: `Claims the bar was '${verdict}' with no \`### Evidence\`. A claim of success nothing asserts is an opinion.`,
       });
-    }
-
-    if (anatomy.exposure === undefined) {
+    } else if (verdictRequires(verdict) === 'exposure' && anatomy.exposure === undefined) {
       loops.push({
         kind: 'measure-unexposed',
         record: record.id,
         hats,
-        detail: 'States a measure with no `### Exposure`. Nothing records what a breach would cost or who it reaches.',
+        detail: `Records a verdict of '${verdict}' with no \`### Exposure\`. Nothing says what remains at risk.`,
       });
     }
 

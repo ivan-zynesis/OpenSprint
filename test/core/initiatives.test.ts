@@ -12,6 +12,8 @@ import {
   isTerminalState,
   stateIndex,
   checkInitiativeState,
+  parseAttestation,
+  DOORS,
   type InitiativeEntry,
 } from '../../src/core/initiatives.js';
 
@@ -319,6 +321,104 @@ describe('initiatives', () => {
       write('a.md', '---\nid: a\nstatus: active\nstate: exploring\n---\n\n## Milestones\n\n- [x] m: done\n');
       const [i] = readInitiatives(root);
       expect(checkInitiativeState(i).map((p) => p.kind)).toEqual(['state-contradicted']);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // The attestation section (DEC-042)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('parseAttestation', () => {
+    const doc = (body: string) => `---\nid: x\n---\n\n## Attestation\n\n${body}\n`;
+    const full = doc(`- **door**: two-way — the flag reverts without data migration
+- **blast-radius**: checkout path, payment reconciliation
+
+### RACI
+
+| Concern | Handled by | R | A | C | I |
+|---|---|---|---|---|---|
+| settlement alerting | system — pagerduty svc-settle | — | — | — | — |
+| manual reconciliation | **not automated** | ops-oncall | head-of-eng | finance | support |`);
+
+    it('is undefined when the section is absent', () => {
+      expect(parseAttestation('---\nid: x\n---\n\n## Description\n\nd\n')).toBeUndefined();
+    });
+
+    it('reads the door and the blast radius', () => {
+      const a = parseAttestation(full)!;
+      expect(a.door).toBe('two-way');
+      expect(a.blastRadius).toContain('checkout path');
+    });
+
+    it('offers exactly two doors', () => {
+      expect([...DOORS]).toEqual(['one-way', 'two-way']);
+    });
+
+    it('reads one-way', () => {
+      expect(parseAttestation(doc('- **door**: one-way'))!.door).toBe('one-way');
+    });
+
+    it('treats a door outside the vocabulary as absent rather than interpreting it', () => {
+      expect(parseAttestation(doc('- **door**: maybe reversible'))!.door).toBeUndefined();
+    });
+
+    it('reads a RACI row handled by a system as automated, with no names', () => {
+      const [row] = parseAttestation(full)!.raci;
+      expect(row.concern).toBe('settlement alerting');
+      expect(row.automated).toBe(true);
+      expect(row.responsible).toBeUndefined();
+      expect(row.accountable).toBeUndefined();
+    });
+
+    it('reads a row that is not automated, with its owners', () => {
+      const row = parseAttestation(full)!.raci[1];
+      expect(row.automated).toBe(false);
+      expect(row.responsible).toBe('ops-oncall');
+      expect(row.accountable).toBe('head-of-eng');
+      expect(row.consulted).toBe('finance');
+      expect(row.informed).toBe('support');
+    });
+
+    it('skips the header and separator rows', () => {
+      expect(parseAttestation(full)!.raci).toHaveLength(2);
+    });
+
+    it('treats dashes, em-dashes and empty cells alike as absent', () => {
+      const a = parseAttestation(doc(`### RACI
+
+| Concern | Handled by | R | A | C | I |
+|---|---|---|---|---|---|
+| x | not automated | ops | lead | — | |`))!;
+      expect(a.raci[0].consulted).toBeUndefined();
+      expect(a.raci[0].informed).toBeUndefined();
+      expect(a.raci[0].responsible).toBe('ops');
+    });
+
+    it('recognises manual and none as not automated', () => {
+      for (const handled of ['**not automated**', 'manual', 'none', 'not handled']) {
+        const a = parseAttestation(doc(`### RACI\n\n| Concern | Handled by | R | A |\n|---|---|---|---|\n| x | ${handled} | r | a |`))!;
+        expect(a.raci[0].automated).toBe(false);
+      }
+    });
+
+    it('does not fail on a table with fewer columns than expected', () => {
+      const a = parseAttestation(doc('### RACI\n\n| Concern | Handled by |\n|---|---|\n| x | system — alerts |'))!;
+      expect(a.raci).toHaveLength(1);
+      expect(a.raci[0].automated).toBe(true);
+    });
+
+    it('returns an empty table rather than failing when there is none', () => {
+      expect(parseAttestation(doc('- **door**: one-way'))!.raci).toEqual([]);
+    });
+
+    it('is carried on the entry when read from a file', () => {
+      write('a.md', `---\nid: a\nstatus: active\nstate: attested\n---\n\n## Attestation\n\n- **door**: one-way\n`);
+      expect(readInitiatives(root)[0].attestation?.door).toBe('one-way');
+    });
+
+    it('is absent on an initiative that has not been attested', () => {
+      write('b.md', '---\nid: b\nstatus: active\nstate: building\n---\n\n## Description\n\nd\n');
+      expect(readInitiatives(root)[0].attestation).toBeUndefined();
     });
   });
 });

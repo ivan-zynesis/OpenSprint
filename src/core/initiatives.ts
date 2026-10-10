@@ -40,6 +40,47 @@ export interface Milestone {
   superseded: boolean;
 }
 
+/**
+ * How reversible a change is (DEC-042).
+ *
+ * An explicit pair rather than free text: the whole value of the question is
+ * that it has two answers and you must pick one.
+ */
+export const DOORS = ['one-way', 'two-way'] as const;
+export type Door = (typeof DOORS)[number];
+
+/**
+ * One row of the RACI table: a follow-up concern, and who holds it after the
+ * pull request closes.
+ *
+ * `handledBy` naming a system is a complete answer — RACI is the **residue
+ * after automation**, so the table grows only where the automation does not.
+ */
+export interface RaciRow {
+  concern: string;
+  handledBy: string;
+  /** True where `handledBy` names a system rather than stating it is manual. */
+  automated: boolean;
+  responsible?: string;
+  accountable?: string;
+  consulted?: string;
+  informed?: string;
+}
+
+/**
+ * What an attestation recorded about the change itself, as opposed to about
+ * any one measure.
+ *
+ * Reversibility and blast radius are properties of the whole change — a
+ * one-way door is one-way whichever bar you are looking at — which is why
+ * they live here rather than under `## Measures` (DEC-042).
+ */
+export interface Attestation {
+  door?: Door;
+  blastRadius?: string;
+  raci: RaciRow[];
+}
+
 export interface InitiativeEntry {
   id: string;
   /** `active` by default, matching how driver-specs default. */
@@ -62,6 +103,8 @@ export interface InitiativeEntry {
    * output format.
    */
   orphanedMilestones: Array<Milestone & { section: string }>;
+  /** What `/opsp:attest` recorded about the change, when it has run. */
+  attestation?: Attestation;
   /** Driver-specs this initiative claims, from `## Driver Specs`. */
   driverSpecs: string[];
   /** Decisions this initiative claims, from `## ADRs`. */
@@ -158,6 +201,81 @@ export function parseOrphanedMilestones(
   return out;
 }
 
+/** A table cell that says nothing: empty, a dash, or an em-dash. */
+function absent(cell: string): boolean {
+  const v = cell.trim();
+  return v === '' || v === '-' || v === '—' || v === '–' || v === 'n/a';
+}
+
+/**
+ * True where a "handled by" cell names a system rather than stating that the
+ * concern is manual.
+ *
+ * Explicit markers rather than inference: a row saying it is not automated
+ * must say so, because guessing wrong here means a concern nobody holds
+ * reads as covered.
+ */
+function namesSystem(handledBy: string): boolean {
+  const v = handledBy.trim().toLowerCase();
+  if (absent(v)) return false;
+  return !(
+    v.includes('not automated') ||
+    v.includes('not handled') ||
+    v.includes('manual') ||
+    v.includes('none')
+  );
+}
+
+/**
+ * Reads the `## Attestation` section an initiative carries once attested.
+ *
+ * Lenient on the dash forms markdown tables collect, and on a table with
+ * fewer columns than expected — a hand-written table that is under-filled is
+ * milestone 12's `raci-unassigned` to report, not this parser's to reject.
+ */
+export function parseAttestation(content: string): Attestation | undefined {
+  const body = sectionBody(content, 'Attestation');
+  if (body === null) return undefined;
+
+  const labelled = (label: string): string | undefined => {
+    for (const line of body.split('\n')) {
+      const m = line.match(new RegExp(`^\\s*[-*]\\s*\\*\\*\\s*${label}\\s*\\*\\*\\s*:\\s*(.+)$`, 'i'));
+      if (m && m[1].trim().length > 0) return m[1].trim();
+    }
+    return undefined;
+  };
+
+  const doorRaw = labelled('door');
+  const door = DOORS.find((d) => doorRaw !== undefined && doorRaw.toLowerCase().startsWith(d));
+
+  const raci: RaciRow[] = [];
+  for (const line of body.split('\n')) {
+    if (!line.trim().startsWith('|')) continue;
+    const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+    if (cells.length < 2) continue;
+    // Skip the header and its separator.
+    if (/^-{2,}$/.test(cells[0].replace(/[:\s]/g, '')) ) continue;
+    if (cells[0].toLowerCase() === 'concern') continue;
+    const [concern, handledBy, r, a, c, i] = cells;
+    if (absent(concern)) continue;
+    raci.push({
+      concern,
+      handledBy: handledBy ?? '',
+      automated: namesSystem(handledBy ?? ''),
+      ...(r && !absent(r) ? { responsible: r } : {}),
+      ...(a && !absent(a) ? { accountable: a } : {}),
+      ...(c && !absent(c) ? { consulted: c } : {}),
+      ...(i && !absent(i) ? { informed: i } : {}),
+    });
+  }
+
+  return {
+    ...(door === undefined ? {} : { door }),
+    ...(labelled('blast-radius') === undefined ? {} : { blastRadius: labelled('blast-radius') as string }),
+    raci,
+  };
+}
+
 /**
  * Reads the record ids from a list section.
  *
@@ -213,6 +331,7 @@ export function readInitiatives(opensprintDir: string): InitiativeEntry[] {
       dependsOn,
       milestones: parseMilestones(content),
       orphanedMilestones: parseOrphanedMilestones(content),
+      ...(parseAttestation(content) === undefined ? {} : { attestation: parseAttestation(content) }),
       driverSpecs: parseMembership(content, 'Driver Specs'),
       decisions: parseMembership(content, 'ADRs'),
       path: filePath,
