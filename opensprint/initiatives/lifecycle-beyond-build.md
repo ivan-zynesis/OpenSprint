@@ -29,34 +29,36 @@ The payoff is honesty in the compiled output. Today `architecture.md` states *"O
         |   /opsp:driver  (external truth)    /opsp:knockdown  (brownfield)
         v
   +------------------------------------------------------------------+
-  | 1  TRIAGE                                        /opsp:explore    |
+  | 1  IDEATE                         /opsp:explore · /opsp:backlog  |
   +------------------------------------------------------------------+
-  | a backlog, thought through at architect altitude                  |
-  | ARTIFACTS  the initiative, at state: exploring     <-- NEW        |
-  +------------------------------------------------------------------+
-        |
-        v
-  +------------------------------------------------------------------+
-  | 2  SET THE BAR                                   /opsp:propose    |
-  +------------------------------------------------------------------+
-  | classify -> driver-specs · ADRs · initiative + milestones         |
-  | ARTIFACTS  opensprint/driver-specs/  ADRs/  initiatives/          |
-  |                                                                   |
-  | >> the BAR is written here. ex ante. <<                           |
+  | high-level ideation — what and why, at architect altitude        |
+  | explore writes nothing; backlog flushes the brainstorm to disk   |
+  | ARTIFACTS  the initiative, at state: exploring   (O + G)         |
   +------------------------------------------------------------------+
         |
         v
   +------------------------------------------------------------------+
-  | 3  BUILD                                /opsp:apply -> opsx       |
+  | 2  TRIAGE · BRAINSTORM · PROPOSE   /opsp:triage · /opsp:propose  |
   +------------------------------------------------------------------+
-  | per milestone:                                                    |
-  |   opsx:explore -> propose -> apply -> verify -> archive           |
-  |                                                                   |
-  | ARTIFACTS  openspec/changes/<name>/{proposal,design,tasks,specs}  |
-  |            openspec/specs/     code · tests · rules               |
-  |                                                                   |
-  | ambiguity --> /opsp:decide   writes an ADR, loops back to (2)     |
-  | /opsp:review  commit graph, branch-level review                   |
+  | pick up a backlog item, brainstorm strategy, then formalize      |
+  | triage decides: advance, decline, or send back to ideation       |
+  | ARTIFACTS  opensprint/driver-specs/  ADRs/  initiatives/         |
+  |                                                                  |
+  | >> the BAR is written here. ex ante. <<                          |
+  +------------------------------------------------------------------+
+        |
+        v
+  +------------------------------------------------------------------+
+  | 3  BUILD                                /opsp:apply -> opsx      |
+  +------------------------------------------------------------------+
+  | per milestone:                                                   |
+  |   opsx:explore -> propose -> apply -> verify -> archive          |
+  |                                                                  |
+  | ARTIFACTS  openspec/changes/<name>/{proposal,design,tasks,specs} |
+  |            openspec/specs/     code · tests · rules              |
+  |                                                                  |
+  | ambiguity --> /opsp:decide   writes an ADR, loops back to (2)    |
+  | /opsp:review  commit graph, branch-level review                  |
   +------------------------------------------------------------------+
         |
         v
@@ -73,17 +75,18 @@ The payoff is honesty in the compiled output. Today `architecture.md` states *"O
         |
         v
   +------------------------------------------------------------------+
-  | 5  COMPILE                      /opsp:archive  ·  /opsp:compact   |
+  | 5  COMPILE                      /opsp:archive  ·  /opsp:compact  |
   +------------------------------------------------------------------+
-  | DERIVED -- never hand-edited (DEC-006). one hop (DEC-011).        |
-  | ARTIFACTS  squad/{index,product,maintainer,dev,devops}.md         |
-  |            architecture.md  DECISION-MAP.md                       |
-  |            BOARD.md  <-- NEW: doing · next · roadmap              |
+  | DERIVED -- never hand-edited (DEC-006). one hop (DEC-011).       |
+  | ARTIFACTS  squad/{index,product,maintainer,dev,devops}.md        |
+  |            architecture.md  DECISION-MAP.md                      |
+  |            BOARD.md  <-- NEW: doing · next · roadmap             |
   +------------------------------------------------------------------+
         |
         v   compact check -- drift fails the build (DEC-010)
         |
-        +---------------->  back to (1) as harvested open loops
+        +---------------->  harvested open loops land in the backlog (1),
+                           and are picked up by triage (2)
 
   --------------------------------------------------------------------
   SIDE RAILS -- orthogonal to the spine, not stages of it
