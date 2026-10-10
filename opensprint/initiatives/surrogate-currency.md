@@ -1,7 +1,7 @@
 ---
 id: surrogate-currency
 status: active
-state: proposed
+state: building
 created: 2026-10-10
 depends-on:
   - lifecycle-beyond-build
@@ -85,7 +85,7 @@ across two milestones of `lifecycle-beyond-build`.
 
 ## Milestones
 
-- [ ] scoped-seal: `compact seal --hat <name>…`; sealing never blesses a section it did not just render. **Blocks everything else** — without it, compiling two hats marks four fresh, which this project already did once by accident
+- [x] scoped-seal: `compact seal --hat <name>…`; sealing never blesses a section it did not just render. **Blocks everything else** — without it, compiling two hats marks four fresh, which this project already did once by accident
 - [ ] render-on-milestone: `/opsp:apply` compiles stale `dev` and `devops` sections at each milestone boundary, after the change branch merges
 - [ ] escalation-handoff: the visible pause; inferred classification carried in the question with a draft record and blast radius; explicit approval; the affected hat's view compiled on approval
 - [ ] knockdown-views: `/opsp:knockdown` produces all five views, empty `product` and `maintainer` rendered as a first-class finding
@@ -93,6 +93,16 @@ across two milestones of `lifecycle-beyond-build`.
 
 `scoped-seal` genuinely blocks the two after it. `knockdown-views` and `migrate-tool` are
 independent of the rest and of each other.
+
+## Progress
+
+**1/5 — `scoped-seal`** · opsx change `2026-10-10-scoped-seal`
+
+`compact seal --hat <name>` scopes sealing, and sealing now refuses to bless a hat whose view was not re-rendered — comparing the view's hash against what the manifest already records, and carrying entries forward verbatim when they match.
+
+The second rule turned out to matter more than the flag: a caller can scope correctly and still bless a section whose inputs moved while its prose was never regenerated.
+
+Verified against the original failure. With twelve sections stale and nothing re-rendered, an unscoped seal reports `Sealed 0 section(s)`, carries all four hats forward, and `compact check` still reports twelve stale. Before this change the same command made the gate pass. It also protects the migration fixture below without anyone having to remember.
 
 ## Notes
 
