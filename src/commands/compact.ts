@@ -22,6 +22,29 @@ export interface SealOptions {
   /** Hats to reseal. Empty or absent means every hat. */
   hats?: string[];
 }
+
+/**
+ * Narrows a requested hat list to those the registry knows.
+ *
+ * An unknown name warns and is dropped rather than failing: a typo in --hat
+ * should not abort an archive, the same way a malformed registry degrades.
+ * Returns undefined when nothing was requested, meaning "every hat".
+ */
+function requestedHats(
+  requested: string[] | undefined,
+  registry: readonly string[]
+): string[] | undefined {
+  if (requested === undefined || requested.length === 0) return undefined;
+  const known = new Set(registry);
+  const kept = requested.filter((hat) => {
+    if (known.has(hat)) return true;
+    console.warn(
+      chalk.yellow(`Unknown hat '${hat}'. Known hats: ${registry.join(', ')}. Ignoring.`)
+    );
+    return false;
+  });
+  return kept.length > 0 ? kept : undefined;
+}
 import { readInitiatives } from '../core/initiatives.js';
 import { attestationOf } from '../core/compact/measures.js';
 import {
@@ -57,6 +80,8 @@ import { deriveOpenLoops, groupLoopsByHat, type OpenLoop } from '../core/compact
 
 export interface CompactOptions {
   json?: boolean;
+  /** Hats to report on. Empty or absent means every hat. */
+  hats?: string[];
 }
 
 // -----------------------------------------------------------------------------
@@ -159,7 +184,13 @@ export async function compactPlanCommand(options: CompactOptions = {}): Promise<
   const projectRoot = process.cwd();
   const s = scan(projectRoot);
   const { statuses, unassigned, unknownHats, registry } = s;
-  const pending = statuses.filter((st) => st.state !== 'fresh');
+  // Open loops are deliberately not filtered: a loop belongs to the records,
+  // not to a view section, so narrowing the plan to one hat must not hide
+  // them.
+  const requested = requestedHats(options.hats, registry);
+  const pending = statuses
+    .filter((st) => st.state !== 'fresh')
+    .filter((st) => requested === undefined || requested.includes(st.hat));
   const loops = openLoopsFor(projectRoot, s);
 
   if (options.json) {
@@ -270,18 +301,9 @@ export async function compactSealCommand(options: SealOptions = {}): Promise<voi
     previousByHat.set(entry.hat, list);
   }
 
-  const known = new Set(registry);
-  const requested = options.hats?.filter((hat) => {
-    if (known.has(hat)) return true;
-    // A typo in --hat must not abort an archive, the same way a malformed
-    // registry degrades rather than failing.
-    console.warn(
-      chalk.yellow(`Unknown hat '${hat}'. Known hats: ${registry.join(', ')}. Ignoring.`)
-    );
-    return false;
-  });
+  const requested = requestedHats(options.hats, registry);
   const inScope = (hat: string): boolean =>
-    requested === undefined || requested.length === 0 || requested.includes(hat);
+    requested === undefined || requested.includes(hat);
 
   const entries: ManifestEntry[] = [];
   const unrendered: string[] = [];

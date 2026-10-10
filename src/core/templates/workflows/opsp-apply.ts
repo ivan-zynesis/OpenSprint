@@ -198,6 +198,53 @@ After the milestone's opsx cycle completes:
 2. Add the opsx change name to the initiative
 3. Summarize what was built and learned
 4. If new ADRs or driver-specs were created, note them
+5. **Compile what this milestone changed** — see below
+
+### Compile at the boundary
+
+The code just moved, and so did every ADR an escalation produced. \`dev\` and \`devops\` views are
+compiled from exactly those things, so this is the moment they go stale — and the moment the next
+milestone will read them (\`DS-VIEW-AUTHORSHIP\`).
+
+\`\`\`bash
+openspec compact plan --hat dev --hat devops
+\`\`\`
+
+Render **only the sections it reports stale**, then:
+
+\`\`\`bash
+openspec compact seal --hat dev --hat devops
+\`\`\`
+
+If nothing is stale, say nothing and move on. A milestone that touched no manifest and produced no
+decision renders nothing at all.
+
+**You may compile \`dev\` and \`devops\` without asking.** You are wearing that hat.
+
+### Offer product and maintainer — never compile them silently
+
+\`\`\`bash
+openspec compact plan --hat product --hat maintainer
+\`\`\`
+
+Where those are stale, report it and **offer**:
+
+> \`product/goals\` is stale, and compiling it means putting on the product hat.
+> Compile it now?
+
+**If the operator accepts, that is a context switch — not a render.** Set down what you are
+holding: the diff, the test output, the escalation you just resolved. Load the product records.
+Compile. Seal with \`--hat product\`. Then pick the dev hat back up and carry on.
+
+Compiling while still holding the implementation produces product prose written through an
+implementation lens, which is **worse than leaving the view stale** — staleness is reported, that
+is not.
+
+**If the operator declines, leave it.** It stays stale, the plan keeps reporting it, and archive
+compiles it. Nothing is lost.
+
+Neither the compile nor the offer gates the milestone. A declined or unanswered offer does not
+block anything.
 
 **Milestone checkpoint** (if review mode is per-milestone):
 Display:

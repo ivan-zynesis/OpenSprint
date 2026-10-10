@@ -159,6 +159,66 @@ describe('opensprint compact (e2e)', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
+  // plan --hat
+  // ═══════════════════════════════════════════════════════════
+
+  describe('plan --hat', () => {
+    const count = (out: string) => {
+      const m = out.match(/(\d+) section\(s\) need recompiling/);
+      return m ? Number(m[1]) : 0;
+    };
+
+    it('reports every hat when unfiltered', async () => {
+      const r = await runCLI(['compact', 'plan'], { cwd: projectRoot });
+      expect(count(r.stdout)).toBeGreaterThan(0);
+    });
+
+    it('reports fewer sections when filtered to one hat', async () => {
+      const all = await runCLI(['compact', 'plan'], { cwd: projectRoot });
+      const one = await runCLI(['compact', 'plan', '--hat', 'dev'], { cwd: projectRoot });
+      expect(count(one.stdout)).toBeGreaterThan(0);
+      expect(count(one.stdout)).toBeLessThan(count(all.stdout));
+    });
+
+    it('reports only the named hats', async () => {
+      const r = await runCLI(['compact', 'plan', '--hat', 'dev'], { cwd: projectRoot });
+      expect(r.stdout).toContain('dev/');
+      expect(r.stdout).not.toContain('product/');
+    });
+
+    it('accepts the flag repeatedly', async () => {
+      const one = await runCLI(['compact', 'plan', '--hat', 'dev'], { cwd: projectRoot });
+      const two = await runCLI(['compact', 'plan', '--hat', 'dev', '--hat', 'product'], {
+        cwd: projectRoot,
+      });
+      expect(count(two.stdout)).toBeGreaterThan(count(one.stdout));
+    });
+
+    it('filters the JSON form too', async () => {
+      const r = await runCLI(['compact', 'plan', '--json', '--hat', 'dev'], { cwd: projectRoot });
+      const parsed = JSON.parse(r.stdout);
+      expect(parsed.sections.length).toBeGreaterThan(0);
+      for (const s of parsed.sections) expect(s.hat).toBe('dev');
+    });
+
+    // A loop belongs to the records, not to a view section, so narrowing the
+    // plan must not hide one.
+    it('does not filter open loops', async () => {
+      const all = await runCLI(['compact', 'plan', '--json'], { cwd: projectRoot });
+      const one = await runCLI(['compact', 'plan', '--json', '--hat', 'dev'], { cwd: projectRoot });
+      expect(JSON.parse(one.stdout).openLoops).toEqual(JSON.parse(all.stdout).openLoops);
+    });
+
+    it('warns on an unknown hat and reports everything', async () => {
+      const all = await runCLI(['compact', 'plan'], { cwd: projectRoot });
+      const r = await runCLI(['compact', 'plan', '--hat', 'nonsense'], { cwd: projectRoot });
+      expect(r.exitCode).toBe(0);
+      expect(r.stdout + r.stderr).toMatch(/Unknown hat 'nonsense'/);
+      expect(count(r.stdout)).toBe(count(all.stdout));
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
   // DEC-SCOPED-SEAL — scoped, and never blessing what it did not render
   // ═══════════════════════════════════════════════════════════
 

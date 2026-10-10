@@ -474,7 +474,13 @@ compactCmd
   .command('plan')
   .description('Report which view sections need recompiling, and the records feeding them')
   .option('--json', 'Output as JSON')
-  .action(async (options: CompactOptions) => {
+  .option(
+    '--hat <name>',
+    'Report only this hat (repeatable)',
+    (value: string, previous: string[] = []) => [...previous, value]
+  )
+  .action(async (options: CompactOptions & { hat?: string[] }) => {
+    options.hats = options.hat;
     try {
       await compactPlanCommand(options);
     } catch (error) {
