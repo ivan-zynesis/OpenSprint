@@ -578,6 +578,112 @@ describe('per-hat classification', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
+  // What an attestation left unanswered (DEC-042)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('attestation loops', () => {
+    const loops = (initiatives: unknown[]) =>
+      deriveOpenLoops(
+        specs(),
+        decs(),
+        buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)),
+        () => [],
+        () => [],
+        initiatives as never
+      );
+    const kinds = (initiatives: unknown[], kind: string) =>
+      loops(initiatives).filter((l) => l.kind === kind).map((l) => l.record);
+
+    const init = (over: Record<string, unknown>) => ({
+      id: 'i',
+      status: 'active',
+      dependsOn: [],
+      milestones: [],
+      orphanedMilestones: [],
+      driverSpecs: [],
+      decisions: [],
+      path: '/tmp/i.md',
+      stem: 'i',
+      ...over,
+    });
+    const raci = (rows: unknown[]) => ({ door: 'two-way', blastRadius: 'x', raci: rows });
+
+    it('the three kinds are registered', () => {
+      for (const k of ['reversibility-unstated', 'blast-radius-unstated', 'raci-unassigned']) {
+        expect([...OPEN_LOOP_KINDS]).toContain(k);
+      }
+    });
+
+    it('fires nothing for an initiative that does not claim to be attested', () => {
+      for (const state of ['exploring', 'proposed', 'building', 'declined', undefined]) {
+        const l = loops([init({ state })]);
+        expect(l.filter((x) => x.kind.startsWith('reversibility') || x.kind.startsWith('blast') || x.kind === 'raci-unassigned')).toEqual([]);
+      }
+    });
+
+    it('reports a missing door on an attested initiative', () => {
+      expect(kinds([init({ state: 'attested' })], 'reversibility-unstated')).toEqual(['i']);
+    });
+
+    it('reports a missing blast radius on an attested initiative', () => {
+      expect(kinds([init({ state: 'attested' })], 'blast-radius-unstated')).toEqual(['i']);
+    });
+
+    it('reports nothing when door and blast radius are stated', () => {
+      const i = init({ state: 'attested', attestation: raci([{ concern: 'x', handledBy: 'system — alerts', automated: true }]) });
+      expect(kinds([i], 'reversibility-unstated')).toEqual([]);
+      expect(kinds([i], 'blast-radius-unstated')).toEqual([]);
+      expect(kinds([i], 'raci-unassigned')).toEqual([]);
+    });
+
+    it('also fires for a completed initiative', () => {
+      expect(kinds([init({ state: 'completed' })], 'reversibility-unstated')).toEqual(['i']);
+    });
+
+    it('reports an attested initiative with no RACI at all', () => {
+      const [l] = loops([init({ state: 'attested' })]).filter((x) => x.kind === 'raci-unassigned');
+      expect(l.detail).toContain('no RACI at all');
+    });
+
+    it('a row handled by a system needs no names', () => {
+      const i = init({ state: 'attested', attestation: raci([{ concern: 'alerting', handledBy: 'system — pagerduty', automated: true }]) });
+      expect(kinds([i], 'raci-unassigned')).toEqual([]);
+    });
+
+    it('a manual row with no Responsible is reported, naming what is missing', () => {
+      const i = init({ state: 'attested', attestation: raci([{ concern: 'reconciliation', handledBy: 'not automated', automated: false, accountable: 'lead' }]) });
+      const [l] = loops([i]).filter((x) => x.kind === 'raci-unassigned');
+      expect(l.detail).toContain('reconciliation');
+      expect(l.detail).toContain('Responsible');
+      expect(l.detail).not.toContain('Accountable');
+    });
+
+    it('a manual row with no Accountable is reported', () => {
+      const i = init({ state: 'attested', attestation: raci([{ concern: 'x', handledBy: 'manual', automated: false, responsible: 'ops' }]) });
+      const [l] = loops([i]).filter((x) => x.kind === 'raci-unassigned');
+      expect(l.detail).toContain('Accountable');
+    });
+
+    it('a manual row with both owners is accepted; Consulted and Informed are optional', () => {
+      const i = init({ state: 'attested', attestation: raci([{ concern: 'x', handledBy: 'manual', automated: false, responsible: 'ops', accountable: 'lead' }]) });
+      expect(kinds([i], 'raci-unassigned')).toEqual([]);
+    });
+
+    it('reports one loop per unowned row', () => {
+      const i = init({ state: 'attested', attestation: raci([
+        { concern: 'a', handledBy: 'manual', automated: false },
+        { concern: 'b', handledBy: 'manual', automated: false },
+        { concern: 'c', handledBy: 'system — x', automated: true },
+      ]) });
+      expect(loops([i]).filter((x) => x.kind === 'raci-unassigned')).toHaveLength(2);
+    });
+
+    it('a caller supplying no initiatives sees no attestation loops', () => {
+      expect(loops([]).filter((x) => x.kind === 'raci-unassigned')).toEqual([]);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
   // record-without-objective
   // ═══════════════════════════════════════════════════════════
 

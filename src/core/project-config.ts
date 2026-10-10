@@ -77,6 +77,16 @@ export const ProjectConfigSchema = z.object({
     .array(z.string())
     .optional()
     .describe('Globs identifying rule files (defaults to DEFAULT_RULE_GLOBS)'),
+
+  // Optional: where external-facing documentation lives (DEC-044). Where a
+  // project's documentation lives is a property of the project, the same way
+  // the hat set is — a repository already publishing from `documentation/`
+  // or `docs/internal/` says so once.
+  docsDir: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Directory for external-facing documentation (defaults to docs/)'),
 });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -236,6 +246,19 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
       } else {
         console.warn(
           `Invalid 'ruleGlobs' field in config (must be a non-empty array of non-empty strings), using the default rule globs`
+        );
+      }
+    }
+
+    // Parse docsDir field using Zod (DEC-044)
+    if (raw.docsDir !== undefined) {
+      const docsResult = z.string().min(1).safeParse(raw.docsDir);
+
+      if (docsResult.success && docsResult.data.trim().length > 0) {
+        config.docsDir = docsResult.data;
+      } else {
+        console.warn(
+          `Invalid 'docsDir' field in config (must be a non-empty string), using the default documentation directory`
         );
       }
     }

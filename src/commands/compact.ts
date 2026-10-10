@@ -16,6 +16,7 @@ import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveHatRegistry, resolveHatSections, resolveHatRoles } from '../core/hats.js';
 import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
+import { readInitiatives } from '../core/initiatives.js';
 import { attestationOf } from '../core/compact/measures.js';
 import {
   readSourcedDriverSpecs,
@@ -113,7 +114,8 @@ function openLoopsFor(projectRoot: string, s: Scan): OpenLoop[] {
     s.decisions,
     index,
     (hat) => resolveHatRoles(projectRoot, hat),
-    (hat) => resolveHatSections(projectRoot, hat)
+    (hat) => resolveHatSections(projectRoot, hat),
+    readInitiatives(s.opensprintDir)
   );
 }
 

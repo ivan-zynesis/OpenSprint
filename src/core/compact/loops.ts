@@ -24,6 +24,7 @@ import {
   POSTURE_VERDICTS,
 } from './measures.js';
 import type { SectionDef } from './sections.js';
+import type { InitiativeEntry } from '../initiatives.js';
 
 export const OPEN_LOOP_KINDS = [
   'constraint-unanswered',
@@ -43,6 +44,12 @@ export const OPEN_LOOP_KINDS = [
   'strategy-unimplemented',
   'exposure-unmitigated',
   'measure-unattested',
+  // Properties of a *change* rather than of a record (DEC-042). They fire
+  // only once an initiative claims to have been attested — asking who holds
+  // a risk before anyone has judged it would be noise.
+  'reversibility-unstated',
+  'blast-radius-unstated',
+  'raci-unassigned',
 ] as const;
 
 /**
@@ -137,7 +144,10 @@ export function deriveOpenLoops(
   rolesFor: (hat: string) => readonly string[] = () => [],
   // Defaults to none, so a caller that does not supply sections sees no
   // record-without-objective loops rather than spurious ones.
-  sectionsFor: (hat: string) => readonly SectionDef[] = () => []
+  sectionsFor: (hat: string) => readonly SectionDef[] = () => [],
+  // Defaults to none, so a caller unaware of initiatives sees no attestation
+  // loops rather than spurious ones.
+  initiatives: readonly InitiativeEntry[] = []
 ): OpenLoop[] {
   const loops: OpenLoop[] = [];
   const activeDecisions = decisions.filter((d) => isActive(d.status));
@@ -405,6 +415,65 @@ export function deriveOpenLoops(
       hats: record.hats ?? [],
       detail: `Stated as a ${record.role} but carries no populated '## Measures' section — nothing says how it is known to be met.`,
     });
+  }
+
+  // ── what an attestation left unanswered (DEC-042)
+  //
+  // Scoped to initiatives that claim to have been attested. Before that
+  // point these questions have no answer yet, and reporting them would train
+  // the operator to ignore the loop that matters once they do.
+  for (const initiative of initiatives) {
+    const claimsAttested = initiative.state === 'attested' || initiative.state === 'completed';
+    if (!claimsAttested) continue;
+
+    const attestation = initiative.attestation;
+
+    if (attestation?.door === undefined) {
+      loops.push({
+        kind: 'reversibility-unstated',
+        record: initiative.id,
+        hats: [],
+        detail: 'Attested without saying whether this is a one-way or two-way door.',
+      });
+    }
+
+    if (attestation?.blastRadius === undefined) {
+      loops.push({
+        kind: 'blast-radius-unstated',
+        record: initiative.id,
+        hats: [],
+        detail: 'Attested without recording what the change affects.',
+      });
+    }
+
+    const rows = attestation?.raci ?? [];
+    if (rows.length === 0) {
+      loops.push({
+        kind: 'raci-unassigned',
+        record: initiative.id,
+        hats: [],
+        detail:
+          'Attested with no RACI at all. Nothing records who holds this once the pull request closes.',
+      });
+    } else {
+      // A row naming a system is a complete answer — RACI is the residue
+      // after automation, so only the manual rows owe names.
+      const unowned = rows.filter(
+        (row) => !row.automated && (row.responsible === undefined || row.accountable === undefined)
+      );
+      for (const row of unowned) {
+        const missing = [
+          row.responsible === undefined ? 'Responsible' : null,
+          row.accountable === undefined ? 'Accountable' : null,
+        ].filter((m): m is string => m !== null);
+        loops.push({
+          kind: 'raci-unassigned',
+          record: initiative.id,
+          hats: [],
+          detail: `'${row.concern}' is not handled by a system and names no ${missing.join(' or ')}.`,
+        });
+      }
+    }
   }
 
   return loops;

@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { checkAmendment } from '../../src/core/compact/amend.js';
+import { resolveDocsDir, DEFAULT_DOCS_DIR } from '../../src/core/compact/rules.js';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
 import {
   getOpspAttestSkillTemplate,
   getOpspAttestCommandTemplate,
@@ -168,5 +172,83 @@ describe('/opsp:attest', () => {
 
   it('the command template carries the same instructions', () => {
     expect(getOpspAttestCommandTemplate().content).toBe(getOpspAttestSkillTemplate().instructions);
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // The second write target (DEC-044)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('resolveDocsDir', () => {
+    let root: string;
+    const config = (body: string) => {
+      fs.mkdirSync(path.join(root, 'openspec'), { recursive: true });
+      fs.writeFileSync(path.join(root, 'openspec', 'config.yaml'), `schema: spec-driven\n${body}`);
+    };
+
+    beforeEach(() => {
+      root = path.join(os.tmpdir(), `opensprint-docs-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      fs.mkdirSync(root, { recursive: true });
+    });
+    afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
+
+    it('defaults to docs/', () => {
+      config('');
+      expect(resolveDocsDir(root)).toBe(DEFAULT_DOCS_DIR);
+      expect(DEFAULT_DOCS_DIR).toBe('docs');
+    });
+
+    it('follows a project override', () => {
+      config('docsDir: docs/internal\n');
+      expect(resolveDocsDir(root)).toBe('docs/internal');
+    });
+
+    it('trims surrounding whitespace', () => {
+      config('docsDir: "  documentation  "\n');
+      expect(resolveDocsDir(root)).toBe('documentation');
+    });
+
+    it('degrades to the default rather than failing on a malformed value', () => {
+      config('docsDir: "   "\n');
+      expect(resolveDocsDir(root)).toBe(DEFAULT_DOCS_DIR);
+    });
+
+    it('defaults when there is no config at all', () => {
+      expect(resolveDocsDir(root)).toBe(DEFAULT_DOCS_DIR);
+    });
+  });
+
+  describe('the instructions cover documentation review', () => {
+    const text = getOpspAttestSkillTemplate().instructions;
+
+    it('asks whether what exists is adequate for what shipped', () => {
+      expect(text).toMatch(/Review\s+the\s+documentation/i);
+      expect(text).toMatch(/adequate\s+and\s+complete/i);
+    });
+
+    it('says the question is not who wrote it', () => {
+      expect(text).toMatch(/not\s+owned\s+by/i);
+      expect(text).toMatch(/by\s+virtue\s+of\s+being\s+documentation/i);
+    });
+
+    it('urges rather than writes silently', () => {
+      expect(text).toMatch(/write\s+only\s+on\s+confirmation/i);
+      expect(text).toMatch(/operator\s+decides/i);
+    });
+
+    it('names the documentation directory as the one free write target', () => {
+      expect(text).toMatch(/DEC-044/);
+      expect(text).toMatch(/Write\s+there\s+and\s+nowhere\s+else/i);
+      expect(text).toMatch(/docs\/ by default/);
+    });
+
+    it('still bounds record writes to Measures and Attestation', () => {
+      expect(text).toMatch(/outside\s+the\s+documentation\s+directory/i);
+      expect(text).toMatch(/## Measures/);
+      expect(text).toMatch(/## Attestation/);
+    });
+
+    it('records thin documentation as a finding rather than accepting it', () => {
+      expect(text).toMatch(/record\s+that\s+as\s+a\s+finding/i);
+    });
   });
 });

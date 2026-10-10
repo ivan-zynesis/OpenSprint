@@ -69,6 +69,28 @@ export interface RuleIndex {
   scanned: string[];
 }
 
+/** Where external-facing documentation lives, `docs/` unless configured. */
+export const DEFAULT_DOCS_DIR = 'docs';
+
+/**
+ * Resolves the documentation directory (DEC-044).
+ *
+ * This is attest's **second write target** — prose for people who will never
+ * open a record. Nothing cites it by id, nothing compiles from it, and no
+ * agent loads it to make a decision, which is why it needs none of the
+ * protections a record does and gets none of the checks.
+ *
+ * A malformed value degrades to the default rather than failing the command,
+ * the same way a malformed hat registry does.
+ */
+export function resolveDocsDir(projectRoot: string): string {
+  const declared = readProjectConfig(projectRoot)?.docsDir;
+  if (typeof declared !== 'string' || declared.trim().length === 0) {
+    return DEFAULT_DOCS_DIR;
+  }
+  return declared.trim();
+}
+
 /**
  * Resolves the rule globs for a project, falling back to the default when the
  * declared value is absent or malformed.

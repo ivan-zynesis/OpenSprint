@@ -164,13 +164,48 @@ for it. Consulted and Informed are optional.
 Do not accept "the team" or "ops" as an answer. A concern owned by everyone is owned by nobody, and
 the first incident is when that gets discovered.
 
-## Step 5: Verify you stayed in bounds
+## Step 5: Review the documentation
+
+The surrogate under \`opensprint/\` is the **operating** record — detailed, cited, read by agents and
+by whoever is doing the work. It is not what an external stakeholder needs, and compiling cannot
+produce that: a shorter account, free of record ids, for a reader who will never follow a citation.
+
+Attestation is where that account gets written, because the questions you have just answered *are*
+the material it is made of (\`DS-DOCUMENTATION-REVIEWED\`).
+
+**Ask what already exists, and judge it against what shipped.** Not who wrote it — documentation is
+not owned by \`product\` or \`maintainer\` by virtue of being documentation. The question is whether it
+is adequate and complete for the change now in front of you:
+
+- does anything describe what this initiative actually changed, in terms an outsider would follow?
+- is anything published now **wrong** because of it?
+- does an accepted exposure need saying out loud to someone who does not read driver-specs?
+- is there a runbook implication from the RACI table that nobody outside this repository knows?
+
+**Then urge the operator to write it.** Produce the account in context, say where it belongs, and
+write only on confirmation. The operator decides what an external reader should be told; you make
+sure the question was asked and the answer landed somewhere durable rather than in a conversation
+nobody reopens.
+
+\`\`\`bash
+openspec config          # the configured documentation directory, docs/ by default
+\`\`\`
+
+**Write there and nowhere else.** The documentation directory is attest's one free write target
+(\`DEC-044\`) — prose for people, so it needs none of the protections a record does. If the operator
+names a different directory serving the same purpose, use theirs.
+
+Where the documentation is thin and the operator declines to improve it now, record that as a
+finding rather than silently accepting it.
+
+## Step 5b: Verify you stayed in bounds
 
 \`\`\`bash
 git diff --unified=0 -- opensprint/driver-specs/ opensprint/initiatives/
 \`\`\`
 
-Every hunk must fall inside a \`## Measures\` or \`## Attestation\` section. If you changed a Statement,
+Every hunk outside the documentation directory must fall inside a \`## Measures\` or
+\`## Attestation\` section. If you changed a Statement,
 a Decision, a Rationale or any frontmatter, **revert it**. Revising a claim is a new decision —
 \`/opsp:decide\` — not an amendment. The bound (\`DEC-027\`) is what keeps \`DEC-006\`'s guarantee meaningful:
 a record's claim never changes under a reader who cited it.
@@ -202,6 +237,7 @@ openspec compact loops         # measure-unattested should have moved
 \`\`\`
 
 Report how many bars were met, how many could not be assessed, every exposure with the work planned
-against it, and every concern that is **not** handled by a system. Then hand to \`/opsp:archive\`,
+against it, every concern that is **not** handled by a system, and what you changed or left wanting
+in the documentation. Then hand to \`/opsp:archive\`,
 which compiles the documentation and cannot honestly run before this does (\`DS-ATTESTED-TRUTH\`).
 `;
