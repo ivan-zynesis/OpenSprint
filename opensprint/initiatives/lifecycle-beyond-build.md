@@ -1,7 +1,7 @@
 ---
 id: lifecycle-beyond-build
 status: active
-state: building
+state: attested
 created: 2026-10-01
 ---
 
@@ -174,8 +174,8 @@ The assurance gradient this produces is the reason exposures are worth recording
 - [x] attested-authority: Third citation authority; compact visibly distinguishes decided, observed and attested
 - [x] attest-tool: The `/opsp:attest` skill, with bounded record amendment
 - [x] forward-closure: `mitigated-by` edges; harvest `exposure-unmitigated`; the board renders exposures beside their mitigation state
-- [ ] attest-as-review: Reading scope superseded — test files in, source and ADR rationales out ([[DEC-040]]); posture-conditional evidence and exposure plus `measure-unattested` ([[DEC-041]]); the three review questions on the initiative, with RACI as the residue after automation ([[DEC-042]]); the same agent may not write the tests and attest them ([[DEC-043]])
-- [ ] attest-documentation: Bring the published-documentation venue under the lifecycle. A second write target — the configurable documentation directory, `docs/` by default ([[DEC-044]]); documentation adequacy reviewed at attestation rather than assumed ([[DS-DOCUMENTATION-REVIEWED]]); harvest `reversibility-unstated`, `blast-radius-unstated`, `raci-unassigned`
+- [x] attest-as-review: Reading scope superseded — test files in, source and ADR rationales out ([[DEC-040]]); posture-conditional evidence and exposure plus `measure-unattested` ([[DEC-041]]); the three review questions on the initiative, with RACI as the residue after automation ([[DEC-042]]); the same agent may not write the tests and attest them ([[DEC-043]])
+- [x] attest-documentation: Bring the published-documentation venue under the lifecycle. A second write target — the configurable documentation directory, `docs/` by default ([[DEC-044]]); documentation adequacy reviewed at attestation rather than assumed ([[DS-DOCUMENTATION-REVIEWED]]); harvest `reversibility-unstated`, `blast-radius-unstated`, `raci-unassigned`
 
 ## Progress
 
@@ -254,6 +254,18 @@ One exposure on this repository, pointing nowhere: `DS-HIGH-IMPACT-OPS`. The boa
 ---
 
 **All milestones complete.** `state: attested` is declared but **not earned**: `/opsp:attest` now exists and has not been run against this initiative's own bars. That is the operator's call, and running it would need a fresh session with a narrow context ([[DEC-033]]) — this one wrote the implementation.
+
+**11/12 — `attest-as-review`** · opsx change `2026-10-10-attest-as-review`
+
+Attestation became a review. Test files are in scope — a test is the implementation's own restatement of a bar, so reading it compares at the same altitude where reading source compares across one. Posture became the judgement: `met` owes evidence, everything else owes exposure, and a measure nobody judged reports once as `measure-unattested`. **35 misleading loops collapsed into 22 accurate ones.** The three review questions parse from an `## Attestation` section, and the workflow refuses a session that wrote the tests.
+
+**Discovered:** three requirements from milestone 2 had silently never reached the source-of-truth specs. `openspec archive` applies only the *last* `## ADDED Requirements` section when a delta carries two — the behaviour shipped and was tested, but the spec said nothing about it. Restored here. The archive bug itself is unfixed and is worth its own backlog item.
+
+**12/12 — `attest-documentation`** · opsx change `2026-10-10-attest-documentation`
+
+The published-documentation venue, brought under the lifecycle. `docsDir` configures where external-facing documentation lives; attest reviews whether what exists is adequate for what shipped, and urges rather than writing silently. Three harvest rules close the loop on the review questions, firing only once an initiative claims to be attested.
+
+**Discovered:** adding `docsDir` to the Zod schema did not make it readable — `readProjectConfig` parses each field explicitly at runtime, so a configured value silently resolved to the default.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 

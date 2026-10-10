@@ -25,7 +25,7 @@ In flight.
 
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | building | 9/11 _(+1 superseded)_ | attest-as-review |
+| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | attested | 11/11 _(+1 superseded)_ | — |
 
 ## Done
 
@@ -50,8 +50,8 @@ risk, and **that initiative's state is the assurance level**.
 
 | Record | Exposure | Mitigated by | Assurance |
 |---|---|---|---|
-| `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | in flight |
-| `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | in flight |
+| `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | done, pending close |
+| `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | done, pending close |
 | `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
 
 ## Problems
