@@ -1,17 +1,20 @@
 ## MODIFIED Requirements
 
-### Requirement: Surrogate resolution escalates what it cannot answer
-The workflow SHALL consult the surrogate before the operator, and SHALL treat what it cannot answer as a **hat handoff** rather than as an interruption.
+### Requirement: Surrogate-based question resolution
+The `/opsp:apply` skill SHALL attempt to resolve questions arising during opsx execution by consulting the operator surrogate (driver-specs + ADRs + architecture.md) before escalating to the operator. What it cannot answer SHALL be treated as a **hat handoff** rather than as an interruption.
 
-#### Scenario: The surrogate can answer
-- **WHEN** a driver-spec, an existing decision or the compiled architecture answers the ambiguity
-- **THEN** it SHALL be resolved without involving the operator
-- **AND** the resolution SHALL name the record it came from
+#### Scenario: Question auto-resolved by surrogate
+- **WHEN** a question arises during opsx execution that can be answered by existing driver-specs, ADRs, or architecture.md
+- **THEN** the agent SHALL resolve it without interrupting the operator
+- **AND** SHALL note the resolution in the opsx change context
 
-#### Scenario: The surrogate cannot answer
-- **WHEN** nothing in the surrogate answers a question in driver-spec scope
-- **THEN** the workflow SHALL pause and escalate
-- **AND** this SHALL be treated as the specification being incomplete, which is normal rather than a defect
+#### Scenario: Question escalated to operator
+- **WHEN** a question arises that the surrogate cannot answer
+- **THEN** the agent SHALL pause the opsx cycle
+- **AND** SHALL treat the gap as the specification being incomplete, which is normal rather than a defect
+- **AND** SHALL present the question at a higher level than the raw opsx question, carrying its own classification
+- **AND** SHALL write the artifact only on explicit approval
+- **AND** SHALL resume the opsx cycle as a distinct step
 
 ## ADDED Requirements
 
