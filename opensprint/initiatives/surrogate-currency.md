@@ -89,12 +89,23 @@ across two milestones of `lifecycle-beyond-build`.
 - [ ] render-on-milestone: `/opsp:apply` compiles stale `dev` and `devops` sections at each milestone boundary, after the change branch merges
 - [ ] escalation-handoff: the visible pause; inferred classification carried in the question with a draft record and blast radius; explicit approval; the affected hat's view compiled on approval
 - [ ] knockdown-views: `/opsp:knockdown` produces all five views, empty `product` and `maintainer` rendered as a first-class finding
-- [ ] migrate-tool: `/opsp:migrate` — detect records the current shapes cannot select, grill the operator one record at a time, backfill on confirmation
+- [ ] migrate-tool: `/opsp:migrate` — detect records the current shapes cannot select, grill the operator one record at a time, backfill on confirmation. **Validated against this repository's own stale state** (see below)
 
 `scoped-seal` genuinely blocks the two after it. `knockdown-views` and `migrate-tool` are
 independent of the rest and of each other.
 
 ## Notes
+
+**This repository's views are deliberately left stale — do not recompile them.**
+
+Twelve sections are stale and `compact check` fails. That is not an oversight waiting to be tidied: it
+is a **live migration fixture**, and the only real one anybody has. It was produced honestly, by
+three milestones of shape changes landing on records written against the old shapes, which is
+exactly the situation `/opsp:migrate` exists for.
+
+Recompiling to make the gate green destroys the test case and leaves the tool validated against
+synthetic fixtures only. The views are compiled at the **end** of this initiative, as the final
+check on whether migrate actually works — not before.
 
 **Decision ids are semantic from here.** [[DEC-036]] decided this and recorded a prerequisite — the
 rule harvest matched `DEC-\d{3}` only, so a semantic id written before widening it would have been
@@ -105,6 +116,7 @@ window.
 
 ## Open Questions
 
-- **Where product/maintainer staleness is surfaced between archives.** `compact plan` reports it, but
-  nothing in `/opsp:apply` puts it in front of the operator. Reporting without compiling may be the
-  right middle ground, and is not decided here.
+None blocking. Where product/maintainer staleness is surfaced between archives was open at proposal
+and is now settled in [[DEC-COMPILE-ON-MILESTONE]]: apply **offers** to compile them, because the
+point of the surrogate is to carry context and a stale view actively misleads whoever loads it next.
+Accepting is a context switch, not a render.
