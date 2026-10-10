@@ -26,7 +26,7 @@ In flight.
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
 | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | building | 11/11 _(+1 superseded)_ | — |
-| [surrogate-currency](initiatives/surrogate-currency.md) | building | 3/5 | knockdown-views |
+| [surrogate-currency](initiatives/surrogate-currency.md) | building | 4/5 | migrate-tool |
 
 ## Done
 
