@@ -1,7 +1,7 @@
 ---
 id: lifecycle-beyond-build
 status: active
-state: attested
+state: building
 created: 2026-10-01
 ---
 
@@ -266,6 +266,19 @@ Attestation became a review. Test files are in scope — a test is the implement
 The published-documentation venue, brought under the lifecycle. `docsDir` configures where external-facing documentation lives; attest reviews whether what exists is adequate for what shipped, and urges rather than writing silently. Three harvest rules close the loop on the review questions, firing only once an initiative claims to be attested.
 
 **Discovered:** adding `docsDir` to the Zod schema did not make it readable — `readProjectConfig` parses each field explicitly at runtime, so a configured value silently resolved to the default.
+
+---
+
+**All twelve milestones complete. State is `building`, not `attested`, and that is deliberate.**
+
+Marking it `attested` was the first thing tried, and the rules shipped in milestone 12 immediately
+reported three loops against it — no door, no blast radius, no RACI. They were right: `/opsp:attest`
+has never been run against this initiative's own bars, and [[DEC-043]] forbids this session from
+running it, because this session wrote both the implementation and the tests.
+
+So the work is **built and unattested**, which `building` says honestly and `attested` would not.
+Attesting it needs a fresh session with a narrow context — which is the whole point of the thing
+that was just built, demonstrated on itself within a minute of shipping.
 
 Dependency order is forced: attest has nothing to write into until `measure-anatomy` lands, and nothing to point `mitigated-by` at until `initiative-state` lands.
 
