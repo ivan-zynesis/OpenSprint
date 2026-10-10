@@ -5,7 +5,7 @@
 ```
 DS-ATTEST-AS-REVIEW (product)
 ├── DEC-040: [[DEC-033]] excluded the entire implementation from the attester's context, on t
-│   [branch] [blast: 1]
+│   [root] [blast: 1]
 │   └── DEC-043: [[DEC-040]] puts test files in the attester's context. The agent that wrote thos
 │       [leaf] [blast: 0]
 ├── DEC-041: [[DEC-019]] gives a measure four parts, and the harvest reports `measure-unasser
@@ -46,12 +46,6 @@ DS-BACKWARD-COMPAT (reliability)
 DS-CI-ATTESTATION (reliability)
 ├── DEC-032: [[DEC-019]] gives a measure an `### Evidence` block. What may go in it, and how 
 │   [leaf] [blast: 0]
-├── DEC-033: [[DS-HATS-AS-CONTEXT]] says most hats are worn by the same engineer, so attestat
-│   [root] [blast: 2]
-│   └── DEC-040: [[DEC-033]] excluded the entire implementation from the attester's context, on t
-│       [branch] [blast: 1]
-│       └── DEC-043: [[DEC-040]] puts test files in the attester's context. The agent that wrote thos
-│           [leaf] [blast: 0]
 └── DEC-038: [[DEC-019]] gives a measure a `### Bar` block, and [[DS-CI-ATTESTATION]] require
     [leaf] [blast: 0]
 
@@ -64,12 +58,6 @@ DS-FORWARD-CLOSURE (product)
     [leaf] [blast: 0]
 
 DS-HATS-AS-CONTEXT (architecture)
-├── DEC-033: [[DS-HATS-AS-CONTEXT]] says most hats are worn by the same engineer, so attestat
-│   [root] [blast: 2]
-│   └── DEC-040: [[DEC-033]] excluded the entire implementation from the attester's context, on t
-│       [branch] [blast: 1]
-│       └── DEC-043: [[DEC-040]] puts test files in the attester's context. The agent that wrote thos
-│           [leaf] [blast: 0]
 ├── DEC-034: [[DEC-025]] narrowed explore's guardrail from "no artifacts" to "the initiative 
 │   [root] [blast: 1]
 │   └── DEC-039: [[DEC-034]] adds `/opsp:backlog`, so a backlog item exists holding an Objective 
@@ -342,8 +330,8 @@ DS-SURROGATE-SCOPE (product)
 | DEC-017 | 0 | DS-SELF-USE-SCOPE | — | 0 |
 | DEC-018 | 0 | DS-MAINTAINER-INHERITED, DS-BACKWARD-COMPAT | — | 0 |
 | DEC-019 | 0 | DS-MEASURE-ANATOMY, DS-BACKWARD-COMPAT | DEC-032, DEC-038, DEC-041 | 3 |
-| DEC-033 | 0 | DS-HATS-AS-CONTEXT, DS-CI-ATTESTATION | DEC-040 | 2 |
 | DEC-034 | 0 | DS-PROGRESSIVE-CRYSTALLIZATION, DS-HATS-AS-CONTEXT | DEC-039 | 1 |
+| DEC-040 | 0 | DS-ATTEST-AS-REVIEW | DEC-043 | 1 |
 | DEC-003 | 1 | DEC-001 | DEC-005 | 1 |
 | DEC-004 | 1 | DS-HIGH-IMPACT-OPS, DEC-002 | — | 0 |
 | DEC-007 | 1 | DS-LOOP-CLOSURE, DEC-006 | — | 0 |
@@ -357,7 +345,6 @@ DS-SURROGATE-SCOPE (product)
 | DEC-032 | 1 | DS-CI-ATTESTATION, DEC-019 | — | 0 |
 | DEC-038 | 1 | DS-MEASURE-ANATOMY, DS-CI-ATTESTATION, DEC-019 | — | 0 |
 | DEC-039 | 1 | DS-PROGRESSIVE-CRYSTALLIZATION, DEC-034 | — | 0 |
-| DEC-040 | 1 | DS-ATTEST-AS-REVIEW, DEC-033 | DEC-043 | 1 |
 | DEC-041 | 1 | DS-ATTEST-AS-REVIEW, DEC-019 | — | 0 |
 | DEC-005 | 2 | DEC-003 | — | 0 |
 | DEC-011 | 2 | DEC-010 | — | 0 |
