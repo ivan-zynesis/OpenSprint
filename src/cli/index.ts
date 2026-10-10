@@ -487,9 +487,14 @@ compactCmd
 compactCmd
   .command('seal')
   .description('Record the current views and their inputs in the provenance manifest')
-  .action(async () => {
+  .option(
+    '--hat <name>',
+    'Seal only this hat (repeatable). Other hats are carried forward untouched.',
+    (value: string, previous: string[] = []) => [...previous, value]
+  )
+  .action(async (options: { hat?: string[] }) => {
     try {
-      await compactSealCommand();
+      await compactSealCommand({ hats: options.hat });
     } catch (error) {
       console.log();
       ora().fail(`Error: ${(error as Error).message}`);

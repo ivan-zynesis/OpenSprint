@@ -16,6 +16,12 @@ import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveHatRegistry, resolveHatSections, resolveHatRoles } from '../core/hats.js';
 import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
+
+/** Options for `compact seal` (DEC-SCOPED-SEAL). */
+export interface SealOptions {
+  /** Hats to reseal. Empty or absent means every hat. */
+  hats?: string[];
+}
 import { readInitiatives } from '../core/initiatives.js';
 import { attestationOf } from '../core/compact/measures.js';
 import {
@@ -249,12 +255,38 @@ function reportUnrouted(
 // seal — record the current state. The only mode that writes.
 // -----------------------------------------------------------------------------
 
-export async function compactSealCommand(): Promise<void> {
+export async function compactSealCommand(options: SealOptions = {}): Promise<void> {
   const projectRoot = process.cwd();
   const { opensprintDir, registry, grouped } = scan(projectRoot);
 
+  // DEC-SCOPED-SEAL. Two rules, and the second matters more than the first:
+  // a caller may scope correctly and still bless a section whose inputs moved
+  // while its prose was never regenerated.
+  const existing = readManifest(opensprintDir);
+  const previousByHat = new Map<string, ManifestEntry[]>();
+  for (const entry of existing.entries) {
+    const list = previousByHat.get(entry.hat) ?? [];
+    list.push(entry);
+    previousByHat.set(entry.hat, list);
+  }
+
+  const known = new Set(registry);
+  const requested = options.hats?.filter((hat) => {
+    if (known.has(hat)) return true;
+    // A typo in --hat must not abort an archive, the same way a malformed
+    // registry degrades rather than failing.
+    console.warn(
+      chalk.yellow(`Unknown hat '${hat}'. Known hats: ${registry.join(', ')}. Ignoring.`)
+    );
+    return false;
+  });
+  const inScope = (hat: string): boolean =>
+    requested === undefined || requested.length === 0 || requested.includes(hat);
+
   const entries: ManifestEntry[] = [];
   const unrendered: string[] = [];
+  const carried: string[] = [];
+  let sealed = 0;
 
   for (const hat of registry) {
     const file = viewPath(opensprintDir, hat);
@@ -267,6 +299,19 @@ export async function compactSealCommand(): Promise<void> {
       (grouped.decisionsByHat.get(hat)?.length ?? 0) > 0;
     if (rendered === null && hatHasRecords) unrendered.push(hat);
 
+    const previous = previousByHat.get(hat) ?? [];
+    // Carrying forward keeps the recorded inputHash, which is what preserves
+    // the staleness signal. Dropping the entries would report `unsealed`,
+    // which is a different and misleading state.
+    const unchanged =
+      previous.length > 0 && rendered !== null && previous.every((e) => e.outputHash === rendered);
+
+    if (!inScope(hat) || unchanged) {
+      entries.push(...previous);
+      if (previous.length > 0) carried.push(hat);
+      continue;
+    }
+
     for (const section of resolveHatSections(projectRoot, hat)) {
       const inputs = resolveSectionInputs(hat, section, grouped);
       const observed = resolveObservedFiles(projectRoot, section);
@@ -278,6 +323,7 @@ export async function compactSealCommand(): Promise<void> {
         inputHash: sectionInputHash(inputs, observed),
         outputHash: rendered,
       });
+      sealed += 1;
     }
   }
 
@@ -288,7 +334,14 @@ export async function compactSealCommand(): Promise<void> {
   // so it is regenerated here rather than sealed and staleness-gated.
   regenerateBoard(opensprintDir);
 
-  console.log(chalk.green(`Sealed ${entries.length} section(s) across ${registry.length} hat(s).`));
+  console.log(
+    chalk.green(`Sealed ${sealed} section(s) across ${registry.length - carried.length} hat(s).`)
+  );
+  if (carried.length > 0) {
+    console.log(
+      chalk.gray(`  carried forward unchanged: ${carried.join(', ')} — not re-rendered or out of scope`)
+    );
+  }
   console.log(chalk.gray(`  regenerated ${BOARD_FILENAME}`));
   for (const hat of unrendered) {
     console.log(
