@@ -30,11 +30,11 @@ vi.mock('../../src/prompts/searchable-multi-select.js', () => ({
 
 describe('OPSP skill generation', () => {
   describe('template functions', () => {
-    it('should return 15 OPSP skill templates (4 utility + 8 lifecycle + 2 reconciliation + 1 compaction)', () => {
+    it('should return 16 OPSP skill templates (5 utility + 8 lifecycle + 2 reconciliation + 1 compaction)', () => {
       const templates = getOpspSkillTemplates();
-      expect(templates).toHaveLength(15);
+      expect(templates).toHaveLength(16);
       expect(templates.map(t => t.workflowId)).toEqual([
-        'driver', 'decide', 'tree', 'rebuild-assess',
+        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
         'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
@@ -48,20 +48,20 @@ describe('OPSP skill generation', () => {
       }
     });
 
-    it('should return 15 OPSP command contents (4 utility + 8 lifecycle + 2 reconciliation + 1 compaction)', () => {
+    it('should return 16 OPSP command contents (5 utility + 8 lifecycle + 2 reconciliation + 1 compaction)', () => {
       const contents = getOpspCommandContents();
-      expect(contents).toHaveLength(15);
+      expect(contents).toHaveLength(16);
       expect(contents.map(c => c.id)).toEqual([
-        'driver', 'decide', 'tree', 'rebuild-assess',
+        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
         'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
     });
 
-    it('should have correct OPSP workflow IDs (15 total)', () => {
+    it('should have correct OPSP workflow IDs (16 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
-        'driver', 'decide', 'tree', 'rebuild-assess',
+        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
         'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',

@@ -40,6 +40,7 @@ import {
   getOpspApplySkillTemplate,
   getOpspArchiveSkillTemplate,
   getOpspAttestSkillTemplate,
+  getOpspMigrateSkillTemplate,
   getOpspReviewSkillTemplate,
   getOpspReexploreSkillTemplate,
   getOpspKnockdownSkillTemplate,
@@ -48,6 +49,7 @@ import {
   getOpspApplyCommandTemplate,
   getOpspArchiveCommandTemplate,
   getOpspAttestCommandTemplate,
+  getOpspMigrateCommandTemplate,
   getOpspReviewCommandTemplate,
   getOpspReexploreCommandTemplate,
   getOpspKnockdownCommandTemplate,
@@ -156,7 +158,7 @@ export function getCommandContents(workflowFilter?: readonly string[]): CommandC
  */
 export const OPSP_WORKFLOW_IDS = [
   // Utility commands
-  'driver', 'decide', 'tree', 'rebuild-assess',
+  'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
   // Lifecycle commands
   'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
   // Universe reconciliation commands
@@ -175,6 +177,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getDecideSkillTemplate(), dirName: 'opensprint-decide', workflowId: 'decide' },
     { template: getTreeSkillTemplate(), dirName: 'opensprint-tree', workflowId: 'tree' },
     { template: getRebuildAssessSkillTemplate(), dirName: 'opensprint-rebuild-assess', workflowId: 'rebuild-assess' },
+    { template: getOpspMigrateSkillTemplate(), dirName: 'opensprint-migrate', workflowId: 'migrate' },
     // Lifecycle skills
     { template: getOpspExploreSkillTemplate(), dirName: 'opensprint-explore', workflowId: 'opsp-explore' },
     { template: getOpspProposeSkillTemplate(), dirName: 'opensprint-propose', workflowId: 'opsp-propose' },
@@ -202,6 +205,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspDecideCommandTemplate(), id: 'decide' },
     { template: getOpspTreeCommandTemplate(), id: 'tree' },
     { template: getOpspRebuildAssessCommandTemplate(), id: 'rebuild-assess' },
+    { template: getOpspMigrateCommandTemplate(), id: 'migrate' },
     // Lifecycle commands
     { template: getOpspExploreCommandTemplate(), id: 'opsp-explore' },
     { template: getOpspProposeCommandTemplate(), id: 'opsp-propose' },

@@ -85,6 +85,7 @@ const OPSP_WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'opsp-explore': 'opensprint-explore',
   'opsp-propose': 'opensprint-propose',
   'opsp-apply': 'opensprint-apply',
+  'migrate': 'opensprint-migrate',
   'opsp-attest': 'opensprint-attest',
   'opsp-archive': 'opensprint-archive',
   'opsp-review': 'opensprint-review',

@@ -465,6 +465,21 @@ program
     }
   });
 
+program
+  .command('migrate')
+  .description('Report records the current hat shapes can no longer select')
+  .option('--json', 'Output as JSON')
+  .action(async (options: { json?: boolean }) => {
+    try {
+      const { migrateCommand } = await import('../commands/migrate.js');
+      await migrateCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
 // Compact command — the deterministic half of /opsp:compact
 const compactCmd = program
   .command('compact')

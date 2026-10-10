@@ -300,8 +300,14 @@ export function deriveOpenLoops(
       if (sections.length === 0) continue;
       // A section with no objective filter can still take this record,
       // provided its roles accept it.
+      //
+      // A section taking no records cannot make a record reachable. `open-loops`
+      // declares `inputs: 'none'` and no roles, and treating "no roles" as
+      // "takes anything" made every record look selectable — which is why this
+      // check silently never fired in production.
       const reachable = sections.some(
         (section) =>
+          section.inputs !== 'none' &&
           section.objective === undefined &&
           (section.roles === undefined ||
             section.roles.length === 0 ||
