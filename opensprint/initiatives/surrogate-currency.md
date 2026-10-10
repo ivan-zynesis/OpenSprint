@@ -86,7 +86,7 @@ across two milestones of `lifecycle-beyond-build`.
 ## Milestones
 
 - [x] scoped-seal: `compact seal --hat <name>…`; sealing never blesses a section it did not just render. **Blocks everything else** — without it, compiling two hats marks four fresh, which this project already did once by accident
-- [ ] render-on-milestone: `/opsp:apply` compiles stale `dev` and `devops` sections at each milestone boundary, after the change branch merges
+- [x] render-on-milestone: `/opsp:apply` compiles stale `dev` and `devops` sections at each milestone boundary, after the change branch merges
 - [ ] escalation-handoff: the visible pause; inferred classification carried in the question with a draft record and blast radius; explicit approval; the affected hat's view compiled on approval
 - [ ] knockdown-views: `/opsp:knockdown` produces all five views, empty `product` and `maintainer` rendered as a first-class finding
 - [ ] migrate-tool: `/opsp:migrate` — detect records the current shapes cannot select, grill the operator one record at a time, backfill on confirmation. **Validated against this repository's own stale state** (see below)
@@ -103,6 +103,14 @@ independent of the rest and of each other.
 The second rule turned out to matter more than the flag: a caller can scope correctly and still bless a section whose inputs moved while its prose was never regenerated.
 
 Verified against the original failure. With twelve sections stale and nothing re-rendered, an unscoped seal reports `Sealed 0 section(s)`, carries all four hats forward, and `compact check` still reports twelve stale. Before this change the same command made the gate pass. It also protects the migration fixture below without anyone having to remember.
+
+**2/5 — `render-on-milestone`** · opsx change `2026-10-10-render-on-milestone`
+
+`compact plan --hat` mirrors `seal --hat`, and `/opsp:apply` gained a compile step in Phase 3 — plan scoped to dev and devops, render only what is stale, seal scoped. Nothing stale means nothing rendered and nothing said.
+
+Product and maintainer are **offered**, with the line that carries the whole decision: compiling while still holding the implementation is *worse than leaving the view stale*, because staleness is reported and that is not.
+
+Open loops are deliberately not filtered by `--hat` — a loop belongs to the records, not to a view section.
 
 ## Notes
 
