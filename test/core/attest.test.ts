@@ -268,4 +268,50 @@ describe('/opsp:attest', () => {
       expect(text).toMatch(/does\s+not\s+go\s+to\s+the\s+network/i);
     });
   });
+
+  describe('the instructions establish the change frame first (DEC-ATTEST-CHANGE-FRAME)', () => {
+    const text = getOpspAttestSkillTemplate().instructions;
+
+    it('makes the frame step 1, before the bars', () => {
+      expect(text.indexOf('## Step 1: Establish')).toBeGreaterThan(-1);
+      expect(text.indexOf('## Step 1: Establish')).toBeLessThan(text.indexOf('## Step 2: Read the bars'));
+    });
+
+    it('tells the agent not to ask what the change is', () => {
+      expect(text).toMatch(/Do\s+not\s+ask\s+the\s+operator\s+what\s+the\s+change\s+is/i);
+      expect(text).toContain('opensprint frame');
+    });
+
+    it('names the base resolution order', () => {
+      expect(text).toContain('--base');
+      expect(text).toMatch(/remote's\s+default\s+branch/i);
+      for (const candidate of ['main', 'master', 'develop', 'trunk']) {
+        expect(text).toContain(candidate);
+      }
+    });
+
+    it('requires explicit confirmation, not acknowledgement', () => {
+      expect(text).toMatch(/Wait\s+for\s+an\s+explicit\s+answer/i);
+      expect(text).toMatch(/Not\s+an\s+acknowledgement/i);
+    });
+
+    it('says the frame scopes the review', () => {
+      expect(text).toMatch(/frame\s+scopes\s+the\s+review/i);
+    });
+
+    it('stops where there is nothing to attest', () => {
+      expect(text).toMatch(/nothing\s+to\s+attest/i);
+    });
+
+    it('keeps the patch and commit bodies out', () => {
+      expect(text).toContain('the patch');
+      expect(text).toContain('commit message bodies');
+      expect(text).toMatch(/subjects\s+yes,\s+bodies\s+no/i);
+    });
+
+    it('says why the frame is not a widening of the narrow context', () => {
+      expect(text).toMatch(/not\s+a\s+widening/i);
+      expect(text).toContain('DEC-ATTEST-CHANGE-FRAME');
+    });
+  });
 });

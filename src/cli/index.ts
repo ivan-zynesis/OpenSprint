@@ -466,6 +466,22 @@ program
   });
 
 program
+  .command('frame')
+  .description('Report what this branch changes, and against what base')
+  .option('--json', 'Output as JSON')
+  .option('--base <ref>', 'Base branch to compare against, overriding the guess')
+  .action(async (options: { json?: boolean; base?: string }) => {
+    try {
+      const { frameCommand } = await import('../commands/frame.js');
+      await frameCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command('migrate')
   .description('Report records the current hat shapes can no longer select')
   .option('--json', 'Output as JSON')

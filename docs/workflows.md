@@ -33,6 +33,7 @@ OpenSprint ships fifteen agent workflows. They are invoked by name in your agent
         ▼
   ┌──────────────────────────────────────────────────────────────────┐
   │ 4  MEET THE BAR                                  /opsp:attest    │
+  │    frame the change first — source → base, confirmed             │
   │    posture · evidence · exposure, against each bar               │
   │    ex post · human in the loop · writes a record, never gates    │
   └──────────────────────────────────────────────────────────────────┘
@@ -65,6 +66,19 @@ Most of these hats are worn by the same engineer. That is expected — the bound
 not who you are, and `/opsp:attest` takes it seriously enough to refuse a context that wrote the
 code.
 
+### Attest frames the change before it reads a bar
+
+An attester is standing in a branch, and a pull request is the unit being reviewed. Before any bar
+is read, `/opsp:attest` runs `opensprint frame`, which resolves `source → base` — the base taken
+from `--base`, else the remote's default branch, else the first of `main`, `master`, `develop`,
+`trunk` that exists — and reports **how** it chose, so a wrong guess in a fork is visible rather
+than silent. It then summarises the range back to you and waits for you to confirm it.
+
+What the frame carries is **scope, not rationale**: commit subject lines, a file-level stat, the
+initiatives the range touches and the changes it archived. Never a patch, and never a commit
+message body. A subject says what moved; a body argues that it was right, and an attester holding
+an argument adopts it.
+
 ## The workflows
 
 ### Lifecycle
@@ -88,6 +102,7 @@ code.
 | `/opsp:decide` | record an ADR when ambiguity needs operator judgement |
 | `/opsp:tree` | visualize the decision tree with blast radius |
 | `/opsp:rebuild-assess` | a driver-spec changed — cascade the re-evaluation |
+| `opensprint frame` | what this branch changes, and against what base |
 | `/opsp:compact` | recompile the views |
 
 ### Intervention
