@@ -1,6 +1,6 @@
 # Workflows
 
-OpenSprint ships fifteen agent workflows. They are invoked by name in your agent
+OpenSprint ships nineteen agent workflows. They are invoked by name in your agent
 (`/opsp:propose`), not from the shell — the CLI underneath them is in the
 [reference](#cli-reference) at the bottom.
 
@@ -12,39 +12,118 @@ OpenSprint ships fifteen agent workflows. They are invoked by name in your agent
         │   /opsp:driver  (external truth)    /opsp:knockdown  (brownfield)
         ▼
   ┌──────────────────────────────────────────────────────────────────┐
-  │ 1  IDEATE                         /opsp:explore · /opsp:backlog  │
+  │ 1  IDEATE                        /opsp:explore · /opsp:backlog   │
   │    high-level ideation — what and why                            │
   │    explore writes nothing; backlog flushes the brainstorm        │
-  │    PRODUCES  the initiative, at state: exploring   (O + G)       │
+  │    PRODUCES  the initiative  (O + G)                             │
+  │    state: exploring                                              │
   └──────────────────────────────────────────────────────────────────┘
-        ▼
+        ▼                                                           ▲ c
   ┌──────────────────────────────────────────────────────────────────┐
-  │ 2  TRIAGE · BRAINSTORM · PROPOSE   /opsp:triage · /opsp:propose  │
+  │ 2  TRIAGE · BRAINSTORM · PROPOSE  /opsp:triage · /opsp:propose   │
   │    pick up a backlog item, brainstorm strategy, then formalize   │
-  │    PRODUCES  driver-specs · ADRs · milestones   (S + M)          │
+  │    PRODUCES  driver-specs · ADRs · milestones  (S + M)           │
   │    >> the BAR is written here. ex ante. <<                       │
+  │    state: proposed                                               │
   └──────────────────────────────────────────────────────────────────┘
-        ▼
+        ▼                                                           ▲ b
   ┌──────────────────────────────────────────────────────────────────┐
-  │ 3  BUILD                                /opsp:apply → opsx       │
+  │ 3  BUILD                               /opsp:apply → opsx        │
   │    per milestone: explore → propose → apply → verify → archive   │
+  │    escalation pauses here — a hat handoff, not an interruption   │
   │    PRODUCES  code · tests · rules · more ADRs                    │
+  │    state: building                                               │
+  └──────────────────────────────────────────────────────────────────┘
+        ▼                                                           ▲ a
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ 4  HAND OVER                           /opsp:apply closes        │
+  │    every milestone done · nothing judged yet                     │
+  │    the dev hat comes off; product or maintainer picks one up     │
+  │    state: ready-for-attestation                                  │
   └──────────────────────────────────────────────────────────────────┘
         ▼
   ┌──────────────────────────────────────────────────────────────────┐
-  │ 4  MEET THE BAR                                  /opsp:attest    │
+  │ 5  MEET THE BAR                                /opsp:attest      │
   │    frame the change first — source → base, confirmed             │
   │    posture · evidence · exposure, against each bar               │
-  │    ex post · human in the loop · writes a record, never gates    │
+  │    ex post · a different context · writes a record, never gates  │
+  │    state: attested                                               │
   └──────────────────────────────────────────────────────────────────┘
         ▼
   ┌──────────────────────────────────────────────────────────────────┐
-  │ 5  COMPILE                      /opsp:archive · /opsp:compact    │
+  │ 6  COMPILE                    /opsp:archive · /opsp:compact      │
   │    PRODUCES  squad/*.md · architecture.md · BOARD.md             │
+  │    the one point in the lifecycle every squad hat is sealed      │
+  │    state: completed                                              │
   └──────────────────────────────────────────────────────────────────┘
         ▼   compact check — drift fails the build
         └──► harvested open loops land in the backlog, triaged at (2)
 ```
+
+## When it is not the happy path
+
+A forward-only SDLC describes a project that never existed. Real work discovers, late, that
+something decided earlier was wrong — and **the whole value of attestation is being the place that
+discovery happens before the merge, not after it.**
+
+So the spine has back-edges. Which one you take is decided by **what has to move**:
+
+```
+  ┌─ a ─ the PLAN moved ──────────────────────── /opsp:reexplore ───┐
+  │      goal holds · strategy holds · the milestones do not        │
+  │      a corrective task is needed                                │
+  │      ready-for-attestation ──────────────────────► building     │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ┌─ b ─ the STRATEGY moved ─────────────────── /opsp:repropose ────┐
+  │      goal holds · what was decided about reaching it does not   │
+  │      "this is not what we meant"                                │
+  │      supersedes ADRs · redraws the milestones beneath them      │
+  │      driver-specs are the invariant — if one moves, stop        │
+  │      building  ──────────────────────────────────► proposed     │
+  │      ready-for-attestation ──────────────────────► proposed     │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ┌─ c ─ the GOAL moved ──────────── /opsp:triage · /opsp:driver ───┐
+  │      the objective, the goal or its bar no longer holds         │
+  │      this is not a revision — it is a conversation that starts  │
+  │      over, and may not be this initiative at all                │
+  └─────────────────────────────────────────────────────────────────┘
+```
+
+**The rungs are not invented.** Driver-specs hold the objective and the goal, ADRs hold the
+strategy, milestones hold the plan — so "which rung" is answered by naming which of three files
+changes, not by judging whether something is "a big change".
+
+There is a fourth edge that is none of these. Attestation finding that **the work is missing or
+wrong**, where building it is all that is needed, is the plan not having been *finished* rather
+than the plan being *wrong*:
+
+```
+  ready-for-attestation ──── request a change ────► building
+      nothing superseded · no ADR moves · the plan is the plan
+```
+
+Both ends of the lifecycle reach the ladder. During **build**, an escalation whose answer revises a
+decision or invalidates milestones takes option `[4] This is bigger than one record` instead of
+writing a record and carrying on. At **attestation**, four findings look alike and are not:
+
+| What the attester found | Exit | Lands at |
+|---|---|---|
+| A bar was missed, with an exposure and a plan | *none* — this is a complete attestation | `attested` |
+| The work is missing or wrong; building it is enough | request a change | `building` |
+| The goal holds; the strategy does not | `/opsp:repropose` | `proposed` |
+| The milestones need a corrective task | `/opsp:reexplore` | `building` |
+
+**Why `/opsp:repropose` returns to `proposed` and `/opsp:reexplore` does not** is the load-bearing
+difference between them. A restated strategy has a bar nothing has been built against yet, so
+`/opsp:apply` must open the work again. A plan revision needs no such reset. That is also why they
+cannot be one tool with a flag — the state they return to *is* the distinction.
+
+Falling back is **recorded, not hidden**. Every move runs through `opensprint advance`, which
+refuses an illegal transition, regenerates `BOARD.md`, and leaves the initiative's history showing
+that the work went backwards and why. A lifecycle that cannot show a reversal is one nobody will
+believe.
 
 Stages 1 and 2 are each a **think, then persist** pair. `explore` is to `backlog` as `triage` is to
 `propose` — the thinking tool writes nothing, and the persisting tool is where you commit.
@@ -59,12 +138,21 @@ needs to rest.
 | ideate | product / maintainer | the initiative — objective and goal |
 | triage · propose | tech lead · architect · scrum master | driver-specs, ADRs, milestones, the bar |
 | build | dev / devops | code, and the decisions made while writing it |
+| **hand over** | dev / devops → product / maintainer | nothing — it is the moment itself |
 | attest | product / maintainer | posture, evidence, exposure |
 | archive | everyone | the compiled views |
 
 Most of these hats are worn by the same engineer. That is expected — the boundary is what you load,
 not who you are, and `/opsp:attest` takes it seriously enough to refuse a context that wrote the
 code.
+
+**Hand over produces nothing, and is a stage anyway.** It is the one point where accountability
+moves rather than work happening, and with the hats on one person that moment is invisible unless
+something marks it — so `ready-for-attestation` marks it, and `BOARD.md` gives it a column of its
+own. Work that needs *time* and work that needs *a person* are not the same queue.
+
+And it is the stage the back-edges leave from. Three of the four reversals above start here,
+because this is where somebody who did not build the thing looks at it for the first time.
 
 ### Attest frames the change before it reads a bar
 
@@ -92,8 +180,19 @@ an argument adopts it.
 | `/opsp:apply` | execute milestones, orchestrating one opsx cycle each |
 | `/opsp:attest` | assess each bar against evidence — the half most processes skip |
 | `/opsp:archive` | compile the surrogate and close the initiative |
-| `/opsp:reexplore` | the plan rung — revise milestones, decisions untouched |
-| `/opsp:repropose` | the strategy rung — supersede ADRs, driver-specs untouched |
+
+**Falling back** — the rungs, by what has to move:
+
+| Workflow | Rung | Returns the initiative to |
+|---|---|---|
+| `/opsp:reexplore` | the **plan** — milestones change, decisions do not | `building` |
+| `/opsp:repropose` | the **strategy** — ADRs superseded, driver-specs do not move | `proposed` |
+| `/opsp:triage` · `/opsp:driver` | the **goal** — a conversation that starts over | `exploring`, or a new initiative |
+
+**Other**
+
+| Workflow | Does |
+|---|---|
 | `/opsp:review` | commit graph, branch status, code review assistance |
 
 ### Utility
@@ -104,6 +203,7 @@ an argument adopts it.
 | `/opsp:decide` | record an ADR when ambiguity needs operator judgement |
 | `/opsp:tree` | visualize the decision tree with blast radius |
 | `/opsp:rebuild-assess` | a driver-spec changed — cascade the re-evaluation |
+| `/opsp:migrate` | report records the current hat shapes can no longer select |
 | `opensprint frame` | what this branch changes, and against what base |
 | `opensprint advance` | move an initiative to its next state |
 | `/opsp:compact` | recompile the views |
@@ -112,7 +212,6 @@ an argument adopts it.
 
 | Workflow | Does |
 |---|---|
-| `/opsp:reexplore` | revise an initiative's plan mid-flight |
 | `/opsp:knockdown` | reverse-engineer a surrogate from an existing codebase |
 
 ### Parallel universes
