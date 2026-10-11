@@ -108,14 +108,19 @@ After confirmation, create files in sequence:
 - Use the operator's words faithfully
 
 **b. ADRs** — for each identified architectural decision:
-- Create \`opensprint/ADRs/DEC-<NNN>.md\` with YAML frontmatter
+- Create \`opensprint/ADRs/DEC-SEMANTIC-NAME.md\` with YAML frontmatter — a short kebab-case
+  phrase in capitals naming what was decided, **never a number** (\`DEC-036\`). Numbers collide
+  across worktrees and tell a reader nothing. \`DEC-001\`–\`DEC-044\` keep theirs permanently.
 - Include: Question, Operator Decision, Consideration Factors, Rationale, Invalidation Trigger
 - Link to parent driver-specs via \`depends-on\`
 - Calculate depth (0 if depends only on driver-specs)
 
 **c. Regenerate DECISION-MAP.md** — after creating ADRs
 
-**d. Initiative Descriptor** — create \`opensprint/initiatives/<name>.md\`:
+**d. Initiative Descriptor** — create \`opensprint/initiatives/<YYYYMMDD>-<name>.md\`, where the
+prefix is today's date with no separators (\`DEC-036\`). The prefix is **presentation
+only** — every reader resolves by the \`id:\` below, never by filename, so a file renamed or a date
+mistyped still resolves:
 
 \`\`\`markdown
 ---

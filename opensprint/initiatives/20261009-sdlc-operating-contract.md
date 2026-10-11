@@ -80,18 +80,18 @@ The step function from idea to proposal splits, and both paths stay open:
 
 ## Milestones
 
-- [ ] backlog-and-triage: `/opsp:backlog` and `/opsp:triage`; each creates or switches to the initiative's worktree if not already in one ([[DEC-029]]); explore reverts to writing nothing; propose becomes purely the formalizer; the `declined` state
-- [ ] git-contract: worktree at apply; rebase → attest → archive → merge; the PR-time state gate; git as a third input to the state check
-- [ ] compact-in-archive: archive consumes compact
+- [x] backlog-and-triage: `/opsp:backlog` and `/opsp:triage`; each creates or switches to the initiative's worktree if not already in one ([[DEC-029]]); explore reverts to writing nothing; propose becomes purely the formalizer; the `declined` state
+- [x] git-contract: worktree at apply; rebase → attest → archive → merge; the PR-time state gate; git as a third input to the state check
+- [x] compact-in-archive: archive consumes compact — **already satisfied when the milestone was reached.** `/opsp:archive` delegates the compile to `/opsp:compact` rather than synthesising `architecture.md` ([[DEC-014]]), and gates the merge on `compact check` and an empty Problems section in `compact board`. Nothing was left to build; verified rather than implemented.
 - [ ] attest-context: the narrow-context attest skill; evidence as a CI artifact reference, with a harvest rule for references that do not resolve
-- [ ] record-naming: **half done** — `RECORD_ID_PATTERN` was widened ahead of this milestone, as a prerequisite to naming `surrogate-currency`'s decisions semantically; see that initiative. Remaining: stop allocating decision numbers in the tooling, and date-prefix initiative filenames once `initiative-parser` resolves by frontmatter `id:`
+- [x] record-naming: decisions are coined semantically and initiative filenames carry a creation-date prefix ([[DEC-036]]). `RECORD_ID_PATTERN` was widened ahead of the milestone, as a prerequisite to naming [[surrogate-currency]]'s decisions semantically — the numbered era stopped at `DEC-044`. This milestone removed the remaining number allocation from `/opsp:decide` and `/opsp:propose`, moved every reader to resolution by frontmatter `id:`, and renamed all five existing initiative files.
 - [ ] sub-frameworks: SWOT-like strategy rendering compiled from cited ADRs; BDD bar forms split by hat
 
 **This initiative depends on [[lifecycle-beyond-build]]** and cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist — attest has nothing to write into, and `declined` has no state machine to join, until they do.
 
-`record-naming` carries two ordering constraints that cannot be taken on trust. `RECORD_ID_PATTERN` had to widen **before** the first semantic decision id was written, or the rule harvest would have gone silently blind to every new decision — so that half was pulled forward and landed with [[surrogate-currency]], stopping the numbered era at `DEC-044`. Initiative filenames must stay unprefixed until `initiative-parser` resolves by frontmatter `id:`, because skills construct `initiatives/<name>.md` directly today.
+`record-naming` carried two ordering constraints, both now discharged. `RECORD_ID_PATTERN` had to widen **before** the first semantic decision id was written, or the rule harvest would have gone silently blind to every new decision — so that half was pulled forward and landed with [[surrogate-currency]]. Initiative filenames had to stay unprefixed until `initiative-parser` resolved by frontmatter `id:`, because the skills constructed `initiatives/<name>.md` directly; that landed with [[lifecycle-beyond-build]], and the prefix followed here.
 
-This initiative's own file is unprefixed for that reason — the convention it establishes cannot apply to it until it ships.
+This initiative's own file was unprefixed for that reason. It is `20261009-sdlc-operating-contract.md` now — the convention applied to itself the moment it shipped.
 
 ## Open Questions
 

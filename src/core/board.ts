@@ -36,6 +36,14 @@ export interface RoadmapRow {
   mitigatedBy: string | null;
   /** That initiative's state, or null when it points nowhere or nowhere real. */
   mitigationState: string | null;
+  /**
+   * The filename stem of that initiative, for linking.
+   *
+   * Carried rather than derived from the id: `DEC-036` prefixes
+   * initiative filenames with their creation date, so `<id>.md` is no longer
+   * the path. A link built from the id would 404 on every dated file.
+   */
+  mitigationStem: string | null;
 }
 
 /**
@@ -51,6 +59,7 @@ export function roadmapRows(
   initiatives: readonly InitiativeEntry[]
 ): RoadmapRow[] {
   const stateOf = new Map(initiatives.map((i) => [i.id, i.state ?? i.status]));
+  const stemOf = new Map(initiatives.map((i) => [i.id, i.stem]));
   const rows: RoadmapRow[] = [];
 
   for (const spec of readSourcedDriverSpecs(opensprintDir)) {
@@ -67,6 +76,7 @@ export function roadmapRows(
       // rather than being reported as mitigated — a dangling pointer is a
       // confession wearing a plan's clothes.
       mitigationState: target === null ? null : stateOf.get(target) ?? null,
+      mitigationStem: target === null ? null : stemOf.get(target) ?? null,
     });
   }
   return rows;
@@ -210,7 +220,7 @@ export function renderBoard(
           ? '**nothing**'
           : row.mitigationState === null
             ? `\`${row.mitigatedBy}\` _(no such initiative)_`
-            : `[${row.mitigatedBy}](initiatives/${row.mitigatedBy}.md)`;
+            : `[${row.mitigatedBy}](initiatives/${row.mitigationStem}.md)`;
       const assurance =
         row.mitigatedBy === null
           ? 'a confession'

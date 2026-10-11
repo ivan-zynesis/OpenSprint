@@ -73,6 +73,10 @@ implement them could not see them.
 
 ## Step 2: Write the initiative, and nothing else
 
+Write it to \`opensprint/initiatives/<YYYYMMDD>-<initiative-name>.md\` — today's date, no
+separators (\`DEC-036\`). A directory listing then reads in the order the thinking
+happened, which is the order a backlog is triaged in. Readers resolve by \`id:\`, not by filename.
+
 \`\`\`markdown
 ---
 id: <initiative-name>

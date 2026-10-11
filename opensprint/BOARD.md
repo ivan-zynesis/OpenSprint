@@ -17,7 +17,7 @@ Proposed — a bar is set, no work started.
 
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [sdlc-operating-contract](initiatives/sdlc-operating-contract.md) | proposed | 0/6 | backlog-and-triage |
+| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | proposed | 0/6 | backlog-and-triage |
 
 ## Doing
 
@@ -25,8 +25,8 @@ In flight.
 
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | building | 11/11 _(+1 superseded)_ | — |
-| [surrogate-currency](initiatives/surrogate-currency.md) | building | 5/5 | — |
+| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | building | 11/11 _(+1 superseded)_ | — |
+| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | building | 5/5 | — |
 
 ## Done
 
@@ -34,8 +34,8 @@ Closed.
 
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [compact-surrogate](initiatives/compact-surrogate.md) | _(none — status: completed)_ | 8/8 | — |
-| [parallel-universe-reconciliation](initiatives/parallel-universe-reconciliation.md) | _(none — status: completed)_ | 4/4 | — |
+| [parallel-universe-reconciliation](initiatives/20260522-parallel-universe-reconciliation.md) | _(none — status: completed)_ | 4/4 | — |
+| [compact-surrogate](initiatives/20260926-compact-surrogate.md) | _(none — status: completed)_ | 8/8 | — |
 
 ## Declined
 
@@ -51,9 +51,9 @@ risk, and **that initiative's state is the assurance level**.
 
 | Record | Exposure | Mitigated by | Assurance |
 |---|---|---|---|
-| `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | in flight |
-| `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/lifecycle-beyond-build.md) | in flight |
-| `DS-ESCALATION-HANDOFF` | Inference can be wrong, and an operator approving quickly may accept a misclassified record. | [surrogate-currency](initiatives/surrogate-currency.md) | in flight |
+| `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | in flight |
+| `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | in flight |
+| `DS-ESCALATION-HANDOFF` | Inference can be wrong, and an operator approving quickly may accept a misclassified record. | [surrogate-currency](initiatives/20261010-surrogate-currency.md) | in flight |
 | `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
 
 ## Problems

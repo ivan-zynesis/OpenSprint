@@ -264,6 +264,18 @@ describe('board', () => {
       expect(renderBoard([], [])).toContain('_No exposures recorded._');
     });
 
+    it('links the mitigating initiative by its filename stem, not its id', () => {
+      spec('DS-A', 'x\nmitigated-by: harden-it');
+      fs.writeFileSync(
+        path.join(dir(), '20261009-harden-it.md'),
+        '---\nid: harden-it\nstatus: active\nstate: proposed\n---\n\n## Description\n\nd\n'
+      );
+      const all = readInitiatives(root);
+      const rows = roadmapRows(root, all);
+      expect(rows[0].mitigationStem).toBe('20261009-harden-it');
+      expect(renderBoard(all, rows)).toContain('[harden-it](initiatives/20261009-harden-it.md)');
+    });
+
     it('omits the mitigated-by line from the rendered exposure text', () => {
       spec('DS-A', 'the real risk here.\nmitigated-by: plan');
       const rows = roadmapRows(root, []);
