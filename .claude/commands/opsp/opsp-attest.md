@@ -7,7 +7,9 @@ tags: [workflow, opsp, attest, initiative, evidence]
 
 Review an initiative against the strategy it proposed, and record what you find.
 
-**Input**: the initiative name after `/opsp:attest`. If omitted, list initiatives whose milestones are all complete and let the operator choose.
+**Input**: optionally an initiative name after `/opsp:attest`, to narrow the review to one. If
+omitted, **the change frame decides the scope** — every initiative the branch touches is attested
+together, which is what `DEC-030` means by one pull request.
 
 This is the stage that asks whether the bar was met — and the handoff where a change leaves `dev` and becomes a security and operations concern.
 
@@ -29,11 +31,12 @@ grading them.
 ```
 LOAD                                 DO NOT LOAD
 ──────────────────────────────       ─────────────────────────────
+the change frame                     the patch
 the initiative's Objective + Goals   the implementation source
-the bars (given / when / then)       the design discussion
-the TEST FILES                       the ADR rationales
-the maintainer rows in scope         the conversation that built it
-the CI evidence artifacts
+the bars (given / when / then)       commit message bodies
+the TEST FILES                       the design discussion
+the maintainer rows in scope         the ADR rationales
+the CI evidence artifacts            the conversation that built it
 ```
 
 **Why tests and not source.** A test is the implementation's own restatement of a bar — `DEC-038`
@@ -46,9 +49,45 @@ reasonable to whoever is reading it.
 question from "was the bar met" to "was the mechanism reasonable" — a different question with a
 different owner (`DEC-040`).
 
+**Why the frame is not a widening.** Commit *subjects* and a file stat say what moved and how much.
+They are not arguments that the change is right, so there is nothing in them to be talked into
+(`DEC-ATTEST-CHANGE-FRAME`). A commit message *body* argues in paragraphs — that is the
+conversation that built it, and it stays out. The line is drawn at the artifact: subjects yes,
+bodies no; stat yes, patch no.
+
 ---
 
-## Step 1: Read the bars
+## Step 1: Establish what you are attesting, and have it confirmed
+
+You are standing in a branch. **Do not ask the operator what the change is — git knows.**
+
+```bash
+opensprint frame
+```
+
+This resolves `source → base` and reports how the base was chosen: `--base` if given, otherwise the
+remote's default branch, otherwise the first of `main`, `master`, `develop`, `trunk` that exists.
+It prints the fork point, the commit subjects, a file-level stat, the initiative ids the range
+touches and the changes it archived.
+
+**Present it back, in your own words, and stop.** Two or three sentences: what branch against what,
+how many commits, which initiatives are in scope, what the shape of the change is. Then ask:
+
+> Is this the change you want attested, and is `<base>` the right base?
+
+**Wait for an explicit answer.** Not an acknowledgement — a confirmation. The frame becomes the
+premise of everything that follows, so it is the worst thing to get silently wrong. A guessed base
+is usually right and is wrong exactly where it matters most: a fork, or a team that merges to
+`develop`.
+
+If the operator names a different base, re-run with `opensprint frame --base <ref>`.
+
+If the range is empty, or git cannot answer, say so and stop. There is nothing to attest.
+
+**The frame scopes the review.** Every initiative it names is in scope; an initiative the operator
+expected and the frame does not show is a finding before you read a single bar.
+
+## Step 2: Read the bars
 
 ```bash
 openspec compact plan --json
@@ -58,7 +97,7 @@ For each driver-spec the initiative claims, read its `## Measures`. The **bar** 
 acceptance criterion. A record already showing `authority: attested` has been judged before —
 re-attesting is legitimate, since attestations age, but say that is what you are doing.
 
-## Step 2: Read the tests, then the evidence
+## Step 3: Read the tests, then the evidence
 
 Find the tests covering each bar. Ask one question of them:
 
@@ -75,7 +114,7 @@ produced, addressable from the pull request. Prose describing a belief is not ev
 **If the tests do not assert the bar, that is the finding.** Do not open the source to work out
 whether the bar holds anyway — that is the move this tool exists to prevent.
 
-## Step 3: Record the verdict, and what it requires
+## Step 4: Record the verdict, and what it requires
 
 ```markdown
 ### Posture
@@ -111,7 +150,7 @@ remote artifact is only as good as the person who cited it.
 `cannot assess` is a **complete attestation**, not a failure to finish. Name what the evidence could
 not answer, record the exposure, and stop looking.
 
-## Step 4: Answer the three review questions
+## Step 5: Answer the three review questions
 
 These describe the **change**, not any one measure, so they go in an `## Attestation` section on the
 initiative (`DEC-042`). Grill the operator until each is answered.
@@ -151,7 +190,7 @@ for it. Consulted and Informed are optional.
 Do not accept "the team" or "ops" as an answer. A concern owned by everyone is owned by nobody, and
 the first incident is when that gets discovered.
 
-## Step 5: Review the documentation
+## Step 6: Review the documentation
 
 The surrogate under `opensprint/` is the **operating** record — detailed, cited, read by agents and
 by whoever is doing the work. It is not what an external stakeholder needs, and compiling cannot
@@ -185,7 +224,7 @@ names a different directory serving the same purpose, use theirs.
 Where the documentation is thin and the operator declines to improve it now, record that as a
 finding rather than silently accepting it.
 
-## Step 5b: Verify you stayed in bounds
+## Step 6b: Verify you stayed in bounds
 
 ```bash
 git diff --unified=0 -- opensprint/driver-specs/ opensprint/initiatives/
