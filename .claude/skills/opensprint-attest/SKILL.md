@@ -253,9 +253,9 @@ not go forward as it is. Three exits, by what has to move (`DEC-ESCALATION-LADDE
 
 | What you found | Exit | Lands at |
 |---|---|---|
-| The plan and the strategy hold; **the work does not** — something is missing or wrong, and building it is all that is needed | **request a change** | `building` |
+| Everything holds; **the work does not** — something is missing or wrong, and building it is all that is needed | **request a change** | `building` |
 | The goal holds; **what was decided about reaching it does not** — this is not what we meant | `/opsp:repropose` | `proposed` |
-| The goal and the strategy hold; **the milestones do not** — a corrective task is needed | `/opsp:reexplore` | `building` |
+| **The goal itself no longer holds** — building it taught us the target was wrong | `/opsp:reideate` | `exploring` |
 
 **Request a change** when you can name the work:
 
@@ -271,6 +271,15 @@ is the plan. You are saying the plan was not finished.
 That is the hardest one to say out loud, because the work is done and it is not what was wanted —
 and it is also the one the whole lifecycle exists to catch, which is why attestation sits before
 the merge rather than after it.
+
+**Reideate** when building the thing taught you the target was wrong. That is rarer and more
+valuable than either of the others: it is the only point in the process where evidence from an
+implementation reaches the objective that justified it.
+
+**You are already wearing the right hat for all three.** Attestation is product and maintainer
+work, and so are all three exits — which is why none of them asks you to change context
+(`DEC-HAT-HANDOFFS`). The hat change already happened, at the handoff into
+`ready-for-attestation`. That is what the handoff was for.
 
 **Do not advance to `attested` and then reopen.** The command will refuse it, and the refusal is
 the point: `attested` means judgement finished, and a judgement that immediately sends the work

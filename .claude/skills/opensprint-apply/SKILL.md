@@ -205,27 +205,33 @@ from — it is a rung of the ladder giving way (`DEC-ESCALATION-LADDER`).
 Ask which, by what has to move:
 
 ```
-  Does a driver-spec — the objective, the goal or its bar — have to change?
+  Does a driver-spec's STATEMENT have to change?
 
-    yes  →  the GOAL moved.  Stop. /opsp:triage, or /opsp:driver.
-            Apply does not resume; this is a conversation that starts over.
+    yes  →  the GOAL moved.  /opsp:reideate  — thinking time at the
+            objective and goal, writing nothing, back to 'exploring'.
+            Then backlog → triage → propose, as the first time.
 
-    no, but a decision we already made is wrong or was never made
+    no, but a decision we made is wrong, or was never made
          →  the STRATEGY moved.  /opsp:repropose  — supersedes ADRs,
-            redraws the milestones beneath them, returns to 'proposed'.
+            may amend '## Measures', redraws the milestones beneath,
+            returns to 'proposed'.
 
-    no, the decisions hold — the milestones do not
-         →  the PLAN moved.  /opsp:reexplore  — adds or revises milestones,
-            leaves the decision trail alone.
+    no, everything holds — the work simply is not finished
+         →  nothing moved.  This was not an escalation. Write the record
+            or add the milestone and carry on.
 ```
 
 **Do not guess which.** You know what you were blocked on; you do not know whether the operator
 considers the goal still right. Present the three and let them say.
 
-**Apply stops either way.** `/opsp:repropose` returns the initiative to `proposed`, which means
-apply must be run again — deliberately, because revised milestones riding on a state that claims
-work was already underway against them is exactly the bookkeeping the state machine exists to
-prevent. `/opsp:reexplore` leaves it at `building` and apply resumes at the revised plan.
+**Both rungs stop apply, and both are hat changes.** `/opsp:repropose` returns the initiative to
+`proposed` and `/opsp:reideate` to `exploring`; either way `opensprint advance` will refuse
+the move until you state the hat, because the objective and the strategy are **product and
+maintainer's** and you have been wearing dev (`DEC-HAT-HANDOFFS`).
+
+Re-entering at `proposed` rather than `building` is deliberate: revised milestones riding on a
+state that claims work was already underway against them is exactly the bookkeeping the state
+machine exists to prevent.
 
 #### On approval
 
@@ -458,8 +464,9 @@ nothing in between gives that moment nowhere to live (`DEC-STATE-MACHINE`).
 **Do not run `/opsp:attest` in this session.** `DEC-043` refuses the author; the handoff is to a
 fresh context, not to your next step.
 
-**If re-planning adds work after this point**, `/opsp:reexplore` takes it back to `building`. The
-handoff is reversible — what it is not is skippable.
+**The handoff is reversible.** `/opsp:attest` sends it back to `building` where the work was
+unfinished; `/opsp:repropose` to `proposed` where the strategy was wrong; `/opsp:reideate` to
+`exploring` where the goal was. What it is not is skippable.
 
 ---
 

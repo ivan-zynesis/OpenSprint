@@ -20,22 +20,41 @@ Restate an initiative's **strategy** when what was built does not meet it.
 Escalation has three rungs, and they are the OGSM altitudes (`DEC-ESCALATION-LADDER`):
 
 ```
-  the GOAL was wrong            → a new initiative, or /opsp:driver
-      the objective or the goal no longer says what the business needs
+  the GOAL moved                → /opsp:reideate
+      the objective or the goal no longer says what the business needs.
+      Thinking time, writing nothing, back to 'exploring'.
 
-  the STRATEGY was wrong        → YOU ARE HERE
-      the goal holds. What was decided about how to reach it does not.
+  the STRATEGY moved            → YOU ARE HERE
+      the goal holds. What was decided about reaching it does not — and the
+      measures and milestones beneath it are redrawn with it.
 
-  the PLAN was wrong            → /opsp:reexplore
-      the goal and the strategy hold. The milestones that implement them do not.
+  the work is MISSING           → a change request from /opsp:attest
+      everything holds. It was not finished. Straight back to 'building'.
 ```
 
-**The test is what has to move.** If a driver-spec's Statement or its bar must change, this is the
-wrong tool — the goal moved, and that is a conversation with product that starts over. If only the
-milestones must change, `/opsp:reexplore` is cheaper and leaves the decision trail alone.
+**The test is a driver-spec's Statement.** If it must change, the goal moved and this is the wrong
+tool — `/opsp:reideate` thinks again at that altitude and writes nothing.
 
-Repropose is the middle: **driver-specs untouched, ADRs superseded, milestones redrawn beneath
-them.**
+If the Statement holds, you are here, and the scope is:
+
+```
+  MAY CHANGE                           MUST NOT CHANGE
+  ──────────────────────────────       ─────────────────────────────
+  ADRs — superseded, or added          a driver-spec's Statement
+  a driver-spec's ## Measures          its objective, goal or role
+  the bar, where the strategy                                      
+    changed how it is known met        anything outside ## Measures
+  milestones resting on the above
+```
+
+**The `## Measures` boundary is the same one `/opsp:attest` writes inside** (`DEC-027`), and
+for the same reason: a record's *claim* never changes under a reader who cited it, while how that
+claim is measured is allowed to improve. A new strategy often means a genuinely different thing is
+observable — and a bar left describing the old mechanism is worse than no bar.
+
+**Lowering the bar to fit what was built is not amending a measure, it is moving the goal.** If
+the new bar is easier rather than different, stop: that is `/opsp:reideate`, and the operator
+should be told so in those words.
 
 ## What brings you here
 
@@ -160,9 +179,12 @@ as though everything was in doubt.
 
 ## Guardrails
 
-- **Driver-specs are the invariant.** If one must change, this is the wrong rung. Stop and say so.
-- **The bar does not move here.** It lives in the driver-spec's `## Measures`. A strategy that
-  cannot meet the bar is a strategy to replace, not a bar to lower.
+- **A driver-spec's Statement is the invariant.** If one must change, this is the wrong rung. Stop
+  and hand to `/opsp:reideate`.
+- **The Statement is the invariant, not the whole record.** `## Measures` may be amended where
+  the strategy changed what is observable; nothing outside it may be touched (`DEC-027`).
+- **A bar that got easier is a goal that moved.** Replace the strategy, not the target. If the
+  operator wants the target lowered, that is `/opsp:reideate`, and say so.
 - **Supersede, never rewrite.** The old ADR keeps every word. `status` and `superseded-by` are
   the only fields that change.
 - **Archived work is immutable.** Add a corrective milestone; never edit a completed change.
