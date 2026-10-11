@@ -88,6 +88,9 @@ opensprint compact check    # views agree with their records
 
 …plus a check that the initiative's state is `attested`.
 
+No command performs that check yet. Until one does, it is the reviewer's job — see
+[Known limitations](known-limitations.md).
+
 **This is a gate on whether you answered, never on what you answered.** A bar recorded as *not met*,
 with an exposure and a plan, passes. That distinction is the whole boundary: insisting a question be
 answered is a consistency check; grading the answer is certification, and certification pulls change
@@ -161,6 +164,9 @@ for it — nothing to reach for — so the only way to close a pending bar is to
 which is when the evidence exists anyway.
 
 ### A minimal pipeline
+
+It installs the published package, so the open loops it reports are the ones that release knows
+about.
 
 ```yaml
 # .github/workflows/opensprint.yml

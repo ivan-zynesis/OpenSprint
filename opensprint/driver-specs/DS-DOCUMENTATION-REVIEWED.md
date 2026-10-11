@@ -57,12 +57,28 @@ should be told; the tool makes sure the question is asked and the answer lands s
 - **Location**: external-facing documentation is written to the configured documentation directory, `docs/` by default
 - **Guardrail**: inadequate documentation is an open loop, never a block
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+**Location** is asserted: the documentation directory resolves to `docs/` by default and follows a
+project override (`test/core/attest.test.ts`). **Primary** and **Guardrail** rest on instruction text
+alone — no harvest reads a documentation judgement, and the loop-kind list in
+`test/core/compact-loops.test.ts` has no documentation kind, so inadequate documentation is not an
+open loop anywhere the compiler sees.
+
+Re-reviewed against `a018238`: unchanged. `test/core/docs-drift.test.ts` checks this repository's own `docs/` names every workflow, state and transition — a guard on OpenSprint's documentation, not on any of the three bars — and its hat check matches a single common word.
+
 ### Exposure
 
 The documentation directory is prose for humans, so nothing compiles or checks it. An account that
 drifts from what shipped will not fail a build the way a compiled view does — only the next
 attestation will notice.
-mitigated-by: lifecycle-beyond-build
+
+An attested initiative with no documentation judgement is invisible to every compile. The previous
+pointer to `lifecycle-beyond-build` was removed: it named the initiative under attestation.
 
 ## Implications
 

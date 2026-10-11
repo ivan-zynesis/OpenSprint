@@ -41,6 +41,23 @@ This also gives the board something to render that no other artifact can: not wh
 - **Primary**: no recorded exposure lacks a `mitigated-by` pointer, or is reported as `exposure-unmitigated`
 - **Legibility**: the compiled roadmap shows every open exposure beside the state of its mitigation
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+The `mitigated-by` parser is asserted, and the board resolves the mitigating initiative's state and
+does not treat a dangling pointer as mitigated (`test/core/board.test.ts`). No test fires
+`exposure-unmitigated` — it is only asserted absent — and the e2e fixture silences it with
+`mitigated-by: not-needed`, a pointer to nothing. The board render assertion on *"a confession"*
+passes trivially, since the legend always contains it. No test covers more than one exposure.
+
+### Exposure
+
+An exposure with no pointer may go unreported by the harvest, and any string may satisfy it. This
+attestation records its own exposures without pointers, which makes the next compile a live check.
+
 ## Implications
 
 - An exposure's forward pointer targets an initiative, which must therefore have a state: [[DS-PROGRESSIVE-CRYSTALLIZATION]]

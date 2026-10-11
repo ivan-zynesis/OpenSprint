@@ -1,7 +1,7 @@
 ---
 id: surrogate-currency
 status: active
-state: ready-for-attestation
+state: attested
 created: 2026-10-10
 depends-on:
   - lifecycle-beyond-build
@@ -158,6 +158,21 @@ invisible, reported `decision-unguarded` forever. That widening was pulled forwa
 `sdlc-operating-contract`'s `record-naming` milestone and landed before these records were written,
 stopping the numbered era at `DEC-044`. Both forms match permanently; this is not a migration
 window.
+
+## Attestation
+
+- **frame**: `opsp/sdlc-operating-contract` against `origin/main`, `2c24097..a018238`, 90 commits — confirmed by the operator; anything committed after `a018238` is outside this attestation
+- **door**: two-way — the merge reverts with `git revert` and no data migration; nothing publishes on merge, because the release workflow runs only on the upstream repository. Two parts are one-way: an npm publish (a version number cannot be reused), and a downstream project that writes semantic decision ids under the new version may not read them back after a downgrade to 0.0.9
+- **blast-radius**: `compact seal --hat` (scoped sealing), `/opsp:apply` compiling `dev` and `devops` at each milestone boundary and pausing on escalation, `/opsp:knockdown` producing all five views, and the new `migrate` command with `/opsp:migrate`. In adopter projects, apply now writes compiled views during implementation rather than only at archive
+
+### RACI
+
+| Concern | Handled by | R | A | C | I |
+|---|---|---|---|---|---|
+| build, test, typecheck and lint regressions | system — GitHub Actions `ci.yml` on pull requests to `main` | — | — | — | — |
+| an `opsp/*` branch merging unattested, or with stale views | **not automated** — no surrogate job runs `compact check` or a state check in this repository | Ivan Lee | Ivan Lee | — | — |
+| npm release, and telling adopter projects to run `opensprint update` | **not automated** — the release workflow is gated to the upstream repository | Ivan Lee | Ivan Lee | — | — |
+| agent behaviour in adopter projects — escalation, attest scope and triage are tested as instruction text only | **not automated** | Ivan Lee | Ivan Lee | — | — |
 
 ## Open Questions
 

@@ -61,6 +61,21 @@ A half-written measure also tells you **where in the lifecycle something is**: b
 - **Primary**: no compiled measure cell states a bar without stating whether it was met
 - **Guardrail**: `measure-unasserted` and `measure-unexposed` are harvested, not noticed by a reader
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+**Guardrail** is asserted: `measure-unasserted` and `measure-unexposed` are harvested, with positive
+and negative cases (`test/core/classification.test.ts`). **Primary** is about compiled cells, and no
+test inspects a compiled measure cell — the guarantee holds at record level only.
+
+### Exposure
+
+A compiled view could state a bar with no posture and no test would fail; only the record-level
+harvest would notice.
+
 ## Implications
 
 - Rendered as optional sub-blocks under the existing `## Measures`, additive under [[DS-BACKWARD-COMPAT]]: [[DEC-019]]

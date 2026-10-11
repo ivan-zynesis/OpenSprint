@@ -55,6 +55,27 @@ The deliberate cost is that **no branch can see every backlog item**. That is a 
 - **Guardrail**: a pull request merging `opsp/*` fails when initiative state and view freshness disagree with what git shows
 - **Hygiene**: no pull request exists whose only content is attestation
 
+### Posture
+
+- **verdict**: not met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+**Primary**: nothing tested prevents a commit reaching `main`. `state-contradicted` fires only once
+a branch has merged (`test/core/initiatives.test.ts`), and `compact check` exits zero with open loops
+(`test/cli-e2e/compact.test.ts`). This repository runs no surrogate job on `opsp/*` pull requests,
+and `docs/git-workflow.md` recommends a state-is-attested check that no command performs.
+**Guardrail**: the view-freshness half is real — `compact check` fails on drift — but the git half is
+unit-tested with injected state and wired into no check. **Hygiene** is instruction text only.
+
+Re-reviewed against `a018238`: unchanged. The state machine adds a transition rule, not a merge gate — no new test touches git, a pull request or CI. `opensprint advance --to attested` succeeds on an initiative with no `## Attestation` and no posture (`test/cli-e2e/advance.test.ts`), and an initiative with no state may move straight to `completed` (`test/core/initiative-transitions.test.ts`), so the state the documentation recommends gating on can be reached without attesting.
+
+### Exposure
+
+An `opsp/*` branch can merge to `main` unattested, this one included. The CI snippet in
+`docs/git-workflow.md` installs the published package, which predates `frame`, `migrate` and the new
+loop kinds.
+
 ## Implications
 
 - Planning in the initiative worktree, created by the planning tools: [[DEC-029]]

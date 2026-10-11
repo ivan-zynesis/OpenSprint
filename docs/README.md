@@ -10,6 +10,7 @@ participants may be human, agent, or both.
 | [Concepts](concepts.md) | you want to know what a driver-spec, a hat or an attestation actually is |
 | [Workflows](workflows.md) | you want the command reference and the order things run in |
 | [Git workflow](git-workflow.md) | deciding how OpenSprint should fit your branching and CI |
+| [Known limitations](known-limitations.md) | you want to know what the current release does not do yet |
 
 Two more documents live at the repository root:
 

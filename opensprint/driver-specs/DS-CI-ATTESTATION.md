@@ -36,6 +36,24 @@ Exempting pipeline changes is a recognised exception with a stated reason, which
 - **Guardrail**: an evidence reference that does not resolve is harvested, not assumed good
 - **Honesty**: `cannot assess` is a recorded outcome with an exposure, never a silent pass
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+**Honesty** is asserted: `cannot assess` without an exposure is harvested
+(`test/core/classification.test.ts`). **Guardrail** is partial: a local path missing from the tree is
+reported, but two tests assert unresolved references are *not* — a path escaping the project root
+(`test/cli-e2e/compact.test.ts`) and remote links (`test/core/classification.test.ts`, by design).
+**Primary**: tests check that a reference is addressable, not that a pipeline produced it — a
+comment-only file satisfies it.
+
+### Exposure
+
+Evidence citing a `../` path is silently accepted rather than reported, and any file in the tree
+counts as evidence regardless of whether a pipeline produced it.
+
 ## Implications
 
 - Evidence is a CI artifact reference; the pipeline exemption rides the next initiative: [[DEC-032]]

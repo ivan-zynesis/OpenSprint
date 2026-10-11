@@ -66,6 +66,23 @@ As with every other row, maintainer owns the **bar** — what uptime is committe
 - **Primary**: a maintainer bar recorded on any project routes to exactly one of the seven without strain
 - **Coverage**: every objective renders, including those with nothing recorded — an empty row is the finding
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+Exclusive routing by the `objective` field is asserted (`test/core/hat-templates.test.ts`,
+`test/core/classification.test.ts`), and an objective with no records resolves to an empty section
+rather than vanishing. No test asserts the **compiled view** renders that empty row; the knockdown
+test titled "seven objectives" checks five. No test shows an off-list objective value being
+reported. *"Without strain"* is not testable.
+
+### Exposure
+
+A record carrying a misspelled or off-list objective may route nowhere without being reported, and
+an empty objective row could disappear from the compiled view without failing a test.
+
 ## Implications
 
 - The six are a shipped section list, not records: [[DEC-018]]

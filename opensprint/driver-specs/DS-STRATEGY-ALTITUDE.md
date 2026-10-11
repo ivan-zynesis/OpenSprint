@@ -44,6 +44,22 @@ The altitude needs no new enforcement mechanism. [[DEC-009]] already requires ev
 - **Primary**: every maintainer strategy cell either cites a dev/devops decision or is reported as `strategy-unimplemented`
 - **Readability**: a strategy cell is intelligible to a reader who has opened no record
 
+### Posture
+
+- **verdict**: cannot assess
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+No test fires or clears `strategy-unimplemented`; it appears only in the loop-kind list in
+`test/core/compact-loops.test.ts`. **Readability** is not testable by unit test — the SWOT rendering
+is asserted as instruction text only. The loop did fire on this repository's own records during
+attestation (`DS-BIG-PICTURE`), but that is a local observation, not a pipeline artifact.
+
+### Exposure
+
+A regression in `strategy-unimplemented` would pass the suite. The evidence could not answer
+whether every maintainer strategy cell cites a decision or is reported.
+
 ## Implications
 
 - Strategies cite rather than describe, enforced by the existing citation rule: [[DEC-020]]

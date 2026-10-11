@@ -44,6 +44,24 @@ The weakness of attestation is that it ages: an attestation is true as of a date
 - **Guardrail**: a compiled view visibly distinguishes decided, observed and attested claims
 - **Freshness**: an attestation carries a date, so staleness is computable rather than assumed
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+Classification of a record as decided or attested is asserted, including that an attestation needs
+both a date and evidence and that the date carries without expiring
+(`test/core/compact-measures.test.ts`). Not asserted: the tense of compiled claims (**Primary**); the
+`observed` authority in compiled output — the test titled "three authorities" checks two, neither of
+them `attested` (**Guardrail**); and that a verdict with evidence but no `attested-on` is downgraded
+(**Freshness**).
+
+### Exposure
+
+A compiled view may state present-tense claims with no attestation behind them, and the
+decided / observed / attested distinction is unverified in rendered output.
+
 ## Implications
 
 - `attested` becomes a third citation authority: [[DEC-021]]

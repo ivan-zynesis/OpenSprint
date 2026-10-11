@@ -82,6 +82,23 @@ accountable author genuinely is there, answering, and approving ([[DS-ESCALATION
 - **traded for**: product and maintainer lag by up to one initiative, visibly
 - **neighbour**: unrecorded — nothing says what recompiling everything on every change would cost in render time or in drift
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+**Guardrail** is asserted with a gap: an out-of-scope hat is not blessed, with a regression test
+(`test/cli-e2e/compact.test.ts`), but *"just rendered"* is approximated as *"the output bytes
+changed"* — a hand edit is sealed. **Primary**: the seal manifest records no authoring hat, so
+authorship cannot be checked after the fact; the apply tests are instruction text. **Currency**: only
+the presence of a compile step in the apply instructions is asserted; no test measures lag.
+
+### Exposure
+
+A hand-edited view can be sealed as if rendered, and which hat compiled a view is not recorded
+anywhere it could be audited.
+
 ## Implications
 
 - `compact seal` must become scopeable, or compiling two hats blesses four: [[DEC-SCOPED-SEAL]]

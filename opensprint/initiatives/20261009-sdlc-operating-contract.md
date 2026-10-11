@@ -1,7 +1,7 @@
 ---
 id: sdlc-operating-contract
 status: active
-state: ready-for-attestation
+state: attested
 created: 2026-10-09
 depends-on:
   - lifecycle-beyond-build
@@ -104,6 +104,21 @@ The step function from idea to proposal splits, and both paths stay open:
 `record-naming` carried two ordering constraints, both now discharged. `RECORD_ID_PATTERN` had to widen **before** the first semantic decision id was written, or the rule harvest would have gone silently blind to every new decision — so that half was pulled forward and landed with [[surrogate-currency]]. Initiative filenames had to stay unprefixed until `initiative-parser` resolved by frontmatter `id:`, because the skills constructed `initiatives/<name>.md` directly; that landed with [[lifecycle-beyond-build]], and the prefix followed here.
 
 This initiative's own file was unprefixed for that reason. It is `20261009-sdlc-operating-contract.md` now — the convention applied to itself the moment it shipped.
+
+## Attestation
+
+- **frame**: `opsp/sdlc-operating-contract` against `origin/main`, `2c24097..a018238`, 90 commits — confirmed by the operator; anything committed after `a018238` is outside this attestation
+- **door**: two-way — the merge reverts with `git revert` and no data migration; nothing publishes on merge, because the release workflow runs only on the upstream repository. Two parts are one-way: an npm publish (a version number cannot be reused), and a downstream project that writes semantic decision ids under the new version may not read them back after a downgrade to 0.0.9
+- **blast-radius**: the `/opsp:backlog`, `/opsp:triage`, `/opsp:explore`, `/opsp:propose` and `/opsp:archive` skills (explore now writes nothing; backlog and triage create worktrees), the new `frame` command, `evidence-unresolvable` and `bar-without-form`, semantic decision ids and date-prefixed initiative filenames, the initiative state machine and `opensprint advance` (six states, `ready-for-attestation` as the handoff), the escalation ladder with `/opsp:repropose` and `/opsp:reexplore`, named hats on every transition, the bar written at `/opsp:propose` and `/opsp:driver`, and the published documentation — about 3,700 lines of upstream OpenSpec docs removed. Adopter projects are the operator's own; the merge-gate exposure on `DS-SURROGATE-GIT-CONTRACT` applies to every one of them
+
+### RACI
+
+| Concern | Handled by | R | A | C | I |
+|---|---|---|---|---|---|
+| build, test, typecheck and lint regressions | system — GitHub Actions `ci.yml` on pull requests to `main` | — | — | — | — |
+| an `opsp/*` branch merging unattested, or with stale views | **not automated** — no surrogate job runs `compact check` or a state check in this repository | Ivan Lee | Ivan Lee | — | — |
+| npm release, and telling adopter projects to run `opensprint update` | **not automated** — the release workflow is gated to the upstream repository | Ivan Lee | Ivan Lee | — | — |
+| agent behaviour in adopter projects — escalation, attest scope and triage are tested as instruction text only | **not automated** | Ivan Lee | Ivan Lee | — | — |
 
 ## Open Questions
 

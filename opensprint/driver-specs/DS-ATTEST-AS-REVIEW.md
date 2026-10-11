@@ -86,12 +86,29 @@ governance, and stays out.
 - **traded for**: the ability to diagnose *why* a bar was missed, which stays with `dev`
 - **neighbour**: unrecorded — nothing says what reading the diff under a stricter protocol would buy
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+The harvest asserts the three review questions on an attested initiative —
+`test/core/classification.test.ts` fires on a missing door, blast radius and unassigned RACI rows.
+No test shows the *"or records why not"* path clearing the loop. **Scope** is asserted only as
+instruction text in `test/core/attest.test.ts`: it shows the prohibition is written down, not that it
+is obeyed. **Guardrail** (never a block) is likewise instruction text; the exit-zero e2e covers a
+different loop kind.
+
 ### Exposure
 
 Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the
 agent that wrote the tests is often the one asked to attest. Lower than with source — *"does this
 test assert the bar?"* is falsifiable where *"is this code reasonable?"* is not — but not zero.
-mitigated-by: lifecycle-beyond-build
+
+Attestation found the **Scope** bar unassertable by any test in the suite — an attester that reads
+source is not detected. The *"or records why not"* path is untested. The previous pointer to
+`lifecycle-beyond-build` was removed: it named the initiative under attestation, which closes
+without retiring this exposure.
 
 ## Implications
 

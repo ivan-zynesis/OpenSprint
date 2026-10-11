@@ -38,6 +38,25 @@ This also gives [[DS-SURROGATE-BUDGET]] a purpose nobody had stated. Progressive
 - **Affordability**: switching hats costs a view load, not a re-read of the records
 - **Entry point**: a stakeholder with no repository access can file a backlog item through an agent in a few sentences
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+`opensprint frame` excludes patches and commit message bodies, asserted in
+`test/core/change-frame.test.ts` and `test/cli-e2e/frame.test.ts`. That the attest **context**
+excludes the implementation is instruction text, not proof, and the frame still lists source paths.
+**Affordability** has no test. **Entry point** is contradicted: `test/core/opsp-backlog-triage.test.ts`
+asserts the backlog skill runs `git worktree add`, which needs repository access.
+
+Re-reviewed against `a018238`: unchanged. *"Refuses to attest in the same session"* (`test/core/state-machine-workflows.test.ts`) is instruction text.
+
+### Exposure
+
+Excluding the implementation from an attest context depends on the agent obeying instructions. A
+stakeholder without repository access has no tested way to file a backlog item.
+
 ## Implications
 
 - Attest loads the bar and the evidence, never the diff, design or ADRs: [[DEC-033]]

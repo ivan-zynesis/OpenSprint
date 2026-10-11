@@ -79,12 +79,27 @@ the only condition that rule requires.
 - **Consent**: no product or maintainer record changes during apply without explicit approval
 - **Honesty**: the blast radius is stated before approval is sought
 
+### Posture
+
+- **verdict**: cannot assess
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+Hat inference by ancestry is unit-tested (`test/core/hats.test.ts`). Everything else is instruction
+text in `test/core/opsp-apply-escalation.test.ts`: the pause strings, approval before compile, the
+blast-radius phrase — which is not checked to precede the approval prompt. No test runs apply and
+checks that a product or maintainer record is unchanged on a decline.
+
+Re-reviewed against `a018238`: unchanged. The escalation-ladder tests (`test/core/escalation-ladder.test.ts`) are instruction text, and *"does not guess which rung"* leans towards an open question rather than an inferred draft. `opensprint advance` asserts that a lifecycle handoff names a hat, which is not an escalation pause.
+
 ### Exposure
 
 Inference can be wrong, and an operator approving quickly may accept a misclassified record. The
 record is correctable afterwards, but a wrong hat routes a constraint to the wrong view and the
 wrong reviewer.
-mitigated-by: surrogate-currency
+
+The evidence could not answer whether an escalation behaves as instructed. The previous pointer to
+`surrogate-currency` was removed: it named the initiative under attestation.
 
 ## Implications
 

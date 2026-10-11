@@ -56,6 +56,27 @@ Documentation also needs this in practice. An in-repo board tracking initiative 
 - **Consistency**: an initiative's declared state never disagrees with which of its cells are filled
 - **Coverage**: every milestone and change traces to an initiative with a state
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Ivan Lee
+- **attested-on**: 2026-10-11
+
+**Consistency** is asserted by the state check in `test/core/initiatives.test.ts`, except that
+`attested` is not checked against the presence of an `## Attestation` section. **Coverage** is
+partial: an active initiative with no state and stranded milestones are reported; nothing asserts an
+openspec change traces to an initiative. **Primary** is contradicted by
+`test/core/opsp-backlog-triage.test.ts`, which asserts explore writes nothing — the deliberate flush
+moved to `/opsp:backlog`. The bar as written is not met by design; revising it is a decision, not an
+attestation.
+
+Re-reviewed against `a018238`: unchanged, with **Consistency** detection broader — the transition checks now report proposed-with-work-done, building-with-every-milestone-done and a handoff with work outstanding (`test/core/initiative-transitions.test.ts`). `advance` writes a contradicted state and reports it rather than refusing (`test/cli-e2e/advance.test.ts`), and `attested` is still not checked against an `## Attestation` section — now reachable by command.
+
+### Exposure
+
+The **Primary** bar has drifted from what shipped and needs revising through `/opsp:decide`. An
+initiative declaring `attested` with no `## Attestation` section passes the state check.
+
 ## Implications
 
 - Initiatives need a deterministic half; they are currently parsed by no code at all: [[DEC-024]]
