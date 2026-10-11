@@ -71,13 +71,23 @@ describe('backlog seam', () => {
   });
 
   describe('DEC-007 — no separate remediation workflow', () => {
-    it('explore and propose remain the only triage route', () => {
+    it('no remediation workflow was introduced', () => {
       const t = workflow('opsp-propose');
       expect(t).toContain('opensprint compact loops');
-      // no fifth workflow was introduced
       const ids = getOpspSkillTemplates().map((s) => s.workflowId);
       expect(ids).not.toContain('opsp-remediate');
-      expect(ids).not.toContain('opsp-triage');
+    });
+
+    // DEC-039 introduced /opsp:triage after this test was written. It is not
+    // the remediation workflow DEC-007 refused — it is the thinking half of
+    // the propose stage, and deciding which open loop is worth work remains a
+    // judgement call rather than a mechanism.
+    it('triage is the propose stage, not a remediation mechanism', () => {
+      const ids = getOpspSkillTemplates().map((s) => s.workflowId);
+      expect(ids).toContain('opsp-triage');
+      const t = workflow('opsp-triage');
+      expect(t).toMatch(/Never\s+formalize\s+here/i);
+      expect(t).not.toMatch(/remediat/i);
     });
   });
 });

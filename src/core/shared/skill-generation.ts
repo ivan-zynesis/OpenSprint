@@ -41,6 +41,8 @@ import {
   getOpspArchiveSkillTemplate,
   getOpspAttestSkillTemplate,
   getOpspMigrateSkillTemplate,
+  getOpspBacklogSkillTemplate,
+  getOpspTriageSkillTemplate,
   getOpspReviewSkillTemplate,
   getOpspReexploreSkillTemplate,
   getOpspKnockdownSkillTemplate,
@@ -50,6 +52,8 @@ import {
   getOpspArchiveCommandTemplate,
   getOpspAttestCommandTemplate,
   getOpspMigrateCommandTemplate,
+  getOpspBacklogCommandTemplate,
+  getOpspTriageCommandTemplate,
   getOpspReviewCommandTemplate,
   getOpspReexploreCommandTemplate,
   getOpspKnockdownCommandTemplate,
@@ -160,7 +164,7 @@ export const OPSP_WORKFLOW_IDS = [
   // Utility commands
   'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
   // Lifecycle commands
-  'opsp-explore', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+  'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
   // Universe reconciliation commands
   'opsp-rebase', 'opsp-abandon',
   // Surrogate compaction
@@ -180,6 +184,8 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspMigrateSkillTemplate(), dirName: 'opensprint-migrate', workflowId: 'migrate' },
     // Lifecycle skills
     { template: getOpspExploreSkillTemplate(), dirName: 'opensprint-explore', workflowId: 'opsp-explore' },
+    { template: getOpspBacklogSkillTemplate(), dirName: 'opensprint-backlog', workflowId: 'opsp-backlog' },
+    { template: getOpspTriageSkillTemplate(), dirName: 'opensprint-triage', workflowId: 'opsp-triage' },
     { template: getOpspProposeSkillTemplate(), dirName: 'opensprint-propose', workflowId: 'opsp-propose' },
     { template: getOpspApplySkillTemplate(), dirName: 'opensprint-apply', workflowId: 'opsp-apply' },
     { template: getOpspAttestSkillTemplate(), dirName: 'opensprint-attest', workflowId: 'opsp-attest' },
@@ -208,6 +214,8 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspMigrateCommandTemplate(), id: 'migrate' },
     // Lifecycle commands
     { template: getOpspExploreCommandTemplate(), id: 'opsp-explore' },
+    { template: getOpspBacklogCommandTemplate(), id: 'opsp-backlog' },
+    { template: getOpspTriageCommandTemplate(), id: 'opsp-triage' },
     { template: getOpspProposeCommandTemplate(), id: 'opsp-propose' },
     { template: getOpspApplyCommandTemplate(), id: 'opsp-apply' },
     { template: getOpspAttestCommandTemplate(), id: 'opsp-attest' },

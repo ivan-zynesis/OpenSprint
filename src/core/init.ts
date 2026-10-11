@@ -83,6 +83,8 @@ const OPSP_WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'tree': 'opensprint-tree',
   'rebuild-assess': 'opensprint-rebuild-assess',
   'opsp-explore': 'opensprint-explore',
+  'opsp-backlog': 'opensprint-backlog',
+  'opsp-triage': 'opensprint-triage',
   'opsp-propose': 'opensprint-propose',
   'opsp-apply': 'opensprint-apply',
   'migrate': 'opensprint-migrate',

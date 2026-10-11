@@ -31,7 +31,19 @@ const OPSP_EXPLORE_INSTRUCTIONS = `Enter initiative-level explore mode. Think at
 
 **IMPORTANT: This is OPSP explore, not OPSX explore.** You are thinking about system-wide initiatives, architectural direction, and strategic decisions — NOT feature-level implementation. If the operator wants to explore a specific feature or code change, use \`/opsx:explore\` instead.
 
-**No artifacts are created during OPSP explore.** When ideas crystallize, offer to transition to \`/opsp:propose\` which will classify the conversation into driver-specs, ADRs, and an initiative plan.
+**No artifacts are created during OPSP explore.** That is deliberate and unchanged: most exploration should not survive, and a tool that saves everything fills the backlog with noise (\`DEC-034\`).
+
+When an idea crystallizes, offer **\`/opsp:backlog\`** — the deliberate flush that writes it down as an initiative at \`state: exploring\`, holding an objective and a goal. It can fire mid-conversation; the thinking continues past it.
+
+The step function has two paths, and both stay open:
+
+\`\`\`
+  1.  explore ─────────────────────────────▶ propose
+                 (straight through, for work that never rests)
+
+  2.  explore ──▶ backlog ···· time ···· triage ──▶ propose
+                  persisted                picked up
+\`\`\`
 
 ---
 

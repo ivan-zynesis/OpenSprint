@@ -35,6 +35,28 @@ const OPSP_PROPOSE_INSTRUCTIONS = `Create an initiative by analyzing the explora
 
 ## Steps
 
+### 0. Where the input comes from
+
+Two paths reach here, and both are valid (\`DEC-034\`):
+
+| Path | What you are given |
+|---|---|
+| straight from \`/opsp:explore\` | a conversation |
+| from \`/opsp:triage\` | an **initiative already on disk** at \`state: exploring\`, holding an objective and a goal, plus the strategy that triage worked out |
+
+**Where an initiative already exists, do not create a second one.** Read it, switch to its worktree
+(\`DEC-029\`), and fill in what it is missing — Strategy and Measure. Its Objective and Goal were
+written at backlog time and are not yours to rewrite.
+
+\`\`\`bash
+openspec compact board          # the Backlog column lists them
+git branch --show-current       # be on opsp/<initiative> before writing
+\`\`\`
+
+**You are the formalizer.** Triage did the strategy brainstorming; this step turns it into records.
+Where you arrived straight from explore, you do both — but the conversation has already happened
+either way, and this step writes rather than thinks.
+
 ### 1. Analyze the Conversation
 
 Review everything discussed in the explore session (or the operator's description). Identify:
@@ -155,6 +177,8 @@ drift from reality. \`Addresses\` records what the initiative set out to close, 
 ## Guardrails
 
 - **Classify, don't invent** — Only create driver-specs and ADRs from what the operator actually said
+- **Never duplicate an initiative** — where one exists at \`state: exploring\`, fill it in and advance it to \`proposed\`; do not write a second
+- **Never rewrite an Objective or Goal** — those were settled at backlog time
 - **Operator confirms** — Always present classification before writing files
 - **High-level milestones** — Each milestone is a brief description, not a detailed plan. Detail comes from opsx.
 - **Use path.join()** — Construct all file paths cross-platform
