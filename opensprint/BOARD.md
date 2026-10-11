@@ -15,9 +15,7 @@ _Empty._
 
 Proposed — a bar is set, no work started.
 
-| Initiative | State | Milestones | Next |
-|---|---|---|---|
-| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | proposed | 0/6 | backlog-and-triage |
+_Empty._
 
 ## Doing
 
@@ -26,6 +24,7 @@ In flight.
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
 | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | building | 11/11 _(+1 superseded)_ | — |
+| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | building | 6/6 | — |
 | [surrogate-currency](initiatives/20261010-surrogate-currency.md) | building | 5/5 | — |
 
 ## Done

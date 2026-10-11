@@ -1,7 +1,7 @@
 ---
 id: sdlc-operating-contract
 status: active
-state: proposed
+state: building
 created: 2026-10-09
 depends-on:
   - lifecycle-beyond-build
