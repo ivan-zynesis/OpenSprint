@@ -67,9 +67,9 @@ describe('initiative transitions', () => {
     });
 
     it('the goal rung is reachable from both build and handoff', () => {
-      const reideate = TRANSITIONS.filter((t) => t.by === '/opsp:reideate');
-      expect(reideate.map((t) => t.from).sort()).toEqual(['building', 'ready-for-attestation']);
-      expect(reideate.every((t) => t.to === 'exploring')).toBe(true);
+      const reexplore = TRANSITIONS.filter((t) => t.by === '/opsp:reexplore');
+      expect(reexplore.map((t) => t.from).sort()).toEqual(['building', 'ready-for-attestation']);
+      expect(reexplore.every((t) => t.to === 'exploring')).toBe(true);
     });
 
     it('the strategy rung is reachable from both build and handoff', () => {

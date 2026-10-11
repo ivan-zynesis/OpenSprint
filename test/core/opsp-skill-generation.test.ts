@@ -35,7 +35,7 @@ describe('OPSP skill generation', () => {
       expect(templates).toHaveLength(19);
       expect(templates.map(t => t.workflowId)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
-        'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reideate', 'opsp-repropose', 'opsp-knockdown',
+        'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
@@ -53,7 +53,7 @@ describe('OPSP skill generation', () => {
       expect(contents).toHaveLength(19);
       expect(contents.map(c => c.id)).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
-        'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reideate', 'opsp-repropose', 'opsp-knockdown',
+        'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
@@ -62,7 +62,7 @@ describe('OPSP skill generation', () => {
     it('should have correct OPSP workflow IDs (19 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
         'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
-        'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reideate', 'opsp-repropose', 'opsp-knockdown',
+        'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
@@ -79,10 +79,10 @@ describe('OPSP skill generation', () => {
     it('should have lifecycle skill templates with correct names', () => {
       const templates = getOpspSkillTemplates();
       const lifecycleNames = templates
-        .filter(t => ['opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reideate', 'opsp-repropose', 'opsp-knockdown'].includes(t.workflowId))
+        .filter(t => ['opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown'].includes(t.workflowId))
         .map(t => t.template.name);
       expect(lifecycleNames).toEqual([
-        'opensprint-explore', 'opensprint-backlog', 'opensprint-triage', 'opensprint-propose', 'opensprint-apply', 'opensprint-attest', 'opensprint-archive', 'opensprint-review', 'opensprint-reideate', 'opensprint-repropose', 'opensprint-knockdown',
+        'opensprint-explore', 'opensprint-backlog', 'opensprint-triage', 'opensprint-propose', 'opensprint-apply', 'opensprint-attest', 'opensprint-archive', 'opensprint-review', 'opensprint-reexplore', 'opensprint-repropose', 'opensprint-knockdown',
       ]);
     });
 
@@ -129,19 +129,19 @@ describe('OPSP skill generation', () => {
       expect(apply!.template.instructions).toContain('/opsx:explore');
     });
 
-    it('should have opsp-reideate skill template that writes nothing', () => {
+    it('should have opsp-reexplore skill template that writes nothing', () => {
       const templates = getOpspSkillTemplates();
-      const reideate = templates.find(t => t.workflowId === 'opsp-reideate');
-      expect(reideate).toBeDefined();
-      expect(reideate!.template.name).toBe('opensprint-reideate');
-      expect(reideate!.dirName).toBe('opensprint-reideate');
+      const reexplore = templates.find(t => t.workflowId === 'opsp-reexplore');
+      expect(reexplore).toBeDefined();
+      expect(reexplore!.template.name).toBe('opensprint-reexplore');
+      expect(reexplore!.dirName).toBe('opensprint-reexplore');
       // The goal rung, symmetric with explore
-      expect(reideate!.template.instructions).toContain('opensprint/initiatives/');
-      expect(reideate!.template.instructions).toContain('/opsp:explore');
-      expect(reideate!.template.instructions).toContain('/opsp:backlog');
-      expect(reideate!.template.instructions).toContain('superseded');
+      expect(reexplore!.template.instructions).toContain('opensprint/initiatives/');
+      expect(reexplore!.template.instructions).toContain('/opsp:explore');
+      expect(reexplore!.template.instructions).toContain('/opsp:backlog');
+      expect(reexplore!.template.instructions).toContain('superseded');
       // Guardrails
-      expect(reideate!.template.instructions).toMatch(/Writes nothing/);
+      expect(reexplore!.template.instructions).toMatch(/Writes nothing/);
     });
 
     it('should have opsp-repropose skill template with the strategy-rung mechanics', () => {
@@ -227,7 +227,7 @@ describe('OPSP skill generation', () => {
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-apply', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-archive', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-review', 'SKILL.md'))).toBe(true);
-      expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-reideate', 'SKILL.md'))).toBe(true);
+      expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-reexplore', 'SKILL.md'))).toBe(true);
       expect(fsSync.existsSync(path.join(skillsDir, 'opensprint-knockdown', 'SKILL.md'))).toBe(true);
     });
 

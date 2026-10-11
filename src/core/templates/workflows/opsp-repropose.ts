@@ -41,7 +41,7 @@ const OPSP_REPROPOSE_INSTRUCTIONS = `Restate an initiative's **strategy** when w
 Escalation has three rungs, and they are the OGSM altitudes (\`DEC-ESCALATION-LADDER\`):
 
 \`\`\`
-  the GOAL moved                → /opsp:reideate
+  the GOAL moved                → /opsp:reexplore
       the objective or the goal no longer says what the business needs.
       Thinking time, writing nothing, back to 'exploring'.
 
@@ -54,7 +54,7 @@ Escalation has three rungs, and they are the OGSM altitudes (\`DEC-ESCALATION-LA
 \`\`\`
 
 **The test is a driver-spec's Statement.** If it must change, the goal moved and this is the wrong
-tool — \`/opsp:reideate\` thinks again at that altitude and writes nothing.
+tool — \`/opsp:reexplore\` thinks again at that altitude and writes nothing.
 
 If the Statement holds, you are here, and the scope is:
 
@@ -74,7 +74,7 @@ claim is measured is allowed to improve. A new strategy often means a genuinely 
 observable — and a bar left describing the old mechanism is worse than no bar.
 
 **Lowering the bar to fit what was built is not amending a measure, it is moving the goal.** If
-the new bar is easier rather than different, stop: that is \`/opsp:reideate\`, and the operator
+the new bar is easier rather than different, stop: that is \`/opsp:reexplore\`, and the operator
 should be told so in those words.
 
 ## What brings you here
@@ -201,11 +201,11 @@ as though everything was in doubt.
 ## Guardrails
 
 - **A driver-spec's Statement is the invariant.** If one must change, this is the wrong rung. Stop
-  and hand to \`/opsp:reideate\`.
+  and hand to \`/opsp:reexplore\`.
 - **The Statement is the invariant, not the whole record.** \`## Measures\` may be amended where
   the strategy changed what is observable; nothing outside it may be touched (\`DEC-027\`).
 - **A bar that got easier is a goal that moved.** Replace the strategy, not the target. If the
-  operator wants the target lowered, that is \`/opsp:reideate\`, and say so.
+  operator wants the target lowered, that is \`/opsp:reexplore\`, and say so.
 - **Supersede, never rewrite.** The old ADR keeps every word. \`status\` and \`superseded-by\` are
   the only fields that change.
 - **Archived work is immutable.** Add a corrective milestone; never edit a completed change.

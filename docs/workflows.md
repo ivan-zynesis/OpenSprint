@@ -70,7 +70,7 @@ So the spine has back-edges. Which one you take is decided by **what has to move
 is in a file you can point at:
 
 ```
-  ┌─ c ─ the GOAL moved ───────────────────────── /opsp:reideate ───┐
+  ┌─ c ─ the GOAL moved ───────────────────────── /opsp:reexplore ───┐
   │      a driver-spec's STATEMENT no longer holds                  │
   │      this is /opsp:explore, later — thinking time with the work │
   │      in hand. WRITES NOTHING, exactly like explore.             │
@@ -97,15 +97,15 @@ is in a file you can point at:
 the objective and goal, ADRs hold the strategy, milestones hold the plan. So "which rung" is
 answered by naming which file changes, not by judging whether something is "a big change".
 
-### Reideate is explore, later
+### Reexplore is explore, later
 
 A tool called *re*-explore that produced artifacts would not be re-exploring. `/opsp:explore`
-writes nothing, and so does `/opsp:reideate` — the thinking is persisted by `/opsp:backlog`, the
+writes nothing, and so does `/opsp:reexplore` — the thinking is persisted by `/opsp:backlog`, the
 same tool that persists an original idea, in the same shape.
 
 ```
   /opsp:explore  ──► /opsp:backlog ──► /opsp:triage ──► /opsp:propose ──► ...
-  /opsp:reideate ──┘
+  /opsp:reexplore ──┘
         the same road, rejoined, with everything you learned building
 ```
 
@@ -134,7 +134,7 @@ allowed to improve. A new strategy often makes a genuinely different thing obser
 still describing the old mechanism is worse than no bar.
 
 **A bar that got easier is a goal that moved.** If the new bar is lower rather than different, that
-is `/opsp:reideate` — and lowering a target becomes a decision somebody takes at the goal altitude
+is `/opsp:reexplore` — and lowering a target becomes a decision somebody takes at the goal altitude
 rather than an edit nobody notices.
 
 ### Every handoff names its hat
@@ -233,7 +233,7 @@ an argument adopts it.
 |---|---|---|
 | a change request from `/opsp:attest` | **nothing moved** — the work was not finished | `building` |
 | `/opsp:repropose` | the **strategy** — ADRs superseded, `## Measures` may be amended | `proposed` |
-| `/opsp:reideate` | the **goal** — thinking time, writes nothing | `exploring` |
+| `/opsp:reexplore` | the **goal** — thinking time, writes nothing | `exploring` |
 
 **Other**
 
