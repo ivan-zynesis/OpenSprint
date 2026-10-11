@@ -1,7 +1,7 @@
 # dev — how is it built?
 
 Describes **the system**, citing decisions where they explain a choice and paths where they were
-observed. Thirty-seven decisions feed this hat; none of them are enumerated here, because a list of
+observed. Fifty-four decisions feed this hat; none of them are enumerated here, because a list of
 condensed ADRs tells a reader nothing about what was built (`DS-BIG-PICTURE`).
 
 **Nothing below is attested.** Claims citing a path are *observed* — true of the code today, and
@@ -10,46 +10,71 @@ possibly accidental. Claims citing a record are *decided* — binding, and not n
 
 ## Tech Stack
 
-OpenSprint is a single TypeScript package that compiles to an ES-module Node CLI. Almost everything
-in this section is **observed** from the manifests. No record chose the language, the runtime or a
-library; the one decision that shapes the stack is that the product surface is a CLI plus the agent
-files it generates, with no GUI and no CI/CD product of its own (`DEC-017`).
+OpenSprint is a TypeScript command-line tool on Node, published as `@ivan-lee/opensprint` at
+version `0.1.0`, ESM throughout (`"type": "module"`), requiring Node `>=20.19.0`
+(`package.json`). Its one binary is `opensprint`, which points at `bin/openspec.js` — a two-line
+shim importing the compiled `dist/cli/index.js` (`package.json`, `bin/openspec.js`). The entry file
+keeps the upstream OpenSpec name while the binary does not; no record explains the split.
 
-| Layer | What it is | Authority |
+That the product is a CLI at all is decided: the surface is the `opensprint` CLI plus the skill and
+command files it generates into a downstream project, with no GUI and no shipped CI/CD product
+(`DEC-017`). Everything below is what that decision is built with, and it is all **observed** —
+no record chooses a language, a runtime, a library or a package manager.
+
+| Layer | What is used | Observed in |
 |---|---|---|
-| Package | `@ivan-lee/opensprint` `0.0.9`, MIT, published publicly | `package.json` |
-| Binary | `opensprint` → `bin/openspec.js` → `dist/cli/index.js` | `package.json`, `bin/openspec.js` |
-| Language | TypeScript `^5.9.3`, `strict`, target `ES2022`, `NodeNext` modules, emits declarations and source maps from `src/` to `dist/` | `package.json`, `tsconfig.json` |
-| Module system | ESM (`"type": "module"`) | `package.json` |
-| Runtime | Node `>=20.19.0`; CI runs Node 20 | `package.json`, `.github/workflows/ci.yml` |
-| CLI framework | `commander` `^14` | `package.json`, `src/cli/index.ts` |
-| Validation | `zod` `^4` | `package.json`, `src/core/schemas/` |
-| Record parsing | `yaml` `^2.8` for frontmatter; `fast-glob` for file discovery | `package.json` |
-| Terminal UX | `chalk`, `ora`, `@inquirer/prompts` + `@inquirer/core` | `package.json` |
-| Telemetry | `posthog-node` `^5` | `package.json`, `src/telemetry/index.ts` |
-| Tests | `vitest` `^3.2.4` (+ `@vitest/ui`) | `package.json` |
-| Lint | `eslint` `^9` with `typescript-eslint` | `package.json` |
-| Release | `@changesets/cli` with the GitHub changelog formatter | `package.json` |
+| Language | TypeScript `^5.9.3`, `strict`, target `ES2022`, `NodeNext` modules and resolution, `src/` → `dist/` with declarations and source maps | `tsconfig.json`, `package.json` |
+| CLI framework | `commander` `^14`; every command and subcommand is registered in one file | `package.json`, `src/cli/index.ts` |
+| Schema validation | `zod` `^4` | `package.json` |
+| Interactive prompts | `@inquirer/core`, `@inquirer/prompts`, plus one local searchable multi-select | `package.json`, `src/prompts/` |
+| Terminal output | `chalk` `^5`, `ora` `^8` | `package.json` |
+| Files and config | `fast-glob` `^3`, `yaml` `^2` | `package.json` |
+| Telemetry | `posthog-node` `^5` | `package.json`, `src/telemetry/` |
+| Build | `build.js` deletes `dist/` and runs the locally installed `tsc` | `build.js` |
+| Test | `vitest` `^3.2.4`, `pool: 'forks'`, at most four workers unless `VITEST_MAX_WORKERS` says otherwise | `vitest.config.ts` |
+| Lint | `eslint` `^9` with `typescript-eslint` `^8`, over `src/` only | `package.json` |
+| Release | Changesets; `release:ci` runs a pack-version check, then `changeset publish` | `package.json` |
+
+The source tree is `cli/` (the entry), `commands/` (command implementations), `core/` (the logic,
+including `compact/` and `command-generation/`), `utils/`, `prompts/`, `ui/` and `telemetry/`,
+with `src/index.ts` exported as the package's library entry (`src/`, `package.json`).
 
 ### Package manager and lockfiles
 
-`package.json` declares `packageManager: pnpm@9.15.9`, and CI installs with `pnpm/action-setup` and
-`pnpm install --frozen-lockfile` (`.github/workflows/ci.yml`). The pnpm lockfile is still at lockfile
-format `6.0` (`pnpm-lock.yaml`).
+The package manager is **pnpm 9**, pinned in exactly one place: `packageManager: pnpm@9.15.9`
+(`package.json`). CI's `pnpm/action-setup@v4` steps pass no `version:`, so the pnpm version reaching
+CI comes only from that field; each job then runs `pnpm install --frozen-lockfile` on Node `20`
+(`.github/workflows/ci.yml`). The Nix flake builds with `pnpm_9` and names its program `opensprint`
+(`flake.nix`). The scripts assume pnpm too — `prepare`, `dev:cli` and `release` all call it
+(`package.json`).
 
-A second lockfile is checked in beside it. `package-lock.json` is an npm lockfile (format 3), and
-its root package is named `@fission-ai/openspec` at `1.2.0`, which is the upstream package this one
-forked from, not the package `package.json` describes (`package-lock.json`, `package.json`). No
-record mentions either lockfile or why two package managers' lockfiles are present. This is
-undocumented, not wrong.
+`pnpm-lock.yaml` is in lockfile format `6.0`, an older format than pnpm 9 writes; CI installs it
+frozen under pnpm 9, so it is read and never rewritten (`pnpm-lock.yaml`,
+`.github/workflows/ci.yml`).
+
+**Two lockfiles are tracked, and they disagree about which package this is.** Beside
+`pnpm-lock.yaml` sits `package-lock.json`, an npm lockfile (format 3) whose root package is
+`@fission-ai/openspec` at `1.2.0` — the upstream fork parent's name and version, not
+`@ivan-lee/opensprint` at `0.1.0` (`package-lock.json`, `package.json`). Nothing in CI or the
+scripts reads it. This is reported, not resolved: no record decides the package manager, so
+nothing says whether the npm lockfile is a leftover or is kept on purpose.
 
 ### What the stack is used to generate
 
-The CLI writes skill and command files into a downstream project for 26 agent tools, one adapter
-each (`src/core/command-generation/adapters/`). That matches the "26 tool adapters behind one
-surface" `DEC-017` weighed. The workflow content those adapters format is TypeScript template
-functions, one file per workflow (`src/core/templates/workflows/`). The `opsp-*` files there are this
-project's lifecycle tools, and the rest are the inherited OpenSpec change workflows.
+Most of what the tool produces is **text for a language model**. Workflow content is written as
+TypeScript template functions (`src/core/templates/workflows/`) and formatted per agent tool by an
+adapter — 26 of them, the count `DEC-017` cites (`src/core/command-generation/adapters/`). The
+generated files are text because their consumer is a model (`DEC-017`). Artifact schemas and
+templates ship in the package beside `dist/` and `bin/` (`package.json` `files`).
+
+The rest is the **deterministic half**: grouping, hashing, staleness and the gate are code, so they
+re-run without a model, while condensing prose stays in a skill (`DEC-022`). That code is the
+`compact` engine — `plan`, `seal`, `check`, `loops`, `board` (`src/core/compact/`,
+`src/core/board.ts`, `src/cli/index.ts`) — the single compile engine behind every compiled artifact (`DEC-014`), with
+`check` decided to fail CI on anything not fresh (`DEC-010`). Where a record found that prose was
+not enough, the stack gained a command rather than an instruction: initiative state moves through
+`opensprint advance` (`DEC-STATE-MACHINE`; `src/commands/advance.ts`), and attest's change frame is
+resolved by `opensprint frame` (`DEC-ATTEST-CHANGE-FRAME`; `src/commands/frame.ts`).
 
 ## Runtime Topology
 

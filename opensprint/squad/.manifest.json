@@ -341,12 +341,12 @@
       },
       "observed": {
         "package-lock.json": "d0e14cbf15efc7c1893999e89d0332905c539741d0a1578679527bdf6c5b6cb3",
-        "package.json": "198c589d334d5f9684dbb3577deb72683b8013874904dce218b3e01b8517fecf",
+        "package.json": "ae8960d13353a2645093bbcc617417eada4ed7816bc7eabf84daf80a6f80ebfb",
         "pnpm-lock.yaml": "45b56ccda98c7359a62262e1359c7bad01c3712886e09ec4411f3574d108c00d",
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
-      "inputHash": "0e732683791b1d79ad826d41ccb574046c2f4179e755770fd882311fdce46b7d",
-      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
+      "inputHash": "b2a32c259beff19436fcdb0836c73e8dd50fffd1685a6acb1bbd2b017072c6f1",
+      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
     },
     {
       "hat": "dev",
@@ -409,7 +409,7 @@
       },
       "observed": {},
       "inputHash": "5325999f592952e5b127e63f4b86cda96d2307494abf6cacb9f5749bfc646fca",
-      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
+      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
     },
     {
       "hat": "dev",
@@ -476,7 +476,7 @@
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
       "inputHash": "180b3447342b070f91f4dc6dd70cdfec6ec6994d24cafd3f02345ab78f938607",
-      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
+      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
     },
     {
       "hat": "dev",
@@ -588,7 +588,7 @@
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
       "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
+      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
     },
     {
       "hat": "devops",
@@ -601,7 +601,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "c4dccd5f8037ba22e4750d371200adcc60ee7bb6a662363ae1c7a7c3294c9867"
+      "outputHash": "4af13bb26de2cf57f583bb666346d9230575490178ac924b28df21328a0c29b6"
     },
     {
       "hat": "devops",
@@ -613,11 +613,11 @@
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603"
       },
       "observed": {
-        ".github/workflows/ci.yml": "ab0b3bd5269bcb24d32eb7c0899ea390ca0a26994dd849e0e668bf8cdecfa132",
-        ".github/workflows/release-prepare.yml": "19d76e8594995cfe0d66f8015007cbaad937cccc1eab4cc4b79092e15296f0a5"
+        ".github/workflows/ci.yml": "150cbc5c82a69754a3209c6e8b8ce67842e46506f177377a635e6865ebee93a9",
+        ".github/workflows/release-prepare.yml": "bc7d747b777da48bee2a5ad59e48e433e3a374b0f76960f575182cf76497152a"
       },
-      "inputHash": "18b3d81c04828a3f62ef8bc4164f9230f20e800ddc5f33e147f8146d2010b45b",
-      "outputHash": "c4dccd5f8037ba22e4750d371200adcc60ee7bb6a662363ae1c7a7c3294c9867"
+      "inputHash": "2fd187f7995c1d2f332dee8c6167da270a5b5a95815f57e1f1ef1dcec54705c4",
+      "outputHash": "4af13bb26de2cf57f583bb666346d9230575490178ac924b28df21328a0c29b6"
     },
     {
       "hat": "devops",
@@ -729,7 +729,7 @@
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
       "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "c4dccd5f8037ba22e4750d371200adcc60ee7bb6a662363ae1c7a7c3294c9867"
+      "outputHash": "4af13bb26de2cf57f583bb666346d9230575490178ac924b28df21328a0c29b6"
     },
     {
       "hat": "maintainer",
