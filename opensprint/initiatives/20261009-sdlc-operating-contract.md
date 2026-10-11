@@ -81,6 +81,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - DEC-STATE-MACHINE — transitions are side effects of tools, and the handoff is a state
 - DEC-ESCALATION-LADDER — escalation has three rungs, and they are the OGSM altitudes
 - DEC-HAT-HANDOFFS — reideate is explore, later; every transition names its hat
+- DEC-BAR-AT-PROPOSE — the bar is written where the goal is, by the hat that owns it
 
 ## Milestones
 
@@ -94,6 +95,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - [x] state-machine: the initiative state machine, which `DEC-035` named and nothing implemented ([[DEC-STATE-MACHINE]]). Six states now, with `ready-for-attestation` for the handoff; eight transitions performed by `opensprint advance` rather than described in prose. Found by asking where states get written and discovering that `/opsp:propose`'s template had no `state:` field at all, so `proposed` was never written by anything and `/opsp:archive`'s gate on `attested` could never pass.
 - [x] escalation-ladder: escalation splits into three rungs, which are the OGSM altitudes ([[DEC-ESCALATION-LADDER]]). `/opsp:repropose` is new — the strategy rung, superseding ADRs and returning the initiative to `proposed`; `/opsp:reexplore` is declared the plan rung; `/opsp:attest` gains a change request and a repropose exit. Found during this initiative's own attestation, which is where it would be found: an operator saying 'we decided that wrongly' had nowhere to go.
 - [x] hat-handoffs: the ladder corrected on contact ([[DEC-HAT-HANDOFFS]]). `/opsp:reexplore` became `/opsp:reideate` and moved to the goal rung — `/opsp:explore` with the work in hand, writing nothing, rejoining `backlog → triage → propose`; the old definition was `/opsp:repropose`'s all along. Repropose absorbed the plan rung and may now amend `## Measures`, guarded by: a bar that got easier is a goal that moved. Every transition declares its hat, and `opensprint advance` refuses a handoff until `--hat` names one.
+- [x] bar-at-propose: the bar is written where the goal is ([[DEC-BAR-AT-PROPOSE]]). Three documents said `/opsp:propose` writes the bar and no instruction did — propose and `/opsp:driver` never mentioned `## Measures`, so the primary path created driver-specs with no hat, no role and no measures. Also reclassifies `/opsp:repropose` as `create` mode: the distinction is whose record it is, and repropose wears the hat that wrote the bar. Found by the operator questioning a risk I had recorded wrongly.
 
 **This initiative depends on [[lifecycle-beyond-build]]** and cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist — attest has nothing to write into, and `declined` has no state machine to join, until they do.
 

@@ -104,8 +104,57 @@ Wait for operator confirmation. Adjust if they correct anything.
 After confirmation, create files in sequence:
 
 **a. Driver Specs** — for each identified external constraint:
-- Create \`opensprint/driver-specs/DS-<ID>.md\` with YAML frontmatter
+- Create \`opensprint/driver-specs/DS-<SEMANTIC-NAME>.md\`
 - Use the operator's words faithfully
+- **Assign the hat and the role**, and **write the bar** — this is where the bar is written, ex ante
+
+\`\`\`markdown
+---
+id: DS-<SEMANTIC-NAME>
+type: <product|legal|compliance|reliability|architecture|business>
+status: active
+created: <YYYY-MM-DD>
+hats: [<product|maintainer>]
+role: <objective|goal|strategy>
+---
+
+<the constraint, in the operator's words>
+
+## Measures
+
+- **Primary**: <the one thing that says whether this landed>
+
+### Bar
+
+<the BDD form for this hat — \`DEC-038\`>
+
+product — a user story:
+  as a    <persona>
+  I want  <goal>
+  for     <reason>
+
+maintainer — given / when / then:
+  given   <precondition>
+  when    <trigger>
+  then    <observable outcome>
+
+- **dimension**: <the axis this sits on>
+- **chosen**: <where on it, and the scope that applies to>
+- **traded for**: <what was given up to sit here>
+- **neighbour**: <the position not taken, or \`unrecorded\`>
+\`\`\`
+
+**A \`goal\` or a \`bar\` without a populated \`## Measures\` is reported on every compile**
+(\`constraint-unmeasurable\`), and so is a record with no \`role\` in a hat that uses them
+(\`record-unclassified\`). Writing them here is cheaper than harvesting them back.
+
+**Do not write a measure you cannot state the bar for.** A \`## Measures\` heading with nothing
+beneath it counts as absent, deliberately — the shape of an answer without the answer is worse than
+the gap, because the gap gets reported.
+
+**Ask the operator; do not invent.** Where they cannot state a bar yet, record
+\`- **Primary**: unstated\` and say the loop will keep reporting it. An honest gap beats a
+fabricated target, and a bar nobody agreed to is one the attester will measure against.
 
 **b. ADRs** — for each identified architectural decision:
 - Create \`opensprint/ADRs/DEC-SEMANTIC-NAME.md\` with YAML frontmatter — a short kebab-case
