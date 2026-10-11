@@ -305,8 +305,9 @@ These conflicts are reported, not resolved. Resolving any of them is a record ch
   says an earlier, planning-on-`main` version was refuted.
 - **Numbered ids.** `DEC-036` says the tool stops allocating numbered ids after `DEC-039`. Yet
   `DEC-040` through `DEC-044` are numbered.
-- **Tool name.** `DEC-BAR-AT-PROPOSE` and `DEC-HAT-HANDOFFS`' transition table name the goal-rung
-  tool `/opsp:reideate`. `DEC-REEXPLORE-NAME` reverts it to `/opsp:reexplore`.
+- **Tool name.** `DEC-HAT-HANDOFFS`' transition table names the goal-rung tool `/opsp:reideate`.
+  `DEC-REEXPLORE-NAME` reverts it to `/opsp:reexplore`, and `DEC-BAR-AT-PROPOSE` carries a dated
+  correction to the same effect.
 - **Leaving `ready-for-attestation`.** `DEC-STATE-MACHINE` and `DEC-ESCALATION-LADDER` give
   `ready-for-attestation → building` to `/opsp:reexplore`. `DEC-HAT-HANDOFFS`' table gives that move
   only to `/opsp:attest`, and sends the explore-again tool to `exploring` instead.

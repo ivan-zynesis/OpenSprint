@@ -42,6 +42,10 @@ The distinction is **whose record it is**. `/opsp:attest` writes posture into a 
 
 The Statement remains out of bounds, and that is unchanged — but it is out of bounds because changing it means the **goal** moved, which is `/opsp:reideate`'s rung, not because repropose is borrowing a write mode it has no claim to.
 
+> **Name corrected 2026-10-11.** `/opsp:reideate` was renamed back to `/opsp:reexplore`
+> ([[DEC-REEXPLORE-NAME]]): the tool kept its name and only its definition moved to the goal rung.
+> Read `/opsp:reideate` above as `/opsp:reexplore`. The decision itself is unchanged.
+
 ## Consideration Factors
 
 | | Bar at propose | Bar at apply (status quo) | Bar harvested later |

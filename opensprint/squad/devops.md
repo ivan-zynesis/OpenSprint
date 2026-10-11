@@ -8,113 +8,151 @@ ships none of its own (`DEC-017`).
 
 ## Infra Architecture
 
-**Observed:** the repository provisions no infrastructure of its own. It holds no Dockerfile,
-Terraform, Compose or cluster manifest; the only build definitions besides the npm package are a
-Nix flake (`flake.nix`, `flake.lock`, `scripts/update-flake.sh`) and an `act` config for running
-the workflows locally (`.actrc`, `.github/workflows/README.md`). What it ships is one npm package,
-`@ivan-lee/opensprint`, exposing the `opensprint` binary, published with public access, requiring
-Node `>=20.19.0` (`package.json`). Its "infrastructure" is a git forge and a package registry.
-
-What the decisions do shape is **where work lives while it is being done**. That is a topology of
-branches and worktrees, not of servers:
+**Nothing is provisioned.** The tree holds no infrastructure-as-code, no deploy target and no
+hosted service; the only infrastructure-shaped files are two GitHub workflows, a Nix flake and an
+`act` config (`.github/workflows/ci.yml`, `.github/workflows/release-prepare.yml`, `flake.nix`,
+`.actrc`). What ships is a CLI package. The four decisions routed here govern **where work and
+synthesis run**, not anything stood up.
 
 ```
-  /opsp:backlog ─┐
-  /opsp:triage  ─┼─ create or switch to ──►  worktree  opsp/<initiative>     (DEC-029)
-  /opsp:propose ─┘                               │
-                                                 │  /opsp:apply, per milestone:
-                                                 │    change branch merges in
-                                                 │    compact plan → render dev+devops
-                                                 │    compact seal --hat dev …   (DEC-COMPILE-ON-MILESTONE)
-                                                 ▼
-                              rebase ─► attest ─► archive ─► merge             (DEC-030)
-                                                                │
-                                                     one PR     ▼
-                                                              main
+  operator machine                        GitHub                       distribution
+  ────────────────                        ──────                       ────────────
+  checkout of main                        PR opsp/<initiative> → main  npm  @ivan-lee/opensprint
+   └─ worktree opsp/<initiative>  ─push─▶  │                            (no pipeline here
+        agent + model:                     ▼                             publishes it)
+        plan · render · seal          Actions: ci.yml
+        views at each milestone        test · lint · nix build     Nix  flake.nix
+                                       artifacts: coverage/ (7 d)        packages · apps · devShell
 ```
 
-- **Planning is decided to happen in the initiative's worktree**, which the planning tools create or
-  switch to themselves; an initiative is one branch from first persisted thought to merge
-  (`DEC-029`). The accepted cost is that backlog items are scattered across branches, so a board
-  shows only what the current branch knows (`DEC-029`).
-- **Compilation is decided to run where an agent is, never in a pipeline.** Rendering a view needs a
-  model and a hat, so CI was ruled out as a compile site; `/opsp:apply` compiles the stale `dev` and
-  `devops` sections at each milestone boundary with a hat-scoped seal, and offers — does not silently
-  run — product and maintainer compiles (`DEC-COMPILE-ON-MILESTONE`). Archive still compiles
-  everything (`DEC-COMPILE-ON-MILESTONE`, `DEC-030`).
-- **Evidence is decided to live in the pipeline**, as a reference to a CI-produced artifact
-  addressable from the pull request, not as prose (`DEC-032`). **Observed:** the only artifacts this
-  repository's CI produces are coverage reports — `coverage-report-pr` on pull requests and
-  `coverage-report-main` on the Linux push run — each retained for 7 days (`.github/workflows/ci.yml`).
-  No record addresses how long an evidence reference must stay resolvable.
+*Left column decided (`DEC-029`, `DEC-COMPILE-ON-MILESTONE`); middle and right observed
+(`.github/workflows/ci.yml`, `.github/workflows/release-prepare.yml`, `flake.nix`).*
 
-**Observed, unexplained by any record:** the Nix flake builds a binary named `openspec`
-(`flake.nix` `pname`/`mainProgram`, and the CI check for `result/bin/openspec` in
-`.github/workflows/ci.yml`), while the npm package exposes `opensprint` (`package.json` `bin`).
+### Where work runs — decided
+
+- **An initiative is one worktree on one branch, from its first persisted thought.**
+  `/opsp:backlog`, `/opsp:triage` and `/opsp:propose` create or switch to the worktree rather than
+  leaving it to the operator, and the branch reaches `main` exactly once (`DEC-029`, `DEC-030`).
+- **The cost is unsolved, and the record says so.** The backlog is scattered across branches, so
+  the compiled board shows only what the current branch knows; cross-branch listing is recorded as
+  blocking the stakeholder path, and record-id collisions widen back out (`DEC-029`).
+- **Rendering a view runs where the agent is, never in a pipeline.** Rendering is synthesis and
+  needs a model; CI "has no agent, and no hat", so it is ruled out as a place to compile
+  (`DEC-COMPILE-ON-MILESTONE`).
+- **Evidence lives in the pipeline.** An `### Evidence` block references an artifact a pipeline run
+  produced, addressable from the pull request; prose is not evidence (`DEC-032`).
+
+### The package — observed
+
+- `@ivan-lee/opensprint` 0.0.9, ESM, one binary `opensprint` mapped to `./bin/openspec.js`,
+  published with public access, Node `>=20.19.0`. It ships `dist`, `bin`, `schemas` and
+  `scripts/postinstall.js`, and runs that script on install (`package.json`).
+- **One pnpm major everywhere.** `packageManager` is `pnpm@9.15.9` (`package.json`); CI sets up
+  pnpm `9` (`.github/workflows/ci.yml`); the flake builds with `pnpm_9` (`flake.nix`). The lockfile
+  still declares `lockfileVersion: '6.0'` (`pnpm-lock.yaml`).
+- **Node differs by place.** CI runs Node 20 (`.github/workflows/ci.yml`), the flake `nodejs_20`
+  (`flake.nix`), the release workflow Node 24 for npm OIDC (`.github/workflows/release-prepare.yml`).
+
+### The Nix flake — observed
+
+- Builds `packages.default` for x86_64/aarch64 Linux and Darwin, reading its version from
+  `package.json`; dependencies come from `fetchPnpmDeps` against a **fixed hash**, then
+  `pnpm run build` (`flake.nix`). `scripts/update-flake.sh` recomputes that hash after a lockfile
+  change (`scripts/update-flake.sh`).
+- `mainProgram` and `apps.default` point at `bin/opensprint`; a dev shell provides `nodejs_20` and
+  `pnpm_9` (`flake.nix`).
+- **Half renamed.** The derivation's `pname` is still `openspec`, its description still reads
+  "OpenSpec - AI-native system for spec-driven development", `homepage` is
+  `https://github.com/Fission-AI/OpenSpec`, and the dev shell greets "OpenSpec development
+  environment" (`flake.nix`). No record explains either the rename or what it left behind —
+  undocumented, not wrong.
+
+### Running CI locally — observed
+
+- `.actrc` maps `ubuntu-latest` to `catthehacker/ubuntu:act-latest` so the workflows can be run with
+  `act` (`.actrc`, `.github/workflows/README.md`).
 
 ## GitOps
 
-Two workflows exist (`.github/workflows/ci.yml`, `.github/workflows/release-prepare.yml`). Neither
-reaches a deployed environment — there is none to reach. Nothing publishes from this fork.
+### The flow to `main` — decided
 
 ```
-  pull_request / merge_group (→ main)
-     ├─ test_pr        ubuntu · Node 20 · build · test ─┐
-     ├─ lint           build · tsc · eslint · dist/ ────┼─► "All checks passed"
-     ├─ nix-flake-validate   only if nix paths changed ─┘    (required aggregate)
-     └─ validate-changesets  not in the aggregate
-
-  push (main)
-     ├─ test_matrix    linux-bash · macos-bash · windows-pwsh ─┐
-     ├─ lint ──────────────────────────────────────────────────┼─► "All checks passed"
-     └─ nix-flake-validate   only if nix paths changed ────────┘
-
-  workflow_dispatch ──► lint · nix-flake-validate only (no tests, no aggregate)
-
-  push (main) ──► Release (prepare)
-                    job guarded: github.repository == 'Fission-AI/OpenSpec'
-                    → on this fork: skipped, nothing publishes
+  opsp/<initiative>  ──rebase──●──attest──●──archive──●──▶  main      one PR
+        ▲
+        └── each milestone: plan → render stale dev/devops sections → seal --hat
 ```
 
-**CI** (`.github/workflows/ci.yml`, observed):
+- **One pull request per initiative, in a fixed order:** rebase onto `main` so the compile sees the
+  record set the merge will produce, attest on the open PR, archive (which consumes compact), merge
+  (`DEC-030`). Planning happens on that same branch, so it arrives by PR too (`DEC-029`).
+- **The `opsp/* → main` PR is gated on state consistency** — the initiative `attested`, the compiled
+  views fresh — and **never on whether a bar was met** (`DEC-030`).
+- **A conflict in a derived artifact is resolved by rebasing and recompiling,** never by hand-merging;
+  concurrent initiative merges serialize on derived artifacts, by design (`DEC-030`).
+- **Views are recompiled inside `/opsp:apply` at each milestone boundary,** after the change branch
+  merges into the initiative branch: only sections `plan` reports stale, `dev` and `devops` without
+  asking, sealed scoped to the hat; `product` and `maintainer` are offered, and accepting is a
+  context switch (`DEC-COMPILE-ON-MILESTONE`). Archive still compiles everything (`DEC-030`,
+  `DEC-COMPILE-ON-MILESTONE`).
+- **Evidence is a reference to a pipeline artifact,** and one that does not resolve is harvested. A
+  bar that cannot be assessed pre-merge — a change to the pipeline itself — is attested
+  `posture: pending` with an exposure, and re-attested by the next initiative touching the area; it
+  never earns a PR of its own (`DEC-032`).
 
-- Triggers on `pull_request` and `merge_group` targeting `main`, on `push` to `main`, and on manual
-  dispatch; concurrent runs on one ref cancel each other. The test jobs and the aggregate are
-  conditioned on the event name, so a manual dispatch runs only lint and the Nix check.
-- On pull requests and the merge queue: one Linux test job (pnpm 9, Node 20, `pnpm install
-  --frozen-lockfile` → `pnpm run build` → `pnpm test`), uploading coverage.
-- On push to `main`: the same steps as a matrix across Linux/bash, macOS/bash and Windows/PowerShell.
-- Always: build, `tsc --noEmit`, `pnpm lint`, and a check that `dist/cli/index.js` exists.
-- When `flake.nix`, `flake.lock`, `package.json`, `pnpm-lock.yaml`, `scripts/update-flake.sh` or
-  `ci.yml` change: a Nix build, a run of the built binary, and a run of the flake update script.
-- `validate-changesets` runs `changeset status --since=origin/main` only if a `changeset` binary is
-  on the runner's `PATH`, and otherwise prints that changesets are not configured and passes. It is
-  not among the jobs the "All checks passed" aggregate requires. No `.changeset/` directory exists in
-  the repository.
-- Observed version skew, unexplained by any record: CI pins pnpm 9 (`ci.yml`) while `package.json`
-  declares `packageManager: pnpm@8.15.0`.
+### The pipelines — observed
 
-**Release** (`.github/workflows/release-prepare.yml`, observed): on push to `main`, a changesets job
-opens or updates a version PR and, when that merges, runs `pnpm run release:ci` —
-`check:pack-version` then `changeset publish` (`package.json`) — over npm OIDC trusted publishing.
-The job is guarded by `github.repository == 'Fission-AI/OpenSpec'`, the upstream this project forked
-from; in this repository it never runs. **Publishing `@ivan-lee/opensprint` is therefore manual**,
-and no record decides how or by whom.
+```
+  trigger                     job (workflow)                         produces
+  ─────────────────────────   ────────────────────────────────────   ─────────────────────────
+  pull_request → main         test_pr        ubuntu, Node 20         coverage-report-pr  (7 d)
+  merge_group  → main         lint           tsc --noEmit + eslint
+                              nix-flake-validate *
+                              validate-changesets   (not required)
+                              required-checks-pr ◀ test_pr·lint·nix
+  push → main                 test_matrix    linux-bash ·            coverage-report-main (7 d)
+                                             macos-bash ·
+                                             windows-pwsh
+                              lint · nix-flake-validate *
+                              required-checks-main
+  push → main                 prepare (release-prepare.yml)          version PR · npm publish
+                              if repo == Fission-AI/OpenSpec         → never runs in this repo
+  workflow_dispatch           jobs with no event condition: changes · lint · nix *
 
-**How an initiative is decided to reach `main`** (`DEC-030`): rebase onto `main`, attest on the open
-PR, archive — which compiles against the rebased record set — then merge, all in **one** pull
-request. A conflict in a derived artifact is decided to be resolved by rebasing and recompiling,
-never by hand-merging (`DEC-030`). Pipeline-only bars that cannot be assessed before merge are
-attested `posture: pending` and re-attested by the next initiative touching the area — never by a
-pull request of their own (`DEC-032`).
+  * only when flake.nix, flake.lock, package.json, pnpm-lock.yaml,
+    scripts/update-flake.sh or ci.yml changed
+```
 
-**Disagreement — decided gate vs. observed pipeline.** `DEC-030` decides that a pull request merging
-`opsp/*` into `main` **is gated on state consistency**: the initiative must be `attested` and the
-compiled views fresh. **Observed:** no workflow in this repository runs `opensprint compact check`
-or checks initiative state (`.github/workflows/ci.yml`, `.github/workflows/release-prepare.yml`).
-`docs/git-workflow.md` *recommends* exactly such a required check, supplies a minimal
-`opensprint.yml` for it, and states that no command performs the attested-state check yet, leaving
-it to the reviewer. The decision and the pipeline disagree; this view does not resolve which moves.
+*All rows observed (`.github/workflows/ci.yml`, `.github/workflows/release-prepare.yml`).*
+
+- **CI runs only against `main`** — PRs and merge-queue entries targeting it, and pushes to it.
+  Nothing runs on `opsp/*` or change branches until their PR to `main` opens
+  (`.github/workflows/ci.yml`).
+- **The test and lint jobs install `--frozen-lockfile` and build** with pnpm 9 and Node 20; CI
+  holds `contents: read` and cancels superseded runs per ref (`.github/workflows/ci.yml`).
+- **Nix validation** builds the flake, requires `result/bin/opensprint`, runs
+  `nix run . -- --version`, then runs `scripts/update-flake.sh` and reports — but does not fail on —
+  a changed `pnpmDeps` hash, restoring `flake.nix` afterwards. The required-checks jobs accept it as
+  `skipped` (`.github/workflows/ci.yml`).
+- **Changeset validation does not gate.** `validate-changesets` is outside both required-checks
+  jobs' `needs`, skips itself when `changeset` is not on the path, and no `.changeset/` directory is
+  tracked (`.github/workflows/ci.yml`).
+- **No environment is reached.** CI's only outputs are coverage artifacts kept seven days
+  (`.github/workflows/ci.yml`). The release workflow — GitHub App token, Changesets version PR,
+  `pnpm run release:ci` publishing via npm OIDC — is guarded to `Fission-AI/OpenSpec` and so never
+  runs for `@ivan-lee/opensprint` (`.github/workflows/release-prepare.yml`, `package.json`). No
+  pipeline in the tree publishes this package.
+
+### Where observation and record disagree — surfaced, not resolved
+
+- **The state gate exists only on paper.** `DEC-030` decides that an `opsp/* → main` PR is gated on
+  fresh views and an `attested` initiative. No workflow runs `opensprint compact check` or inspects
+  initiative state, and `required-checks-pr` needs only `test_pr`, `lint` and `nix-flake-validate`
+  (`.github/workflows/ci.yml`, `.github/workflows/release-prepare.yml`). `docs/git-workflow.md`
+  recommends `compact check` as a required check, sketches a workflow for it, and says no command
+  checks `attested` state yet, leaving it to the reviewer (`docs/git-workflow.md`).
+- **Evidence may outlast what it points at.** `DEC-032` makes evidence a
+  reference to a pipeline artifact and harvests one that stops resolving; the only artifacts CI
+  produces are coverage reports retained for seven days (`.github/workflows/ci.yml`).
 
 ## Open Loops
 

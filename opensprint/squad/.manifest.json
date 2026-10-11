@@ -326,7 +326,7 @@
         "DEC-043": "ebfcf107a1373c566b28add593953166b6d50fd55ecbf590d995798df3d259ca",
         "DEC-044": "ba0f98a3603b5917bc11cc8fd863b519d6e6ab2f9ed1dc47161c12f2f97bef74",
         "DEC-ATTEST-CHANGE-FRAME": "f4ad8c5c91b493a0cbbc9a4ea0f80789642b509b454316b4c272777229ae5954",
-        "DEC-BAR-AT-PROPOSE": "e676e14c3e47119926cacdaae4de6cfce9a40a9c575e78d56c9ac67fd408589b",
+        "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
@@ -341,12 +341,12 @@
       },
       "observed": {
         "package-lock.json": "d0e14cbf15efc7c1893999e89d0332905c539741d0a1578679527bdf6c5b6cb3",
-        "package.json": "d3a00042882adcb8b7bbf2fa490b482ac1fc023b5f709b5ed23f97f6ba437055",
+        "package.json": "198c589d334d5f9684dbb3577deb72683b8013874904dce218b3e01b8517fecf",
         "pnpm-lock.yaml": "45b56ccda98c7359a62262e1359c7bad01c3712886e09ec4411f3574d108c00d",
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
-      "inputHash": "f19f3a892f46bc6f4d962c77d7d89b8d544adc3a1e770355bf11223ddfc289af",
-      "outputHash": "37f7cd96696bb426474e63f3d6391e7b8903f177a4fc631b14362e58cdac4138"
+      "inputHash": "0e732683791b1d79ad826d41ccb574046c2f4179e755770fd882311fdce46b7d",
+      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
     },
     {
       "hat": "dev",
@@ -394,7 +394,7 @@
         "DEC-043": "ebfcf107a1373c566b28add593953166b6d50fd55ecbf590d995798df3d259ca",
         "DEC-044": "ba0f98a3603b5917bc11cc8fd863b519d6e6ab2f9ed1dc47161c12f2f97bef74",
         "DEC-ATTEST-CHANGE-FRAME": "f4ad8c5c91b493a0cbbc9a4ea0f80789642b509b454316b4c272777229ae5954",
-        "DEC-BAR-AT-PROPOSE": "e676e14c3e47119926cacdaae4de6cfce9a40a9c575e78d56c9ac67fd408589b",
+        "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
@@ -408,8 +408,8 @@
         "DEC-STATE-MACHINE": "860cbcd4107a1d6f59088e7ad1d126523a966d441aab97e4e8cd00c0b0060a97"
       },
       "observed": {},
-      "inputHash": "6c7c80a7d3f698e47c06dab08d8cb62b1b0c4e92f23bbff10a2176092e6416b4",
-      "outputHash": "37f7cd96696bb426474e63f3d6391e7b8903f177a4fc631b14362e58cdac4138"
+      "inputHash": "5325999f592952e5b127e63f4b86cda96d2307494abf6cacb9f5749bfc646fca",
+      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
     },
     {
       "hat": "dev",
@@ -457,7 +457,7 @@
         "DEC-043": "ebfcf107a1373c566b28add593953166b6d50fd55ecbf590d995798df3d259ca",
         "DEC-044": "ba0f98a3603b5917bc11cc8fd863b519d6e6ab2f9ed1dc47161c12f2f97bef74",
         "DEC-ATTEST-CHANGE-FRAME": "f4ad8c5c91b493a0cbbc9a4ea0f80789642b509b454316b4c272777229ae5954",
-        "DEC-BAR-AT-PROPOSE": "e676e14c3e47119926cacdaae4de6cfce9a40a9c575e78d56c9ac67fd408589b",
+        "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
@@ -475,8 +475,8 @@
         "src/core/schemas/change.schema.ts": "88726513993f66a29594b996a31340e3741c41cae0ff31d7f2da40348efc4106",
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
-      "inputHash": "26500177545f61dd770158ec78398f2c62f03e4f68797c2cf8ef5f8fc6bc78ad",
-      "outputHash": "37f7cd96696bb426474e63f3d6391e7b8903f177a4fc631b14362e58cdac4138"
+      "inputHash": "180b3447342b070f91f4dc6dd70cdfec6ec6994d24cafd3f02345ab78f938607",
+      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
     },
     {
       "hat": "dev",
@@ -588,7 +588,7 @@
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
       "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "37f7cd96696bb426474e63f3d6391e7b8903f177a4fc631b14362e58cdac4138"
+      "outputHash": "4b9d7bc3a2be96fcf904c953bed4816fdd0cb035687b36c5e8cde299ea9ff47d"
     },
     {
       "hat": "devops",
@@ -601,7 +601,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "2e3dc3c27d81875fdac2c2bcda30c5963a3fddeaefb649d7565b6fabc941c85e"
+      "outputHash": "c4dccd5f8037ba22e4750d371200adcc60ee7bb6a662363ae1c7a7c3294c9867"
     },
     {
       "hat": "devops",
@@ -613,11 +613,11 @@
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603"
       },
       "observed": {
-        ".github/workflows/ci.yml": "12d39ece40683daa383ab02924407f343121a317afe2445323b30190ddd50891",
+        ".github/workflows/ci.yml": "ab0b3bd5269bcb24d32eb7c0899ea390ca0a26994dd849e0e668bf8cdecfa132",
         ".github/workflows/release-prepare.yml": "19d76e8594995cfe0d66f8015007cbaad937cccc1eab4cc4b79092e15296f0a5"
       },
-      "inputHash": "b0eb23a2db775414c866a28a3af4b70d7e75c328441106210ec492d762312af5",
-      "outputHash": "2e3dc3c27d81875fdac2c2bcda30c5963a3fddeaefb649d7565b6fabc941c85e"
+      "inputHash": "18b3d81c04828a3f62ef8bc4164f9230f20e800ddc5f33e147f8146d2010b45b",
+      "outputHash": "c4dccd5f8037ba22e4750d371200adcc60ee7bb6a662363ae1c7a7c3294c9867"
     },
     {
       "hat": "devops",
@@ -729,7 +729,7 @@
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
       "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "2e3dc3c27d81875fdac2c2bcda30c5963a3fddeaefb649d7565b6fabc941c85e"
+      "outputHash": "c4dccd5f8037ba22e4750d371200adcc60ee7bb6a662363ae1c7a7c3294c9867"
     },
     {
       "hat": "maintainer",
