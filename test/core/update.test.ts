@@ -650,7 +650,7 @@ Legacy content without generatedBy
         `---
 name: openspec-explore
 metadata:
-  generatedBy: "0.1.0"
+  generatedBy: "0.0.0"
 ---
 
 Old version content
@@ -663,7 +663,7 @@ Old version content
 
       // Should show version transition
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('0.1.0')
+        expect.stringContaining('0.0.0')
       );
 
       consoleSpy.mockRestore();
@@ -779,7 +779,7 @@ metadata:
         path.join(cursorSkillDir, 'SKILL.md'),
         `---
 metadata:
-  generatedBy: "0.1.0"
+  generatedBy: "0.0.0"
 ---
 `
       );
@@ -833,7 +833,7 @@ metadata:
       const claudeContent = await fs.readFile(claudeSkillFile, 'utf-8');
       await fs.writeFile(
         claudeSkillFile,
-        claudeContent.replace(/generatedBy:\s*["'][^"']+["']/, 'generatedBy: "0.1.0"')
+        claudeContent.replace(/generatedBy:\s*["'][^"']+["']/, 'generatedBy: "0.0.0"')
       );
 
       const consoleSpy = vi.spyOn(console, 'log');
