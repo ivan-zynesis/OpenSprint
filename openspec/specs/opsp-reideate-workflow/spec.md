@@ -1,7 +1,11 @@
 # opsp-reideate-workflow Specification
 
 ## Purpose
-TBD - created by archiving change hat-handoffs. Update Purpose after archive.
+The goal rung of the escalation ladder: a workflow for reconsidering an initiative's objective and goal once work has been done against them.
+
+It is `/opsp:explore` run later, and it produces no artifacts for the same reason explore does not — the thinking is persisted by `/opsp:backlog`, the same tool that persists an original idea. That symmetry is what lets a re-ideated goal rejoin the forward path rather than run beside it.
+
+It exists because an implementation is the only thing that can disprove a goal, and nothing in the lifecycle carried that evidence back up to the altitude where the goal was set.
 ## Requirements
 ### Requirement: The goal rung thinks and writes nothing
 The system SHALL provide a workflow for reconsidering an initiative's objective and goal that produces no artifacts, mirroring the exploration workflow, so that re-ideation rejoins the forward path rather than running beside it.
