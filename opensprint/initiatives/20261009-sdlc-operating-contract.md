@@ -77,6 +77,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - DEC-037 — a strategy cell renders SWOT-like, compiled from the decisions it cites
 - DEC-038 — a bar is written in BDD form, split by hat
 - DEC-039 — `/opsp:triage` is its own tool, for explicitness rather than necessity
+- DEC-ATTEST-CHANGE-FRAME — attest frames the change before it reads a bar
 
 ## Milestones
 
@@ -86,6 +87,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - [x] attest-context: the narrow-context attest skill and evidence-as-CI-artifact shipped with [[lifecycle-beyond-build]]; this milestone added the half that was missing — `evidence-unresolvable`, which reports an attestation citing nothing addressable or a path not in the tree. Remote references are taken on trust: resolving them would put the network inside a compile.
 - [x] record-naming: decisions are coined semantically and initiative filenames carry a creation-date prefix ([[DEC-036]]). `RECORD_ID_PATTERN` was widened ahead of the milestone, as a prerequisite to naming [[surrogate-currency]]'s decisions semantically — the numbered era stopped at `DEC-044`. This milestone removed the remaining number allocation from `/opsp:decide` and `/opsp:propose`, moved every reader to resolution by frontmatter `id:`, and renamed all five existing initiative files.
 - [x] sub-frameworks: SWOT-like strategy rendering compiled from cited ADRs ([[DEC-037]]) and BDD bar forms split by hat ([[DEC-038]]). `BAR_FORMS` and `SWOT_SOURCES` hold the vocabulary in code so the skill and the harvest cannot drift; `bar-without-form` makes the form mechanical. The BDD form is **additional to** the spectrum, not a replacement — the spectrum says where the bar sits and what that cost, the BDD says what a pipeline runs to tell you it still sits there.
+- [x] attest-frame: `/opsp:attest` resolves `source → base` and has the operator confirm it before reading a bar ([[DEC-ATTEST-CHANGE-FRAME]]). Found by using the tool: the attester could not know what change it was reviewing, so the operator had to narrate it. Added after the other six closed — attestation is change management, and this is the orientation step it was missing.
 
 **This initiative depends on [[lifecycle-beyond-build]]** and cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist — attest has nothing to write into, and `declined` has no state machine to join, until they do.
 

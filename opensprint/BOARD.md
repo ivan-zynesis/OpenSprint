@@ -24,7 +24,7 @@ In flight.
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
 | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | building | 11/11 _(+1 superseded)_ | — |
-| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | building | 6/6 | — |
+| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | building | 7/7 | — |
 | [surrogate-currency](initiatives/20261010-surrogate-currency.md) | building | 5/5 | — |
 
 ## Done
