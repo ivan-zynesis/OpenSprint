@@ -6,7 +6,7 @@ compatibility: Requires openspec CLI.
 metadata:
   author: opensprint
   version: "1.0"
-  generatedBy: "0.0.6"
+  generatedBy: "0.0.9"
 ---
 
 Create an initiative by analyzing the exploration conversation and classifying operator inputs into the proper opensprint artifacts.
@@ -16,6 +16,28 @@ Create an initiative by analyzing the exploration conversation and classifying o
 ---
 
 ## Steps
+
+### 0. Where the input comes from
+
+Two paths reach here, and both are valid (`DEC-034`):
+
+| Path | What you are given |
+|---|---|
+| straight from `/opsp:explore` | a conversation |
+| from `/opsp:triage` | an **initiative already on disk** at `state: exploring`, holding an objective and a goal, plus the strategy that triage worked out |
+
+**Where an initiative already exists, do not create a second one.** Read it, switch to its worktree
+(`DEC-029`), and fill in what it is missing — Strategy and Measure. Its Objective and Goal were
+written at backlog time and are not yours to rewrite.
+
+```bash
+openspec compact board          # the Backlog column lists them
+git branch --show-current       # be on opsp/<initiative> before writing
+```
+
+**You are the formalizer.** Triage did the strategy brainstorming; this step turns it into records.
+Where you arrived straight from explore, you do both — but the conversation has already happened
+either way, and this step writes rather than thinks.
 
 ### 1. Analyze the Conversation
 
@@ -68,14 +90,19 @@ After confirmation, create files in sequence:
 - Use the operator's words faithfully
 
 **b. ADRs** — for each identified architectural decision:
-- Create `opensprint/ADRs/DEC-<NNN>.md` with YAML frontmatter
+- Create `opensprint/ADRs/DEC-SEMANTIC-NAME.md` with YAML frontmatter — a short kebab-case
+  phrase in capitals naming what was decided, **never a number** (`DEC-036`). Numbers collide
+  across worktrees and tell a reader nothing. `DEC-001`–`DEC-044` keep theirs permanently.
 - Include: Question, Operator Decision, Consideration Factors, Rationale, Invalidation Trigger
 - Link to parent driver-specs via `depends-on`
 - Calculate depth (0 if depends only on driver-specs)
 
 **c. Regenerate DECISION-MAP.md** — after creating ADRs
 
-**d. Initiative Descriptor** — create `opensprint/initiatives/<name>.md`:
+**d. Initiative Descriptor** — create `opensprint/initiatives/<YYYYMMDD>-<name>.md`, where the
+prefix is today's date with no separators (`DEC-036`). The prefix is **presentation
+only** — every reader resolves by the `id:` below, never by filename, so a file renamed or a date
+mistyped still resolves:
 
 ```markdown
 ---
@@ -98,6 +125,13 @@ created: <YYYY-MM-DD>
 - DEC-001
 - DEC-002
 
+## Addresses
+
+<!-- Only when this initiative arose from triaging open loops. Omit otherwise. -->
+
+- constraint-unanswered: DS-BACKWARD-COMPAT
+- decision-unguarded: DEC-010
+
 ## Milestones
 
 - [ ] extract-auth-service: Extract authentication into standalone service
@@ -115,9 +149,23 @@ Display what was created:
 
 ---
 
+### Recording what the initiative closes
+
+If the exploration started from open loops (`opensprint compact loops`), list them under
+`## Addresses` in the descriptor — the loop kind and the record it concerns. Omit the section
+entirely when the initiative did not arise from a loop.
+
+It is prose, not frontmatter, and deliberately so. **Nothing marks a loop resolved.** A gap exists
+while the harvest reports it and stops existing when it stops reporting it, so the backlog cannot
+drift from reality. `Addresses` records what the initiative set out to close, not what it did.
+
+---
+
 ## Guardrails
 
 - **Classify, don't invent** — Only create driver-specs and ADRs from what the operator actually said
+- **Never duplicate an initiative** — where one exists at `state: exploring`, fill it in and advance it to `proposed`; do not write a second
+- **Never rewrite an Objective or Goal** — those were settled at backlog time
 - **Operator confirms** — Always present classification before writing files
 - **High-level milestones** — Each milestone is a brief description, not a detailed plan. Detail comes from opsx.
 - **Use path.join()** — Construct all file paths cross-platform

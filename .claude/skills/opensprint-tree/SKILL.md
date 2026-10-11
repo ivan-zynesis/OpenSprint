@@ -6,7 +6,7 @@ compatibility: Requires openspec CLI.
 metadata:
   author: opensprint
   version: "1.0"
-  generatedBy: "0.0.6"
+  generatedBy: "0.0.9"
 ---
 
 Visualize or regenerate the decision tree in `opensprint/DECISION-MAP.md`.

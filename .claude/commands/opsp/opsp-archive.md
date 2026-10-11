@@ -15,57 +15,65 @@ Archive a completed initiative by compiling the current architectural state into
 
 ### 1. Verify Initiative Completion
 
-Read `opensprint/initiatives/<name>.md` and check:
+Read the initiative — resolve it by the `id:` in frontmatter, since filenames carry a
+creation-date prefix (`20261011-<name>.md`) — and check:
 - Are all milestones marked as done?
 - If not, warn the operator and ask for confirmation to proceed
 
-### 2. Compile architecture.md
+### 2. Compile the Surrogate
 
-Read all source materials:
-- `opensprint/driver-specs/*.md` — all active driver specs
-- `opensprint/ADRs/*.md` — all active/accepted ADRs
-- `opensprint/DECISION-MAP.md` — the decision tree
+Do not synthesise `architecture.md` here. Invoke the compact workflow (`/opsp:compact`) and let it compile.
 
-Then **rewrite** `opensprint/architecture.md` with these sections:
+One engine compiles every derived artifact (DEC-014). Archive writing its own version of architecture.md, with its own section list and its own synthesis rules, is how two documents that claim to describe the same system come to disagree.
 
-#### System Overview
-Synthesize from driver-specs: what is this system, what does it do, why does it exist?
-Write as a narrative, not a list of specs.
+Compact produces:
+- `opensprint/architecture.md` — the architectural state
+- `opensprint/squad/*.md` — the per-hat views
+- `opensprint/squad/.manifest.json` — the provenance record
 
-#### Driver Specs
-Compile a narrative of active driver specs, grouped by type (product, legal, compliance, etc.).
-Link to each spec by ID for traceability.
+Then confirm the compile is sound:
 
-#### Architectural Decisions
-Walk the decision tree in narrative form. For each significant decision:
-- State the decision and its rationale
-- Reference the ADR by ID (e.g., "We chose serverless architecture (DEC-001) because...")
-- Show how decisions chain together
-
-#### System Structure
-Describe the current system architecture — services, components, data stores, interfaces.
-This should be derivable from the decisions but stated concretely:
-"The system consists of: Auth Service (Lambda), Payment API (Lambda), ..."
-
-Use ASCII diagrams where they help:
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│   Auth   │────▶│   API    │────▶│   Jobs   │
-│ Service  │     │ Gateway  │     │ Service  │
-└──────────┘     └──────────┘     └──────────┘
-                       │
-                       ▼
-                 ┌──────────┐
-                 │ DynamoDB │
-                 └──────────┘
+```bash
+opensprint compact check
 ```
 
-#### Constraints & Non-Negotiables
-Extract from driver-specs the hard constraints that bound all implementation:
-- Compliance requirements (SOC2, GDPR, etc.)
-- Performance requirements (latency, throughput)
-- Legal requirements (data residency, retention)
-- Business constraints (pricing model, SLA)
+## The merge sequence
+
+Archiving is not the last step — it is the third of four, and the order is forced
+(`DEC-030`):
+
+```
+  opsp/<initiative>  ──rebase──●──attest──●──archive──●──▶ main
+```
+
+**Rebase onto the trunk first.** Archive compiles from whatever records it can see. Compile before
+rebasing and you compile against a record set that excludes whatever else landed meanwhile — the
+artifact is wrong the instant it merges, and `compact check` would be right to fail it.
+
+**Attest before archiving.** Nothing can be documented that has not been attested
+(`DS-ATTESTED-TRUTH`), and archive is what compiles the documentation. If `/opsp:attest` has not
+run, stop and say so rather than compiling claims nobody has checked.
+
+**Then archive, then merge** — as one pull request. A second pull request carrying only attestation
+adds history noise and is, in practice, the one that never happens.
+
+### The PR gate
+
+A pull request merging `opsp/*` into the trunk should be gated on **state consistency**:
+
+```bash
+opensprint compact check      # views agree with their records
+opensprint compact board      # the Problems section must be empty
+```
+
+The initiative's state must be `attested`, and its `## Attestation` section must answer
+reversibility, blast radius and RACI.
+
+**This gates on whether you answered, never on what you answered.** A bar recorded as *not met*,
+with an exposure and a plan, passes. Insisting a question be answered is a consistency check;
+grading the answer is certification, which `DS-SURROGATE-SCOPE` places out of scope.
+
+If `check` reports anything not fresh, resolve it before continuing — an archive that ships a stale view records an architectural state that was never true.
 
 ### 3. Clean Up Worktrees
 
@@ -119,8 +127,8 @@ Review opensprint/architecture.md for the complete picture.
 
 ## Key Principles
 
-- **Synthesize, don't copy-paste** — architecture.md should read as a coherent document, not a concatenation of specs
-- **Rewrite completely** — Don't append to existing architecture.md. Rewrite it with current state. ADRs are the version history.
+- **Delegate the compile** — architecture.md and the hat views are produced by `/opsp:compact`, never synthesised here (DEC-014)
+- **Rewrite completely** — compact rewrites with current state rather than appending. The decision records are the version history.
 - **Link to sources** — Reference driver-spec and ADR IDs so readers can drill into details
 - **Readable by humans** — This is the document you'd hand to a new team member to understand the system
 - **Readable by agents** — This is also what the surrogate reads to answer future questions
@@ -130,7 +138,7 @@ Review opensprint/architecture.md for the complete picture.
 ## Guardrails
 
 - **Verify milestones** — Warn if initiative has incomplete milestones
-- **Rewrite, don't append** — architecture.md captures current state only
+- **Don't compile by hand** — if architecture.md needs regenerating, run compact; never edit it directly
 - **Use path.join()** — Construct all file paths cross-platform
 - **Preserve ADRs** — Never modify or delete ADRs during archive. They are the permanent trail.
 - **Check for uncommitted work** — Before removing any worktree, verify it has no uncommitted changes. Pause if it does.

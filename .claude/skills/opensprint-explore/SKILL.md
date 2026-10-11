@@ -6,14 +6,26 @@ compatibility: Requires openspec CLI.
 metadata:
   author: opensprint
   version: "1.0"
-  generatedBy: "0.0.6"
+  generatedBy: "0.0.9"
 ---
 
 Enter initiative-level explore mode. Think at the architect level. No artifacts created — everything stays in conversation memory.
 
 **IMPORTANT: This is OPSP explore, not OPSX explore.** You are thinking about system-wide initiatives, architectural direction, and strategic decisions — NOT feature-level implementation. If the operator wants to explore a specific feature or code change, use `/opsx:explore` instead.
 
-**No artifacts are created during OPSP explore.** When ideas crystallize, offer to transition to `/opsp:propose` which will classify the conversation into driver-specs, ADRs, and an initiative plan.
+**No artifacts are created during OPSP explore.** That is deliberate and unchanged: most exploration should not survive, and a tool that saves everything fills the backlog with noise (`DEC-034`).
+
+When an idea crystallizes, offer **`/opsp:backlog`** — the deliberate flush that writes it down as an initiative at `state: exploring`, holding an objective and a goal. It can fire mid-conversation; the thinking continues past it.
+
+The step function has two paths, and both stay open:
+
+```
+  1.  explore ─────────────────────────────▶ propose
+                 (straight through, for work that never rests)
+
+  2.  explore ──▶ backlog ···· time ···· triage ──▶ propose
+                  persisted                picked up
+```
 
 ---
 
@@ -26,6 +38,31 @@ Read all existing opensprint artifacts to establish context:
 3. `opensprint/ADRs/*.md` — all active architectural decisions
 4. `opensprint/DECISION-MAP.md` — decision tree visualization
 5. `opensprint/initiatives/*.md` — any active initiatives
+
+Then load the **backlog**:
+
+```bash
+opensprint compact loops --json
+```
+
+These are the open loops — what the record says does not line up. Present them grouped by the hat
+accountable for each:
+
+- `constraint-unanswered` — a constraint nobody decided
+- `constraint-unasserted` — decided, but no rule guards any of the answering decisions
+- `decision-unguarded` — a decision no rule cites
+- `rule-guards-dead-record` — a rule still guarding something superseded
+- `decision-on-superseded` — a decision resting on an ancestor that moved
+
+**Do not rank them, score them, or recommend one over another.** Which gap is worth work now is
+the operator's call; an agent nudging the backlog is an agent setting the roadmap.
+
+**Some absences are decisions.** A hat with no records, or a constraint left deliberately open,
+may be settled rather than missing — say so and cite the record that settles it rather than
+proposing work to close it.
+
+If the command cannot run — no surrogate, or no CLI — continue without the backlog. It is context,
+not a precondition.
 
 This is the **operator surrogate** — the accumulated knowledge of how the operator thinks about this system. Use it to inform your reasoning.
 

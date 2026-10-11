@@ -15,7 +15,9 @@ Re-explore an initiative to brainstorm and revise the milestone plan.
 
 ## Phase 1: Load Full Initiative Context
 
-1. **Read the initiative** at `opensprint/initiatives/<name>.md`
+1. **Read the initiative** in `opensprint/initiatives/` — **resolve by the `id:` in frontmatter, not by filename.**
+   Filenames carry a creation-date prefix (`20261011-<name>.md`), so `<name>.md` will not exist.
+   `openspec compact board` lists every initiative with its path.
    - If the initiative doesn't exist, inform the operator and suggest `/opsp:propose` first.
 
 2. **Load the operator surrogate** — read ALL of:

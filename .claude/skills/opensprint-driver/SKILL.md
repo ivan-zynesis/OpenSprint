@@ -6,7 +6,7 @@ compatibility: Requires openspec CLI.
 metadata:
   author: opensprint
   version: "1.0"
-  generatedBy: "0.0.6"
+  generatedBy: "0.0.9"
 ---
 
 Manage driver specs in the `opensprint/driver-specs/` directory.

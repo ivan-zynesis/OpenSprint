@@ -6,7 +6,7 @@ compatibility: Requires openspec CLI and git.
 metadata:
   author: opensprint
   version: "1.0"
-  generatedBy: "0.0.6"
+  generatedBy: "0.0.9"
 ---
 
 Review an initiative's branches and commit history to assist with code review.
@@ -34,7 +34,9 @@ Review an initiative's branches and commit history to assist with code review.
 
    Note: A branch with an active worktree cannot be checked out in another location. This is informational — it does not affect read-only review operations.
 
-3. **Read the initiative descriptor** at `opensprint/initiatives/<initiative-name>.md`
+3. **Read the initiative descriptor** in `opensprint/initiatives/` — **resolve by the `id:` in frontmatter, not by filename.**
+   Filenames carry a creation-date prefix (`20261011-<name>.md`), so `<name>.md` will not exist.
+   `openspec compact board` lists every initiative with its path.
    - Get the milestone list and their completion status
    - Get the opsx change names associated with each milestone
 
