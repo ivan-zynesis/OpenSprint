@@ -100,12 +100,26 @@ After cleanup, remove the initiative worktree itself (it is no longer needed onc
 git worktree remove ../<repo>-opsp-<initiative-name>
 ```
 
-### 4. Mark Initiative Completed
+### 4. Close the Initiative
 
-Update the initiative descriptor:
+```bash
+opensprint advance <initiative-name> --to completed
+```
+
+This refuses anything but `attested` → `completed` (`DEC-STATE-MACHINE`), which is what makes
+the compile above load-bearing rather than advisory: an initiative cannot reach `completed`
+without having passed through attestation, and attestation cannot be reached without the handoff.
+**Every squad hat is therefore guaranteed compiled and sealed at exactly one point in the
+lifecycle — here.** That is the only place in the process where that is true.
+
+Then finish the descriptor by hand:
 - Set `status: completed`
 - Add `completed: <YYYY-MM-DD>` to frontmatter
 - Ensure all opsx change references are listed
+
+`status` and `state` are different fields and both are kept: `status` is whether the record is
+live, which every record type has; `state` is where it sits in the lifecycle, which only an
+initiative has.
 
 ### 5. Display Summary
 

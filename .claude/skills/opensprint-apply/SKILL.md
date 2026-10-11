@@ -64,12 +64,21 @@ Execute an initiative by orchestrating opsx cycles for each milestone, with git 
 
    **The operator's main checkout is not modified.**
 
-4. **Select review mode** — ask the operator to choose:
+4. **Open the initiative** — the first milestone starting is what makes it `building`:
+
+   ```bash
+   opensprint advance <initiative-name> --to building
+   ```
+
+   Skip this where it already declares `building` — the command says so and changes nothing.
+   Never edit `state:` by hand (`DEC-STATE-MACHINE`).
+
+5. **Select review mode** — ask the operator to choose:
    - **Per-milestone** (default) — pause after each milestone completes
    - **Per-change** — pause after each opsx change is archived
    - **Continuous** — run all milestones without pause (only pause for surrogate escalations)
 
-5. **Display progress**:
+6. **Display progress**:
    ```
    Initiative: migrate-to-serverless
    Worktree: ../<repo>-opsp-migrate-to-serverless
@@ -177,6 +186,7 @@ decision is owned by `dev` or `devops` (`DEC-028`). Carry the inference *in the 
       · product/goals and product/measures go stale
 
   [1] Approve   [2] Correct the classification   [3] Answer differently
+  [4] This is bigger than one record
 ```
 
 **The blast radius is part of the question, not a footnote.** Nobody can consent to a change whose
@@ -185,6 +195,37 @@ premise of `/opsp:rebuild-assess`.
 
 **Correcting the classification is an offered action**, which is how the inference stays falsifiable
 without a second prompt. Confirming it happens by approving the record.
+
+#### When the answer does not fit in one record
+
+Option **[4]** exists because most escalations are a missing fact and some are not. An answer that
+revises a decision already made, or invalidates milestones, is not a record to write and resume
+from — it is a rung of the ladder giving way (`DEC-ESCALATION-LADDER`).
+
+Ask which, by what has to move:
+
+```
+  Does a driver-spec — the objective, the goal or its bar — have to change?
+
+    yes  →  the GOAL moved.  Stop. /opsp:triage, or /opsp:driver.
+            Apply does not resume; this is a conversation that starts over.
+
+    no, but a decision we already made is wrong or was never made
+         →  the STRATEGY moved.  /opsp:repropose  — supersedes ADRs,
+            redraws the milestones beneath them, returns to 'proposed'.
+
+    no, the decisions hold — the milestones do not
+         →  the PLAN moved.  /opsp:reexplore  — adds or revises milestones,
+            leaves the decision trail alone.
+```
+
+**Do not guess which.** You know what you were blocked on; you do not know whether the operator
+considers the goal still right. Present the three and let them say.
+
+**Apply stops either way.** `/opsp:repropose` returns the initiative to `proposed`, which means
+apply must be run again — deliberately, because revised milestones riding on a state that claims
+work was already underway against them is exactly the bookkeeping the state machine exists to
+prevent. `/opsp:reexplore` leaves it at `building` and apply resumes at the revised plan.
 
 #### On approval
 
@@ -387,9 +428,38 @@ New ADRs: DEC-003 (Express for serverless), DEC-004 (DynamoDB for sessions)
 New Driver Specs: DS-LATENCY (sub-200ms API response)
 
 The initiative worktree contains all changes.
-Review with `/opsp:review migrate-to-serverless` or merge the initiative branch to main when ready.
-Ready to compile architectural state. Run `/opsp:archive migrate-to-serverless`.
 ```
+
+### Hand the initiative over
+
+Escalation **borrows** a hat for one question and gives it back. This is the other gesture: the dev
+hat comes off and does not go back on. Mark it:
+
+```bash
+opensprint advance <initiative-name> --to ready-for-attestation
+```
+
+Then say so, in those terms:
+
+```
+══ HANDOFF — multi-region-failover ══════════════════════════════
+   3/3 milestones done · nothing judged yet
+   setting down:  dev, devops
+   waiting on:    product, maintainer
+
+   Next:  /opsp:attest multi-region-failover
+```
+
+**This state exists because the hats are usually the same person**
+(`DS-HATS-AS-CONTEXT`). An engineer who has just finished building will attest what they built
+unless something marks the moment the accountability moves — and `building` → `attested` with
+nothing in between gives that moment nowhere to live (`DEC-STATE-MACHINE`).
+
+**Do not run `/opsp:attest` in this session.** `DEC-043` refuses the author; the handoff is to a
+fresh context, not to your next step.
+
+**If re-planning adds work after this point**, `/opsp:reexplore` takes it back to `building`. The
+handoff is reversible — what it is not is skippable.
 
 ---
 

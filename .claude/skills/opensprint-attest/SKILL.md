@@ -228,7 +228,55 @@ names a different directory serving the same purpose, use theirs.
 Where the documentation is thin and the operator declines to improve it now, record that as a
 finding rather than silently accepting it.
 
-## Step 6b: Verify you stayed in bounds
+## Step 6b: Close the attestation
+
+Every bar carries a posture, and the three change questions are answered:
+
+```bash
+opensprint advance <initiative-name> --to attested
+```
+
+The command refuses the move from anywhere but `ready-for-attestation`, which is the point — an
+initiative still declaring `building` was never handed over, and attesting it means you attested
+work nobody said was finished (`DEC-STATE-MACHINE`).
+
+**`attested` does not mean every bar was met.** A bar recorded as `not met`, with an exposure and
+a `mitigated-by`, is a complete attestation (`DEC-041`). The state records that judgement
+*happened*, never that it was favourable — grading the answer is certification, and
+`DS-SURROGATE-SCOPE` puts that out of scope.
+
+### When you are not closing it
+
+A verdict of `not met` does **not** by itself stop the close — a bar missed, with an exposure and
+a `mitigated-by`, is a finished judgement. What stops the close is finding that the change should
+not go forward as it is. Three exits, by what has to move (`DEC-ESCALATION-LADDER`):
+
+| What you found | Exit | Lands at |
+|---|---|---|
+| The plan and the strategy hold; **the work does not** — something is missing or wrong, and building it is all that is needed | **request a change** | `building` |
+| The goal holds; **what was decided about reaching it does not** — this is not what we meant | `/opsp:repropose` | `proposed` |
+| The goal and the strategy hold; **the milestones do not** — a corrective task is needed | `/opsp:reexplore` | `building` |
+
+**Request a change** when you can name the work:
+
+```bash
+opensprint advance <initiative-name> --to building
+```
+
+Say what is missing, in the initiative, so the next `/opsp:apply` reads it rather than asking you
+again. A change request is **not** a repropose: nothing is superseded, no ADR moves, and the plan
+is the plan. You are saying the plan was not finished.
+
+**Repropose** when the thing in front of you serves the goal badly and the goal is still right.
+That is the hardest one to say out loud, because the work is done and it is not what was wanted —
+and it is also the one the whole lifecycle exists to catch, which is why attestation sits before
+the merge rather than after it.
+
+**Do not advance to `attested` and then reopen.** The command will refuse it, and the refusal is
+the point: `attested` means judgement finished, and a judgement that immediately sends the work
+back was not finished.
+
+## Step 6c: Verify you stayed in bounds
 
 ```bash
 git diff --unified=0 -- opensprint/driver-specs/ opensprint/initiatives/
