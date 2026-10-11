@@ -284,12 +284,13 @@ judgement call:
 | `strategy-unimplemented` | an approach with no decision descending from it |
 | `exposure-unmitigated` | a risk with no planned work behind it |
 | `measure-unattested` | a measure nobody has judged, or a verdict nobody recognises |
+| `bar-without-form` | a bar in prose, in a hat whose bars take a form |
 | `evidence-unresolvable` | evidence citing nothing addressable, or a path not in the tree |
 | `reversibility-unstated` | an attested change that never said whether it reverts |
 | `blast-radius-unstated` | an attested change that never said what it can break |
 | `raci-unassigned` | a residual risk nobody was named to hold |
 
-The first seven are properties of the **record graph**. The next seven are properties of a
+The first seven are properties of the **record graph**. The next eight are properties of a
 **measure** — and a process that only reports the first kind can tell you a constraint has no
 measure, never that a measure went unmet. The last three are properties of a **change** rather than
 of any record, so they fire only once an initiative claims to have been attested; asking who holds a

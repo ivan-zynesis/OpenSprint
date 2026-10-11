@@ -635,6 +635,83 @@ describe('per-hat classification', () => {
       expect(kinds('evidence-unresolvable')).toEqual([]);
     });
 
+    // ── DEC-038: a bar takes the form its hat's bars take
+
+    it('bar-without-form fires on a maintainer bar written as a spectrum', () => {
+      spec('DS-A', {
+        hats: '[maintainer]',
+        role: 'bar',
+        body: measures('### Bar\n\n- **dimension**: speed <-> safety\n- **neighbour**: unrecorded\n'),
+      });
+      expect(kinds('bar-without-form')).toEqual(['DS-A']);
+      const [l] = loops().filter((x) => x.kind === 'bar-without-form');
+      expect(l.detail).toContain('given / when / then');
+    });
+
+    it('a complete maintainer form reports nothing', () => {
+      spec('DS-A', {
+        hats: '[maintainer]',
+        role: 'bar',
+        body: measures('### Bar\n\ngiven a credential is committed\nwhen CI runs\nthen the build fails\n- **neighbour**: unrecorded\n'),
+      });
+      expect(kinds('bar-without-form')).toEqual([]);
+    });
+
+    it('a partial form is reported as started and not finished, naming what is missing', () => {
+      spec('DS-A', {
+        hats: '[maintainer]',
+        role: 'bar',
+        body: measures('### Bar\n\ngiven a credential is committed\nthen the build fails\n- **neighbour**: unrecorded\n'),
+      });
+      const [l] = loops().filter((x) => x.kind === 'bar-without-form');
+      expect(l.detail).toContain('`when`');
+      expect(l.detail).toContain('not finished');
+    });
+
+    it('a product bar owes the user story, not given/when/then', () => {
+      spec('DS-A', {
+        hats: '[product]',
+        role: 'bar',
+        body: measures('### Bar\n\ngiven x\nwhen y\nthen z\n- **neighbour**: unrecorded\n'),
+      });
+      const [l] = loops().filter((x) => x.kind === 'bar-without-form');
+      expect(l.detail).toContain('as a / I want / for');
+    });
+
+    it('a complete product form reports nothing', () => {
+      spec('DS-A', {
+        hats: '[product]',
+        role: 'bar',
+        body: measures('### Bar\n\nas a returning customer\nI want my cart kept\nfor the abandoned checkout\n- **neighbour**: unrecorded\n'),
+      });
+      expect(kinds('bar-without-form')).toEqual([]);
+    });
+
+    it('does not fire for a hat that declares no form', () => {
+      spec('DS-A', {
+        hats: '[dev]',
+        role: 'bar',
+        body: measures('### Bar\n\n- **dimension**: speed <-> safety\n- **neighbour**: unrecorded\n'),
+      });
+      expect(kinds('bar-without-form')).toEqual([]);
+    });
+
+    it('does not fire where no bar was written at all', () => {
+      spec('DS-A', { hats: '[maintainer]', role: 'bar', body: measures('') });
+      expect(kinds('bar-without-form')).toEqual([]);
+    });
+
+    it('is reported against the hat whose form it is, not every hat', () => {
+      spec('DS-A', {
+        hats: '[maintainer, dev]',
+        role: 'bar',
+        body: measures('### Bar\n\n- **dimension**: x\n- **neighbour**: unrecorded\n'),
+      });
+      const found = loops().filter((x) => x.kind === 'bar-without-form');
+      expect(found).toHaveLength(1);
+      expect(found[0].hats).toEqual(['maintainer']);
+    });
+
     // ── unchanged
 
     it('bar-without-neighbour fires on a bar that omits the label', () => {

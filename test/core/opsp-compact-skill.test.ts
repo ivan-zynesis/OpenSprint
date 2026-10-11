@@ -178,4 +178,73 @@ describe('DEC-014 — one compile engine, called from every skill that needs one
     expect(i).toContain('/opsp:compact');
     expect(i).toMatch(/regenerated, never merged/i);
   });
+
+  describe('the strategy sub-framework (DEC-037)', () => {
+    const i = () => instructions();
+
+    it('names all four parts', () => {
+      for (const part of ['Strength', 'Weakness', 'Opportunity', 'Threat']) {
+        expect(i()).toContain(part);
+      }
+    });
+
+    it('states that opportunity is a deliberate redefinition', () => {
+      expect(i()).toMatch(/deliberate\s+redefinition/i);
+      expect(i()).toMatch(/external\s+upside/i);
+    });
+
+    it('says the cell is compiled from the ADR, not authored', () => {
+      expect(i()).toMatch(/compiled\s+from\s+the\s+ADR/i);
+      expect(i()).toMatch(/never\s+authored\s+here/i);
+    });
+
+    it('names a source in the ADR for each part', () => {
+      expect(i()).toContain('Consideration Factors');
+      expect(i()).toContain('Invalidation Trigger');
+    });
+
+    it('says to write unrecorded rather than invent a part', () => {
+      expect(i()).toMatch(/invented\s+to\s+fill\s+the\s+shape/i);
+      expect(i()).toMatch(/Never\s+open\s+the\s+implementation/i);
+    });
+  });
+
+  describe('the bar sub-framework (DEC-038)', () => {
+    const i = () => instructions();
+
+    it('gives product a user story', () => {
+      expect(i()).toContain('as a');
+      expect(i()).toContain('I want');
+    });
+
+    it('gives maintainer given / when / then', () => {
+      expect(i()).toContain('given');
+      expect(i()).toContain('when');
+      expect(i()).toContain('then');
+    });
+
+    it('says why the split is not a preference', () => {
+      expect(i()).toMatch(/awkward\s+fiction/i);
+      expect(i()).toMatch(/point\s+a\s+pipeline\s+at/i);
+    });
+
+    it('says a bar in that form is already a test specification', () => {
+      expect(i()).toMatch(/already\s+a\s+test\s+specification/i);
+      expect(i()).toContain('DS-CI-ATTESTATION');
+    });
+
+    it('says dev and devops declare no form', () => {
+      expect(i()).toMatch(/declare\s+no\s+form/i);
+    });
+
+    it('keeps posture, evidence and exposure as prose', () => {
+      expect(i()).toMatch(/stay\s+prose/i);
+      expect(i()).toMatch(/filled-in\s+templates\s+rather\s+than\s+thought/i);
+    });
+
+    it('lists the new loop kinds', () => {
+      expect(i()).toContain('bar-without-form');
+      expect(i()).toContain('evidence-unresolvable');
+    });
+  });
 });

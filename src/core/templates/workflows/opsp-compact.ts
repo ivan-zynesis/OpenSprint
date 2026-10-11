@@ -229,6 +229,34 @@ the sentence with a citation, it does not belong in this view.
 Where a strategy has nothing to cite, **say so**. Do not invent an implementation; the harvest
 reports the same gap as \`strategy-unimplemented\`.
 
+#### The strategy sub-framework — SWOT-like, deliberately not SWOT
+
+Where a strategy cites decisions, render four parts beneath the position (\`DEC-037\`). Each is
+**compiled from the ADR**, never authored here:
+
+| Part | Means here | Read it from |
+|---|---|---|
+| **Strength** | why this choice | the ✓ cells of the chosen column in \`## Consideration Factors\` |
+| **Weakness** | the trade-off it carries | the ✗ cells of the chosen column |
+| **Opportunity** | **the alternatives corresponding to the choice made** | the other columns of \`## Consideration Factors\` |
+| **Threat** | the risk, and what would mitigate it | \`## Invalidation Trigger\` |
+
+\`Opportunity\` is a **deliberate redefinition**. Standard SWOT means external upside; here it means
+the alternatives that were weighed. Stated so it does not read as a misunderstanding.
+
+\`\`\`
+credentials never live in the repository
+  → DEC-SECRET-STORE (dev)
+    strength:    rotation without a deploy; no secret in a diff, ever
+    weakness:    a hard runtime dependency on the store being reachable
+    opportunity: sealed secrets in-repo, and a KMS-encrypted env file
+    threat:      a store outage becomes a deploy outage — mitigated by a cached lease
+\`\`\`
+
+**Four parts, not four paragraphs.** Each is one line. If a part has no source in the ADR, write
+\`unrecorded\` — the compile reports what the record says, and a part invented to fill the shape is
+worse than an empty one. Never open the implementation to work out what the weakness must be.
+
 #### The measure anatomy
 
 A measure has four parts. The **bar** is written when the work is proposed; **posture**,
@@ -243,6 +271,39 @@ posture:    was the bar met — or, where no bar is set, the honest position
 evidence:   what asserts it
 exposure:   what remains at risk, and what is planned to close it
 \`\`\`
+
+#### The bar sub-framework — BDD, split by hat
+
+The bar's **statement** takes one of two forms, chosen by hat (\`DEC-038\`). The anatomy above says
+where the bar *sits*; the form says how CI tells you it is still there.
+
+**product** — a user story, because the persona and the reason are the point:
+
+\`\`\`
+as a    returning customer
+I want  my cart to survive a session expiry
+for     the checkout I abandoned on mobile to still be there on desktop
+\`\`\`
+
+**maintainer** — given / when / then, because the bar must be assessable from pipeline output:
+
+\`\`\`
+given  a credential is committed
+when   CI runs
+then   the build fails
+\`\`\`
+
+A maintainer bar written as a user story is an awkward fiction — *"as a maintainer, I want
+credentials not to be committed"* says less than the three lines above, and only those tell you
+what to point a pipeline at. **A bar in given/when/then form is already a test specification**,
+which is what makes \`DS-CI-ATTESTATION\` mechanically possible rather than aspirational: the gap
+between stating a bar and producing evidence for it is as small as it can be.
+
+\`dev\` and \`devops\` declare no form. They describe a system; they do not commit to a bar.
+
+**Posture, evidence and exposure stay prose.** Those are judgements and references, and imposing
+structure on them produces filled-in templates rather than thought. The structure is spent where it
+buys something.
 
 A bar stated without its trade reads like a law of nature when it was a purchase somebody made,
 and the receipt is what a maintainer picking up the hat actually needs. **If the records do not
@@ -292,6 +353,8 @@ Report **only** what the plan reported. The harvest supplies eleven kinds:
 | \`bar-without-neighbour\` | a bar that does not state the position not taken |
 | \`record-without-objective\` | a record its hat's sections cannot select |
 | \`strategy-unimplemented\` | an approach with no decision descending from it |
+| \`bar-without-form\` | a bar in prose, in a hat whose bars take a form |
+| \`evidence-unresolvable\` | evidence citing nothing addressable, or a path not in the tree |
 
 **Do not infer a missing decision or a missing test from a record's content.** An invented gap
 costs someone a triage conversation about nothing, and the backlog is only useful while everything

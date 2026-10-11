@@ -16,6 +16,10 @@ import {
   statesNeighbour,
   evidenceReferences,
   EVIDENCE_REFERENCE_FORMS,
+  BAR_FORMS,
+  parseBarForm,
+  SWOT_PARTS,
+  SWOT_SOURCES,
 } from '../../src/core/compact/measures.js';
 
 /**
@@ -363,6 +367,86 @@ ci/secret-scan run 4821
         { form: 'remote', target: 'https://ci/1' },
         { form: 'local', target: 'reports/plan.txt' },
       ]);
+    });
+  });
+
+  describe('BAR_FORMS and parseBarForm (DEC-038)', () => {
+    it('declares a form for exactly the two hats that commit to a bar', () => {
+      expect(Object.keys(BAR_FORMS).sort()).toEqual(['maintainer', 'product']);
+    });
+
+    it('product bars are a user story', () => {
+      expect([...BAR_FORMS.product]).toEqual(['as a', 'I want', 'for']);
+    });
+
+    it('maintainer bars are given / when / then', () => {
+      expect([...BAR_FORMS.maintainer]).toEqual(['given', 'when', 'then']);
+    });
+
+    it('returns null for a hat declaring no form', () => {
+      expect(parseBarForm('given x\nwhen y\nthen z', 'dev')).toBeNull();
+      expect(parseBarForm('given x\nwhen y\nthen z', 'devops')).toBeNull();
+    });
+
+    it('reads a complete maintainer form', () => {
+      const f = parseBarForm('given a credential is committed\nwhen CI runs\nthen the build fails', 'maintainer');
+      expect(f?.stated).toEqual(['given', 'when', 'then']);
+      expect([...(f?.expected ?? [])]).toEqual(['given', 'when', 'then']);
+    });
+
+    it('reads a complete product form', () => {
+      const f = parseBarForm('as a returning customer\nI want my cart kept\nfor the abandoned checkout', 'product');
+      expect(f?.stated).toEqual(['as a', 'I want', 'for']);
+    });
+
+    it('accepts bulleted and bold labels', () => {
+      const f = parseBarForm('- **given**: x\n- **when**: y\n- **then**: z', 'maintainer');
+      expect(f?.stated).toEqual(['given', 'when', 'then']);
+    });
+
+    it('reports a partial form rather than a verdict', () => {
+      const f = parseBarForm('given a credential is committed\nthen the build fails', 'maintainer');
+      expect(f?.stated).toEqual(['given', 'then']);
+    });
+
+    it('does not find labels buried in a sentence', () => {
+      const f = parseBarForm('the build fails when a credential is given to the repository', 'maintainer');
+      expect(f?.stated).toEqual([]);
+    });
+
+    it('is case-insensitive on the label', () => {
+      const f = parseBarForm('Given x\nWhen y\nThen z', 'maintainer');
+      expect(f?.stated).toEqual(['given', 'when', 'then']);
+    });
+
+    it('finds nothing in a bar written as a spectrum', () => {
+      const f = parseBarForm('- **dimension**: speed <-> safety\n- **chosen**: safety', 'maintainer');
+      expect(f?.stated).toEqual([]);
+    });
+  });
+
+  describe('SWOT_PARTS and SWOT_SOURCES (DEC-037)', () => {
+    it('declares four parts, by explicit list', () => {
+      expect([...SWOT_PARTS]).toEqual(['strength', 'weakness', 'opportunity', 'threat']);
+    });
+
+    it('every part names where it is compiled from', () => {
+      for (const part of SWOT_PARTS) {
+        expect(SWOT_SOURCES[part].length).toBeGreaterThan(0);
+      }
+    });
+
+    it('opportunity is the redefinition — the alternatives, not external upside', () => {
+      expect(SWOT_SOURCES.opportunity).toContain('alternatives');
+    });
+
+    it('strength and weakness are the two halves of the chosen column', () => {
+      expect(SWOT_SOURCES.strength).toContain('chosen column');
+      expect(SWOT_SOURCES.weakness).toContain('chosen column');
+    });
+
+    it('threat is the invalidation trigger', () => {
+      expect(SWOT_SOURCES.threat).toContain('Invalidation Trigger');
     });
   });
 });
