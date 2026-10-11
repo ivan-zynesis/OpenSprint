@@ -63,6 +63,14 @@ v1 deliberately stops short of changing what `/opsp:explore` and `/opsp:apply` l
     it is run.
   - Diagram convention detected from the repository's existing habit, ASCII as default, escalating to the operator when ambiguous.
   - Validation needs a project with real operational records. This repository has one maintainer record and no devops records, so cashier is the candidate.
+- [x] documentation-rewrite _(added at re-exploration, 2026-09-27)_: Rewrite the primary documentation now that the surrogate holds what it
+  used to. `PHILOSOPHY.md` becomes the origin story, explicitly marked as history — what inspired
+  the project, what it got right, why the ambition grew. `README.md` states what OpenSprint is now
+  and points at the compiled views rather than restating them. The five OpenSprint principles are
+  revisited against `DS-AGENTIC-SDLC`; "clear not simple" and "enterprise-intuitive" predate the
+  hat model and the dev/sec/ops framing entirely. Sequenced after `hat-templates` because the
+  compiled product view is what the documentation should point a reader at — writing it first
+  means writing it twice.
 
 ### documentation-rewrite — complete (2026-09-28)
 
@@ -436,14 +444,3 @@ exactly what the gap makes necessary.
   true where the test expects false. These pass in CI, where Oh My Zsh is absent, and fail for
   any developer who has it. Same shape as the defect above: a guard that does not guard what
   it claims to. Awaiting triage via `/opsp:explore`.
-
-## Added at re-exploration, 2026-09-27
-
-- [x] documentation-rewrite: Rewrite the primary documentation now that the surrogate holds what it
-  used to. `PHILOSOPHY.md` becomes the origin story, explicitly marked as history — what inspired
-  the project, what it got right, why the ambition grew. `README.md` states what OpenSprint is now
-  and points at the compiled views rather than restating them. The five OpenSprint principles are
-  revisited against `DS-AGENTIC-SDLC`; "clear not simple" and "enterprise-intuitive" predate the
-  hat model and the dev/sec/ops framing entirely. Sequenced after `hat-templates` because the
-  compiled product view is what the documentation should point a reader at — writing it first
-  means writing it twice.

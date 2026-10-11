@@ -1,8 +1,9 @@
 ---
 id: sdlc-operating-contract
-status: active
-state: attested
+status: completed
+state: completed
 created: 2026-10-09
+completed: 2026-10-11
 depends-on:
   - lifecycle-beyond-build
 ---
@@ -104,6 +105,20 @@ The step function from idea to proposal splits, and both paths stay open:
 `record-naming` carried two ordering constraints, both now discharged. `RECORD_ID_PATTERN` had to widen **before** the first semantic decision id was written, or the rule harvest would have gone silently blind to every new decision — so that half was pulled forward and landed with [[surrogate-currency]]. Initiative filenames had to stay unprefixed until `initiative-parser` resolved by frontmatter `id:`, because the skills constructed `initiatives/<name>.md` directly; that landed with [[lifecycle-beyond-build]], and the prefix followed here.
 
 This initiative's own file was unprefixed for that reason. It is `20261009-sdlc-operating-contract.md` now — the convention applied to itself the moment it shipped.
+
+## OPSX Changes
+
+- `openspec/changes/archive/2026-10-11-backlog-and-triage/`
+- `openspec/changes/archive/2026-10-11-git-contract/`
+- `openspec/changes/archive/2026-10-11-attest-context/`
+- `openspec/changes/archive/2026-10-11-record-naming/`
+- `openspec/changes/archive/2026-10-11-sub-frameworks/`
+- `openspec/changes/archive/2026-10-11-attest-frame/`
+- `openspec/changes/archive/2026-10-11-state-machine/`
+- `openspec/changes/archive/2026-10-11-escalation-ladder/`
+- `openspec/changes/archive/2026-10-11-hat-handoffs/`
+- `openspec/changes/archive/2026-10-11-bar-at-propose/`
+- `openspec/changes/archive/2026-10-11-reexplore-name/`
 
 ## Attestation
 

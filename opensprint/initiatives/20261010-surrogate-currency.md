@@ -1,8 +1,9 @@
 ---
 id: surrogate-currency
-status: active
-state: attested
+status: completed
+state: completed
 created: 2026-10-10
+completed: 2026-10-11
 depends-on:
   - lifecycle-beyond-build
 ---
@@ -158,6 +159,14 @@ invisible, reported `decision-unguarded` forever. That widening was pulled forwa
 `sdlc-operating-contract`'s `record-naming` milestone and landed before these records were written,
 stopping the numbered era at `DEC-044`. Both forms match permanently; this is not a migration
 window.
+
+## OPSX Changes
+
+- `openspec/changes/archive/2026-10-10-scoped-seal/`
+- `openspec/changes/archive/2026-10-10-render-on-milestone/`
+- `openspec/changes/archive/2026-10-10-escalation-handoff/`
+- `openspec/changes/archive/2026-10-10-knockdown-views/`
+- `openspec/changes/archive/2026-10-10-migrate-tool/`
 
 ## Attestation
 

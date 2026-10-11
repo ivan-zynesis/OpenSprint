@@ -4,12 +4,12 @@ Compiled from `opensprint/driver-specs/` and `opensprint/ADRs/`, and from the sy
 **Derived — do not edit.** If a view is wrong, the system is wrong: raise it with `/opsp:explore`,
 not with a text editor.
 
-| Wearing | Owns the question | Start with | Shape |
-|---|---|---|---|
-| **product** | what must it **do**? | [product.md](product.md) | objective · goals · strategies · measures |
-| **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | posture · seven inherited objectives |
-| **dev** | how is it **built**? | [dev.md](dev.md) | tech-stack · runtime-topology · entity-schema |
-| **devops** | how is it **stood up and kept running**? | [devops.md](devops.md) | infra-architecture · gitops |
+| Wearing | Owns the question | Start with | Shape | Records |
+|---|---|---|---|---|
+| **product** | what must it **do**? | [product.md](product.md) | objective · goals · strategies · measures | 23 |
+| **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | posture · seven inherited objectives | 15 |
+| **dev** | how is it **built**? | [dev.md](dev.md) | tech-stack · runtime-topology · entity-schema | 54 |
+| **devops** | how is it **stood up and kept running**? | [devops.md](devops.md) | infra-architecture · gitops | 4 |
 
 Each hat has its own shape, because the four accountabilities produce different *kinds* of knowledge
 rather than the same kind about different subjects. Product states a chain of intent; maintainer

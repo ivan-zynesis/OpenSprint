@@ -6,8 +6,9 @@ them, present in substantially every software project — which is why this acco
 off from product and given to a specialist.
 
 **Nothing below is attested.** Every claim here rests on a *decision*, not on evidence that it holds
-(`DS-ATTESTED-TRUTH`). `/opsp:attest` exists and has not been run against these bars, so each row
-states what was decided rather than what is true of the running system.
+(`DS-ATTESTED-TRUTH`). `/opsp:attest` first ran on 2026-10-11 and judged no bar `met`, so each row
+states what was decided — with the posture and exposure recorded against it — rather than what is
+true of the running system.
 
 ## Posture
 
@@ -55,66 +56,534 @@ for, how long it is kept, or who can see it.
 
 ## Integrity & Correctness
 
-**Goal** — nothing is documented as true until it has been attested. A compiled claim may be stated
-as present-tense fact only where a human asserted it with evidence (`DS-ATTESTED-TRUTH`).
+**Goal — nothing is documented as true until it is attested.** A compiled claim may be stated as
+present-tense fact only when a human has asserted it with evidence; intent written in the grammar of
+state is the defect (`DS-ATTESTED-TRUTH`). It is answered by three decisions: `attested` as a third
+citation authority beside decided and observed (`DEC-021`), attestation as its own tool rather than a
+phase of compact (`DEC-022`), and that tool writing a record without ever gating (`DEC-023`).
 
-**Strategy** — mutating the canonical surrogate stays manual. `/opsp:rebase` and `/opsp:abandon` are
-operator-invocable only, never reachable from a pipeline, a sub-agent or another skill
-(`DS-HIGH-IMPACT-OPS`). The mechanism lives in `dev` — `DEC-002`, `DEC-004` and `DEC-006` are what
-implement it.
+**Strategy — operations that mutate the canonical surrogate are operator-invocable only.**
+Reconciliation (`/opsp:rebase`, `/opsp:abandon`) is decided as never triggerable by a pipeline, a
+sub-agent or another skill, because a corrupted surrogate degrades every agent that reads it
+(`DS-HIGH-IMPACT-OPS`). Compaction is released from this position: it never writes a record and
+every view regenerates, so it cannot corrupt the surrogate (`DEC-006`).
 
-**Measure** — *the surrogate is never corrupted by an automated operation.*
+```
+mutating reconciliation is operator-invocable only            (DS-HIGH-IMPACT-OPS)
+  → DEC-002 (dev)   the agent reasons, the operator confirms
+    strength:    a false escalation costs one prompt; a false auto-accept costs the surrogate
+    weakness:    unrecorded
+    opportunity: unrecorded — the factors are bullets, no alternative column is weighed
+    threat:      operator fatigue from a high escalation rate — mitigated by a confidence-scoring
+                 rubric, with the default kept conservative
+  → DEC-004 (dev)   a read-only planning phase precedes execution
+    strength:    no undo short of git reset, so scope and a wrong-command guard come first
+    weakness:    unrecorded
+    opportunity: unrecorded — the factors are bullets, no alternative column is weighed
+    threat:      planning becomes slow on very large surrogates — mitigated by a count-only pre-scan
+```
 
-| | |
-|---|---|
-| **dimension** | automation ←→ human confirmation, on operations that mutate the canonical surrogate |
-| **chosen** | fully manual, permanently |
-| **traded for** | every scrap of automation on these two operations |
-| **neighbour** | **unrecorded** — nothing says what a partially-automated reconciliation would cost |
-| **posture** | stated as absolute rather than as a preference. `DEC-006` releases compaction from this bar: compact never writes a record and every view regenerates, so it cannot corrupt the surrogate |
-| **evidence** | **none.** The guardrail is instruction text in a skill, which no rule reads |
-| **exposure** | a corrupted surrogate degrades every downstream agent operation, unboundedly. A false escalation costs one prompt; a false auto-accept costs the surrogate (`DEC-002`). **No work is planned against it** |
+**Measure — the goal.** Three measures: no compiled claim in the present tense without an attestation
+behind it (**Primary**); a compiled view visibly distinguishes decided, observed and attested claims
+(**Guardrail**); an attestation carries a date, so staleness is computable (**Freshness**)
+(`DS-ATTESTED-TRUTH`).
 
-`DS-ATTESTED-TRUTH` carries no measure at all — the goal that demands evidence has none of its own.
+```
+bar:        no `### Bar` recorded
+posture:    partially met — attested by Ivan Lee, 2026-10-11 (DS-ATTESTED-TRUTH)
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found classification of a record as decided or attested asserted — including that an
+attestation needs both a date and evidence, and that the date carries without expiring
+(`test/core/compact-measures.test.ts`). It found three things unasserted: the tense of compiled claims
+(**Primary**); the `observed` authority in compiled output, since the test titled "three authorities"
+checks two, neither of them `attested` (**Guardrail**); and that a verdict with evidence but no
+`attested-on` is downgraded (**Freshness**) (`DS-ATTESTED-TRUTH`).
+
+Exposure as recorded: a compiled view may state present-tense claims with no attestation behind them,
+and the decided / observed / attested distinction is unverified in rendered output
+(`DS-ATTESTED-TRUTH`).
+
+**Measure — the strategy.** No operation that mutates the canonical surrogate is reachable from a
+pipeline, a sub-agent or another skill (`DS-HIGH-IMPACT-OPS`).
+
+```
+bar:        dimension — automation ←→ human confirmation, on surrogate-mutating operations
+            chosen    — fully manual: /opsp:rebase and /opsp:abandon, operator-invocable only
+            traded for— every scrap of automation on these two operations, permanently
+            neighbour — unrecorded: nothing says what partial automation would look like or cost
+            form      — prose; no given / when / then is recorded
+posture:    no verdict — "stated as absolute rather than as a preference"
+exposure:   recorded, with no mitigated-by
+```
+
+The posture states no verdict, so the measure is unattested (`DS-HIGH-IMPACT-OPS`). Its exposure: a
+corrupted surrogate degrades every downstream agent operation and the damage is unbounded; a false
+escalation costs one prompt, a false auto-accept costs the surrogate (`DS-HIGH-IMPACT-OPS`,
+`DEC-002`). The position is therefore **decided, not attested** — nothing recorded says the guardrail
+holds in the running system.
+
+**A disagreement between records.** `DEC-019` describes `DS-HIGH-IMPACT-OPS` migrating to *"an
+`integrity & correctness` goal whose strategy is 'mutating reconciliation is operator-invocable
+only'"*; the record itself carries `role: strategy`, and the goal of this objective is
+`DS-ATTESTED-TRUTH`. Rendered here as the record states it.
 
 ## Change & Quality
 
-The most populated row, and the only one with five records behind it.
+**Goal — nothing recorded.** Nine records select this objective and every one carries
+`role: strategy`; none states the outcome they serve, so the goal cell is empty
+(`DS-SURROGATE-GIT-CONTRACT`, `DS-ATTEST-AS-REVIEW`, `DS-CI-ATTESTATION`, `DS-MEASURE-ANATOMY`,
+`DS-DOCUMENTATION-REVIEWED`, `DS-ESCALATION-HANDOFF`, `DS-VIEW-AUTHORSHIP`, `DS-STRATEGY-ALTITUDE`,
+`DS-BACKWARD-COMPAT`).
 
-**Goal** — *not stated.* Five strategies sit here with no goal above them saying what outcome they
-reach.
+**Where the measures stand.** Eight of the nine were attested by Ivan Lee on 2026-10-11. **None is
+`met`**, so nothing in this section is a present-tense property of the system — every position below
+is decided, and the verdicts say how far the tests bear it out.
 
-**Strategies**
-
-- **Evidence is a CI artifact.** A coverage report, a recorded end-to-end run, a plan output, a cost
-  diff — something the pipeline produced. Testing belongs in CI, not CD (`DS-CI-ATTESTATION`).
-  Implemented by `DEC-032`, `DEC-033`.
-- **One pull request per initiative, attested before it merges.** Planning lives in the initiative's
-  worktree; `main` is production grade by definition (`DS-SURROGATE-GIT-CONTRACT`). Implemented by
-  `DEC-029`, `DEC-030`.
-- **A measure has four parts** — bar ex ante, posture, evidence and exposure ex post
-  (`DS-MEASURE-ANATOMY`). Implemented by `DEC-019`, `DEC-038`.
-- **Compatibility is best-effort, scoped to one surface** — a new release meeting a project written
-  by an older version (`DS-BACKWARD-COMPAT`).
-- **A strategy states a position, never a mechanism.** Domain know-how belongs to `dev` and
-  `devops`; the audience for this view is senior management (`DS-STRATEGY-ALTITUDE`). Implemented by
-  `DEC-020`, `DEC-037`.
-
-**Measure** — only `DS-BACKWARD-COMPAT` states one: *a project whose directories were written by an
-earlier release still parses under the current one.*
-
-| | |
+| Strategy | Verdict |
 |---|---|
-| **dimension** | guaranteed compatibility ←→ speed of evolution |
-| **chosen** | best-effort, scoped to that one surface |
-| **traded for** | the ability to move quickly, which `DS-SELF-USE-SCOPE` says is the point |
-| **neighbour** | **unrecorded** — nothing says what a guarantee would cost, or over what window |
-| **posture** | below what a product sold to strangers would hold, deliberately. A published package is static, so nothing can break retroactively |
-| **evidence** | **none.** Nothing asserts that a record written by an older release still parses |
-| **exposure** | **unrecorded** |
+| one PR per initiative, attested before it merges | **not met** (`DS-SURROGATE-GIT-CONTRACT`) |
+| attestation reviews the implementation against the strategy | partially met (`DS-ATTEST-AS-REVIEW`) |
+| evidence is a CI artifact | partially met (`DS-CI-ATTESTATION`) |
+| every measure has the same four parts | partially met (`DS-MEASURE-ANATOMY`) |
+| documentation quality is reviewed at attestation | partially met (`DS-DOCUMENTATION-REVIEWED`) |
+| an escalation is a hat handoff | cannot assess (`DS-ESCALATION-HANDOFF`) |
+| a view is compiled only by an accountable author | partially met (`DS-VIEW-AUTHORSHIP`) |
+| a maintainer strategy stays above domain know-how | cannot assess (`DS-STRATEGY-ALTITUDE`) |
+| backward compatibility is best-effort | no verdict recorded (`DS-BACKWARD-COMPAT`) |
 
-The other four strategies carry no measure, so four of the five things this objective commits to
-have no way of being known.
+No record here carries an `### Evidence` block; under `DEC-041` a verdict short of `met` requires an
+exposure rather than evidence, and each attested record has one. **No exposure carries a
+`mitigated-by`** — each stands on the board as an unplanned risk. Three record that an earlier
+pointer was removed because it named the initiative under attestation
+(`DS-DOCUMENTATION-REVIEWED`, `DS-ESCALATION-HANDOFF`), one adding that the initiative closes without
+retiring the exposure (`DS-ATTEST-AS-REVIEW`).
+
+### One PR per initiative, attested before it merges
+
+Planning is authored in the initiative's own worktree; change branches merge into the initiative
+branch; the single `opsp/<initiative> → main` pull request is where every other hat arrives, and
+attestation happens before that merge, never after; `main` is production grade by definition
+(`DS-SURROGATE-GIT-CONTRACT`).
+
+```
+ explore ── backlog ── triage ── propose ── apply ──────── attest ──────── archive
+ product/   worktree   same      same       opsx/* →       opsp/* PR       opsp/* → main
+ maintainer created    worktree  worktree   opsp/*         open, not
+            opsp/<i>                        no product     merged
+                                                                    (DS-SURROGATE-GIT-CONTRACT)
+```
+
+```
+one initiative, one branch, one pull request, attested before main     (DS-SURROGATE-GIT-CONTRACT)
+  → DEC-029 (dev, devops)   planning happens in the initiative's worktree
+    strength:    planning is visible to the work it plans; nothing is committed straight to main
+    weakness:    the backlog is scattered across branches; every initiative can collide on ids
+    opportunity: planning on main
+    threat:      cross-branch listing proves unsolvable — mitigated by moving the backlog alone to
+                 main, splitting the decision; the signal is a stakeholder who cannot see candidates
+  → DEC-030 (dev, devops)   rebase, attest, archive, merge — one PR, gated on state consistency
+    strength:    dangling initiatives prevented by the gate; derived artifacts correct on arrival
+    weakness:    the branch must be current before closing
+    opportunity: a closing PR after the merge; archiving without rebasing
+    threat:      a gate blocking ready work — mitigated by revisiting the state vocabulary (DEC-024)
+  → DEC-023 (dev, maintainer)   the gate is on state consistency, never on whether a bar was met
+    strength:    stays inside the surrogate's scope; the operator keeps the judgement
+    weakness:    a missed bar is not caught automatically — a human must read
+    opportunity: gating on unmet bars
+    threat:      a need for real certification — a deliberate scope change, not a feature; the
+                 first PR adding an exit code to attest is the signal
+```
+
+Derived artifacts that conflict across initiatives are resolved by recompiling, never by
+hand-merging (`DS-SURROGATE-GIT-CONTRACT`, `DEC-006`).
+
+```
+bar:        no `### Bar` recorded; measures in prose
+            Primary   — no commit reaches main for an initiative whose bars are unattested
+            Guardrail — a PR merging opsp/* fails when initiative state and view freshness
+                        disagree with what git shows
+            Hygiene   — no pull request exists whose only content is attestation
+posture:    NOT MET — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+**This strategy is not met** (`DS-SURROGATE-GIT-CONTRACT`). The attestation records that nothing
+tested prevents a commit reaching `main`: `state-contradicted` fires only once a branch has merged
+(`test/core/initiatives.test.ts`), `compact check` exits zero with open loops
+(`test/cli-e2e/compact.test.ts`), this repository runs no surrogate job on `opsp/*` pull requests,
+and `docs/git-workflow.md` recommends a state-is-attested check that no command performs. Of the
+**Guardrail**, the view-freshness half is asserted — `compact check` fails on drift — while the git
+half is unit-tested with injected state and wired into no check. **Hygiene** is instruction text only.
+Re-reviewed against `a018238`: unchanged — `opensprint advance --to attested` succeeds on an
+initiative with no `## Attestation` and no posture (`test/cli-e2e/advance.test.ts`), and an initiative
+with no state may move straight to `completed` (`test/core/initiative-transitions.test.ts`)
+(`DS-SURROGATE-GIT-CONTRACT`).
+
+So the gate `DEC-030` decides is, per this attestation, not wired anywhere. Exposure as recorded: an
+`opsp/*` branch can merge to `main` unattested, this one included, and the CI snippet in
+`docs/git-workflow.md` installs the published package, which predates `frame`, `migrate` and the new
+loop kinds (`DS-SURROGATE-GIT-CONTRACT`).
+
+The record names its own deliberate cost: no branch can see every backlog item, which breaks the one
+interaction non-technical stakeholders have — an agent reading the compiled board for them
+(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`).
+
+### Attestation reviews the implementation against the stated strategy
+
+Attestation is the review of how the implementation matches the strategy proposed, and the moment a
+change hands off from `dev` into security and operations. It reads the test files and never the
+source, the design discussion or the decision rationales, and every attestation answers
+reversibility, blast radius and RACI for whatever no system handles (`DS-ATTEST-AS-REVIEW`).
+
+```
+attestation is a review at bar altitude, and a handoff past merge          (DS-ATTEST-AS-REVIEW)
+  → DEC-040 (dev)   the attester reads the tests — never source, design or rationale
+                    (supersedes DEC-033)
+    strength:    a test is the bar restated; a suite that asserts nothing becomes visible
+    weakness:    unrecorded — no ✗ in the chosen column; the rationale accepts that some
+                 self-assessment risk returns
+    opportunity: CI artifacts only (DEC-033's scope); the full diff
+    threat:      tests unreadable without the source, or tests generated from the bars — the scope
+                 is rethought, not quietly widened
+  → DEC-041 (dev)   posture is the judgement; evidence and exposure are conditional on it
+    strength:    one precise loop per verdict, and an unmet bar still reports
+    weakness:    three branches where two unconditional checks would do
+    opportunity: requiring both evidence and exposure on every measure
+    threat:      `met` postures routinely needing an exposure; mitigation unrecorded
+  → DEC-042 (dev)   the three review questions live on the initiative
+    strength:    a change is the unit; harvestable; no answer repeated per measure
+    weakness:    unrecorded
+    opportunity: per measure; a separate record type
+    threat:      "handled by a system" used to avoid naming a human — mitigated by requiring a
+                 named owner even for automated concerns
+  → DEC-043 (dev)   the agent that wrote the tests may not attest them
+    strength:    the author cannot grade their own assertion; costs a session, not a person
+    weakness:    enforceable by instruction only
+    opportunity: refusing only on implementation; trusting the narrow context
+    threat:      operators attest in the authoring session anyway — then remove the rule and record
+                 that attestation here is self-assessment
+```
+
+```
+bar:        dimension — review depth ←→ attester independence
+            chosen    — test files, bars and CI artifacts; never source, design or rationale
+            traded for— the ability to diagnose why a bar was missed, which stays with dev
+            neighbour — unrecorded: nothing says what reading the diff under a stricter protocol
+                        would buy
+            form      — prose; no given / when / then is recorded
+posture:    partially met — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found the three review questions asserted on an attested initiative —
+`test/core/classification.test.ts` fires on a missing door, blast radius and unassigned RACI rows —
+but no test shows the *"or records why not"* path clearing the loop. **Scope** and **Guardrail**
+(never a block) are asserted only as instruction text (`test/core/attest.test.ts`); the exit-zero
+e2e covers a different loop kind (`DS-ATTEST-AS-REVIEW`).
+
+Exposure as recorded: reading tests reintroduces some self-assessment risk, since the agent that
+wrote the tests is often the one asked to attest; the **Scope** bar is unassertable by any test in the
+suite, so an attester that reads source is not detected; the *"or records why not"* path is untested
+(`DS-ATTEST-AS-REVIEW`).
+
+### Evidence is a CI artifact
+
+Evidence is something the pipeline produced; testing belongs in CI, not CD. A change to the pipeline
+itself is the named exemption — attested post-merge, riding the next initiative that touches the area
+rather than earning a pull request of its own. The record states this as a bet: refusing post-merge
+acceptance forces the investment in CI (`DS-CI-ATTESTATION`).
+
+```
+evidence is what the pipeline produced                                     (DS-CI-ATTESTATION)
+  → DEC-032 (dev, devops)   evidence is a CI artifact reference; the exemption rides the next
+                            initiative
+    strength:    checkable; usable by a non-engineer; the exemption has no mechanism to widen
+    weakness:    pending bars close only opportunistically, and may linger
+    opportunity: free prose; a dedicated follow-up PR for pipeline changes
+    threat:      pending attestations outlive several initiatives — mitigated by an owner and a
+                 date; ordinary work reclassed as pipeline work — mitigated by a narrower exemption
+  → DEC-038 (dev)   a bar is written in BDD form, split by hat
+    strength:    given / when / then maps to a test; each hat writes in its own idiom
+    weakness:    two forms to learn
+    opportunity: one form for both hats; free prose
+    threat:      BDD bars still unattestable from CI — the problem is then the pipeline, not the form
+  → DEC-033 (dev, superseded) → DEC-040 (dev)   the attester's reading scope
+                                                 (rendered under the previous strategy)
+```
+
+```
+bar:        no `### Bar` recorded; measures in prose
+            Primary   — every `### Evidence` block references a pipeline artifact, resolvable from
+                        the pull request
+            Guardrail — an evidence reference that does not resolve is harvested, not assumed good
+            Honesty   — `cannot assess` is a recorded outcome with an exposure, never a silent pass
+posture:    partially met — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found **Honesty** asserted: `cannot assess` without an exposure is harvested
+(`test/core/classification.test.ts`). **Guardrail** is partial: a local path missing from the tree is
+reported, but two tests assert unresolved references are *not* — a path escaping the project root
+(`test/cli-e2e/compact.test.ts`) and remote links (`test/core/classification.test.ts`, by design).
+**Primary**: tests check that a reference is addressable, not that a pipeline produced it — a
+comment-only file satisfies it (`DS-CI-ATTESTATION`).
+
+Exposure as recorded: evidence citing a `../` path is silently accepted, and any file in the tree
+counts as evidence regardless of whether a pipeline produced it (`DS-CI-ATTESTATION`).
+
+**A disagreement between records.** `DEC-032` attests a pipeline-exempt bar as `posture: pending`.
+`DEC-041`'s verdict table, and the harvest that reported this plan's loops, accept only `met`,
+`partially met`, `not met` and `cannot assess` — so a bar attested as `DEC-032` decides would be
+reported as unattested. Surfaced, not resolved.
+
+### Every measure has the same four parts
+
+A measure is bar, posture, evidence and exposure, for every hat: the bar written ex ante at propose,
+the other three ex post at attest. Posture is not a weaker bar — it is the honest statement where no
+bar was set. A half-written measure says where in the lifecycle something is (`DS-MEASURE-ANATOMY`).
+
+```
+bar · posture · evidence · exposure, inherited rather than invented        (DS-MEASURE-ANATOMY)
+  → DEC-019 (dev)   the anatomy renders as optional sub-blocks under `## Measures`
+    strength:    purely additive — old records parse; each part lives with its measure
+    weakness:    a measure is not a first-class node
+    opportunity: separate records with `role: bar`; frontmatter fields
+    threat:      a bar routinely shared by several goals — it then becomes a record of its own
+  → DEC-022 (dev)   attestation is a separate tool, not a phase of compact
+    strength:    compact stays re-runnable without a model, and still never writes a record
+    weakness:    one more skill
+    opportunity: attestation as a phase of compact
+    threat:      attestation turns out fully derivable from rule outcomes and test artifacts — it
+                 then belongs back inside compact
+```
+
+```
+bar:        no `### Bar` recorded; measures in prose
+            Primary   — no compiled measure cell states a bar without stating whether it was met
+            Guardrail — `measure-unasserted` and `measure-unexposed` are harvested, not noticed
+posture:    partially met — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found **Guardrail** asserted with positive and negative cases
+(`test/core/classification.test.ts`); **Primary** concerns compiled cells, and no test inspects a
+compiled measure cell — the guarantee holds at record level only. Exposure as recorded: a compiled
+view could state a bar with no posture and no test would fail; only the record-level harvest would
+notice (`DS-MEASURE-ANATOMY`).
+
+**A disagreement between records.** `DS-MEASURE-ANATOMY` still states that *"nothing in the tool
+writes the second half"*. `DEC-022` decided the tool that writes it, and the postures in this section
+were written by it on 2026-10-11. The statement describes the world before `DEC-022`.
+
+### Documentation quality is reviewed at attestation
+
+Attestation reviews whether the documentation is adequate and complete for what shipped — not who
+wrote it — and urges a condensed account for external stakeholders into the documentation directory,
+`docs/` by default, separate from the operating surrogate (`DS-DOCUMENTATION-REVIEWED`).
+
+```
+attestation judges documentation against what shipped              (DS-DOCUMENTATION-REVIEWED)
+  → DEC-044 (dev)   attest gains a second write target — the documentation directory
+    strength:    a record's claim stays stable; the external account actually gets written
+    weakness:    the write surface grows by a whole directory
+    opportunity: widening the record bound; never writing docs
+    threat:      other tooling starts parsing or citing the directory — it then needs a record's
+                 protections; the first structured read of docsDir is the signal
+```
+
+```
+bar:        no `### Bar` recorded; measures in prose
+            Primary   — every attested initiative records a judgement on documentation adequacy
+            Location  — external documentation is written to the configured directory, docs/ default
+            Guardrail — inadequate documentation is an open loop, never a block
+posture:    partially met — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found **Location** asserted — the directory resolves to `docs/` by default and
+follows a project override (`test/core/attest.test.ts`). **Primary** and **Guardrail** rest on
+instruction text alone: no harvest reads a documentation judgement, and the loop-kind list in
+`test/core/compact-loops.test.ts` has no documentation kind. Re-reviewed against `a018238`:
+unchanged — `test/core/docs-drift.test.ts` guards this repository's own `docs/`, not any of the three
+bars (`DS-DOCUMENTATION-REVIEWED`).
+
+Exposure as recorded: the documentation directory is prose that nothing compiles or checks, so an
+account that drifts from what shipped fails no build; and an attested initiative with no
+documentation judgement is invisible to every compile (`DS-DOCUMENTATION-REVIEWED`, `DEC-044`).
+
+### An escalation is a hat handoff, not an interruption
+
+A specification that does not cover everything is the normal case. When the surrogate cannot answer a
+question in driver-spec scope, apply pauses visibly, infers the question's hat rather than asking it,
+presents a draft record, and seeks explicit approval with the blast radius stated
+(`DS-ESCALATION-HANDOFF`).
+
+```
+   apply [dev] ── surrogate cannot answer ──▶ PAUSE: dev hat set down, hat inferred
+                                                  │
+   apply [dev] ◀── resume ── APPROVAL: record + blast radius ◀── operator [product|maintainer]
+                                                                     (DS-ESCALATION-HANDOFF)
+```
+
+```
+a gap in the spec is a handoff between accountabilities               (DS-ESCALATION-HANDOFF)
+  → DEC-ESCALATION-IS-A-STAGE (dev)   the escalation renders as a stage boundary
+    strength:    the operator knows which hat they wear; the spec gap stays visible
+    weakness:    more ceremony, less flow
+    opportunity: a prompt mid-flow
+    threat:      escalations frequent enough that the ceremony is skipped — the fix is upstream, at
+                 propose, where bars are too thin to build against
+  → DEC-CLASSIFY-IN-QUESTION (dev)   the escalation carries its own classification
+    strength:    the answer lands in a slot; one question, not two; the inference is correctable
+    weakness:    the inference can be wrong
+    opportunity: classifying after the answer; asking which hat
+    threat:      frequent corrections — mitigated by offering two candidates; unread approvals —
+                 mitigated by leading with the blast radius
+  → DEC-COMPILE-ON-APPROVAL (dev)   an approved escalation permits compiling the affected hat
+    strength:    an accountable author is present by definition; the view matches the record
+    weakness:    one more approval in the flow
+    opportunity: leaving the view stale until archive; compiling whenever stale
+    threat:      approvals given without reading the blast radius; mitigation unrecorded
+```
+
+```
+bar:        no `### Bar` recorded; measures in prose
+            Primary    — every escalation presents an inferred hat and a draft record
+            Visibility — the pause is rendered as a stage boundary rather than as a prompt
+            Consent    — no product or maintainer record changes during apply without approval
+            Honesty    — the blast radius is stated before approval is sought
+posture:    cannot assess — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found hat inference by ancestry unit-tested (`test/core/hats.test.ts`) and everything
+else instruction text (`test/core/opsp-apply-escalation.test.ts`): the blast-radius phrase is not
+checked to precede the approval prompt, and no test runs apply and checks that a record is unchanged
+on a decline. Re-reviewed against `a018238`: unchanged — the escalation-ladder tests are instruction
+text, and their *"does not guess which rung"* leans towards an open question rather than an inferred
+draft (`test/core/escalation-ladder.test.ts`) (`DS-ESCALATION-HANDOFF`).
+
+Exposure as recorded: inference can be wrong, and an operator approving quickly may accept a
+misclassified record that routes a constraint to the wrong view and reviewer; the evidence could not
+answer whether an escalation behaves as instructed (`DS-ESCALATION-HANDOFF`).
+
+### A hat's view is compiled only by an accountable author who is present
+
+Views run on two clocks: product and maintainer move on the record clock (backlog, propose, attest),
+dev and devops on the code clock (continuously, through apply). Each view is compiled only while
+someone holding its hat is present and approving — dev/devops during apply, product/maintainer on an
+approved escalation, measures at attest, everything at archive (`DS-VIEW-AUTHORSHIP`).
+
+```
+an author who holds the hat, or no compile                              (DS-VIEW-AUTHORSHIP)
+  → DEC-SCOPED-SEAL (dev)   seal is scopeable, and never blesses a section it did not render
+    strength:    cannot mark stale content fresh, so `check` stays trustworthy
+    weakness:    one more flag
+    opportunity: sealing everything, always; never sealing mid-initiative
+    threat:      unscoped seal run to silence `check` — mitigated by making every seal
+                 output-compared
+  → DEC-COMPILE-ON-MILESTONE (dev, devops)   apply compiles at each milestone, bounded to the hat
+    strength:    dev/devops at most one milestone behind; the author is already present
+    weakness:    unrecorded
+    opportunity: archive only; on demand; in CI
+    threat:      offers to compile product/maintainer accepted without a real context switch — the
+                 fallback is to report without offering
+  → DEC-COMPILE-ON-APPROVAL (dev)   rendered under the previous strategy
+  → DEC-KNOCKDOWN-ALL-VIEWS (dev)   knockdown produces all five views; the empty ones are the finding
+    strength:    the gap is visible on day one; a complete surrogate
+    weakness:    two mostly-empty views to render
+    opportunity: dev and devops only; no views
+    threat:      empty views read as "no requirements" — the rendering is then at fault
+```
+
+```
+bar:        dimension — view currency ←→ authorship discipline
+            chosen    — compile continuously, but only what the hat in the room owns
+            traded for— product and maintainer lag by up to one initiative, visibly
+            neighbour — unrecorded: nothing says what recompiling everything on every change would
+                        cost in render time or in drift
+            form      — prose; no given / when / then is recorded
+posture:    partially met — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found **Guardrail** asserted with a gap: an out-of-scope hat is not blessed, with a
+regression test (`test/cli-e2e/compact.test.ts`), but *"just rendered"* is approximated as *"the
+output bytes changed"*, so a hand edit is sealed. **Primary**: the seal manifest records no authoring
+hat, so authorship cannot be checked after the fact. **Currency**: only the presence of a compile
+step in the apply instructions is asserted; no test measures lag (`DS-VIEW-AUTHORSHIP`).
+
+Exposure as recorded: a hand-edited view can be sealed as if rendered, and which hat compiled a view
+is recorded nowhere it could be audited (`DS-VIEW-AUTHORSHIP`).
+
+### A maintainer strategy stays above domain know-how
+
+A maintainer strategy states a position, never a mechanism, and cites the `dev`/`devops` decisions
+that implement it; the audience is senior management, and a cell they cannot read is in the wrong
+place (`DS-STRATEGY-ALTITUDE`).
+
+```
+the maintainer view is an index into dev and devops                    (DS-STRATEGY-ALTITUDE)
+  → DEC-020 (dev, maintainer)   the existing citation rule enforces the altitude
+    strength:    no new mechanism; an uncitable claim cannot be written; graph, not regex
+    weakness:    still partly depends on compact's synthetic half behaving
+    opportunity: a length or vocabulary rule; an unenforced convention
+    threat:      strategies with no implementer because the mechanism is genuinely absent —
+                 `strategy-unimplemented` then belongs on the roadmap, not in open loops
+```
+
+```
+bar:        no `### Bar` recorded; measures in prose
+            Primary     — every maintainer strategy cell cites a dev/devops decision or is reported
+                          as `strategy-unimplemented`
+            Readability — a strategy cell is intelligible to a reader who has opened no record
+posture:    cannot assess — attested by Ivan Lee, 2026-10-11
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found that no test fires or clears `strategy-unimplemented` — it appears only in the
+loop-kind list in `test/core/compact-loops.test.ts` — and that **Readability** is not unit-testable,
+the SWOT rendering being asserted as instruction text only. The loop did fire on this repository's
+own records during attestation, a local observation rather than a pipeline artifact. Exposure as
+recorded: a regression in `strategy-unimplemented` would pass the suite (`DS-STRATEGY-ALTITUDE`).
+
+### Backward compatibility is best-effort
+
+A new tooling release attempts to work with a project already running an earlier version of
+OpenSprint — best-effort, not guaranteed. A published package is static, so the only surface that can
+break is a new release meeting an older project's `openspec/` and `opensprint/` directories
+(`DS-BACKWARD-COMPAT`). The record follows from `DS-SELF-USE-SCOPE`: a tool optimised for speed of
+evolution cannot also promise never to move.
+
+```
+best-effort, scoped to a new release meeting an older project              (DS-BACKWARD-COMPAT)
+  → no decision is named in the record's implications; descending by depends-on:
+  → DEC-MIGRATE-SEPARATE-TOOL (dev)   schema migration is its own tool
+    strength:    upgrades are assisted; reuses detection that half-exists; clear when to run it
+    weakness:    one more tool on the surface
+    opportunity: folding it into /opsp:rebuild-assess; leaving migration manual
+    threat:      migration routinely requires re-deciding — the boundary is then wrong and the two
+                 tools merge; if shapes stop changing, the tool is removed
+  → DEC-019 (dev)   additive sub-blocks — rendered under "every measure has the same four parts"
+```
+
+```
+bar:        dimension — guaranteed compatibility ←→ speed of evolution
+            chosen    — best-effort, scoped to one surface: a new release meeting an older project
+            traded for— the ability to move quickly, which DS-SELF-USE-SCOPE says is the point
+            neighbour — unrecorded: nothing says what a guarantee would cost, or over what window
+            form      — prose; no given / when / then is recorded
+posture:    no verdict — "below what a product sold to strangers would hold, and deliberately so"
+```
+
+The posture states no verdict and the record carries no exposure, so this measure is unattested
+(`DS-BACKWARD-COMPAT`).
+
+**A disagreement between records.** `DS-BACKWARD-COMPAT` still calls itself *"the one constraint on
+this project that belongs to the `maintainer` hat"*; eleven records now select this view's
+Integrity & Correctness and Change & Quality objectives alone.
 
 ## Availability & Continuity
 
@@ -132,28 +601,42 @@ What this costs to run and maintain. The business model belongs to `product`.
 
 ## Open Loops
 
-**Harvested:**
+What the harvest reported for this hat, grouped by kind. Nothing here is inferred from a record's
+content.
 
-- `measure-unasserted` — **DS-ATTESTED-TRUTH**, **DS-BACKWARD-COMPAT**, **DS-CI-ATTESTATION**,
-  **DS-HIGH-IMPACT-OPS**, **DS-MEASURE-ANATOMY**, **DS-STRATEGY-ALTITUDE**,
-  **DS-SURROGATE-GIT-CONTRACT**. Seven of eight records state a measure that nothing asserts.
-- `measure-unexposed` — the same records bar `DS-HIGH-IMPACT-OPS`. Nothing records what a breach
-  would cost or who it would reach.
-- `exposure-unmitigated` — **DS-HIGH-IMPACT-OPS**. The one exposure this hat records points at no
-  planned work.
-- `constraint-unasserted` — **DS-SELF-USE-SCOPE** (answered by `DEC-017`), **DS-SURROGATE-GIT-CONTRACT**
-  (answered by `DEC-029`, `DEC-030`). Answered, but no rule cites the answering decisions.
+**`exposure-unmitigated`** — an exposure with no `mitigated-by`; a risk with no planned work is a
+confession. Ten records:
 
-**Structural:**
+- `DS-ATTESTED-TRUTH`
+- `DS-HIGH-IMPACT-OPS`
+- `DS-SURROGATE-GIT-CONTRACT`
+- `DS-ATTEST-AS-REVIEW`
+- `DS-CI-ATTESTATION`
+- `DS-MEASURE-ANATOMY`
+- `DS-DOCUMENTATION-REVIEWED`
+- `DS-ESCALATION-HANDOFF`
+- `DS-VIEW-AUTHORSHIP`
+- `DS-STRATEGY-ALTITUDE`
 
-- **Five of seven objectives are empty.** `security & access`, `isolation & confidentiality`,
-  `privacy, retention & legal`, `availability & continuity` and `cost & budget` have nothing
-  recorded. That is the finding this shape exists to produce — and for a self-use CLI some of it is
-  proportionate, which is precisely the argument nobody has written down.
-- **`change & quality` has five strategies and no goal.** The approaches are recorded; the outcome
-  they are meant to reach is not.
-- **Neither bar states its neighbour.** Both say where we sit and roughly what it bought; neither
-  records what the next position along would cost, which is the number that makes a future trade
-  arguable rather than re-litigated.
-- **Nothing in this hat is attested.** `/opsp:attest` shipped with this initiative and has not been
-  run. Until it is, every claim above is a decision, not a fact.
+**`bar-without-form`** — a bar stated in prose; a maintainer bar is written `given / when / then`,
+which is already a test specification.
+
+- `DS-HIGH-IMPACT-OPS`
+- `DS-ATTEST-AS-REVIEW`
+- `DS-VIEW-AUTHORSHIP`
+- `DS-BACKWARD-COMPAT`
+
+**`measure-unattested`** — a posture whose verdict is not one of `met`, `partially met`, `not met`,
+`cannot assess`.
+
+- `DS-HIGH-IMPACT-OPS`
+- `DS-BACKWARD-COMPAT`
+
+**`constraint-unasserted`** — answered by a decision, but no rule cites any answering decision.
+
+- `DS-SELF-USE-SCOPE` — answered by `DEC-017`
+- `DS-STRATEGY-ALTITUDE` — answered by `DEC-020`
+
+**`decision-unguarded`** — a decision no rule cites.
+
+- `DEC-020`

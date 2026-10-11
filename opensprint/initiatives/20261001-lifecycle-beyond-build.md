@@ -1,8 +1,9 @@
 ---
 id: lifecycle-beyond-build
-status: active
-state: attested
+status: completed
+state: completed
 created: 2026-10-01
+completed: 2026-10-11
 ---
 
 ## Description
@@ -303,6 +304,20 @@ written down until the first incident.
 
 That is project-management-as-code, document-as-code and decisions-as-code arriving at the same
 place — one repository, versioned, reviewed, diffable, unable to drift silently.
+
+## OPSX Changes
+
+- `openspec/changes/archive/2026-10-09-maintainer-objectives/`
+- `openspec/changes/archive/2026-10-09-measure-anatomy/`
+- `openspec/changes/archive/2026-10-09-strategy-altitude/`
+- `openspec/changes/archive/2026-10-09-initiative-parser/`
+- `openspec/changes/archive/2026-10-09-initiative-state/`
+- `openspec/changes/archive/2026-10-09-board-view/`
+- `openspec/changes/archive/2026-10-09-attested-authority/`
+- `openspec/changes/archive/2026-10-09-attest-tool/`
+- `openspec/changes/archive/2026-10-09-forward-closure/`
+- `openspec/changes/archive/2026-10-10-attest-as-review/`
+- `openspec/changes/archive/2026-10-10-attest-documentation/`
 
 ## Attestation
 

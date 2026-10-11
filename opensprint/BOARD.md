@@ -21,11 +21,7 @@ _Empty._
 
 In flight.
 
-| Initiative | State | Milestones | Next |
-|---|---|---|---|
-| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | attested | 11/11 _(+1 superseded)_ | — |
-| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | attested | 12/12 | — |
-| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | attested | 5/5 | — |
+_Empty._
 
 ## Handoff
 
@@ -40,7 +36,10 @@ Closed.
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
 | [parallel-universe-reconciliation](initiatives/20260522-parallel-universe-reconciliation.md) | _(none — status: completed)_ | 4/4 | — |
-| [compact-surrogate](initiatives/20260926-compact-surrogate.md) | _(none — status: completed)_ | 8/8 | — |
+| [compact-surrogate](initiatives/20260926-compact-surrogate.md) | _(none — status: completed)_ | 9/9 | — |
+| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | completed | 11/11 _(+1 superseded)_ | — |
+| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | completed | 12/12 | — |
+| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | completed | 5/5 | — |
 
 ## Declined
 
@@ -75,4 +74,4 @@ risk, and **that initiative's state is the assurance level**.
 
 Ways this board would otherwise be quietly wrong.
 
-- `milestone-outside-section` **compact-surrogate** — `documentation-rewrite` lives under "Added at re-exploration, 2026-09-27", so it is not counted in this initiative's progress.
+_None._
