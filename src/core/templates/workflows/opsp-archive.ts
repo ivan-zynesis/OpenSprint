@@ -58,6 +58,42 @@ Then confirm the compile is sound:
 opensprint compact check
 \`\`\`
 
+## The merge sequence
+
+Archiving is not the last step — it is the third of four, and the order is forced
+(\`DEC-030\`):
+
+\`\`\`
+  opsp/<initiative>  ──rebase──●──attest──●──archive──●──▶ main
+\`\`\`
+
+**Rebase onto the trunk first.** Archive compiles from whatever records it can see. Compile before
+rebasing and you compile against a record set that excludes whatever else landed meanwhile — the
+artifact is wrong the instant it merges, and \`compact check\` would be right to fail it.
+
+**Attest before archiving.** Nothing can be documented that has not been attested
+(\`DS-ATTESTED-TRUTH\`), and archive is what compiles the documentation. If \`/opsp:attest\` has not
+run, stop and say so rather than compiling claims nobody has checked.
+
+**Then archive, then merge** — as one pull request. A second pull request carrying only attestation
+adds history noise and is, in practice, the one that never happens.
+
+### The PR gate
+
+A pull request merging \`opsp/*\` into the trunk should be gated on **state consistency**:
+
+\`\`\`bash
+opensprint compact check      # views agree with their records
+opensprint compact board      # the Problems section must be empty
+\`\`\`
+
+The initiative's state must be \`attested\`, and its \`## Attestation\` section must answer
+reversibility, blast radius and RACI.
+
+**This gates on whether you answered, never on what you answered.** A bar recorded as *not met*,
+with an exposure and a plan, passes. Insisting a question be answered is a consistency check;
+grading the answer is certification, which \`DS-SURROGATE-SCOPE\` places out of scope.
+
 If \`check\` reports anything not fresh, resolve it before continuing — an archive that ships a stale view records an architectural state that was never true.
 
 ### 3. Clean Up Worktrees

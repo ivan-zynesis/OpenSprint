@@ -421,4 +421,75 @@ describe('initiatives', () => {
       expect(readInitiatives(root)[0].attestation).toBeUndefined();
     });
   });
+
+  // ═══════════════════════════════════════════════════════════
+  // Git as the third input (DEC-024)
+  // ═══════════════════════════════════════════════════════════
+
+  describe('the state check with git', () => {
+    const entry = (over: Partial<InitiativeEntry>): InitiativeEntry => ({
+      id: 'i',
+      status: 'active',
+      dependsOn: [],
+      milestones: [],
+      orphanedMilestones: [],
+      driverSpecs: [],
+      decisions: [],
+      path: '/tmp/i.md',
+      stem: 'i',
+      ...over,
+    });
+    const ms = (done: number, total: number) =>
+      Array.from({ length: total }, (_, k) => ({
+        name: `m${k}`,
+        description: 'd',
+        done: k < done,
+        superseded: false,
+      }));
+    const merged = { branchExists: true, merged: true };
+    const open = { branchExists: true, merged: false };
+    const none = { branchExists: false, merged: false };
+    const kinds = (e: InitiativeEntry, g?: typeof merged) =>
+      checkInitiativeState(e, g).map((p) => p.kind);
+
+    it('reports nothing extra when git is not supplied', () => {
+      expect(kinds(entry({ state: 'building', milestones: ms(1, 3) }))).toEqual([]);
+    });
+
+    // The original motivation: a fully implemented PR merges and the
+    // initiative is never closed.
+    it('reports an initiative whose branch merged while it still says building', () => {
+      const problems = checkInitiativeState(
+        entry({ state: 'building', milestones: ms(3, 3) }),
+        merged
+      );
+      expect(problems.map((p) => p.kind)).toEqual(['state-contradicted']);
+      expect(problems[0].detail).toMatch(/has merged/i);
+      expect(problems[0].detail).toMatch(/never closed/i);
+    });
+
+    it('reports it for proposed and exploring too', () => {
+      for (const state of ['exploring', 'proposed']) {
+        expect(kinds(entry({ state, driverSpecs: ['DS-A'] }), merged)).toContain('state-contradicted');
+      }
+    });
+
+    it('does not report an attested or completed initiative whose branch merged', () => {
+      for (const state of ['attested', 'completed']) {
+        expect(kinds(entry({ state, milestones: ms(2, 2) }), merged)).toEqual([]);
+      }
+    });
+
+    it('does not report an unmerged branch', () => {
+      expect(kinds(entry({ state: 'building', milestones: ms(1, 2) }), open)).toEqual([]);
+    });
+
+    it('does not report when no branch exists', () => {
+      expect(kinds(entry({ state: 'building', milestones: ms(1, 2) }), none)).toEqual([]);
+    });
+
+    it('never contradicts declined, whatever git says', () => {
+      expect(kinds(entry({ state: 'declined' }), merged)).toEqual([]);
+    });
+  });
 });

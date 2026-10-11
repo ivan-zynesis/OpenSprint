@@ -26,6 +26,7 @@ import {
 } from './initiatives.js';
 import { readSourcedDriverSpecs } from './compact/records.js';
 import { parseMeasureAnatomy, mitigatedBy } from './compact/measures.js';
+import { readInitiativeGitState } from './initiative-git.js';
 
 /** An exposure and the work, if any, planned to close it. */
 export interface RoadmapRow {
@@ -154,7 +155,9 @@ function nextMilestoneOf(entry: InitiativeEntry): string {
 /** Renders the board from the initiatives, deterministically. */
 export function renderBoard(
   initiatives: readonly InitiativeEntry[],
-  roadmap: readonly RoadmapRow[] = []
+  roadmap: readonly RoadmapRow[] = [],
+  /** What git says per initiative id, where it knows. */
+  gitStates: ReadonlyMap<string, import('./initiatives.js').InitiativeGitState> = new Map()
 ): string {
   const lines: string[] = [
     '# Board',
@@ -221,7 +224,7 @@ export function renderBoard(
 
   const problems: string[] = [];
   for (const entry of initiatives) {
-    for (const problem of checkInitiativeState(entry)) {
+    for (const problem of checkInitiativeState(entry, gitStates.get(entry.id))) {
       problems.push(`- \`${problem.kind}\` **${problem.initiative}** — ${problem.detail}`);
     }
     for (const orphan of entry.orphanedMilestones) {
@@ -245,6 +248,15 @@ export function renderBoard(
 /** Regenerates `BOARD.md`, mirroring `regenerateDecisionMap`. */
 export function regenerateBoard(opensprintDir: string): void {
   const initiatives = readInitiatives(opensprintDir);
-  const board = renderBoard(initiatives, roadmapRows(opensprintDir, initiatives));
+  // The project root is the parent of opensprint/. Git may know nothing —
+  // no repository, no trunk — and the check then reports exactly what it
+  // reported before.
+  const projectRoot = path.dirname(opensprintDir);
+  const gitStates = new Map<string, import('./initiatives.js').InitiativeGitState>();
+  for (const initiative of initiatives) {
+    const state = readInitiativeGitState(projectRoot, initiative.id);
+    if (state !== undefined) gitStates.set(initiative.id, state);
+  }
+  const board = renderBoard(initiatives, roadmapRows(opensprintDir, initiatives), gitStates);
   fs.writeFileSync(path.join(opensprintDir, BOARD_FILENAME), board, 'utf-8');
 }

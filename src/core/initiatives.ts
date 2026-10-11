@@ -412,6 +412,22 @@ export function stateIndex(state: string): number {
 
 export type StateProblemKind = 'state-unknown' | 'state-contradicted' | 'state-undeclared';
 
+/**
+ * What git says about an initiative's branch.
+ *
+ * The third input to the state check (DEC-024). Declared state and filled
+ * cells can agree with each other and both be wrong about reality — an
+ * initiative whose work merged weeks ago but still says `building` is the
+ * dangling case this exists to catch, and it was the original motivation:
+ * a fully implemented PR merging while the initiative was never closed.
+ */
+export interface InitiativeGitState {
+  /** Whether `opsp/<id>` exists as a ref at all. */
+  branchExists: boolean;
+  /** Whether that branch has been merged into the trunk. */
+  merged: boolean;
+}
+
 export interface StateProblem {
   initiative: string;
   kind: StateProblemKind;
@@ -429,7 +445,10 @@ export interface StateProblem {
  * question is narrower — is the declared state *impossible*? — which reports
  * the drift worth reporting and stays quiet about the rest.
  */
-export function checkInitiativeState(entry: InitiativeEntry): StateProblem[] {
+export function checkInitiativeState(
+  entry: InitiativeEntry,
+  git?: InitiativeGitState
+): StateProblem[] {
   const problems: StateProblem[] = [];
   const { state, id } = entry;
 
@@ -490,6 +509,18 @@ export function checkInitiativeState(entry: InitiativeEntry): StateProblem[] {
 
   if (state === 'building' && total === 0) {
     contradiction(`Declares 'building' but has no milestones.`);
+  }
+
+  // ── git, the third input (DEC-024)
+  //
+  // Reported only where git actually knows something. A caller that supplies
+  // nothing sees exactly the checks it saw before.
+  if (git !== undefined && git.branchExists && git.merged) {
+    if (stateIndex(state) >= 0 && stateIndex(state) < stateIndex('attested')) {
+      contradiction(
+        `Declares '${state}', but opsp/${id} has merged. Work landed and the initiative was never closed.`
+      );
+    }
   }
 
   return problems;
