@@ -77,7 +77,7 @@ The system SHALL derive open loops from the index and the decision graph, and SH
 
 #### Scenario: The loop kinds
 - **WHEN** the system enumerates the kinds of open loop it can report
-- **THEN** the list SHALL be exactly: `constraint-unanswered`, `constraint-unasserted`, `decision-unguarded`, `rule-guards-dead-record`, `decision-on-superseded`, `record-unclassified`, `constraint-unmeasurable`, `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`, `record-without-objective`, `strategy-unimplemented`, `exposure-unmitigated`, `measure-unattested`
+- **THEN** the list SHALL be exactly: `constraint-unanswered`, `constraint-unasserted`, `decision-unguarded`, `rule-guards-dead-record`, `decision-on-superseded`, `record-unclassified`, `constraint-unmeasurable`, `measure-unasserted`, `measure-unexposed`, `bar-without-neighbour`, `record-without-objective`, `strategy-unimplemented`, `exposure-unmitigated`, `measure-unattested`, `evidence-unresolvable`, `reversibility-unstated`, `blast-radius-unstated`, `raci-unassigned`
 
 #### Scenario: A constraint no decision answers
 - **WHEN** an active driver-spec has no active decision whose `depends-on` includes it
@@ -110,6 +110,27 @@ The system SHALL derive open loops from the index and the decision graph, and SH
 - **WHEN** any open loop is reported
 - **THEN** it SHALL be attributed to every hat the subject record declares
 - **AND** a loop against an unassigned record SHALL be reported without a hat
+
+#### Scenario: Evidence that cites nothing addressable
+- **WHEN** a record carries an `### Evidence` block
+- **AND** that block contains neither a markdown link nor a backticked path
+- **THEN** the system SHALL report an `evidence-unresolvable` loop against that record's hats
+- **AND** the detail SHALL name both accepted forms
+
+#### Scenario: Evidence citing a repository path that does not exist
+- **WHEN** an evidence block cites a repository-relative path
+- **AND** that path is not in the tree
+- **THEN** the system SHALL report `evidence-unresolvable` naming the path
+
+#### Scenario: A remote reference is never fetched
+- **WHEN** an evidence reference carries a URL scheme
+- **THEN** the system SHALL accept it without resolving it
+- **AND** no network request SHALL be made during a compile
+
+#### Scenario: A path the check will not look at
+- **WHEN** an evidence reference is absolute, or resolves outside the project root
+- **THEN** the system SHALL NOT report it as unresolvable
+- **AND** the reason SHALL be that a check with nothing to say must not invent a gap
 
 ### Requirement: Open loops are reported, never gated
 The system SHALL report open loops without failing any verification command on their account.

@@ -529,7 +529,7 @@ describe('per-hat classification', () => {
     });
 
     it('met with evidence reports nothing', () => {
-      spec('DS-A', { role: 'goal', body: measures(posture('met') + '\n### Evidence\n\nci run 1\n') });
+      spec('DS-A', { role: 'goal', body: measures(posture('met') + '\n### Evidence\n\n[ci run 1](https://ci/1)\n') });
       expect(kinds('measure-unasserted')).toEqual([]);
       expect(kinds('measure-unexposed')).toEqual([]);
       expect(kinds('measure-unattested')).toEqual([]);
@@ -559,6 +559,80 @@ describe('per-hat classification', () => {
       expect(kinds('measure-unasserted')).toEqual([]);
       expect(kinds('measure-unattested')).toEqual([]);
       expect(kinds('exposure-unmitigated')).toEqual([]);
+    });
+
+    // ── DS-CI-ATTESTATION: evidence is addressable or it is not evidence
+
+    it('evidence-unresolvable fires on an evidence block of pure prose', () => {
+      spec('DS-A', { role: 'goal', body: measures(posture('met') + '\n### Evidence\n\nthe suite passed\n') });
+      expect(kinds('evidence-unresolvable')).toEqual(['DS-A']);
+      const [l] = loops().filter((x) => x.kind === 'evidence-unresolvable');
+      expect(l.detail).toContain('no addressable artifact');
+    });
+
+    it('a markdown link satisfies it', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: measures(posture('met') + '\n### Evidence\n\n[coverage](https://ci.example.com/runs/4821)\n'),
+      });
+      expect(kinds('evidence-unresolvable')).toEqual([]);
+    });
+
+    it('a backticked path satisfies it', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: measures(posture('met') + '\n### Evidence\n\nsee `reports/plan.txt`\n'),
+      });
+      expect(kinds('evidence-unresolvable')).toEqual([]);
+    });
+
+    it('a backticked symbol name is not a reference', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: measures(posture('met') + '\n### Evidence\n\n`deriveOpenLoops` covers it\n'),
+      });
+      expect(kinds('evidence-unresolvable')).toEqual(['DS-A']);
+    });
+
+    it('reports a local path that is not in the tree, naming it', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: measures(posture('met') + '\n### Evidence\n\n`reports/gone.txt`\n'),
+      });
+      const found = deriveOpenLoops(
+        specs(),
+        decs(),
+        buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)),
+        rolesFor,
+        () => [],
+        [],
+        () => false
+      ).filter((l) => l.kind === 'evidence-unresolvable');
+      expect(found.map((l) => l.record)).toEqual(['DS-A']);
+      expect(found[0].detail).toContain('reports/gone.txt');
+      expect(found[0].detail).toContain('not in the tree');
+    });
+
+    it('a remote reference is never resolved, even where local ones fail', () => {
+      spec('DS-A', {
+        role: 'goal',
+        body: measures(posture('met') + '\n### Evidence\n\n[run](https://ci.example.com/4821)\n'),
+      });
+      const found = deriveOpenLoops(
+        specs(),
+        decs(),
+        buildRuleIndex(root, [...specs(), ...decs()].map((r) => r.id)),
+        rolesFor,
+        () => [],
+        [],
+        () => false
+      ).filter((l) => l.kind === 'evidence-unresolvable');
+      expect(found).toEqual([]);
+    });
+
+    it('does not fire where there is no evidence block to read', () => {
+      spec('DS-A', { role: 'goal', body: measures(posture('not met') + '\n### Exposure\n\nx\nmitigated-by: y\n') });
+      expect(kinds('evidence-unresolvable')).toEqual([]);
     });
 
     // ── unchanged

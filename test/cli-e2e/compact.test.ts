@@ -19,7 +19,7 @@ describe('opensprint compact (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Posture\n\n- **verdict**: met\n- **attested-by**: test\n- **attested-on**: 2026-01-01\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\nmitigated-by: not-needed\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Posture\n\n- **verdict**: met\n- **attested-by**: test\n- **attested-on**: 2026-01-01\n\n### Evidence\n\n`src/a.test.ts`\n\n### Exposure\n\nnone recorded\nmitigated-by: not-needed\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
@@ -335,7 +335,7 @@ describe('opensprint compact loops (e2e)', () => {
     fs.writeFileSync(path.join(projectRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md'),
-      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Posture\n\n- **verdict**: met\n- **attested-by**: test\n- **attested-on**: 2026-01-01\n\n### Evidence\n\nsrc/a.test.ts\n\n### Exposure\n\nnone recorded\nmitigated-by: not-needed\n'
+      '---\nid: DS-A\ntype: product\nstatus: active\ncreated: 2026-01-01\nhats: [product]\nrole: goal\n---\n\nA constraint.\n\n## Measures\n\n- **Primary**: a number\n\n### Posture\n\n- **verdict**: met\n- **attested-by**: test\n- **attested-on**: 2026-01-01\n\n### Evidence\n\n`src/a.test.ts`\n\n### Exposure\n\nnone recorded\nmitigated-by: not-needed\n'
     );
     fs.writeFileSync(
       path.join(projectRoot, 'opensprint', 'ADRs', 'DEC-001.md'),
@@ -359,6 +359,28 @@ describe('opensprint compact loops (e2e)', () => {
     const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
     expect(r.exitCode).toBe(0);
     expect(r.stdout).toContain('No open loops');
+  });
+
+  it('reports evidence citing a path that is not in the tree, naming it', async () => {
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.stdout).toContain('evidence-unresolvable');
+    expect(r.stdout).toContain('src/a.test.ts');
+  });
+
+  it('stops reporting once the cited artifact exists', async () => {
+    fs.writeFileSync(path.join(projectRoot, 'src', 'a.test.ts'), '// guards DEC-001\n');
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.stdout).not.toContain('evidence-unresolvable');
+  });
+
+  it('does not resolve a path that escapes the project root', async () => {
+    const dsPath = path.join(projectRoot, 'opensprint', 'driver-specs', 'DS-A.md');
+    fs.writeFileSync(
+      dsPath,
+      fs.readFileSync(dsPath, 'utf-8').replace('`src/a.test.ts`', '`../elsewhere/report.txt`')
+    );
+    const r = await runCLI(['compact', 'loops'], { cwd: projectRoot });
+    expect(r.stdout).not.toContain('evidence-unresolvable');
   });
 
   it('names both triage workflows when loops exist', async () => {

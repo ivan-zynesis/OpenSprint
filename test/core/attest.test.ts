@@ -251,4 +251,21 @@ describe('/opsp:attest', () => {
       expect(text).toMatch(/record\s+that\s+as\s+a\s+finding/i);
     });
   });
+
+  describe('the instructions mandate an addressable evidence reference', () => {
+    const text = getOpspAttestSkillTemplate().instructions;
+
+    it('names the two forms the harvest reads', () => {
+      expect(text).toMatch(/markdown\s+link/i);
+      expect(text).toMatch(/backticked\s+repository-relative\s+path/i);
+    });
+
+    it('names the loop that fires when neither is written', () => {
+      expect(text).toContain('evidence-unresolvable');
+    });
+
+    it('says a remote reference is taken on trust', () => {
+      expect(text).toMatch(/does\s+not\s+go\s+to\s+the\s+network/i);
+    });
+  });
 });

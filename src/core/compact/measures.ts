@@ -267,3 +267,67 @@ export function mitigatedBy(exposureBlock: string): string | null {
 export function statesNeighbour(block: string): boolean {
   return parseBar(block).neighbour !== undefined;
 }
+
+/**
+ * The two forms an evidence reference may take.
+ *
+ * `remote` is anything carrying a scheme — a pipeline run, a published
+ * coverage report, a scan result hosted by the forge. `local` is a path
+ * inside the repository.
+ *
+ * The split exists because only one of them can be checked here. A compiler
+ * that resolved a remote reference would have to go to the network, which
+ * makes a compile non-deterministic, slow, and dependent on credentials the
+ * reader may not hold. `DEC-007` forbids inventing a gap; a failed fetch is
+ * exactly that — it reports the network, not the record.
+ */
+export const EVIDENCE_REFERENCE_FORMS = ['remote', 'local'] as const;
+
+export type EvidenceReferenceForm = (typeof EVIDENCE_REFERENCE_FORMS)[number];
+
+export interface EvidenceReference {
+  form: EvidenceReferenceForm;
+  /** The URL, or the repository-relative path. */
+  target: string;
+}
+
+/**
+ * Every addressable reference an evidence block carries.
+ *
+ * Two forms are recognised, both of them things an author writes
+ * deliberately rather than shapes a parser guesses at: a markdown link, and
+ * a backticked path. Prose is not scanned for things that look like
+ * filenames — `DS-CI-ATTESTATION` requires an *addressable* artifact, and a
+ * word with a dot in it is not an address.
+ *
+ * A link with a scheme is remote; one without is a path, and is reported the
+ * same way a backticked path is.
+ */
+export function evidenceReferences(block: string): EvidenceReference[] {
+  const refs: EvidenceReference[] = [];
+  const seen = new Set<string>();
+
+  const add = (target: string): void => {
+    const cleaned = target.trim().replace(/[.,;)]+$/, '');
+    if (cleaned.length === 0 || seen.has(cleaned)) return;
+    seen.add(cleaned);
+    refs.push({
+      form: /^[a-z][a-z0-9+.-]*:/i.test(cleaned) ? 'remote' : 'local',
+      target: cleaned,
+    });
+  };
+
+  // Markdown links: the target, not the label.
+  for (const match of block.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) add(match[1]);
+
+  // Backticked paths. A backticked token without a separator is a symbol
+  // name, not an address, so it does not count as a reference.
+  for (const match of block.matchAll(/`([^`\n]+)`/g)) {
+    const token = match[1].trim();
+    if (!token.includes('/')) continue;
+    if (/\s/.test(token)) continue;
+    add(token);
+  }
+
+  return refs;
+}
