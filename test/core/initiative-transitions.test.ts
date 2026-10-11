@@ -34,8 +34,8 @@ describe('initiative transitions', () => {
       expect([...INITIATIVE_STATES]).toContain(READY_FOR_ATTESTATION);
     });
 
-    it('declares exactly eight transitions, each owned by a workflow', () => {
-      expect(TRANSITIONS).toHaveLength(8);
+    it('declares exactly eleven transitions, each owned by a workflow', () => {
+      expect(TRANSITIONS).toHaveLength(11);
       for (const t of TRANSITIONS) {
         expect(t.by).toMatch(/^\/opsp:/);
         expect(t.when.length).toBeGreaterThan(0);
@@ -59,12 +59,17 @@ describe('initiative transitions', () => {
       expect(by('attested', 'completed')).toBe('/opsp:archive');
     });
 
-    it('re-exploring is the one edge that runs backwards', () => {
+    it('the handoff falls back by re-planning and by a change request', () => {
       const backwards = TRANSITIONS.filter(
         (t) => t.from === 'ready-for-attestation' && t.to === 'building'
       );
-      expect(backwards).toHaveLength(1);
-      expect(backwards[0].by).toBe('/opsp:reexplore');
+      expect(backwards.map((t) => t.by).sort()).toEqual(['/opsp:attest', '/opsp:reexplore']);
+    });
+
+    it('the strategy rung is reachable from both build and handoff', () => {
+      const repropose = TRANSITIONS.filter((t) => t.by === '/opsp:repropose');
+      expect(repropose.map((t) => t.from).sort()).toEqual(['building', 'ready-for-attestation']);
+      expect(repropose.every((t) => t.to === 'proposed')).toBe(true);
     });
 
     it('declining is reversible, keeping history', () => {
@@ -81,7 +86,7 @@ describe('initiative transitions', () => {
       const r = checkTransition('building', 'completed');
       expect(r).not.toBeNull();
       expect(r!.reason).toContain("'building' does not move to 'completed'");
-      expect(r!.legal.map((t) => t.to)).toEqual(['ready-for-attestation']);
+      expect(r!.legal.map((t) => t.to).sort()).toEqual(['proposed', 'ready-for-attestation']);
     });
 
     it('refuses skipping the handoff', () => {

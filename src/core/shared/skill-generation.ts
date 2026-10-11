@@ -45,6 +45,7 @@ import {
   getOpspTriageSkillTemplate,
   getOpspReviewSkillTemplate,
   getOpspReexploreSkillTemplate,
+  getOpspReproposeSkillTemplate,
   getOpspKnockdownSkillTemplate,
   getOpspExploreCommandTemplate,
   getOpspProposeCommandTemplate,
@@ -56,6 +57,7 @@ import {
   getOpspTriageCommandTemplate,
   getOpspReviewCommandTemplate,
   getOpspReexploreCommandTemplate,
+  getOpspReproposeCommandTemplate,
   getOpspKnockdownCommandTemplate,
   getOpspRebaseSkillTemplate,
   getOpspRebaseCommandTemplate,
@@ -164,7 +166,7 @@ export const OPSP_WORKFLOW_IDS = [
   // Utility commands
   'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
   // Lifecycle commands
-  'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-knockdown',
+  'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
   // Universe reconciliation commands
   'opsp-rebase', 'opsp-abandon',
   // Surrogate compaction
@@ -192,6 +194,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspArchiveSkillTemplate(), dirName: 'opensprint-archive', workflowId: 'opsp-archive' },
     { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
     { template: getOpspReexploreSkillTemplate(), dirName: 'opensprint-reexplore', workflowId: 'opsp-reexplore' },
+    { template: getOpspReproposeSkillTemplate(), dirName: 'opensprint-repropose', workflowId: 'opsp-repropose' },
     { template: getOpspKnockdownSkillTemplate(), dirName: 'opensprint-knockdown', workflowId: 'opsp-knockdown' },
     // Universe reconciliation skills
     { template: getOpspRebaseSkillTemplate(), dirName: 'opensprint-rebase', workflowId: 'opsp-rebase' },
@@ -222,6 +225,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspArchiveCommandTemplate(), id: 'opsp-archive' },
     { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
     { template: getOpspReexploreCommandTemplate(), id: 'opsp-reexplore' },
+    { template: getOpspReproposeCommandTemplate(), id: 'opsp-repropose' },
     { template: getOpspKnockdownCommandTemplate(), id: 'opsp-knockdown' },
     // Universe reconciliation commands
     { template: getOpspRebaseCommandTemplate(), id: 'opsp-rebase' },

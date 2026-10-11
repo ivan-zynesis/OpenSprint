@@ -132,6 +132,22 @@ re-explore — leaves the state alone.
 engineer and a product owner iterating on the plan, which is the same conversation \`/opsp:triage\`
 has before the work starts. Re-explore is that conversation held again, with the work in hand.
 
+### Which rung is this?
+
+Re-explore is the **plan** rung (\`DEC-ESCALATION-LADDER\`). The goal holds and the strategy holds;
+the milestones that implement them do not.
+
+\`\`\`
+  the GOAL was wrong        → a new initiative, or /opsp:driver
+  the STRATEGY was wrong    → /opsp:repropose    — supersedes ADRs, returns to 'proposed'
+  the PLAN was wrong        → YOU ARE HERE       — revises milestones, stays at 'building'
+\`\`\`
+
+**If the revision requires superseding a decision, you are on the wrong rung.** Hand to
+\`/opsp:repropose\`. Re-explore that quietly supersedes an ADR has collapsed two rungs into one,
+and the reason they are separate is that returning to \`proposed\` forces \`/opsp:apply\` to open
+the work again — which a plan revision does not need and a strategy revision does.
+
 ### Adding a corrective milestone (for completed work that needs fixing)
 
 1. Add a new milestone to the initiative plan (after the completed milestone, or at operator-specified position)
