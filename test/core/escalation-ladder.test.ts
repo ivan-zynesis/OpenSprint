@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getOpspSkillTemplates, OPSP_WORKFLOW_IDS } from '../../src/core/shared/index.js';
-import { TRANSITIONS, checkTransition } from '../../src/core/initiative-transitions.js';
+import { TRANSITIONS, checkTransition, transitionFor } from '../../src/core/initiative-transitions.js';
 
 const instructions = (id: string) =>
   getOpspSkillTemplates().find((t) => t.workflowId === id)!.template.instructions;
@@ -18,23 +18,36 @@ describe('the escalation ladder', () => {
 
     it('names all three rungs and where it sits', () => {
       const text = instructions('opsp-repropose');
-      expect(text).toMatch(/the GOAL was wrong/);
-      expect(text).toMatch(/the STRATEGY was wrong/);
-      expect(text).toMatch(/the PLAN was wrong/);
+      expect(text).toMatch(/the GOAL moved/);
+      expect(text).toMatch(/the STRATEGY moved/);
+      expect(text).toMatch(/the work is MISSING/);
       expect(text).toMatch(/YOU ARE HERE/);
     });
 
-    it('makes the driver-specs its invariant and stops where one must move', () => {
+    it('tests the Statement, not the whole driver-spec', () => {
       const text = instructions('opsp-repropose');
-      expect(text).toMatch(/Driver-specs are the invariant/);
-      expect(text).toMatch(/this is the goal moving, not the strategy/i);
-      expect(text).toContain('/opsp:driver');
+      expect(text).toMatch(/The test is a driver-spec's Statement/);
+      expect(text).toContain('/opsp:reideate');
     });
 
-    it('refuses to move the bar', () => {
-      expect(instructions('opsp-repropose')).toMatch(
-        /strategy that\s+cannot meet the bar is a strategy to replace, not a bar to lower/
-      );
+    it('may amend Measures, bounded the way attest is', () => {
+      const text = instructions('opsp-repropose');
+      expect(text).toMatch(/MAY CHANGE/);
+      expect(text).toMatch(/MUST NOT CHANGE/);
+      expect(text).toContain('## Measures');
+      expect(text).toContain('DEC-027');
+    });
+
+    it('routes a lowered bar to the goal rung', () => {
+      const text = instructions('opsp-repropose');
+      expect(text).toMatch(/Lowering the bar to fit what was built is not amending a measure/);
+      expect(text).toMatch(/easier rather than different/);
+    });
+
+    it('makes the Statement its invariant and stops where one must move', () => {
+      const text = instructions('opsp-repropose');
+      expect(text).toMatch(/Statement is the invariant/);
+      expect(text).toMatch(/this is the goal moving, not the strategy/i);
     });
 
     it('supersedes rather than rewrites, and says why', () => {
@@ -69,6 +82,11 @@ describe('the escalation ladder', () => {
       expect(find('building', 'proposed', '/opsp:repropose')).toBeDefined();
     });
 
+    it('build and handoff can both fall back to the goal rung', () => {
+      expect(find('building', 'exploring', '/opsp:reideate')).toBeDefined();
+      expect(find('ready-for-attestation', 'exploring', '/opsp:reideate')).toBeDefined();
+    });
+
     it('attestation can fall back to the strategy rung', () => {
       expect(find('ready-for-attestation', 'proposed', '/opsp:repropose')).toBeDefined();
     });
@@ -76,24 +94,30 @@ describe('the escalation ladder', () => {
     it('attestation can request a change without superseding anything', () => {
       const t = find('ready-for-attestation', 'building', '/opsp:attest');
       expect(t).toBeDefined();
-      expect(t!.when).toMatch(/the plan holds, the work does not/);
+      expect(t!.when).toMatch(/the work was not finished/);
     });
 
-    it('re-planning keeps its own edge, distinct from a change request', () => {
-      expect(find('ready-for-attestation', 'building', '/opsp:reexplore')).toBeDefined();
+    it('a change request is the only way back to building from the handoff', () => {
+      const back = TRANSITIONS.filter(
+        (t) => t.from === 'ready-for-attestation' && t.to === 'building'
+      );
+      expect(back.map((t) => t.by)).toEqual(['/opsp:attest']);
+      expect(back[0].when).toMatch(/the work was not finished/);
     });
 
     it('a refusal from the handoff names every way back', () => {
       const r = checkTransition('ready-for-attestation', 'completed');
       expect(r).not.toBeNull();
       const tos = r!.legal.map((t) => t.to).sort();
-      expect(tos).toEqual(['attested', 'building', 'building', 'proposed']);
+      expect(tos).toEqual(['attested', 'building', 'exploring', 'proposed']);
       expect(r!.legal.map((t) => t.by)).toContain('/opsp:repropose');
+      expect(r!.legal.map((t) => t.by)).toContain('/opsp:reideate');
     });
 
-    it('building can go forward to the handoff or back to the strategy', () => {
+    it('building can go forward to the handoff or back to either rung', () => {
       expect(checkTransition('building', 'ready-for-attestation')).toBeNull();
       expect(checkTransition('building', 'proposed')).toBeNull();
+      expect(checkTransition('building', 'exploring')).toBeNull();
     });
 
     it('still refuses a move no rung declares', () => {
@@ -110,20 +134,21 @@ describe('the escalation ladder', () => {
     });
 
     it('asks what has to move, mechanically', () => {
-      expect(text()).toMatch(/Does a driver-spec/);
+      expect(text()).toMatch(/Does a driver-spec's STATEMENT have to change\?/);
       expect(text()).toMatch(/the GOAL moved/);
       expect(text()).toMatch(/the STRATEGY moved/);
-      expect(text()).toMatch(/the PLAN moved/);
+      expect(text()).toMatch(/nothing moved/);
     });
 
     it('does not guess which rung it is', () => {
       expect(text()).toMatch(/Do not guess which/);
     });
 
-    it('says apply stops either way, and why repropose needs a rerun', () => {
-      expect(text()).toMatch(/Apply stops either way/);
+    it('says both rungs stop apply, and that both are hat changes', () => {
+      expect(text()).toMatch(/Both rungs stop apply, and both are hat changes/);
       expect(text()).toContain('/opsp:repropose');
-      expect(text()).toContain('/opsp:reexplore');
+      expect(text()).toContain('/opsp:reideate');
+      expect(text()).toContain('DEC-HAT-HANDOFFS');
     });
   });
 
@@ -137,7 +162,12 @@ describe('the escalation ladder', () => {
     it('offers all three exits', () => {
       expect(text()).toMatch(/request a change/);
       expect(text()).toContain('/opsp:repropose');
-      expect(text()).toContain('/opsp:reexplore');
+      expect(text()).toContain('/opsp:reideate');
+    });
+
+    it('says the hat change already happened at the handoff', () => {
+      expect(text()).toMatch(/already wearing the right hat for all three/);
+      expect(text()).toMatch(/That is what the handoff was for/);
     });
 
     it('a change request supersedes nothing', () => {
@@ -153,17 +183,96 @@ describe('the escalation ladder', () => {
     });
   });
 
-  describe('reexplore states its rung', () => {
-    const text = () => instructions('opsp-reexplore');
+  describe('reideate is explore, later', () => {
+    const text = () => instructions('opsp-reideate');
 
-    it('declares itself the plan rung', () => {
-      expect(text()).toMatch(/Which rung is this\?/);
-      expect(text()).toMatch(/YOU ARE HERE/);
+    it('is registered in place of reexplore', () => {
+      expect([...OPSP_WORKFLOW_IDS]).toContain('opsp-reideate');
+      expect([...OPSP_WORKFLOW_IDS]).not.toContain('opsp-reexplore');
     });
 
-    it('hands to repropose where a decision must be superseded', () => {
-      expect(text()).toMatch(/you are on the wrong rung/i);
+    it('declares itself the goal rung', () => {
+      expect(text()).toMatch(/Which rung is this\?/);
+      expect(text()).toMatch(/YOU ARE HERE/);
+      expect(text()).toMatch(/the GOAL moved/);
+    });
+
+    it('writes nothing, and says that is the symmetry with explore', () => {
+      expect(text()).toMatch(/\*\*writes\s+nothing\*\*/);
+      expect(text()).toMatch(/Writes nothing\./);
+      expect(text()).toMatch(/would not be re-exploring/);
+    });
+
+    it('rejoins the forward road rather than inventing a path', () => {
+      expect(text()).toContain('/opsp:backlog');
+      expect(text()).toContain('/opsp:triage');
+      expect(text()).toContain('/opsp:propose');
+      expect(text()).toMatch(/the same road, rejoined/);
+    });
+
+    it('tests the Statement, handing Measures-only changes to repropose', () => {
+      expect(text()).toMatch(/does a driver-spec's \*\*Statement\*\* have to change/i);
       expect(text()).toContain('/opsp:repropose');
+    });
+
+    it('states the hat change before thinking', () => {
+      expect(text()).toMatch(/HAT CHANGE/);
+      expect(text()).toMatch(/setting down:\s+dev, devops/);
+      expect(text()).toMatch(/picking up:\s+product, maintainer/);
+    });
+
+    it('refuses to load the implementation', () => {
+      expect(text()).toMatch(/DO NOT LOAD/);
+      expect(text()).toMatch(/becomes a rationalisation of that\s+implementation/);
+    });
+
+    it('supersedes the milestones that served the old goal', () => {
+      expect(text()).toMatch(/served the old goal as superseded/);
+    });
+
+    it('treats no-change as a result', () => {
+      expect(text()).toMatch(/is a \*\*successful\*\* re-ideation/);
+    });
+
+    it('advances with the hat named', () => {
+      expect(text()).toContain('--to exploring --hat product');
+    });
+  });
+
+  describe('every transition declares its hat', () => {
+    it('each names at least one accountable hat', () => {
+      for (const t of TRANSITIONS) {
+        expect(t.hat.length, `${t.from} → ${t.to}`).toBeGreaterThan(0);
+        for (const h of t.hat) expect(['product', 'maintainer', 'dev', 'devops']).toContain(h);
+      }
+    });
+
+    it('marks the handoffs and only the handoffs', () => {
+      const handoffs = TRANSITIONS.filter((t) => t.handoff).map((t) => `${t.from}→${t.to}`);
+      expect(handoffs.sort()).toEqual([
+        'attested→completed',
+        'building→exploring',
+        'building→proposed',
+        'building→ready-for-attestation',
+        'proposed→building',
+      ]);
+    });
+
+    it('no exit from the handoff state is itself a handoff', () => {
+      const fromHandoff = TRANSITIONS.filter((t) => t.from === 'ready-for-attestation');
+      expect(fromHandoff.every((t) => !t.handoff)).toBe(true);
+      expect(fromHandoff.every((t) => t.hat.includes('product'))).toBe(true);
+    });
+
+    it('build is dev and devops work; the rungs out of it are not', () => {
+      expect(transitionFor('proposed', 'building')!.hat).toEqual(['dev', 'devops']);
+      expect(transitionFor('building', 'proposed')!.hat).toEqual(['product', 'maintainer']);
+      expect(transitionFor('building', 'exploring')!.hat).toEqual(['product', 'maintainer']);
+    });
+
+    it('resolves a transition by workflow where two share from and to', () => {
+      expect(transitionFor('building', 'ready-for-attestation', '/opsp:apply')!.by).toBe('/opsp:apply');
+      expect(transitionFor('building', 'nowhere')).toBeNull();
     });
   });
 });

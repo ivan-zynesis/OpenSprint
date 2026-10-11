@@ -469,9 +469,10 @@ program
   .command('advance [initiative]')
   .description("Move an initiative to its next state")
   .option('--to <state>', 'The state to advance to')
+  .option('--hat <hat>', 'The accountability you are exercising — required on a handoff')
   .option('--dry-run', 'Report the move without writing it')
   .option('--json', 'Output as JSON')
-  .action(async (initiative: string | undefined, options: { to?: string; dryRun?: boolean; json?: boolean }) => {
+  .action(async (initiative: string | undefined, options: { to?: string; hat?: string; dryRun?: boolean; json?: boolean }) => {
     try {
       const { advanceCommand } = await import('../commands/advance.js');
       await advanceCommand(initiative, options);

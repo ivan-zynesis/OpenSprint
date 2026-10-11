@@ -66,70 +66,116 @@ A forward-only SDLC describes a project that never existed. Real work discovers,
 something decided earlier was wrong — and **the whole value of attestation is being the place that
 discovery happens before the merge, not after it.**
 
-So the spine has back-edges. Which one you take is decided by **what has to move**:
+So the spine has back-edges. Which one you take is decided by **what has to move**, and the answer
+is in a file you can point at:
 
 ```
-  ┌─ a ─ the PLAN moved ──────────────────────── /opsp:reexplore ───┐
-  │      goal holds · strategy holds · the milestones do not        │
-  │      a corrective task is needed                                │
-  │      ready-for-attestation ──────────────────────► building     │
+  ┌─ c ─ the GOAL moved ───────────────────────── /opsp:reideate ───┐
+  │      a driver-spec's STATEMENT no longer holds                  │
+  │      this is /opsp:explore, later — thinking time with the work │
+  │      in hand. WRITES NOTHING, exactly like explore.             │
+  │      then rejoin: backlog → triage → propose, as the first time │
+  │      building · ready-for-attestation ───────────► exploring    │
   └─────────────────────────────────────────────────────────────────┘
 
   ┌─ b ─ the STRATEGY moved ─────────────────── /opsp:repropose ────┐
-  │      goal holds · what was decided about reaching it does not   │
-  │      "this is not what we meant"                                │
-  │      supersedes ADRs · redraws the milestones beneath them      │
-  │      driver-specs are the invariant — if one moves, stop        │
-  │      building  ──────────────────────────────────► proposed     │
-  │      ready-for-attestation ──────────────────────► proposed     │
+  │      the Statement holds. What was decided about reaching it    │
+  │      does not — "this is not what we meant"                     │
+  │      supersedes ADRs · may amend ## Measures · redraws the      │
+  │      milestones resting on them                                 │
+  │      building · ready-for-attestation ───────────► proposed     │
   └─────────────────────────────────────────────────────────────────┘
 
-  ┌─ c ─ the GOAL moved ──────────── /opsp:triage · /opsp:driver ───┐
-  │      the objective, the goal or its bar no longer holds         │
-  │      this is not a revision — it is a conversation that starts  │
-  │      over, and may not be this initiative at all                │
+  ┌─ a ─ nothing moved, the work was not FINISHED ─ a change request┐
+  │      goal, strategy and plan all hold. It is simply incomplete. │
+  │      nothing superseded · no ADR moves · no record changes      │
+  │      ready-for-attestation ──────────────────────► building     │
   └─────────────────────────────────────────────────────────────────┘
 ```
 
-**The rungs are not invented.** Driver-specs hold the objective and the goal, ADRs hold the
-strategy, milestones hold the plan — so "which rung" is answered by naming which of three files
-changes, not by judging whether something is "a big change".
+**The rungs are not invented** — they are the artifact hierarchy read downwards. Driver-specs hold
+the objective and goal, ADRs hold the strategy, milestones hold the plan. So "which rung" is
+answered by naming which file changes, not by judging whether something is "a big change".
 
-There is a fourth edge that is none of these. Attestation finding that **the work is missing or
-wrong**, where building it is all that is needed, is the plan not having been *finished* rather
-than the plan being *wrong*:
+### Reideate is explore, later
+
+A tool called *re*-explore that produced artifacts would not be re-exploring. `/opsp:explore`
+writes nothing, and so does `/opsp:reideate` — the thinking is persisted by `/opsp:backlog`, the
+same tool that persists an original idea, in the same shape.
 
 ```
-  ready-for-attestation ──── request a change ────► building
-      nothing superseded · no ADR moves · the plan is the plan
+  /opsp:explore  ──► /opsp:backlog ──► /opsp:triage ──► /opsp:propose ──► ...
+  /opsp:reideate ──┘
+        the same road, rejoined, with everything you learned building
 ```
 
-Both ends of the lifecycle reach the ladder. During **build**, an escalation whose answer revises a
-decision or invalidates milestones takes option `[4] This is bigger than one record` instead of
-writing a record and carrying on. At **attestation**, four findings look alike and are not:
+That symmetry is why the goal rung needs no new vocabulary, no new artifacts and no new stage. A
+fallback path that reuses the forward path is one fewer thing to learn and one fewer thing to
+drift.
 
-| What the attester found | Exit | Lands at |
+The work already done is not pretended away: milestones that served the old goal are marked
+superseded, which is exactly what happened to them.
+
+### What repropose may and may not touch
+
+```
+  MAY CHANGE                           MUST NOT CHANGE
+  ──────────────────────────────       ─────────────────────────────
+  ADRs — superseded, or added          a driver-spec's Statement
+  a driver-spec's ## Measures          its objective, goal or role
+  the bar, where the strategy
+    changed how it is known met        anything outside ## Measures
+  milestones resting on the above
+```
+
+The `## Measures` boundary is the same one `/opsp:attest` writes inside, for the same reason: a
+record's *claim* never changes under a reader who cited it, while how that claim is measured is
+allowed to improve. A new strategy often makes a genuinely different thing observable, and a bar
+still describing the old mechanism is worse than no bar.
+
+**A bar that got easier is a goal that moved.** If the new bar is lower rather than different, that
+is `/opsp:reideate` — and lowering a target becomes a decision somebody takes at the goal altitude
+rather than an edit nobody notices.
+
+### Every handoff names its hat
+
+A transition is not only a state change; most are a **change of accountability**. And since most
+hats are worn by the same engineer, that change is invisible unless something declares it.
+
+So each transition carries the hat it must be made wearing, and `opensprint advance` **refuses the
+move** until you name it:
+
+```
+$ opensprint advance multi-region --to building
+✖ 'proposed' → 'building' is a handoff. It is dev · devops work.
+  Set down the hat you are wearing, then re-run with --hat <dev|devops>
+  to state which accountability you are exercising.
+```
+
+| Transition | Hat | Handoff |
 |---|---|---|
-| A bar was missed, with an exposure and a plan | *none* — this is a complete attestation | `attested` |
-| The work is missing or wrong; building it is enough | request a change | `building` |
-| The goal holds; the strategy does not | `/opsp:repropose` | `proposed` |
-| The milestones need a corrective task | `/opsp:reexplore` | `building` |
+| exploring → proposed | all four | |
+| exploring ⇄ declined | product · maintainer | |
+| proposed → building | dev · devops | **yes** |
+| building → ready-for-attestation | dev · devops | **yes** |
+| building → proposed · exploring | product · maintainer | **yes** |
+| ready-for-attestation → anywhere | product · maintainer | |
+| attested → completed | all four | **yes** |
 
-**Why `/opsp:repropose` returns to `proposed` and `/opsp:reexplore` does not** is the load-bearing
-difference between them. A restated strategy has a bar nothing has been built against yet, so
-`/opsp:apply` must open the work again. A plan revision needs no such reset. That is also why they
-cannot be one tool with a flag — the state they return to *is* the distinction.
+No command can verify a context was cleared. What it can do is refuse to move until somebody
+states which accountability they are exercising — and the moment of stating it is the moment the
+switch becomes deliberate.
 
-Falling back is **recorded, not hidden**. Every move runs through `opensprint advance`, which
-refuses an illegal transition, regenerates `BOARD.md`, and leaves the initiative's history showing
-that the work went backwards and why. A lifecycle that cannot show a reversal is one nobody will
-believe.
+**None of attestation's exits is a handoff.** Attestation is product and maintainer work, and so
+are all three ways out of it. The hat change already happened, at the handoff into
+`ready-for-attestation`. That is what the handoff was for.
 
-Stages 1 and 2 are each a **think, then persist** pair. `explore` is to `backlog` as `triage` is to
-`propose` — the thinking tool writes nothing, and the persisting tool is where you commit.
+### At the other end: escalation during build
 
-You can also go straight through: `explore → propose`, skipping the backlog, for work that never
-needs to rest.
+The same ladder, reached from the other side. An escalation whose answer revises a decision or
+invalidates milestones takes option `[4] This is bigger than one record` instead of writing a
+record and carrying on — and both rungs out of `building` are hat changes, because the objective
+and the strategy are not dev's to restate.
 
 ## Who owns what
 
@@ -185,9 +231,9 @@ an argument adopts it.
 
 | Workflow | Rung | Returns the initiative to |
 |---|---|---|
-| `/opsp:reexplore` | the **plan** — milestones change, decisions do not | `building` |
-| `/opsp:repropose` | the **strategy** — ADRs superseded, driver-specs do not move | `proposed` |
-| `/opsp:triage` · `/opsp:driver` | the **goal** — a conversation that starts over | `exploring`, or a new initiative |
+| a change request from `/opsp:attest` | **nothing moved** — the work was not finished | `building` |
+| `/opsp:repropose` | the **strategy** — ADRs superseded, `## Measures` may be amended | `proposed` |
+| `/opsp:reideate` | the **goal** — thinking time, writes nothing | `exploring` |
 
 **Other**
 

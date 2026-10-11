@@ -96,7 +96,7 @@ export interface InitiativeEntry {
    * Checkbox lines found outside `## Milestones`, with the section holding
    * them.
    *
-   * `/opsp:reexplore` appends milestones under a dated heading rather than
+   * `/opsp:repropose` appends milestones under a dated heading rather than
    * into the section, so strict scoping would drop them silently. Reporting
    * them instead keeps the scoping predictable without losing the work —
    * the board can surface them, and the real fix belongs in re-exploration's

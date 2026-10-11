@@ -91,7 +91,7 @@ const OPSP_WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'opsp-attest': 'opensprint-attest',
   'opsp-archive': 'opensprint-archive',
   'opsp-review': 'opensprint-review',
-  'opsp-reexplore': 'opensprint-reexplore',
+  'opsp-reideate': 'opensprint-reideate',
   'opsp-knockdown': 'opensprint-knockdown',
 };
 

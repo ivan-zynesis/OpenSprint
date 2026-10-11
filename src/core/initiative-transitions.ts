@@ -35,11 +35,8 @@ export const READY_FOR_ATTESTATION = 'ready-for-attestation' as const;
  * it turns out to be wrong — and a rule derived from an index cannot express
  * that without exceptions that then have to be remembered.
  *
- * Two entries may share a `from` and a `to` and differ in `by`. That is not
- * redundancy: `ready-for-attestation → building` means something different
- * when `/opsp:attest` requests a change than when `/opsp:reexplore` adds one,
- * and a refusal message naming both is more use than one naming neither
- * (DEC-ESCALATION-LADDER).
+ * Two entries may share a `from` and a `to` and differ in `by`, and a refusal
+ * naming both is more use than one naming neither (DEC-ESCALATION-LADDER).
  */
 export interface Transition {
   from: InitiativeState;
@@ -48,6 +45,23 @@ export interface Transition {
   by: string;
   /** When it fires, in the words the operator would use. */
   when: string;
+  /**
+   * The hat this move must be made wearing.
+   *
+   * Declared rather than derived from the state, because a state does not
+   * have one owner — `ready-for-attestation` is dev's to leave and product's
+   * to pick up, and which hat you need depends on which way you are going.
+   */
+  hat: readonly string[];
+  /**
+   * True where making this move means putting a different hat down first.
+   *
+   * `DS-HATS-AS-CONTEXT` makes most hats the same engineer, so a handoff is
+   * invisible unless it is declared. `opensprint advance` requires `--hat` on
+   * these, which is the cheapest enforceable version of "change context"
+   * (DEC-HAT-HANDOFFS).
+   */
+  handoff: boolean;
 }
 
 export const TRANSITIONS: readonly Transition[] = [
@@ -56,68 +70,99 @@ export const TRANSITIONS: readonly Transition[] = [
     to: 'proposed',
     by: '/opsp:propose',
     when: 'the driver-specs, ADRs, milestones and the bar are written',
+    hat: ['product', 'maintainer', 'dev', 'devops'],
+    handoff: false,
   },
   {
     from: 'exploring',
     to: 'declined',
     by: '/opsp:triage',
     when: 'the idea is dropped, with the reason recorded',
+    hat: ['product', 'maintainer'],
+    handoff: false,
   },
   {
     from: 'declined',
     to: 'exploring',
     by: '/opsp:triage',
     when: 'a declined idea is revived, keeping its history',
+    hat: ['product', 'maintainer'],
+    handoff: false,
   },
   {
     from: 'proposed',
     to: 'building',
     by: '/opsp:apply',
     when: 'the first milestone starts',
+    hat: ['dev', 'devops'],
+    handoff: true,
   },
   {
     from: 'building',
     to: READY_FOR_ATTESTATION,
     by: '/opsp:apply',
     when: 'the last milestone closes — the dev hat is set down',
-  },
-  {
-    from: READY_FOR_ATTESTATION,
-    to: 'building',
-    by: '/opsp:reexplore',
-    when: 're-planning adds work that was not there',
-  },
-  {
-    from: READY_FOR_ATTESTATION,
-    to: 'building',
-    by: '/opsp:attest',
-    when: 'a change is requested — the plan holds, the work does not',
+    hat: ['dev', 'devops'],
+    handoff: true,
   },
   {
     from: 'building',
     to: 'proposed',
     by: '/opsp:repropose',
-    when: 'an escalation found the strategy does not survive contact',
+    when: 'the strategy does not survive contact — the goal holds, what was decided does not',
+    hat: ['product', 'maintainer'],
+    handoff: true,
+  },
+  {
+    from: 'building',
+    to: 'exploring',
+    by: '/opsp:reideate',
+    when: 'the goal itself is in question',
+    hat: ['product', 'maintainer'],
+    handoff: true,
+  },
+  {
+    from: READY_FOR_ATTESTATION,
+    to: 'building',
+    by: '/opsp:attest',
+    when: 'a change is requested — everything holds, the work was not finished',
+    hat: ['product', 'maintainer'],
+    handoff: false,
   },
   {
     from: READY_FOR_ATTESTATION,
     to: 'proposed',
     by: '/opsp:repropose',
-    when: 'the strategy must be restated — the goal holds, what was decided does not',
+    when: 'the strategy must be restated, and its measures with it',
+    hat: ['product', 'maintainer'],
+    handoff: false,
+  },
+  {
+    from: READY_FOR_ATTESTATION,
+    to: 'exploring',
+    by: '/opsp:reideate',
+    when: 'the goal no longer holds — back to thinking, writing nothing',
+    hat: ['product', 'maintainer'],
+    handoff: false,
   },
   {
     from: READY_FOR_ATTESTATION,
     to: 'attested',
     by: '/opsp:attest',
     when: 'every bar carries a posture, and the change questions are answered',
+    hat: ['product', 'maintainer'],
+    handoff: false,
   },
   {
     from: 'attested',
     to: 'completed',
     by: '/opsp:archive',
     when: 'the views are compiled and the branch merges',
+    hat: ['product', 'maintainer', 'dev', 'devops'],
+    handoff: true,
   },
 ];
+
 
 export interface TransitionRefusal {
   /** Why this move is not allowed, in one line. */
@@ -161,6 +206,25 @@ export function checkTransition(
     reason: `'${from}' does not move to '${to}'.`,
     legal,
   };
+}
+
+/**
+ * The transition a move corresponds to, or null where it is not one.
+ *
+ * Several transitions may share `from` and `to` and differ in `by`. Where
+ * they do, the caller names the workflow; where it does not, the first is
+ * returned, because what the caller needs from it — the hat, and whether it
+ * is a handoff — is the same for both.
+ */
+export function transitionFor(
+  from: string | undefined,
+  to: string,
+  by?: string
+): Transition | null {
+  const matches = nextStates(from).filter((t) => t.to === to);
+  if (matches.length === 0) return null;
+  if (by === undefined) return matches[0];
+  return matches.find((t) => t.by === by) ?? matches[0];
 }
 
 /**

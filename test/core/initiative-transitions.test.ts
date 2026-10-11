@@ -34,8 +34,8 @@ describe('initiative transitions', () => {
       expect([...INITIATIVE_STATES]).toContain(READY_FOR_ATTESTATION);
     });
 
-    it('declares exactly eleven transitions, each owned by a workflow', () => {
-      expect(TRANSITIONS).toHaveLength(11);
+    it('declares exactly twelve transitions, each owned by a workflow', () => {
+      expect(TRANSITIONS).toHaveLength(12);
       for (const t of TRANSITIONS) {
         expect(t.by).toMatch(/^\/opsp:/);
         expect(t.when.length).toBeGreaterThan(0);
@@ -59,11 +59,17 @@ describe('initiative transitions', () => {
       expect(by('attested', 'completed')).toBe('/opsp:archive');
     });
 
-    it('the handoff falls back by re-planning and by a change request', () => {
+    it('the handoff falls back to building only by a change request', () => {
       const backwards = TRANSITIONS.filter(
         (t) => t.from === 'ready-for-attestation' && t.to === 'building'
       );
-      expect(backwards.map((t) => t.by).sort()).toEqual(['/opsp:attest', '/opsp:reexplore']);
+      expect(backwards.map((t) => t.by)).toEqual(['/opsp:attest']);
+    });
+
+    it('the goal rung is reachable from both build and handoff', () => {
+      const reideate = TRANSITIONS.filter((t) => t.by === '/opsp:reideate');
+      expect(reideate.map((t) => t.from).sort()).toEqual(['building', 'ready-for-attestation']);
+      expect(reideate.every((t) => t.to === 'exploring')).toBe(true);
     });
 
     it('the strategy rung is reachable from both build and handoff', () => {
@@ -86,7 +92,11 @@ describe('initiative transitions', () => {
       const r = checkTransition('building', 'completed');
       expect(r).not.toBeNull();
       expect(r!.reason).toContain("'building' does not move to 'completed'");
-      expect(r!.legal.map((t) => t.to).sort()).toEqual(['proposed', 'ready-for-attestation']);
+      expect(r!.legal.map((t) => t.to).sort()).toEqual([
+        'exploring',
+        'proposed',
+        'ready-for-attestation',
+      ]);
     });
 
     it('refuses skipping the handoff', () => {
