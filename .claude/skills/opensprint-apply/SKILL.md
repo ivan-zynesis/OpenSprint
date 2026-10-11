@@ -207,7 +207,7 @@ Ask which, by what has to move:
 ```
   Does a driver-spec's STATEMENT have to change?
 
-    yes  →  the GOAL moved.  /opsp:reideate  — thinking time at the
+    yes  →  the GOAL moved.  /opsp:reexplore  — thinking time at the
             objective and goal, writing nothing, back to 'exploring'.
             Then backlog → triage → propose, as the first time.
 
@@ -225,7 +225,7 @@ Ask which, by what has to move:
 considers the goal still right. Present the three and let them say.
 
 **Both rungs stop apply, and both are hat changes.** `/opsp:repropose` returns the initiative to
-`proposed` and `/opsp:reideate` to `exploring`; either way `opensprint advance` will refuse
+`proposed` and `/opsp:reexplore` to `exploring`; either way `opensprint advance` will refuse
 the move until you state the hat, because the objective and the strategy are **product and
 maintainer's** and you have been wearing dev (`DEC-HAT-HANDOFFS`).
 
@@ -465,7 +465,7 @@ nothing in between gives that moment nowhere to live (`DEC-STATE-MACHINE`).
 fresh context, not to your next step.
 
 **The handoff is reversible.** `/opsp:attest` sends it back to `building` where the work was
-unfinished; `/opsp:repropose` to `proposed` where the strategy was wrong; `/opsp:reideate` to
+unfinished; `/opsp:repropose` to `proposed` where the strategy was wrong; `/opsp:reexplore` to
 `exploring` where the goal was. What it is not is skippable.
 
 ---

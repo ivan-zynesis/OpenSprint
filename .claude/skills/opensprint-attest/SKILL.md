@@ -255,7 +255,7 @@ not go forward as it is. Three exits, by what has to move (`DEC-ESCALATION-LADDE
 |---|---|---|
 | Everything holds; **the work does not** — something is missing or wrong, and building it is all that is needed | **request a change** | `building` |
 | The goal holds; **what was decided about reaching it does not** — this is not what we meant | `/opsp:repropose` | `proposed` |
-| **The goal itself no longer holds** — building it taught us the target was wrong | `/opsp:reideate` | `exploring` |
+| **The goal itself no longer holds** — building it taught us the target was wrong | `/opsp:reexplore` | `exploring` |
 
 **Request a change** when you can name the work:
 
@@ -272,7 +272,7 @@ That is the hardest one to say out loud, because the work is done and it is not 
 and it is also the one the whole lifecycle exists to catch, which is why attestation sits before
 the merge rather than after it.
 
-**Reideate** when building the thing taught you the target was wrong. That is rarer and more
+**Reexplore** when building the thing taught you the target was wrong. That is rarer and more
 valuable than either of the others: it is the only point in the process where evidence from an
 implementation reaches the objective that justified it.
 

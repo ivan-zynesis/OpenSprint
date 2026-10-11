@@ -1,13 +1,13 @@
 ---
-name: "OPSP: Reideate"
+name: "OPSP: Reexplore"
 description: "Think again at the objective and goal — writes nothing, returns to exploring"
 category: Workflow
-tags: [workflow, opsp, reideate, ideation, goal]
+tags: [workflow, opsp, reexplore, ideation, goal]
 ---
 
 Think again at the **objective and goal**, with the work in hand.
 
-**Input**: the initiative name after `/opsp:reideate`. If omitted, list initiatives at `building` or `ready-for-attestation` and let the operator choose.
+**Input**: the initiative name after `/opsp:reexplore`. If omitted, list initiatives at `building` or `ready-for-attestation` and let the operator choose.
 
 ---
 
@@ -22,7 +22,7 @@ is called `/opsp:repropose`.
 
 ```
   /opsp:explore  ──► /opsp:backlog ──► /opsp:triage ──► /opsp:propose ──► ...
-  /opsp:reideate ──┘
+  /opsp:reexplore ──┘
         the same road, rejoined, with everything you learned building
 ```
 
@@ -151,5 +151,5 @@ worth more than the idea.
 - **Do not load the implementation.** An objective rethought while holding a diff rationalises it.
 - **If only `## Measures` moves, you are on the wrong rung** — that is `/opsp:repropose`.
 - **Concluding "no change" is a result**, not a failure. Record it.
-- **Rejoin the road.** Reideate does not propose; `/opsp:backlog` and `/opsp:propose` do.
+- **Rejoin the road.** Reexplore does not propose; `/opsp:backlog` and `/opsp:propose` do.
 
