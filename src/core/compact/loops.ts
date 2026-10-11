@@ -23,6 +23,7 @@ import {
   verdictRequires,
   POSTURE_VERDICTS,
   evidenceReferences,
+  parseBarForm,
 } from './measures.js';
 import type { SectionDef } from './sections.js';
 import type { InitiativeEntry } from '../initiatives.js';
@@ -49,6 +50,10 @@ export const OPEN_LOOP_KINDS = [
   // sits with the measure loops rather than the change loops because it is a
   // property of one measure's evidence, not of the change as a whole.
   'evidence-unresolvable',
+  // A bar stated in prose, in a hat whose bars take a form (DEC-038). It
+  // fires only where a bar was written — a record with no bar at all is
+  // already reported by constraint-unmeasurable.
+  'bar-without-form',
   // Properties of a *change* rather than of a record (DEC-042). They fire
   // only once an initiative claims to have been attested — asking who holds
   // a risk before anyone has judged it would be noise.
@@ -443,6 +448,27 @@ export function deriveOpenLoops(
         detail:
           'States a bar with no `neighbour`. The position not taken is what makes a future trade arguable rather than re-litigated.',
       });
+    }
+
+    // DEC-038: a bar in given/when/then form is already a test
+    // specification, which is what makes DS-CI-ATTESTATION mechanically
+    // possible. Reported per hat, because the two forms are not
+    // interchangeable — a maintainer bar as a user story is a fiction.
+    if (anatomy.bar !== undefined) {
+      for (const hat of hats) {
+        const form = parseBarForm(anatomy.bar, hat);
+        if (form === null || form.stated.length === form.expected.length) continue;
+        const missing = form.expected.filter((label) => !form.stated.includes(label));
+        loops.push({
+          kind: 'bar-without-form',
+          record: record.id,
+          hats: [hat],
+          detail:
+            form.stated.length === 0
+              ? `States a bar in prose. A ${hat} bar is written \`${form.expected.join(' / ')}\`, which is already a test specification.`
+              : `States a ${hat} bar missing ${missing.map((l) => `\`${l}\``).join(', ')}. The thought was started and not finished.`,
+        });
+      }
     }
   }
 

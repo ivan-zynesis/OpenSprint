@@ -221,7 +221,7 @@ describe('rule harvesting', () => {
   // ═══════════════════════════════════════════════════════════
 
   describe('deriveOpenLoops', () => {
-    it('defines exactly seventeen kinds, by explicit list', () => {
+    it('defines exactly eighteen kinds, by explicit list', () => {
       expect([...OPEN_LOOP_KINDS]).toEqual([
         // properties of the record graph
         'constraint-unanswered',
@@ -245,6 +245,8 @@ describe('rule harvesting', () => {
         'measure-unattested',
         // an attestation citing nothing addressable
         'evidence-unresolvable',
+        // a bar in prose, in a hat whose bars take a form
+        'bar-without-form',
         // what an attestation left unanswered — properties of a change
         'reversibility-unstated',
         'blast-radius-unstated',

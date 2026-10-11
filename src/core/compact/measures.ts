@@ -331,3 +331,84 @@ export function evidenceReferences(block: string): EvidenceReference[] {
 
   return refs;
 }
+
+/**
+ * The form a bar takes, by hat (`DEC-038`).
+ *
+ * BDD, in one of two shapes. A maintainer bar written as a user story
+ * becomes an awkward fiction — "as a maintainer, I want credentials not to be
+ * committed" says less than "given a credential is committed, when CI runs,
+ * then the build fails", and only the second tells you what to point a
+ * pipeline at. Product bars invert it: a user story carries the persona and
+ * the reason, which given/when/then has nowhere to put.
+ *
+ * The labels are the whole vocabulary, by explicit list rather than pattern,
+ * so the skill that writes a bar and the harvest that reads one cannot drift.
+ * A hat absent from this map declares no form, and nothing is checked of it —
+ * `dev` and `devops` describe a system rather than commit to a bar.
+ */
+export const BAR_FORMS: Readonly<Record<string, readonly string[]>> = {
+  product: ['as a', 'I want', 'for'],
+  maintainer: ['given', 'when', 'then'],
+};
+
+export interface BarForm {
+  /** The hat whose form this is. */
+  hat: string;
+  /** The labels the block states, in the order the form declares them. */
+  stated: string[];
+  /** Every label the form declares. */
+  expected: readonly string[];
+}
+
+/**
+ * Whether a bar block states the form a given hat's bars take.
+ *
+ * Reports what is stated rather than returning a verdict, so the caller
+ * decides what a partial form means. A bar carrying `given` and `then` but no
+ * `when` has started the thought and not finished it, which is a different
+ * finding from prose that never began.
+ *
+ * Labels are read the same way the rest of the anatomy reads them: at the
+ * start of a line, optionally bulleted and optionally bold. That is what an
+ * author types; it is not an attempt to find the words in a sentence.
+ */
+export function parseBarForm(block: string, hat: string): BarForm | null {
+  const expected = BAR_FORMS[hat];
+  if (expected === undefined) return null;
+
+  const stated: string[] = [];
+  for (const label of expected) {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`^\\s*(?:[-*]\\s*)?(?:\\*\\*)?${escaped}(?:\\*\\*)?[\\s:]`, 'im');
+    if (pattern.test(block)) stated.push(label);
+  }
+  return { hat, stated, expected };
+}
+
+/**
+ * The four parts of a strategy cell (`DEC-037`).
+ *
+ * SWOT-like and deliberately not SWOT. `opportunity` is a **redefinition**:
+ * standard SWOT means external upside, and here it means the alternatives
+ * weighed against the choice that was made. Recorded as a redefinition so it
+ * does not read as a misunderstanding of the framework.
+ */
+export const SWOT_PARTS = ['strength', 'weakness', 'opportunity', 'threat'] as const;
+
+export type SwotPart = (typeof SWOT_PARTS)[number];
+
+/**
+ * Where each part is compiled from, in the decision it cites.
+ *
+ * The cell is **compiled, not authored** (`DS-DOCUMENTATION-AS-OUTPUT`): each
+ * part names a section of the ADR rather than a prompt for the renderer to
+ * answer. A strategy cell nobody can trace to a decision is the gap
+ * `strategy-unimplemented` already reports.
+ */
+export const SWOT_SOURCES: Readonly<Record<SwotPart, string>> = {
+  strength: 'the ✓ cells of the chosen column in `## Consideration Factors`',
+  weakness: 'the ✗ cells of the chosen column in `## Consideration Factors`',
+  opportunity: 'the other columns of `## Consideration Factors` — the alternatives weighed',
+  threat: '`## Invalidation Trigger`',
+};
