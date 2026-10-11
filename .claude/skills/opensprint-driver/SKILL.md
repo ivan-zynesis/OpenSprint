@@ -38,12 +38,36 @@ id: DS-<KEBAB-NAME>
 type: <type>
 status: active
 created: <YYYY-MM-DD>
+hats: [<product|maintainer>]
+role: <objective|goal|strategy>
 ---
 
 <operator's description, faithfully recorded>
+
+## Measures
+
+- **Primary**: <the one thing that says whether this landed>
+
+### Bar
+
+<the BDD form for this hat — `DEC-038`. product: as a / I want / for.
+ maintainer: given / when / then.>
+
+- **dimension**: <the axis this sits on>
+- **chosen**: <where on it, and the scope that applies to>
+- **traded for**: <what was given up to sit here>
+- **neighbour**: <the position not taken, or `unrecorded`>
 ```
 
-5. Confirm creation to the operator
+5. **Ask the operator for the bar** where the role is `goal`. You are a scribe for the constraint
+   and you are also the one who knows it will be reported without one — a `goal` with no populated
+   `## Measures` fires `constraint-unmeasurable` on every compile. Ask; do not invent.
+
+   Where the operator cannot state a bar yet, record `## Measures` with
+   `- **Primary**: unstated` and say the loop will keep reporting it. An honest gap beats a
+   fabricated target.
+
+6. Confirm creation to the operator
 
 ### Edit a Driver Spec
 
