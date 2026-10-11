@@ -66,9 +66,18 @@ describe('documentation drift', () => {
 
     it('names the three rungs by what moves', () => {
       const fallback = doc().slice(doc().indexOf('## When it is not the happy path'));
-      expect(fallback).toMatch(/the PLAN moved/);
-      expect(fallback).toMatch(/the STRATEGY moved/);
       expect(fallback).toMatch(/the GOAL moved/);
+      expect(fallback).toMatch(/the STRATEGY moved/);
+      expect(fallback).toMatch(/the work was not FINISHED/);
+    });
+
+    it('documents the hat each transition requires', () => {
+      const doc_ = doc();
+      expect(doc_).toMatch(/Every handoff names its hat/);
+      expect(doc_).toContain('--hat');
+      for (const t of TRANSITIONS.filter((x) => x.handoff)) {
+        expect(doc_, `${t.from} → ${t.to} hat undocumented`).toContain(t.hat[0]);
+      }
     });
 
     it('gives the handoff its own stage', () => {

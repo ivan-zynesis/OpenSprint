@@ -14,11 +14,17 @@ import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveInitiative, checkInitiativeState, readInitiatives } from '../core/initiatives.js';
 import { readInitiativeGitState } from '../core/initiative-git.js';
-import { checkTransition, writeState, nextStates } from '../core/initiative-transitions.js';
+import {
+  checkTransition,
+  writeState,
+  nextStates,
+  transitionFor,
+} from '../core/initiative-transitions.js';
 import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
 
 export interface AdvanceOptions {
   to?: string;
+  hat?: string;
   json?: boolean;
   /** Report the move and the problems it would leave, without writing. */
   dryRun?: boolean;
@@ -71,6 +77,24 @@ export async function advanceCommand(
   }
 
   const from = entry.state;
+  const move = transitionFor(from, options.to);
+
+  // DS-HATS-AS-CONTEXT: most hats are the same engineer, so a handoff is
+  // invisible unless something makes it a step. Naming the hat is the
+  // cheapest thing a command can actually require (DEC-HAT-HANDOFFS) — it
+  // cannot verify a context was cleared, and it can refuse to move until
+  // somebody states which accountability they are exercising.
+  if (move?.handoff === true) {
+    const accepted = move.hat;
+    if (options.hat === undefined || !accepted.includes(options.hat)) {
+      throw new Error(
+        `'${from}' → '${options.to}' is a handoff. ` +
+          `It is ${accepted.join(' · ')} work${options.hat === undefined ? '' : `, not ${options.hat}'s`}. ` +
+          `Set down the hat you are wearing, then re-run with --hat <${accepted.join('|')}> ` +
+          `to state which accountability you are exercising.`
+      );
+    }
+  }
 
   if (options.dryRun !== true) {
     writeState(entry.path, options.to);
@@ -87,7 +111,15 @@ export async function advanceCommand(
   if (options.json) {
     console.log(
       JSON.stringify(
-        { initiative: entry.id, from: from ?? null, to: options.to, dryRun: options.dryRun === true, problems },
+        {
+          initiative: entry.id,
+          from: from ?? null,
+          to: options.to,
+          hat: move?.hat ?? null,
+          handoff: move?.handoff ?? false,
+          dryRun: options.dryRun === true,
+          problems,
+        },
         null,
         2
       )
@@ -100,6 +132,12 @@ export async function advanceCommand(
   console.log(
     `  ${chalk.bold(entry.id)}  ${arrow}${options.dryRun === true ? chalk.dim('  (dry run)') : ''}`
   );
+  if (move !== null) {
+    console.log(
+      chalk.dim(`  ${move.hat.join(' · ')} work`) +
+        (move.handoff ? chalk.yellow('  · hat change') : '')
+    );
+  }
   if (options.dryRun !== true) {
     console.log(chalk.dim(`  ${path.relative(projectRoot, entry.path)} · ${BOARD_FILENAME} regenerated`));
   }

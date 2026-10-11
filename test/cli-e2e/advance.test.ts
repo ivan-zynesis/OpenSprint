@@ -27,9 +27,49 @@ describe('opensprint advance (e2e)', () => {
     fs.rmSync(root, { recursive: true, force: true });
   });
 
+  it('refuses a handoff until the hat is named', async () => {
+    initiative('a', 'state: proposed\n', ['- [ ] m1: d']);
+    const r = await runCLI(['advance', 'a', '--to', 'building'], { cwd: root });
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr + r.stdout).toContain('is a handoff');
+    expect(r.stderr + r.stdout).toContain('--hat <dev|devops>');
+  });
+
+  it('refuses a handoff made in the wrong hat', async () => {
+    initiative('a', 'state: proposed\n', ['- [ ] m1: d']);
+    const r = await runCLI(['advance', 'a', '--to', 'building', '--hat', 'product'], { cwd: root });
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr + r.stdout).toContain("not product's");
+  });
+
+  it('performs a handoff when the hat is named', async () => {
+    initiative('a', 'state: proposed\n', ['- [ ] m1: d']);
+    const r = await runCLI(['advance', 'a', '--to', 'building', '--hat', 'dev'], { cwd: root });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('hat change');
+  });
+
+  it('does not require a hat where the move is not a handoff', async () => {
+    initiative('a', 'state: ready-for-attestation\n');
+    const r = await runCLI(['advance', 'a', '--to', 'attested'], { cwd: root });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('product · maintainer work');
+    expect(r.stdout).not.toContain('hat change');
+  });
+
+  it('--json carries the hat and whether it is a handoff', async () => {
+    initiative('a', 'state: building\n');
+    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--hat', 'dev', '--json'], {
+      cwd: root,
+    });
+    const out = JSON.parse(r.stdout);
+    expect(out.hat).toEqual(['dev', 'devops']);
+    expect(out.handoff).toBe(true);
+  });
+
   it('performs a legal move and says what it did', async () => {
     initiative('a', 'state: building\n');
-    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation'], { cwd: root });
+    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--hat', 'dev'], { cwd: root });
     expect(r.exitCode).toBe(0);
     expect(r.stdout).toContain('building → ready-for-attestation');
     expect(fs.readFileSync(path.join(dir(), '20261011-a.md'), 'utf-8')).toContain(
@@ -39,7 +79,7 @@ describe('opensprint advance (e2e)', () => {
 
   it('regenerates the board, so the card actually moves', async () => {
     initiative('a', 'state: building\n');
-    await runCLI(['advance', 'a', '--to', 'ready-for-attestation'], { cwd: root });
+    await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--hat', 'dev'], { cwd: root });
     const board = fs.readFileSync(path.join(root, 'opensprint', 'BOARD.md'), 'utf-8');
     expect(board).toContain('## Handoff');
     expect(board.slice(board.indexOf('## Handoff'), board.indexOf('## Done'))).toContain('a');
@@ -61,7 +101,7 @@ describe('opensprint advance (e2e)', () => {
 
   it('resolves by frontmatter id, not by the dated filename', async () => {
     initiative('a', 'state: proposed\n');
-    const r = await runCLI(['advance', 'a', '--to', 'building'], { cwd: root });
+    const r = await runCLI(['advance', 'a', '--to', 'building', '--hat', 'dev'], { cwd: root });
     expect(r.exitCode).toBe(0);
   });
 
@@ -75,9 +115,9 @@ describe('opensprint advance (e2e)', () => {
 
   it('records a contradicted state and reports it rather than refusing', async () => {
     initiative('a', 'state: proposed\n', ['- [ ] m1: d', '- [ ] m2: d']);
-    const r = await runCLI(['advance', 'a', '--to', 'building'], { cwd: root });
+    const r = await runCLI(['advance', 'a', '--to', 'building', '--hat', 'dev'], { cwd: root });
     expect(r.exitCode).toBe(0);
-    const r2 = await runCLI(['advance', 'a', '--to', 'ready-for-attestation'], { cwd: root });
+    const r2 = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--hat', 'devops'], { cwd: root });
     expect(r2.exitCode).toBe(0);
     expect(r2.stdout).toContain('disagrees with');
     expect(r2.stdout).toContain('outstanding');
@@ -85,14 +125,14 @@ describe('opensprint advance (e2e)', () => {
 
   it('--dry-run writes nothing', async () => {
     initiative('a', 'state: building\n');
-    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--dry-run'], { cwd: root });
+    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--hat', 'dev', '--dry-run'], { cwd: root });
     expect(r.stdout).toContain('dry run');
     expect(fs.readFileSync(path.join(dir(), '20261011-a.md'), 'utf-8')).toContain('state: building');
   });
 
   it('--json carries the move and the problems', async () => {
     initiative('a', 'state: building\n');
-    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--json'], { cwd: root });
+    const r = await runCLI(['advance', 'a', '--to', 'ready-for-attestation', '--hat', 'dev', '--json'], { cwd: root });
     const out = JSON.parse(r.stdout);
     expect(out).toMatchObject({ initiative: 'a', from: 'building', to: 'ready-for-attestation' });
   });

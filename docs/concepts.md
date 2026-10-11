@@ -226,7 +226,7 @@ has got:
    exploring  proposed        building      ready-for-       attested   completed
                                  ▲          attestation
                                  └──────────────┘
-                                 /opsp:reexplore — re-planning adds work
+                              a change request — the work was not finished
 ```
 
 Plus `declined` — terminal, for a candidate considered and dropped. It is kept rather than deleted,
@@ -245,10 +245,9 @@ It is also the only honest thing to put on a board. Work in progress and work wa
 to put a different hat on need different responses — one needs time, the other needs a person — so
 `BOARD.md` gives the handoff its own **Handoff** column rather than burying it in Doing.
 
-`building ⇄ ready-for-attestation` runs both ways. `/opsp:reexplore` takes a handed-over initiative
-back to `building` when re-planning adds work, which makes the handoff a door rather than a cliff.
-That loop is the same conversation `/opsp:triage` has before the work starts — an engineer and a
-product owner iterating on the plan — held again with the work in hand.
+`building ⇄ ready-for-attestation` runs both ways. A handed-over initiative goes back to `building`
+when attestation finds the work simply unfinished, which makes the handoff a door rather than a
+cliff. Where something above the work is wrong instead, it falls further — see the ladder below.
 
 ### Escalation has three rungs
 
@@ -256,16 +255,18 @@ Work does not only move forward. When something above the current work turns out
 falls back — and **what has to move decides how far**:
 
 ```
-  the GOAL moved        objective, goal, or the bar
-      → /opsp:triage or /opsp:driver — a conversation that starts over
+  the GOAL moved        a driver-spec's Statement no longer holds
+      → /opsp:reideate — /opsp:explore, later. Writes nothing.
+      → returns to `exploring`, then rejoins backlog → triage → propose
 
   the STRATEGY moved    what was decided about reaching the goal
-      → /opsp:repropose — supersedes ADRs, redraws the milestones beneath
-      → the initiative returns to `proposed`
+      → /opsp:repropose — supersedes ADRs, may amend `## Measures`,
+        redraws the milestones resting on them
+      → returns to `proposed`
 
-  the PLAN moved        the milestones implementing the strategy
-      → /opsp:reexplore — revises milestones, leaves the decision trail alone
-      → the initiative stays at `building`
+  nothing moved         the work was simply not FINISHED
+      → a change request from /opsp:attest — nothing superseded
+      → returns to `building`
 ```
 
 The rungs are not invented — they are the artifact hierarchy read downwards. Driver-specs hold the
@@ -306,9 +307,10 @@ No workflow edits `state:` directly.
 | proposed | building | `/opsp:apply`, at the first milestone |
 | building | ready-for-attestation | `/opsp:apply`, when the last one closes |
 | building | proposed | `/opsp:repropose`, when the strategy gives way |
-| ready-for-attestation | building | `/opsp:reexplore`, re-planning |
-| ready-for-attestation | building | `/opsp:attest`, a change requested |
+| building | exploring | `/opsp:reideate`, when the goal does |
+| ready-for-attestation | building | `/opsp:attest`, the work was not finished |
 | ready-for-attestation | proposed | `/opsp:repropose`, the strategy restated |
+| ready-for-attestation | exploring | `/opsp:reideate`, the goal no longer holds |
 | ready-for-attestation | attested | `/opsp:attest` |
 | attested | completed | `/opsp:archive` |
 

@@ -29,7 +29,7 @@ describe('workflows perform the transitions the table assigns them', () => {
   });
 
   it('no workflow is left editing the field by hand', () => {
-    for (const id of ['opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-reexplore']) {
+    for (const id of ['opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-reideate', 'opsp-repropose']) {
       expect(instructions(id)).toMatch(/opensprint advance/);
     }
   });
@@ -71,8 +71,11 @@ describe('workflows perform the transitions the table assigns them', () => {
       expect(text()).toContain('DEC-043');
     });
 
-    it('says the handoff is reversible but not skippable', () => {
-      expect(text()).toMatch(/reversible — what it is not is skippable/);
+    it('says the handoff is reversible but not skippable, naming each way back', () => {
+      expect(text()).toMatch(/The handoff is reversible/);
+      expect(text()).toMatch(/what it is not is skippable/i);
+      expect(text()).toContain('/opsp:repropose');
+      expect(text()).toContain('/opsp:reideate');
     });
   });
 
@@ -88,9 +91,10 @@ describe('workflows perform the transitions the table assigns them', () => {
       expect(text()).toContain('DS-SURROGATE-SCOPE');
     });
 
-    it('sends missing work back through reexplore rather than advancing', () => {
-      expect(text()).toMatch(/do not advance/i);
-      expect(text()).toContain('/opsp:reexplore');
+    it('offers an exit for each rung rather than advancing', () => {
+      expect(text()).toContain('/opsp:repropose');
+      expect(text()).toContain('/opsp:reideate');
+      expect(text()).toMatch(/request a change/);
     });
   });
 
@@ -111,20 +115,33 @@ describe('workflows perform the transitions the table assigns them', () => {
     });
   });
 
-  describe('reexplore', () => {
-    const text = () => instructions('opsp-reexplore');
+  describe('reideate', () => {
+    const text = () => instructions('opsp-reideate');
 
-    it('reopens a handed-over initiative', () => {
-      expect(text()).toContain('--to building');
+    it('returns a handed-over initiative to exploring, with the hat named', () => {
+      expect(text()).toContain('--to exploring --hat product');
     });
 
-    it('names itself as the loop the lifecycle runs on', () => {
-      expect(text()).toMatch(/the loop the lifecycle actually runs on/i);
+    it('rejoins the forward road rather than inventing one', () => {
+      expect(text()).toContain('/opsp:backlog');
       expect(text()).toContain('/opsp:triage');
+      expect(text()).toContain('/opsp:propose');
     });
 
-    it('leaves the state alone where nothing changed', () => {
-      expect(text()).toMatch(/leaves the state alone/i);
+    it('leaves the state alone where the goal holds after all', () => {
+      expect(text()).toMatch(/The initiative's state does not change/);
+    });
+  });
+
+  describe('repropose', () => {
+    const text = () => instructions('opsp-repropose');
+
+    it('returns the initiative to proposed', () => {
+      expect(text()).toContain('--to proposed');
+    });
+
+    it('says why not building', () => {
+      expect(text()).toMatch(/Back to\s+\\?`proposed\\?`, not/);
     });
   });
 });
