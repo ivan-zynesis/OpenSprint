@@ -1,7 +1,7 @@
 ---
 id: surrogate-currency
 status: active
-state: building
+state: ready-for-attestation
 created: 2026-10-10
 depends-on:
   - lifecycle-beyond-build

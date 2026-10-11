@@ -1,7 +1,7 @@
 ---
 id: lifecycle-beyond-build
 status: active
-state: building
+state: ready-for-attestation
 created: 2026-10-01
 ---
 

@@ -220,6 +220,7 @@ describe('initiatives', () => {
         'exploring',
         'proposed',
         'building',
+        'ready-for-attestation',
         'attested',
         'completed',
         'declined',
@@ -463,9 +464,12 @@ describe('initiatives', () => {
         entry({ state: 'building', milestones: ms(3, 3) }),
         merged
       );
-      expect(problems.map((p) => p.kind)).toEqual(['state-contradicted']);
-      expect(problems[0].detail).toMatch(/has merged/i);
-      expect(problems[0].detail).toMatch(/never closed/i);
+      // Two contradictions, and both are true: the handoff never happened
+      // (DEC-STATE-MACHINE) and the branch landed anyway (DEC-024).
+      expect(problems.map((p) => p.kind)).toEqual(['state-contradicted', 'state-contradicted']);
+      const merged_detail = problems.find((p) => /has merged/i.test(p.detail));
+      expect(merged_detail?.detail).toMatch(/never closed/i);
+      expect(problems.some((p) => /ready-for-attestation/.test(p.detail))).toBe(true);
     });
 
     it('reports it for proposed and exploring too', () => {

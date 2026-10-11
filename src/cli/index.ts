@@ -466,6 +466,23 @@ program
   });
 
 program
+  .command('advance [initiative]')
+  .description("Move an initiative to its next state")
+  .option('--to <state>', 'The state to advance to')
+  .option('--dry-run', 'Report the move without writing it')
+  .option('--json', 'Output as JSON')
+  .action(async (initiative: string | undefined, options: { to?: string; dryRun?: boolean; json?: boolean }) => {
+    try {
+      const { advanceCommand } = await import('../commands/advance.js');
+      await advanceCommand(initiative, options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command('frame')
   .description('Report what this branch changes, and against what base')
   .option('--json', 'Output as JSON')

@@ -247,7 +247,27 @@ names a different directory serving the same purpose, use theirs.
 Where the documentation is thin and the operator declines to improve it now, record that as a
 finding rather than silently accepting it.
 
-## Step 6b: Verify you stayed in bounds
+## Step 6b: Close the attestation
+
+Every bar carries a posture, and the three change questions are answered:
+
+\`\`\`bash
+opensprint advance <initiative-name> --to attested
+\`\`\`
+
+The command refuses the move from anywhere but \`ready-for-attestation\`, which is the point — an
+initiative still declaring \`building\` was never handed over, and attesting it means you attested
+work nobody said was finished (\`DEC-STATE-MACHINE\`).
+
+**\`attested\` does not mean every bar was met.** A bar recorded as \`not met\`, with an exposure and
+a \`mitigated-by\`, is a complete attestation (\`DEC-041\`). The state records that judgement
+*happened*, never that it was favourable — grading the answer is certification, and
+\`DS-SURROGATE-SCOPE\` puts that out of scope.
+
+**Where the answer is that work is missing rather than unmeasured**, do not advance. Say so, and
+hand to \`/opsp:reexplore\`, which returns the initiative to \`building\`.
+
+## Step 6c: Verify you stayed in bounds
 
 \`\`\`bash
 git diff --unified=0 -- opensprint/driver-specs/ opensprint/initiatives/

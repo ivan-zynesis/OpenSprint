@@ -103,11 +103,17 @@ export const BOARD_FILENAME = 'BOARD.md';
  * If we group them, we track them by name in a constant. `attested` sits in
  * Doing rather than Done because the work is not closed until it is archived
  * — an attested initiative is still in flight.
+ *
+ * `ready-for-attestation` gets a column of its own rather than sharing Doing.
+ * It is the one place a board can show that work is waiting on a *person
+ * wearing a different hat* rather than on more work, and burying it in Doing
+ * would hide exactly the queue a lead needs to see (DEC-STATE-MACHINE).
  */
 const SECTION_BY_STATE: Readonly<Record<string, string>> = {
   exploring: 'Backlog',
   proposed: 'Next',
   building: 'Doing',
+  'ready-for-attestation': 'Handoff',
   attested: 'Doing',
   completed: 'Done',
   declined: 'Declined',
@@ -118,18 +124,22 @@ const ASSURANCE: Readonly<Record<string, string>> = {
   exploring: 'we know, we are thinking',
   proposed: 'committed, with a bar',
   building: 'in flight',
+  'ready-for-attestation': 'built, awaiting judgement',
   attested: 'done, pending close',
   completed: 'closed',
   declined: '**dropped — the exposure stands**',
 };
 
 /** Rendered in this order, every one of them, empty or not. */
-const SECTIONS = ['Backlog', 'Next', 'Doing', 'Done', 'Declined'] as const;
+const SECTIONS = ['Backlog', 'Next', 'Doing', 'Handoff', 'Done', 'Declined'] as const;
 
 const SECTION_BLURB: Readonly<Record<string, string>> = {
   Backlog: 'Ideas captured, not yet triaged.',
   Next: 'Proposed — a bar is set, no work started.',
   Doing: 'In flight.',
+  Handoff:
+    'Every milestone done, nothing judged yet. **Waiting on a person, not on work** — ' +
+    'somebody must put the product or maintainer hat on and run `/opsp:attest`.',
   Done: 'Closed.',
   Declined: 'Considered and dropped. Kept because why it was declined is worth more than the idea.',
 };

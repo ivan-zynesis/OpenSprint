@@ -1,7 +1,7 @@
 ---
 id: sdlc-operating-contract
 status: active
-state: building
+state: ready-for-attestation
 created: 2026-10-09
 depends-on:
   - lifecycle-beyond-build
@@ -78,6 +78,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - DEC-038 — a bar is written in BDD form, split by hat
 - DEC-039 — `/opsp:triage` is its own tool, for explicitness rather than necessity
 - DEC-ATTEST-CHANGE-FRAME — attest frames the change before it reads a bar
+- DEC-STATE-MACHINE — transitions are side effects of tools, and the handoff is a state
 
 ## Milestones
 
@@ -88,6 +89,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - [x] record-naming: decisions are coined semantically and initiative filenames carry a creation-date prefix ([[DEC-036]]). `RECORD_ID_PATTERN` was widened ahead of the milestone, as a prerequisite to naming [[surrogate-currency]]'s decisions semantically — the numbered era stopped at `DEC-044`. This milestone removed the remaining number allocation from `/opsp:decide` and `/opsp:propose`, moved every reader to resolution by frontmatter `id:`, and renamed all five existing initiative files.
 - [x] sub-frameworks: SWOT-like strategy rendering compiled from cited ADRs ([[DEC-037]]) and BDD bar forms split by hat ([[DEC-038]]). `BAR_FORMS` and `SWOT_SOURCES` hold the vocabulary in code so the skill and the harvest cannot drift; `bar-without-form` makes the form mechanical. The BDD form is **additional to** the spectrum, not a replacement — the spectrum says where the bar sits and what that cost, the BDD says what a pipeline runs to tell you it still sits there.
 - [x] attest-frame: `/opsp:attest` resolves `source → base` and has the operator confirm it before reading a bar ([[DEC-ATTEST-CHANGE-FRAME]]). Found by using the tool: the attester could not know what change it was reviewing, so the operator had to narrate it. Added after the other six closed — attestation is change management, and this is the orientation step it was missing.
+- [x] state-machine: the initiative state machine, which `DEC-035` named and nothing implemented ([[DEC-STATE-MACHINE]]). Six states now, with `ready-for-attestation` for the handoff; eight transitions performed by `opensprint advance` rather than described in prose. Found by asking where states get written and discovering that `/opsp:propose`'s template had no `state:` field at all, so `proposed` was never written by anything and `/opsp:archive`'s gate on `attested` could never pass.
 
 **This initiative depends on [[lifecycle-beyond-build]]** and cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist — attest has nothing to write into, and `declined` has no state machine to join, until they do.
 

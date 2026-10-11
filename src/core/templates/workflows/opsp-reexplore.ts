@@ -116,6 +116,22 @@ Based on the operator's direction, orchestrate the plan changes. Multiple action
 1. Update the milestone description in the initiative descriptor
 2. The revised milestone will be picked up by the next \`/opsp:apply\` run
 
+### Reopening an initiative that was handed over
+
+Where the initiative declares \`ready-for-attestation\` and the revision **adds work**:
+
+\`\`\`bash
+opensprint advance <initiative-name> --to building
+\`\`\`
+
+This is the one edge that runs backwards (\`DEC-STATE-MACHINE\`), and it is what makes the handoff
+reversible rather than a one-way door. Re-planning that changes nothing — the common outcome of a
+re-explore — leaves the state alone.
+
+**This is the loop the lifecycle actually runs on.** \`building\` ⇄ \`ready-for-attestation\` is an
+engineer and a product owner iterating on the plan, which is the same conversation \`/opsp:triage\`
+has before the work starts. Re-explore is that conversation held again, with the work in hand.
+
 ### Adding a corrective milestone (for completed work that needs fixing)
 
 1. Add a new milestone to the initiative plan (after the completed milestone, or at operator-specified position)

@@ -82,12 +82,21 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
 
    **The operator's main checkout is not modified.**
 
-4. **Select review mode** — ask the operator to choose:
+4. **Open the initiative** — the first milestone starting is what makes it \`building\`:
+
+   \`\`\`bash
+   opensprint advance <initiative-name> --to building
+   \`\`\`
+
+   Skip this where it already declares \`building\` — the command says so and changes nothing.
+   Never edit \`state:\` by hand (\`DEC-STATE-MACHINE\`).
+
+5. **Select review mode** — ask the operator to choose:
    - **Per-milestone** (default) — pause after each milestone completes
    - **Per-change** — pause after each opsx change is archived
    - **Continuous** — run all milestones without pause (only pause for surrogate escalations)
 
-5. **Display progress**:
+6. **Display progress**:
    \`\`\`
    Initiative: migrate-to-serverless
    Worktree: ../<repo>-opsp-migrate-to-serverless
@@ -405,9 +414,38 @@ New ADRs: DEC-003 (Express for serverless), DEC-004 (DynamoDB for sessions)
 New Driver Specs: DS-LATENCY (sub-200ms API response)
 
 The initiative worktree contains all changes.
-Review with \`/opsp:review migrate-to-serverless\` or merge the initiative branch to main when ready.
-Ready to compile architectural state. Run \`/opsp:archive migrate-to-serverless\`.
 \`\`\`
+
+### Hand the initiative over
+
+Escalation **borrows** a hat for one question and gives it back. This is the other gesture: the dev
+hat comes off and does not go back on. Mark it:
+
+\`\`\`bash
+opensprint advance <initiative-name> --to ready-for-attestation
+\`\`\`
+
+Then say so, in those terms:
+
+\`\`\`
+══ HANDOFF — multi-region-failover ══════════════════════════════
+   3/3 milestones done · nothing judged yet
+   setting down:  dev, devops
+   waiting on:    product, maintainer
+
+   Next:  /opsp:attest multi-region-failover
+\`\`\`
+
+**This state exists because the hats are usually the same person**
+(\`DS-HATS-AS-CONTEXT\`). An engineer who has just finished building will attest what they built
+unless something marks the moment the accountability moves — and \`building\` → \`attested\` with
+nothing in between gives that moment nowhere to live (\`DEC-STATE-MACHINE\`).
+
+**Do not run \`/opsp:attest\` in this session.** \`DEC-043\` refuses the author; the handoff is to a
+fresh context, not to your next step.
+
+**If re-planning adds work after this point**, \`/opsp:reexplore\` takes it back to \`building\`. The
+handoff is reversible — what it is not is skippable.
 
 ---
 

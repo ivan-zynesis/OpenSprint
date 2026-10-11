@@ -21,11 +21,17 @@ _Empty._
 
 In flight.
 
+_Empty._
+
+## Handoff
+
+Every milestone done, nothing judged yet. **Waiting on a person, not on work** — somebody must put the product or maintainer hat on and run `/opsp:attest`.
+
 | Initiative | State | Milestones | Next |
 |---|---|---|---|
-| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | building | 11/11 _(+1 superseded)_ | — |
-| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | building | 7/7 | — |
-| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | building | 5/5 | — |
+| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | ready-for-attestation | 11/11 _(+1 superseded)_ | — |
+| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | ready-for-attestation | 8/8 | — |
+| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | ready-for-attestation | 5/5 | — |
 
 ## Done
 
@@ -50,9 +56,9 @@ risk, and **that initiative's state is the assurance level**.
 
 | Record | Exposure | Mitigated by | Assurance |
 |---|---|---|---|
-| `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | in flight |
-| `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | in flight |
-| `DS-ESCALATION-HANDOFF` | Inference can be wrong, and an operator approving quickly may accept a misclassified record. | [surrogate-currency](initiatives/20261010-surrogate-currency.md) | in flight |
+| `DS-ATTEST-AS-REVIEW` | Reading tests reintroduces some of the self-assessment risk the narrow context removed, because the agent that wrote … | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | built, awaiting judgement |
+| `DS-DOCUMENTATION-REVIEWED` | The documentation directory is prose for humans, so nothing compiles or checks it. | [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | built, awaiting judgement |
+| `DS-ESCALATION-HANDOFF` | Inference can be wrong, and an operator approving quickly may accept a misclassified record. | [surrogate-currency](initiatives/20261010-surrogate-currency.md) | built, awaiting judgement |
 | `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
 
 ## Problems
