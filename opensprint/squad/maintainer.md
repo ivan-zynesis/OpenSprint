@@ -601,42 +601,46 @@ What this costs to run and maintain. The business model belongs to `product`.
 
 ## Open Loops
 
-What the harvest reported for this hat, grouped by kind. Nothing here is inferred from a record's
-content.
+19 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
 
-**`exposure-unmitigated`** — an exposure with no `mitigated-by`; a risk with no planned work is a
-confession. Ten records:
+### `constraint-unasserted` — answered, but no rule cites any answering decision
 
-- `DS-ATTESTED-TRUTH`
-- `DS-HIGH-IMPACT-OPS`
-- `DS-SURROGATE-GIT-CONTRACT`
-- `DS-ATTEST-AS-REVIEW`
-- `DS-CI-ATTESTATION`
-- `DS-MEASURE-ANATOMY`
-- `DS-DOCUMENTATION-REVIEWED`
-- `DS-ESCALATION-HANDOFF`
-- `DS-VIEW-AUTHORSHIP`
-- `DS-STRATEGY-ALTITUDE`
+- `DS-SELF-USE-SCOPE` — Answered by `DEC-017`, but no rule cites any of them.
+- `DS-STRATEGY-ALTITUDE` — Answered by `DEC-020`, but no rule cites any of them.
 
-**`bar-without-form`** — a bar stated in prose; a maintainer bar is written `given / when / then`,
-which is already a test specification.
-
-- `DS-HIGH-IMPACT-OPS`
-- `DS-ATTEST-AS-REVIEW`
-- `DS-VIEW-AUTHORSHIP`
-- `DS-BACKWARD-COMPAT`
-
-**`measure-unattested`** — a posture whose verdict is not one of `met`, `partially met`, `not met`,
-`cannot assess`.
-
-- `DS-HIGH-IMPACT-OPS`
-- `DS-BACKWARD-COMPAT`
-
-**`constraint-unasserted`** — answered by a decision, but no rule cites any answering decision.
-
-- `DS-SELF-USE-SCOPE` — answered by `DEC-017`
-- `DS-STRATEGY-ALTITUDE` — answered by `DEC-020`
-
-**`decision-unguarded`** — a decision no rule cites.
+### `decision-unguarded` — a decision no rule cites
 
 - `DEC-020`
+
+_No rule cites this decision._
+
+### `measure-unattested` — a measure nobody has judged, or judged with an unrecognised verdict
+
+- `DS-BACKWARD-COMPAT`
+- `DS-HIGH-IMPACT-OPS`
+
+_States a posture with an unrecognised verdict. Accepted: met, partially met, not met, cannot assess._
+
+### `exposure-unmitigated` — an exposure with no `mitigated-by`
+
+- `DS-ATTEST-AS-REVIEW`
+- `DS-ATTESTED-TRUTH`
+- `DS-CI-ATTESTATION`
+- `DS-DOCUMENTATION-REVIEWED`
+- `DS-ESCALATION-HANDOFF`
+- `DS-HIGH-IMPACT-OPS`
+- `DS-MEASURE-ANATOMY`
+- `DS-STRATEGY-ALTITUDE`
+- `DS-SURROGATE-GIT-CONTRACT`
+- `DS-VIEW-AUTHORSHIP`
+
+_States an exposure with no `mitigated-by`. A risk with no planned work is a confession._
+
+### `bar-without-form` — a bar stated in prose rather than in its hat's form
+
+- `DS-ATTEST-AS-REVIEW`
+- `DS-BACKWARD-COMPAT`
+- `DS-HIGH-IMPACT-OPS`
+- `DS-VIEW-AUTHORSHIP`
+
+_States a bar in prose. A maintainer bar is written `given / when / then`, which is already a test specification._

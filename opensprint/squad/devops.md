@@ -191,6 +191,10 @@ CI (`DEC-COMPILE-ON-MILESTONE`).
 
 ## Open Loops
 
-- **`decision-unguarded` — `DEC-032`** (shared with `dev`). No rule cites the decision that evidence
-  is a CI artifact reference and that pipeline-only bars ride the next initiative, so nothing would
-  fail if an `### Evidence` block held prose or a pending bar acquired a pull request of its own.
+1 loop the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+
+### `decision-unguarded` — a decision no rule cites
+
+- `DEC-032`
+
+_No rule cites this decision._

@@ -9,7 +9,7 @@
       },
       "observed": {},
       "inputHash": "f9cb821c9ab74faa7541a0f1b990f42131348ce91ba2a66733d3b3e1ed3db828",
-      "outputHash": "d41e54bfa76acdd58a75b1aef4c8b2298b8bbaaa5ab5d81f1413df21e9332c9a"
+      "outputHash": "c609c581d08b9d17d7e54fdc5cf5e523d8ea1e1f7ab7b911ae5ff276dafac2b2"
     },
     {
       "hat": "product",
@@ -22,7 +22,7 @@
       },
       "observed": {},
       "inputHash": "ef048e1202df617c2c5fd765a898119d36677669207dfd5ff093e683395848f6",
-      "outputHash": "d41e54bfa76acdd58a75b1aef4c8b2298b8bbaaa5ab5d81f1413df21e9332c9a"
+      "outputHash": "c609c581d08b9d17d7e54fdc5cf5e523d8ea1e1f7ab7b911ae5ff276dafac2b2"
     },
     {
       "hat": "product",
@@ -49,7 +49,7 @@
       },
       "observed": {},
       "inputHash": "a259bcc82dbf3732d28c344c5b0cbe06252aa0faa8986fa2933a815f74d07ba8",
-      "outputHash": "d41e54bfa76acdd58a75b1aef4c8b2298b8bbaaa5ab5d81f1413df21e9332c9a"
+      "outputHash": "c609c581d08b9d17d7e54fdc5cf5e523d8ea1e1f7ab7b911ae5ff276dafac2b2"
     },
     {
       "hat": "product",
@@ -149,7 +149,7 @@
         "test/core/shared/tool-detection.test.ts": "6dd1ac8a723253c08222f76cd2646d175e35d043d0c6ba115bacf175b4567149",
         "test/core/state-machine-workflows.test.ts": "9fc09ea200b582f30d434f1d039bd3ba1b521463dae36ebd70f48349601a46a2",
         "test/core/templates/skill-templates-parity.test.ts": "4fc1a732d4318926a2e6eb0c594f17349965f746f8bbc25fe21b47a9c8951310",
-        "test/core/update.test.ts": "254413858866f29aaf3a26c122c8fd0c1470dbe0bf15f5892bc2d3fa718a9f73",
+        "test/core/update.test.ts": "22c4769b38246e1cbb30942262db37ad683b9b5132d3672e2d3e5dfe5bd6a1bb",
         "test/core/validation.enriched-messages.test.ts": "a9e1582bdb117a30012b66b4e36fb1584fc29ecfde9b8f268f2df374473d89a9",
         "test/core/validation.test.ts": "19d72ae12dfe04425091c143f646fd8935ec6aceb0de6faa887b23e94c53d43f",
         "test/core/view.test.ts": "335d22c0ae0722ca275138d909d2f2953c252df27bbb7bb8d2e875c2449224b4",
@@ -165,8 +165,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "cdf2a295823a19949f5e1be7fe30a81d965332128be073939015820430957c31",
-      "outputHash": "d41e54bfa76acdd58a75b1aef4c8b2298b8bbaaa5ab5d81f1413df21e9332c9a"
+      "inputHash": "18f3652c7b894d6be751abe437883377970ce67f4ba89e5335da32f05060efad",
+      "outputHash": "c609c581d08b9d17d7e54fdc5cf5e523d8ea1e1f7ab7b911ae5ff276dafac2b2"
     },
     {
       "hat": "product",
@@ -261,7 +261,7 @@
         "test/core/shared/tool-detection.test.ts": "6dd1ac8a723253c08222f76cd2646d175e35d043d0c6ba115bacf175b4567149",
         "test/core/state-machine-workflows.test.ts": "9fc09ea200b582f30d434f1d039bd3ba1b521463dae36ebd70f48349601a46a2",
         "test/core/templates/skill-templates-parity.test.ts": "4fc1a732d4318926a2e6eb0c594f17349965f746f8bbc25fe21b47a9c8951310",
-        "test/core/update.test.ts": "254413858866f29aaf3a26c122c8fd0c1470dbe0bf15f5892bc2d3fa718a9f73",
+        "test/core/update.test.ts": "22c4769b38246e1cbb30942262db37ad683b9b5132d3672e2d3e5dfe5bd6a1bb",
         "test/core/validation.enriched-messages.test.ts": "a9e1582bdb117a30012b66b4e36fb1584fc29ecfde9b8f268f2df374473d89a9",
         "test/core/validation.test.ts": "19d72ae12dfe04425091c143f646fd8935ec6aceb0de6faa887b23e94c53d43f",
         "test/core/view.test.ts": "335d22c0ae0722ca275138d909d2f2953c252df27bbb7bb8d2e875c2449224b4",
@@ -277,8 +277,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "d41e54bfa76acdd58a75b1aef4c8b2298b8bbaaa5ab5d81f1413df21e9332c9a"
+      "inputHash": "22a860d2cb49764e5f3800b5a399a11fd2d20206ee0ce6c64fda73972264e46f",
+      "outputHash": "c609c581d08b9d17d7e54fdc5cf5e523d8ea1e1f7ab7b911ae5ff276dafac2b2"
     },
     {
       "hat": "dev",
@@ -346,7 +346,7 @@
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
       "inputHash": "b2a32c259beff19436fcdb0836c73e8dd50fffd1685a6acb1bbd2b017072c6f1",
-      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
+      "outputHash": "c8184d11ec6ae291b84d9cd8778b85f4f2ccb115fc491b581bb4b7b84c6418c7"
     },
     {
       "hat": "dev",
@@ -409,7 +409,7 @@
       },
       "observed": {},
       "inputHash": "5325999f592952e5b127e63f4b86cda96d2307494abf6cacb9f5749bfc646fca",
-      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
+      "outputHash": "c8184d11ec6ae291b84d9cd8778b85f4f2ccb115fc491b581bb4b7b84c6418c7"
     },
     {
       "hat": "dev",
@@ -476,7 +476,7 @@
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
       "inputHash": "180b3447342b070f91f4dc6dd70cdfec6ec6994d24cafd3f02345ab78f938607",
-      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
+      "outputHash": "c8184d11ec6ae291b84d9cd8778b85f4f2ccb115fc491b581bb4b7b84c6418c7"
     },
     {
       "hat": "dev",
@@ -571,7 +571,7 @@
         "test/core/shared/tool-detection.test.ts": "6dd1ac8a723253c08222f76cd2646d175e35d043d0c6ba115bacf175b4567149",
         "test/core/state-machine-workflows.test.ts": "9fc09ea200b582f30d434f1d039bd3ba1b521463dae36ebd70f48349601a46a2",
         "test/core/templates/skill-templates-parity.test.ts": "4fc1a732d4318926a2e6eb0c594f17349965f746f8bbc25fe21b47a9c8951310",
-        "test/core/update.test.ts": "254413858866f29aaf3a26c122c8fd0c1470dbe0bf15f5892bc2d3fa718a9f73",
+        "test/core/update.test.ts": "22c4769b38246e1cbb30942262db37ad683b9b5132d3672e2d3e5dfe5bd6a1bb",
         "test/core/validation.enriched-messages.test.ts": "a9e1582bdb117a30012b66b4e36fb1584fc29ecfde9b8f268f2df374473d89a9",
         "test/core/validation.test.ts": "19d72ae12dfe04425091c143f646fd8935ec6aceb0de6faa887b23e94c53d43f",
         "test/core/view.test.ts": "335d22c0ae0722ca275138d909d2f2953c252df27bbb7bb8d2e875c2449224b4",
@@ -587,8 +587,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "c41844459f40d61c2a5081e3af936cc18ec3b319c0c5323c772d152d6f6fc4c5"
+      "inputHash": "22a860d2cb49764e5f3800b5a399a11fd2d20206ee0ce6c64fda73972264e46f",
+      "outputHash": "c8184d11ec6ae291b84d9cd8778b85f4f2ccb115fc491b581bb4b7b84c6418c7"
     },
     {
       "hat": "devops",
@@ -601,7 +601,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "4af13bb26de2cf57f583bb666346d9230575490178ac924b28df21328a0c29b6"
+      "outputHash": "47f224f8ba759f4c53078a99df3f5b2fba4e703f61ffe233bfb84ad0fdc41169"
     },
     {
       "hat": "devops",
@@ -617,7 +617,7 @@
         ".github/workflows/release-prepare.yml": "bc7d747b777da48bee2a5ad59e48e433e3a374b0f76960f575182cf76497152a"
       },
       "inputHash": "2fd187f7995c1d2f332dee8c6167da270a5b5a95815f57e1f1ef1dcec54705c4",
-      "outputHash": "4af13bb26de2cf57f583bb666346d9230575490178ac924b28df21328a0c29b6"
+      "outputHash": "47f224f8ba759f4c53078a99df3f5b2fba4e703f61ffe233bfb84ad0fdc41169"
     },
     {
       "hat": "devops",
@@ -712,7 +712,7 @@
         "test/core/shared/tool-detection.test.ts": "6dd1ac8a723253c08222f76cd2646d175e35d043d0c6ba115bacf175b4567149",
         "test/core/state-machine-workflows.test.ts": "9fc09ea200b582f30d434f1d039bd3ba1b521463dae36ebd70f48349601a46a2",
         "test/core/templates/skill-templates-parity.test.ts": "4fc1a732d4318926a2e6eb0c594f17349965f746f8bbc25fe21b47a9c8951310",
-        "test/core/update.test.ts": "254413858866f29aaf3a26c122c8fd0c1470dbe0bf15f5892bc2d3fa718a9f73",
+        "test/core/update.test.ts": "22c4769b38246e1cbb30942262db37ad683b9b5132d3672e2d3e5dfe5bd6a1bb",
         "test/core/validation.enriched-messages.test.ts": "a9e1582bdb117a30012b66b4e36fb1584fc29ecfde9b8f268f2df374473d89a9",
         "test/core/validation.test.ts": "19d72ae12dfe04425091c143f646fd8935ec6aceb0de6faa887b23e94c53d43f",
         "test/core/view.test.ts": "335d22c0ae0722ca275138d909d2f2953c252df27bbb7bb8d2e875c2449224b4",
@@ -728,8 +728,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "4af13bb26de2cf57f583bb666346d9230575490178ac924b28df21328a0c29b6"
+      "inputHash": "22a860d2cb49764e5f3800b5a399a11fd2d20206ee0ce6c64fda73972264e46f",
+      "outputHash": "47f224f8ba759f4c53078a99df3f5b2fba4e703f61ffe233bfb84ad0fdc41169"
     },
     {
       "hat": "maintainer",
@@ -739,7 +739,7 @@
       },
       "observed": {},
       "inputHash": "a602fa7e930ac7b8b5aa33755141c87c0c1989c3bed65c44ca38f424c45bc295",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -747,7 +747,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -755,7 +755,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -763,7 +763,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -774,7 +774,7 @@
       },
       "observed": {},
       "inputHash": "a0c490d7d5e574f07af6a619dbbb7d3c06589bddca29fe783a2aded1e0788102",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -792,7 +792,7 @@
       },
       "observed": {},
       "inputHash": "d20a2e3a08fa9a9d479634670f2e7232480497e2177561bcab3aa0eb247f1228",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -800,7 +800,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -808,7 +808,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     },
     {
       "hat": "maintainer",
@@ -903,7 +903,7 @@
         "test/core/shared/tool-detection.test.ts": "6dd1ac8a723253c08222f76cd2646d175e35d043d0c6ba115bacf175b4567149",
         "test/core/state-machine-workflows.test.ts": "9fc09ea200b582f30d434f1d039bd3ba1b521463dae36ebd70f48349601a46a2",
         "test/core/templates/skill-templates-parity.test.ts": "4fc1a732d4318926a2e6eb0c594f17349965f746f8bbc25fe21b47a9c8951310",
-        "test/core/update.test.ts": "254413858866f29aaf3a26c122c8fd0c1470dbe0bf15f5892bc2d3fa718a9f73",
+        "test/core/update.test.ts": "22c4769b38246e1cbb30942262db37ad683b9b5132d3672e2d3e5dfe5bd6a1bb",
         "test/core/validation.enriched-messages.test.ts": "a9e1582bdb117a30012b66b4e36fb1584fc29ecfde9b8f268f2df374473d89a9",
         "test/core/validation.test.ts": "19d72ae12dfe04425091c143f646fd8935ec6aceb0de6faa887b23e94c53d43f",
         "test/core/view.test.ts": "335d22c0ae0722ca275138d909d2f2953c252df27bbb7bb8d2e875c2449224b4",
@@ -919,8 +919,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "1db37320279da716e335bfe936061b350684c7929f92efeb3a6cded59f133048",
-      "outputHash": "a6f04b4d58be8e0878d1bac9aaf2f5e9719cc2934515fd9f2fc1f144fcd541a8"
+      "inputHash": "22a860d2cb49764e5f3800b5a399a11fd2d20206ee0ce6c64fda73972264e46f",
+      "outputHash": "d2c7cd9b3db87248ea8162ceb86effa643c5c51b67b01770cb37b767bc9f66cb"
     }
   ]
 }

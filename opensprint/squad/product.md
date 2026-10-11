@@ -232,74 +232,116 @@ no exposure names a `mitigated-by`. `DS-SQUAD-HATS`, `DS-SME-OWNERSHIP`, `DS-LOO
 
 ## Measures
 
-For each goal, this section says what measures it and what asserts that measure. A measure without a
-posture is decided, not true (`DS-MEASURE-ANATOMY`). On that standard, **no goal is known to have
-landed.**
+For each goal: what measures it, and what asserts that measure. The plan classifies all four goal
+records as **decided**; none is `attested`. So every bar below is a commitment, not a property the
+system is known to have. Where a check exists, it is cited by path, and that citation is
+**observed** (it shows what the test exercises), not a verdict on the bar. None of these records
+says what its bar traded away or what the next point along would cost: **the trade is unrecorded
+for every bar here.**
 
-| Goal | Measure stated | Bar | Posture | Evidence | Exposure |
-|---|---|---|---|---|---|
-| Cover all four accountabilities (`DS-FULL-COVERAGE`) | yes | unrecorded | none | none | none |
-| Documentation is compiled (`DS-DOCUMENTATION-AS-OUTPUT`) | yes | unrecorded | none | none | none |
-| Nothing true until attested (`DS-ATTESTED-TRUTH`) | yes | unrecorded | partially met | in the posture text only | yes, no mitigation planned |
-| Surrogate budget (`DS-SURROGATE-BUDGET`) | **no** | — | — | — | — |
+```
+goal                         record                      measures             posture
+---------------------------  --------------------------  -------------------  ----------------------
+all four accountabilities    DS-FULL-COVERAGE            primary, guardrail   none recorded
+documentation is compiled    DS-DOCUMENTATION-AS-OUTPUT  primary, guardrail   none recorded
+true only once attested      DS-ATTESTED-TRUTH           primary, guardrail,  partially met, no
+                                                         freshness            evidence: decided
+surrogate within budget      DS-SURROGATE-BUDGET         none                 n/a
+```
 
-**Cover all four accountabilities.** This goal has two measures (`DS-FULL-COVERAGE`):
+### Cover all four accountabilities
 
-- **Primary:** every hat in the registry has records, or a recorded decision explaining why not.
-- **Guardrail:** no hat accumulates records that no rule asserts, with reference to
-  `DS-LOOP-CLOSURE`.
+- **Primary**: every hat in a project's registry has records, or a recorded decision explaining
+  why it has none (`DS-FULL-COVERAGE`). The record names nothing that checks this.
+- **Guardrail**: no hat accumulates records that no rule asserts (`DS-FULL-COVERAGE`, which points
+  to `DS-LOOP-CLOSURE`). The harvest that reports a decision no rule cites is exercised by
+  `test/core/compact-loops.test.ts`. `test/cli-e2e/compact.test.ts` shows that `compact loops`
+  reports an unguarded decision **and exits zero**. So the gap is reported, but nothing fails
+  because of it.
+- **Posture**: none recorded. The plan reports this measure as `measure-unattested`
+  (`DS-FULL-COVERAGE`).
 
-The record has no `### Bar`, so its trade-off is unrecorded. It has no posture either, so nothing
-asserts this measure (`DS-FULL-COVERAGE`).
+### Documentation is compiled, never a second effort
 
-**Documentation is compiled, never a second effort.** This goal has two measures
-(`DS-DOCUMENTATION-AS-OUTPUT`):
+- **Primary**: no documentation artifact is hand-authored where a compiled one would serve
+  (`DS-DOCUMENTATION-AS-OUTPUT`). The record names nothing that checks this.
+- **Guardrail**: a compiled artifact that disagrees with its sources fails the build
+  (`DS-DOCUMENTATION-AS-OUTPUT`, see `DEC-010`). `test/cli-e2e/compact.test.ts` asserts that
+  `compact check` exits non-zero after a view is hand-edited or after a record changes. That covers
+  the check. It does not show that the check gates a build.
+- **Posture**: none recorded. The plan reports this measure as `measure-unattested`
+  (`DS-DOCUMENTATION-AS-OUTPUT`).
 
-- **Primary:** no documentation is hand-written where a compiled artifact would serve.
-- **Guardrail:** a compiled artifact that disagrees with its sources fails the build. The record
-  points to `DEC-010` for this.
+### Nothing is documented as true until it is attested
 
-The trade-off is unrecorded, and with no posture, nothing asserts this measure
-(`DS-DOCUMENTATION-AS-OUTPUT`).
+- **Primary**: no compiled claim is stated in the present tense without an attestation behind it
+  (`DS-ATTESTED-TRUTH`).
+- **Guardrail**: a compiled view visibly distinguishes decided, observed and attested claims
+  (`DS-ATTESTED-TRUTH`).
+- **Freshness**: an attestation carries a date, so staleness can be computed instead of assumed
+  (`DS-ATTESTED-TRUTH`).
+- **Posture** as recorded: **partially met**, attested by Ivan Lee on 2026-10-11
+  (`DS-ATTESTED-TRUTH`). Per that posture, `test/core/compact-measures.test.ts` asserts how a record
+  is classified as decided or attested. That includes the rule that an attestation needs both a
+  date and evidence, and that the date carries forward without expiring. According to the posture,
+  three things are not asserted:
+  - **Primary**: the tense of compiled claims.
+  - **Guardrail**: the `observed` authority in compiled output. The test titled "three
+    authorities" checks two of them, and neither is `attested`.
+  - **Freshness**: that a verdict with evidence but no `attested-on` is downgraded.
+- **Evidence**: the record has no `### Evidence` section, so the plan classifies it **decided**,
+  not attested. The verdict above is a judgement with no artifact behind it.
+- **Exposure** as recorded: a compiled view may state present-tense claims with no attestation
+  behind them, and the decided / observed / attested distinction is unverified in rendered output
+  (`DS-ATTESTED-TRUTH`). It names no `mitigated-by`, and the plan reports it as
+  `exposure-unmitigated`.
 
-**Nothing is documented as true until it is attested.** This goal has three measures
-(`DS-ATTESTED-TRUTH`):
+### Loading the surrogate must not consume the session budget
 
-- **Primary:** no compiled claim is in the present tense without an attestation behind it.
-- **Guardrail:** a compiled view visibly distinguishes decided, observed and attested claims.
-- **Freshness:** every attestation carries a date, so staleness can be computed.
-
-There is no `### Bar`, so the trade-off is unrecorded. Ivan Lee recorded the posture as **partially
-met** on 2026-10-11 (`DS-ATTESTED-TRUTH`).
-
-There is no `### Evidence` block. The posture text cites `test/core/compact-measures.test.ts` as
-covering only how a record is classified. That classification includes two points: an attestation
-needs both a date and evidence, and the date does not expire (`DS-ATTESTED-TRUTH`). The posture
-records three things as not asserted (`DS-ATTESTED-TRUTH`):
-
-- the tense of compiled claims (Primary)
-- the `observed` authority in compiled output. The test named "three authorities" checks only two,
-  and neither of them is `attested` (Guardrail).
-- that a verdict with evidence but no `attested-on` date is downgraded (Freshness)
-
-The recorded exposure: a compiled view may state present-tense claims with no attestation behind
-them, and no one has verified the decided / observed / attested distinction in rendered output. No
-`mitigated-by` is named (`DS-ATTESTED-TRUTH`).
-
-**Loading the surrogate must not consume the session budget.** This goal **has no measure**. The
-record carries no `## Measures` section (`DS-SURROGATE-BUDGET`). Its token table is a baseline taken
-across three projects, not a bar. Nothing states what load would count as success, so nothing can
-assert it.
+**No measure.** `DS-SURROGATE-BUDGET` has no `## Measures` section, and the plan reports it as
+`constraint-unmeasurable`. Its rationale records load sizes measured across three projects (ADRs at
+61–74% of every load). Those figures describe the problem. They do not set a bar, so nothing says
+how this goal is known to be met.
 
 ## Open Loops
 
-These are the loops this compile's harvest reported for the product hat, grouped by kind. There are
-23. None is a block (`DEC-023`). Each is triage input for the product owner (`DS-SME-OWNERSHIP`).
+23 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
 
-**`exposure-unmitigated` (13).** These records state an exposure but name no `mitigated-by`:
+### `constraint-unanswered` — a constraint no active decision answers
 
-- `DS-ATTESTED-TRUTH`
+- `DS-AGENTIC-SDLC`
+- `DS-BIG-PICTURE`
+- `DS-DOCUMENTATION-AS-OUTPUT`
+
+_No active decision answers this constraint._
+
+### `constraint-unasserted` — answered, but no rule cites any answering decision
+
+- `DS-STRATEGY-ALTITUDE` — Answered by `DEC-020`, but no rule cites any of them.
+
+### `constraint-unmeasurable` — stated as a goal, with no populated `## Measures`
+
+- `DS-SURROGATE-BUDGET`
+
+_Stated as a goal but carries no populated '## Measures' section — nothing says how it is known to be met._
+
+### `strategy-unimplemented` — an approach with no decision descending from it
+
+- `DS-BIG-PICTURE`
+
+_States an approach with no decision descending from it. Intent nobody built._
+
+### `measure-unattested` — a measure nobody has judged, or judged with an unrecognised verdict
+
+- `DS-DOCUMENTATION-AS-OUTPUT`
+- `DS-FULL-COVERAGE`
+
+_States a measure with no `### Posture`. Nobody has judged whether the bar was met._
+
+### `exposure-unmitigated` — an exposure with no `mitigated-by`
+
 - `DS-ATTEST-AS-REVIEW`
+- `DS-ATTESTED-TRUTH`
 - `DS-CI-ATTESTATION`
 - `DS-DOCUMENTATION-REVIEWED`
 - `DS-ESCALATION-HANDOFF`
@@ -312,32 +354,11 @@ These are the loops this compile's harvest reported for the product hat, grouped
 - `DS-SURROGATE-GIT-CONTRACT`
 - `DS-VIEW-AUTHORSHIP`
 
-That accounts for every exposure attested on 2026-10-11. `DS-FORWARD-CLOSURE` expected this outcome:
-its attestation left its own exposures without pointers on purpose, so that the next compile would
-check them live.
+_States an exposure with no `mitigated-by`. A risk with no planned work is a confession._
 
-**`constraint-unanswered` (3).** No active decision answers these:
-
-- `DS-AGENTIC-SDLC`, the objective
-- `DS-BIG-PICTURE`
-- `DS-DOCUMENTATION-AS-OUTPUT`
-
-**`measure-unattested` (2).** These goals state a measure but have no `### Posture`:
-
-- `DS-FULL-COVERAGE`
-- `DS-DOCUMENTATION-AS-OUTPUT`
-
-**`bar-without-form` (2).** These records state their bar in prose instead of the product form
-`as a / I want / for`:
+### `bar-without-form` — a bar stated in prose rather than in its hat's form
 
 - `DS-ATTEST-AS-REVIEW`
 - `DS-VIEW-AUTHORSHIP`
 
-**`constraint-unasserted` (1).** `DEC-020` answers `DS-STRATEGY-ALTITUDE`, but no rule cites either
-of them.
-
-**`strategy-unimplemented` (1).** `DS-BIG-PICTURE` states an approach, but no decision descends
-from it.
-
-**`constraint-unmeasurable` (1).** `DS-SURROGATE-BUDGET` is stated as a goal but has no populated
-`## Measures` section.
+_States a bar in prose. A product bar is written `as a / I want / for`, which is already a test specification._

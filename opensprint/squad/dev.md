@@ -443,17 +443,17 @@ No record decides anything about this layer. It is described here only as observ
 
 ## Open Loops
 
-The harvest reports eight `decision-unguarded` loops for this hat. Each one is a decision that no test or check cites by id, so nothing would fail if the system departed from it (`DEC-013`). They are backlog items, to be triaged through `/opsp:explore` → `/opsp:propose` (`DEC-007`).
+8 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
 
-| Record | Also CC'd to | What is decided but unguarded |
-|---|---|---|
-| `DEC-005` | | Abandon preserves the losing universe as `opensprint/abandoned/{name}/` with a snapshot and `migration-manifest.md` |
-| `DEC-008` | | A hat's charter compiles from governance records, never hand-authored |
-| `DEC-013` | | Rule links are harvested from code, not declared in records |
-| `DEC-015` | | v1 does not change what `/opsp:explore` and `/opsp:apply` load |
-| `DEC-017` | | The product surface is the CLI plus generated agent files: no GUI, no CI/CD product |
-| `DEC-020` | maintainer | A maintainer strategy cites its implementing decisions instead of describing the mechanism |
-| `DEC-031` | | Archive consumes compact; compact stays safe to run mid-initiative and is not embedded in knockdown |
-| `DEC-032` | devops | Evidence is a CI artifact reference; a pipeline-only bar is attested `pending` and re-attested by the next initiative touching the area |
+### `decision-unguarded` — a decision no rule cites
 
-The loop list says nothing about the record/observation disagreements surfaced under **Entity Schema** and **Tech Stack**. Those appear here only through this note, not as harvested loops.
+- `DEC-005`
+- `DEC-008`
+- `DEC-013`
+- `DEC-015`
+- `DEC-017`
+- `DEC-020`
+- `DEC-031`
+- `DEC-032`
+
+_No rule cites this decision._
