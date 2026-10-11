@@ -215,20 +215,69 @@ intake and fills as the work crystallizes, which is why its state is simply how 
 has got:
 
 ```
-  /opsp:backlog    /opsp:propose     /opsp:apply   /opsp:attest   /opsp:archive
-       │                │                 │             │              │
-       ▼                ▼                 ▼             ▼              ▼
-  ┌──────────┬─────────────────┬────────────┬───────────────┬───────────┐
-  │OBJECTIVE │ STRATEGY        │ milestones │ POSTURE       │ compiled  │
-  │GOAL      │ MEASURE (bar)   │ executing  │ EVIDENCE      │ into      │
-  │          │                 │            │ EXPOSURE      │ views     │
-  └──────────┴─────────────────┴────────────┴───────────────┴───────────┘
-   exploring  proposed          building     attested        completed
+  /opsp:backlog  /opsp:propose   /opsp:apply ──────────┐  /opsp:attest  /opsp:archive
+       │              │               │                │       │             │
+       ▼              ▼               ▼                ▼       ▼             ▼
+  ┌──────────┬───────────────┬────────────┬────────────────┬──────────┬───────────┐
+  │OBJECTIVE │ STRATEGY      │ milestones │ every milestone│ POSTURE  │ compiled  │
+  │GOAL      │ MEASURE (bar) │ executing  │ done, nothing  │ EVIDENCE │ into      │
+  │          │               │            │ judged yet     │ EXPOSURE │ views     │
+  └──────────┴───────────────┴────────────┴────────────────┴──────────┴───────────┘
+   exploring  proposed        building      ready-for-       attested   completed
+                                 ▲          attestation
+                                 └──────────────┘
+                                 /opsp:reexplore — re-planning adds work
 ```
 
 Plus `declined` — terminal, for a candidate considered and dropped. It is kept rather than deleted,
 because **why something was declined is worth more than the idea**: the same proposal returns six
-months later, and one line ends the conversation.
+months later, and one line ends the conversation. Reviving it returns it to `exploring`.
+
+### The handoff is a state
+
+`ready-for-attestation` means **every milestone is done and nothing has been judged**. It exists
+because most hats are worn by the same engineer: `building` says work is happening and `attested`
+says judgement happened, and between them is the moment the work stops being `dev`'s and becomes
+`product` and `maintainer`'s. With no state for that moment it is invisible, which in practice
+means it does not occur — the engineer who finished building attests what they built.
+
+It is also the only honest thing to put on a board. Work in progress and work waiting on somebody
+to put a different hat on need different responses — one needs time, the other needs a person — so
+`BOARD.md` gives the handoff its own **Handoff** column rather than burying it in Doing.
+
+`building ⇄ ready-for-attestation` runs both ways. `/opsp:reexplore` takes a handed-over initiative
+back to `building` when re-planning adds work, which makes the handoff a door rather than a cliff.
+That loop is the same conversation `/opsp:triage` has before the work starts — an engineer and a
+product owner iterating on the plan — held again with the work in hand.
+
+### Transitions are performed, not described
+
+Every move is `opensprint advance <initiative> --to <state>`, called by the workflow that owns it.
+No workflow edits `state:` directly.
+
+| From | To | By |
+|---|---|---|
+| exploring | proposed | `/opsp:propose` |
+| exploring | declined | `/opsp:triage` |
+| declined | exploring | `/opsp:triage` |
+| proposed | building | `/opsp:apply`, at the first milestone |
+| building | ready-for-attestation | `/opsp:apply`, when the last one closes |
+| ready-for-attestation | building | `/opsp:reexplore` |
+| ready-for-attestation | attested | `/opsp:attest` |
+| attested | completed | `/opsp:archive` |
+
+The reason is unglamorous: a prose instruction saying "now set `state:`" produces nothing when it is
+skipped, and nothing looks exactly like nothing-to-do. For most of this project's life every
+initiative's state was hand-edited, `proposed` was never written by anything, and the archive gate
+required a state no tool could produce. A command leaves a trace; its absence is visible.
+
+An illegal *move* is refused. A legal move into a state the content contradicts is **recorded, with
+the contradiction reported beside it** — refusing there would make a tool that records what happened
+into one that decides what may happen.
+
+Because `completed` is reachable only through `attested`, and `attested` only through the handoff,
+the compile that `/opsp:archive` runs is the one point in the lifecycle where **every squad hat is
+guaranteed compiled and sealed**.
 
 The hierarchy: an **initiative** is an epic, a **milestone** is a group of tickets or one large
 ticket, and an **openspec change** is a ticket.

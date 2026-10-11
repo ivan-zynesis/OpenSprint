@@ -126,6 +126,7 @@ mistyped still resolves:
 ---
 id: <initiative-name>
 status: active
+state: proposed
 created: <YYYY-MM-DD>
 ---
 
@@ -182,7 +183,18 @@ drift from reality. \`Addresses\` records what the initiative set out to close, 
 ## Guardrails
 
 - **Classify, don't invent** — Only create driver-specs and ADRs from what the operator actually said
-- **Never duplicate an initiative** — where one exists at \`state: exploring\`, fill it in and advance it to \`proposed\`; do not write a second
+- **Never duplicate an initiative** — where one exists at \`state: exploring\`, fill it in and advance it; do not write a second
+
+## Step 5: Advance the state
+
+\`\`\`bash
+opensprint advance <initiative-name> --to proposed
+\`\`\`
+
+**Do not edit \`state:\` by hand.** The command refuses an illegal move, names the legal ones, and
+regenerates \`BOARD.md\` (\`DEC-STATE-MACHINE\`). Writing the field directly is what left every
+initiative in this project stuck at the wrong state — the instruction to set it existed and was
+simply never followed.
 - **Never rewrite an Objective or Goal** — those were settled at backlog time
 - **Operator confirms** — Always present classification before writing files
 - **High-level milestones** — Each milestone is a brief description, not a detailed plan. Detail comes from opsx.

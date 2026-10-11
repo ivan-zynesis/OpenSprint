@@ -384,11 +384,18 @@ export function resolveInitiative(
  *
  * `declined` sits at the end as a terminal state rather than a stage
  * (DEC-035): a backlog without an exit becomes a graveyard.
+ *
+ * `ready-for-attestation` is the handoff (DEC-STATE-MACHINE). Every
+ * milestone is done and nothing has been judged — the one moment a change
+ * stops being dev's and becomes product and maintainer's. DS-HATS-AS-CONTEXT
+ * makes that the same engineer, so without a state marking it the handoff
+ * happens silently or not at all.
  */
 export const INITIATIVE_STATES = [
   'exploring',
   'proposed',
   'building',
+  'ready-for-attestation',
   'attested',
   'completed',
   'declined',
@@ -494,10 +501,34 @@ export function checkInitiativeState(
     contradiction(`Declares 'exploring' but ${done} milestone(s) are already done.`);
   }
 
+  // The same contradiction one state further along, and the one that went
+  // unreported longest: every initiative in this repository sat at 'proposed'
+  // while its milestones closed, because nothing advanced it (DEC-STATE-MACHINE).
+  if (state === 'proposed' && done > 0) {
+    contradiction(
+      `Declares 'proposed' but ${done} milestone(s) are already done. ` +
+        `/opsp:apply advances to 'building' when the first milestone starts.`
+    );
+  }
+
+  // The handoff that did not happen. Work is finished and the initiative
+  // still claims to be in flight, so nobody has been told to pick up a
+  // different hat.
+  if (state === 'building' && total > 0 && done === total) {
+    contradiction(
+      `Declares 'building' but all ${total} milestone(s) are done. ` +
+        `/opsp:apply advances to 'ready-for-attestation' when the last one closes.`
+    );
+  }
+
   // attested and completed are not distinguished from one another here:
   // nothing in the content separates "every milestone done" from "every bar
   // attested" until /opsp:attest exists.
-  if ((state === 'attested' || state === 'completed') && total > 0 && done < total) {
+  if (
+    (state === 'ready-for-attestation' || state === 'attested' || state === 'completed') &&
+    total > 0 &&
+    done < total
+  ) {
     contradiction(`Declares '${state}' but ${total - done} of ${total} milestone(s) are outstanding.`);
   }
 
@@ -509,6 +540,10 @@ export function checkInitiativeState(
 
   if (state === 'building' && total === 0) {
     contradiction(`Declares 'building' but has no milestones.`);
+  }
+
+  if (state === 'ready-for-attestation' && total === 0) {
+    contradiction(`Declares 'ready-for-attestation' but has no milestones — nothing was built.`);
   }
 
   // ── git, the third input (DEC-024)

@@ -103,6 +103,7 @@ an argument adopts it.
 | `/opsp:tree` | visualize the decision tree with blast radius |
 | `/opsp:rebuild-assess` | a driver-spec changed — cascade the re-evaluation |
 | `opensprint frame` | what this branch changes, and against what base |
+| `opensprint advance` | move an initiative to its next state |
 | `/opsp:compact` | recompile the views |
 
 ### Intervention
