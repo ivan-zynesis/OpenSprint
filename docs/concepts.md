@@ -250,6 +250,49 @@ back to `building` when re-planning adds work, which makes the handoff a door ra
 That loop is the same conversation `/opsp:triage` has before the work starts — an engineer and a
 product owner iterating on the plan — held again with the work in hand.
 
+### Escalation has three rungs
+
+Work does not only move forward. When something above the current work turns out to be wrong, it
+falls back — and **what has to move decides how far**:
+
+```
+  the GOAL moved        objective, goal, or the bar
+      → /opsp:triage or /opsp:driver — a conversation that starts over
+
+  the STRATEGY moved    what was decided about reaching the goal
+      → /opsp:repropose — supersedes ADRs, redraws the milestones beneath
+      → the initiative returns to `proposed`
+
+  the PLAN moved        the milestones implementing the strategy
+      → /opsp:reexplore — revises milestones, leaves the decision trail alone
+      → the initiative stays at `building`
+```
+
+The rungs are not invented — they are the artifact hierarchy read downwards. Driver-specs hold the
+objective and goal, ADRs hold the strategy, milestones hold the plan. That makes the test mechanical
+rather than a judgement call: nobody has to decide whether something is "a big change", only
+whether a driver-spec, an ADR or a milestone has to change. Those are three different files.
+
+**Re-entering at `proposed` rather than `building` is the load-bearing part.** A restated strategy
+has a bar nothing has been built against yet, so `/opsp:apply` must open the work again. A plan
+revision needs no such reset. That difference is why the two cannot be one tool with a flag.
+
+Both ends of the lifecycle reach the ladder. An **escalation during build** that turns out to be
+bigger than one record routes to a rung instead of writing a record and carrying on. An
+**attestation** that finds the change should not go forward sends it back — and distinguishes three
+things that look alike:
+
+| What the attester found | Exit | Lands at |
+|---|---|---|
+| A bar was missed, with an exposure and a plan | *none* — this is a complete attestation | `attested` |
+| The work is missing or wrong; building it is all that is needed | request a change | `building` |
+| This is not what we meant — the goal holds, the strategy does not | `/opsp:repropose` | `proposed` |
+
+The third is the case the whole lifecycle exists to catch. Nothing is broken, every bar may pass,
+and the thing still serves the goal badly. It is not a defect — it is a strategy that was
+underspecified, found by the only people who could find it, at the only point they were asked to
+look. Which is why attestation sits **before** the merge rather than after it.
+
 ### Transitions are performed, not described
 
 Every move is `opensprint advance <initiative> --to <state>`, called by the workflow that owns it.
@@ -262,7 +305,10 @@ No workflow edits `state:` directly.
 | declined | exploring | `/opsp:triage` |
 | proposed | building | `/opsp:apply`, at the first milestone |
 | building | ready-for-attestation | `/opsp:apply`, when the last one closes |
-| ready-for-attestation | building | `/opsp:reexplore` |
+| building | proposed | `/opsp:repropose`, when the strategy gives way |
+| ready-for-attestation | building | `/opsp:reexplore`, re-planning |
+| ready-for-attestation | building | `/opsp:attest`, a change requested |
+| ready-for-attestation | proposed | `/opsp:repropose`, the strategy restated |
 | ready-for-attestation | attested | `/opsp:attest` |
 | attested | completed | `/opsp:archive` |
 

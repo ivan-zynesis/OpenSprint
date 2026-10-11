@@ -92,6 +92,8 @@ an argument adopts it.
 | `/opsp:apply` | execute milestones, orchestrating one opsx cycle each |
 | `/opsp:attest` | assess each bar against evidence — the half most processes skip |
 | `/opsp:archive` | compile the surrogate and close the initiative |
+| `/opsp:reexplore` | the plan rung — revise milestones, decisions untouched |
+| `/opsp:repropose` | the strategy rung — supersede ADRs, driver-specs untouched |
 | `/opsp:review` | commit graph, branch status, code review assistance |
 
 ### Utility

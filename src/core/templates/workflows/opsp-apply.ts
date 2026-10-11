@@ -204,6 +204,7 @@ decision is owned by \`dev\` or \`devops\` (\`DEC-028\`). Carry the inference *i
       · product/goals and product/measures go stale
 
   [1] Approve   [2] Correct the classification   [3] Answer differently
+  [4] This is bigger than one record
 \`\`\`
 
 **The blast radius is part of the question, not a footnote.** Nobody can consent to a change whose
@@ -212,6 +213,37 @@ premise of \`/opsp:rebuild-assess\`.
 
 **Correcting the classification is an offered action**, which is how the inference stays falsifiable
 without a second prompt. Confirming it happens by approving the record.
+
+#### When the answer does not fit in one record
+
+Option **[4]** exists because most escalations are a missing fact and some are not. An answer that
+revises a decision already made, or invalidates milestones, is not a record to write and resume
+from — it is a rung of the ladder giving way (\`DEC-ESCALATION-LADDER\`).
+
+Ask which, by what has to move:
+
+\`\`\`
+  Does a driver-spec — the objective, the goal or its bar — have to change?
+
+    yes  →  the GOAL moved.  Stop. /opsp:triage, or /opsp:driver.
+            Apply does not resume; this is a conversation that starts over.
+
+    no, but a decision we already made is wrong or was never made
+         →  the STRATEGY moved.  /opsp:repropose  — supersedes ADRs,
+            redraws the milestones beneath them, returns to 'proposed'.
+
+    no, the decisions hold — the milestones do not
+         →  the PLAN moved.  /opsp:reexplore  — adds or revises milestones,
+            leaves the decision trail alone.
+\`\`\`
+
+**Do not guess which.** You know what you were blocked on; you do not know whether the operator
+considers the goal still right. Present the three and let them say.
+
+**Apply stops either way.** \`/opsp:repropose\` returns the initiative to \`proposed\`, which means
+apply must be run again — deliberately, because revised milestones riding on a state that claims
+work was already underway against them is exactly the bookkeeping the state machine exists to
+prevent. \`/opsp:reexplore\` leaves it at \`building\` and apply resumes at the revised plan.
 
 #### On approval
 

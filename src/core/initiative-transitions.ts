@@ -31,9 +31,15 @@ export const READY_FOR_ATTESTATION = 'ready-for-attestation' as const;
  * Every legal move, with the tool that owns it and what it means.
  *
  * An explicit table rather than an ordering rule. The lifecycle is not a
- * line — `declined` revives, and `ready-for-attestation` falls back to
- * `building` when re-planning adds work — and a rule derived from an index
- * cannot express either without exceptions that then have to be remembered.
+ * line — `declined` revives, and work falls back a rung whenever a rung above
+ * it turns out to be wrong — and a rule derived from an index cannot express
+ * that without exceptions that then have to be remembered.
+ *
+ * Two entries may share a `from` and a `to` and differ in `by`. That is not
+ * redundancy: `ready-for-attestation → building` means something different
+ * when `/opsp:attest` requests a change than when `/opsp:reexplore` adds one,
+ * and a refusal message naming both is more use than one naming neither
+ * (DEC-ESCALATION-LADDER).
  */
 export interface Transition {
   from: InitiativeState;
@@ -80,6 +86,24 @@ export const TRANSITIONS: readonly Transition[] = [
     to: 'building',
     by: '/opsp:reexplore',
     when: 're-planning adds work that was not there',
+  },
+  {
+    from: READY_FOR_ATTESTATION,
+    to: 'building',
+    by: '/opsp:attest',
+    when: 'a change is requested — the plan holds, the work does not',
+  },
+  {
+    from: 'building',
+    to: 'proposed',
+    by: '/opsp:repropose',
+    when: 'an escalation found the strategy does not survive contact',
+  },
+  {
+    from: READY_FOR_ATTESTATION,
+    to: 'proposed',
+    by: '/opsp:repropose',
+    when: 'the strategy must be restated — the goal holds, what was decided does not',
   },
   {
     from: READY_FOR_ATTESTATION,
