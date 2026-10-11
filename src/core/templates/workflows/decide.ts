@@ -57,15 +57,22 @@ const DECIDE_INSTRUCTIONS = `Record a decision in \`opensprint/ADRs/\` when genu
    - Identify any prior decision IDs this builds upon
    - Calculate depth: 0 if depends only on driver specs, max(parent depths) + 1 otherwise
 
-4. **Assign sequential ID**:
-   - Read existing files in \`opensprint/ADRs/\`
-   - Assign the next sequential number (DEC-001, DEC-002, etc.)
+4. **Coin a semantic ID** — never a number (\`DEC-036\`):
+   - \`DEC-\` followed by a short kebab-case phrase naming what was decided, in capitals
+   - \`DEC-ATTEST-NEVER-GATES\`, \`DEC-SCOPED-SEAL\`, \`DEC-KNOCKDOWN-ALL-VIEWS\`
+   - **Do not read the directory and increment.** Numbers collide across worktrees, which is
+     what \`DS-PARALLEL-EXEC\` makes routine, and they tell a reader nothing: \`(DEC-014)\` in
+     compiled prose requires a lookup that \`(DEC-COMPACT-SINGLE-ENGINE)\` does not.
+   - Name it at the altitude of the decision, not the implementation, so it survives being
+     superseded.
+   - Existing \`DEC-001\`–\`DEC-044\` keep their numbers **permanently**. An id that changes is
+     not an id, and they are cited in merged commits and compiled views. Never renumber one.
 
-5. **Create the decision record** at \`opensprint/ADRs/DEC-NNN.md\`:
+5. **Create the decision record** at \`opensprint/ADRs/DEC-SEMANTIC-NAME.md\`:
 
 \`\`\`markdown
 ---
-id: DEC-NNN
+id: DEC-SEMANTIC-NAME
 status: accepted
 depends-on:
   - DS-PRICING

@@ -37,7 +37,8 @@ const OPSP_ARCHIVE_INSTRUCTIONS = `Archive a completed initiative by compiling t
 
 ### 1. Verify Initiative Completion
 
-Read \`opensprint/initiatives/<name>.md\` and check:
+Read the initiative — resolve it by the \`id:\` in frontmatter, since filenames carry a
+creation-date prefix (\`20261011-<name>.md\`) — and check:
 - Are all milestones marked as done?
 - If not, warn the operator and ask for confirmation to proceed
 

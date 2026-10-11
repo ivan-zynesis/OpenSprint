@@ -35,7 +35,9 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
 
 ## Phase 1: Load Context & Setup
 
-1. **Read the initiative** at \`opensprint/initiatives/<name>.md\`
+1. **Read the initiative** in \`opensprint/initiatives/\` — **resolve by the \`id:\` in frontmatter, not by filename.**
+   Filenames carry a creation-date prefix (\`20261011-<name>.md\`), so \`<name>.md\` will not exist.
+   \`openspec compact board\` lists every initiative with its path.
    - Get the milestone list and their completion status
    - Identify the next incomplete milestone
 
