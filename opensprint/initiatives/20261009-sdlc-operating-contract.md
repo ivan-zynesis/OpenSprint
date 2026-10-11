@@ -82,6 +82,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - DEC-ESCALATION-LADDER — escalation has three rungs, and they are the OGSM altitudes
 - DEC-HAT-HANDOFFS — reideate is explore, later; every transition names its hat
 - DEC-BAR-AT-PROPOSE — the bar is written where the goal is, by the hat that owns it
+- DEC-REEXPLORE-NAME — the tool keeps its name; only its definition moved
 
 ## Milestones
 
@@ -96,6 +97,7 @@ The step function from idea to proposal splits, and both paths stay open:
 - [x] escalation-ladder: escalation splits into three rungs, which are the OGSM altitudes ([[DEC-ESCALATION-LADDER]]). `/opsp:repropose` is new — the strategy rung, superseding ADRs and returning the initiative to `proposed`; `/opsp:reexplore` is declared the plan rung; `/opsp:attest` gains a change request and a repropose exit. Found during this initiative's own attestation, which is where it would be found: an operator saying 'we decided that wrongly' had nowhere to go.
 - [x] hat-handoffs: the ladder corrected on contact ([[DEC-HAT-HANDOFFS]]). `/opsp:reexplore` became `/opsp:reideate` and moved to the goal rung — `/opsp:explore` with the work in hand, writing nothing, rejoining `backlog → triage → propose`; the old definition was `/opsp:repropose`'s all along. Repropose absorbed the plan rung and may now amend `## Measures`, guarded by: a bar that got easier is a goal that moved. Every transition declares its hat, and `opensprint advance` refuses a handoff until `--hat` names one.
 - [x] bar-at-propose: the bar is written where the goal is ([[DEC-BAR-AT-PROPOSE]]). Three documents said `/opsp:propose` writes the bar and no instruction did — propose and `/opsp:driver` never mentioned `## Measures`, so the primary path created driver-specs with no hat, no role and no measures. Also reclassifies `/opsp:repropose` as `create` mode: the distinction is whose record it is, and repropose wears the hat that wrote the bar. Found by the operator questioning a risk I had recorded wrongly.
+- [x] reexplore-name: the rename reverted ([[DEC-REEXPLORE-NAME]]). The tool keeps the name it has had since the beginning; only its definition moved. "Reexplore" names what it does — redo the explore process — where "reideate" named the altitude, and an operator reaching for a fallback asks what to run. The rename had also created a duplicate capability, `opsp-reideate-workflow`, while `opsp-reexplore-workflow` still held four requirements describing `/opsp:repropose`'s job; those are removed with migrations and the two are merged.
 
 **This initiative depends on [[lifecycle-beyond-build]]** and cannot start until `measure-anatomy`, `initiative-state` and `attest-tool` exist — attest has nothing to write into, and `declined` has no state machine to join, until they do.
 

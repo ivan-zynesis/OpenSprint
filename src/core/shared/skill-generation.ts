@@ -44,7 +44,7 @@ import {
   getOpspBacklogSkillTemplate,
   getOpspTriageSkillTemplate,
   getOpspReviewSkillTemplate,
-  getOpspReideateSkillTemplate,
+  getOpspReexploreSkillTemplate,
   getOpspReproposeSkillTemplate,
   getOpspKnockdownSkillTemplate,
   getOpspExploreCommandTemplate,
@@ -56,7 +56,7 @@ import {
   getOpspBacklogCommandTemplate,
   getOpspTriageCommandTemplate,
   getOpspReviewCommandTemplate,
-  getOpspReideateCommandTemplate,
+  getOpspReexploreCommandTemplate,
   getOpspReproposeCommandTemplate,
   getOpspKnockdownCommandTemplate,
   getOpspRebaseSkillTemplate,
@@ -166,7 +166,7 @@ export const OPSP_WORKFLOW_IDS = [
   // Utility commands
   'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
   // Lifecycle commands
-  'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reideate', 'opsp-repropose', 'opsp-knockdown',
+  'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
   // Universe reconciliation commands
   'opsp-rebase', 'opsp-abandon',
   // Surrogate compaction
@@ -193,7 +193,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getOpspAttestSkillTemplate(), dirName: 'opensprint-attest', workflowId: 'opsp-attest' },
     { template: getOpspArchiveSkillTemplate(), dirName: 'opensprint-archive', workflowId: 'opsp-archive' },
     { template: getOpspReviewSkillTemplate(), dirName: 'opensprint-review', workflowId: 'opsp-review' },
-    { template: getOpspReideateSkillTemplate(), dirName: 'opensprint-reideate', workflowId: 'opsp-reideate' },
+    { template: getOpspReexploreSkillTemplate(), dirName: 'opensprint-reexplore', workflowId: 'opsp-reexplore' },
     { template: getOpspReproposeSkillTemplate(), dirName: 'opensprint-repropose', workflowId: 'opsp-repropose' },
     { template: getOpspKnockdownSkillTemplate(), dirName: 'opensprint-knockdown', workflowId: 'opsp-knockdown' },
     // Universe reconciliation skills
@@ -224,7 +224,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspAttestCommandTemplate(), id: 'opsp-attest' },
     { template: getOpspArchiveCommandTemplate(), id: 'opsp-archive' },
     { template: getOpspReviewCommandTemplate(), id: 'opsp-review' },
-    { template: getOpspReideateCommandTemplate(), id: 'opsp-reideate' },
+    { template: getOpspReexploreCommandTemplate(), id: 'opsp-reexplore' },
     { template: getOpspReproposeCommandTemplate(), id: 'opsp-repropose' },
     { template: getOpspKnockdownCommandTemplate(), id: 'opsp-knockdown' },
     // Universe reconciliation commands

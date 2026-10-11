@@ -256,7 +256,7 @@ falls back — and **what has to move decides how far**:
 
 ```
   the GOAL moved        a driver-spec's Statement no longer holds
-      → /opsp:reideate — /opsp:explore, later. Writes nothing.
+      → /opsp:reexplore — /opsp:explore, later. Writes nothing.
       → returns to `exploring`, then rejoins backlog → triage → propose
 
   the STRATEGY moved    what was decided about reaching the goal
@@ -307,10 +307,10 @@ No workflow edits `state:` directly.
 | proposed | building | `/opsp:apply`, at the first milestone |
 | building | ready-for-attestation | `/opsp:apply`, when the last one closes |
 | building | proposed | `/opsp:repropose`, when the strategy gives way |
-| building | exploring | `/opsp:reideate`, when the goal does |
+| building | exploring | `/opsp:reexplore`, when the goal does |
 | ready-for-attestation | building | `/opsp:attest`, the work was not finished |
 | ready-for-attestation | proposed | `/opsp:repropose`, the strategy restated |
-| ready-for-attestation | exploring | `/opsp:reideate`, the goal no longer holds |
+| ready-for-attestation | exploring | `/opsp:reexplore`, the goal no longer holds |
 | ready-for-attestation | attested | `/opsp:attest` |
 | attested | completed | `/opsp:archive` |
 

@@ -29,7 +29,7 @@ describe('workflows perform the transitions the table assigns them', () => {
   });
 
   it('no workflow is left editing the field by hand', () => {
-    for (const id of ['opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-reideate', 'opsp-repropose']) {
+    for (const id of ['opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-reexplore', 'opsp-repropose']) {
       expect(instructions(id)).toMatch(/opensprint advance/);
     }
   });
@@ -75,7 +75,7 @@ describe('workflows perform the transitions the table assigns them', () => {
       expect(text()).toMatch(/The handoff is reversible/);
       expect(text()).toMatch(/what it is not is skippable/i);
       expect(text()).toContain('/opsp:repropose');
-      expect(text()).toContain('/opsp:reideate');
+      expect(text()).toContain('/opsp:reexplore');
     });
   });
 
@@ -93,7 +93,7 @@ describe('workflows perform the transitions the table assigns them', () => {
 
     it('offers an exit for each rung rather than advancing', () => {
       expect(text()).toContain('/opsp:repropose');
-      expect(text()).toContain('/opsp:reideate');
+      expect(text()).toContain('/opsp:reexplore');
       expect(text()).toMatch(/request a change/);
     });
   });
@@ -115,8 +115,8 @@ describe('workflows perform the transitions the table assigns them', () => {
     });
   });
 
-  describe('reideate', () => {
-    const text = () => instructions('opsp-reideate');
+  describe('reexplore', () => {
+    const text = () => instructions('opsp-reexplore');
 
     it('returns a handed-over initiative to exploring, with the hat named', () => {
       expect(text()).toContain('--to exploring --hat product');

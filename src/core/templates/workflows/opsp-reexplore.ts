@@ -1,5 +1,5 @@
 /**
- * OPSP Reideate Workflow Template
+ * OPSP Reexplore Workflow Template
  *
  * The goal rung. `/opsp:explore` with the work in hand: thinking time at the
  * objective and goal, writing nothing, returning the initiative to
@@ -12,31 +12,31 @@
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
 
-export function getOpspReideateSkillTemplate(): SkillTemplate {
+export function getOpspReexploreSkillTemplate(): SkillTemplate {
   return {
-    name: 'opensprint-reideate',
+    name: 'opensprint-reexplore',
     description:
       'Re-ideate an initiative — think again at the objective and goal, with the work in hand. Writes nothing, like explore, and returns the initiative to exploring.',
-    instructions: OPSP_REIDEATE_INSTRUCTIONS,
+    instructions: OPSP_REEXPLORE_INSTRUCTIONS,
     license: 'MIT',
     compatibility: 'Requires openspec CLI.',
     metadata: { author: 'opensprint', version: '1.0' },
   };
 }
 
-export function getOpspReideateCommandTemplate(): CommandTemplate {
+export function getOpspReexploreCommandTemplate(): CommandTemplate {
   return {
-    name: 'OPSP: Reideate',
+    name: 'OPSP: Reexplore',
     description: 'Think again at the objective and goal — writes nothing, returns to exploring',
     category: 'Workflow',
-    tags: ['workflow', 'opsp', 'reideate', 'ideation', 'goal'],
-    content: OPSP_REIDEATE_INSTRUCTIONS,
+    tags: ['workflow', 'opsp', 'reexplore', 'ideation', 'goal'],
+    content: OPSP_REEXPLORE_INSTRUCTIONS,
   };
 }
 
-const OPSP_REIDEATE_INSTRUCTIONS = `Think again at the **objective and goal**, with the work in hand.
+const OPSP_REEXPLORE_INSTRUCTIONS = `Think again at the **objective and goal**, with the work in hand.
 
-**Input**: the initiative name after \`/opsp:reideate\`. If omitted, list initiatives at \`building\` or \`ready-for-attestation\` and let the operator choose.
+**Input**: the initiative name after \`/opsp:reexplore\`. If omitted, list initiatives at \`building\` or \`ready-for-attestation\` and let the operator choose.
 
 ---
 
@@ -51,7 +51,7 @@ is called \`/opsp:repropose\`.
 
 \`\`\`
   /opsp:explore  ──► /opsp:backlog ──► /opsp:triage ──► /opsp:propose ──► ...
-  /opsp:reideate ──┘
+  /opsp:reexplore ──┘
         the same road, rejoined, with everything you learned building
 \`\`\`
 
@@ -180,5 +180,5 @@ worth more than the idea.
 - **Do not load the implementation.** An objective rethought while holding a diff rationalises it.
 - **If only \`## Measures\` moves, you are on the wrong rung** — that is \`/opsp:repropose\`.
 - **Concluding "no change" is a result**, not a failure. Record it.
-- **Rejoin the road.** Reideate does not propose; \`/opsp:backlog\` and \`/opsp:propose\` do.
+- **Rejoin the road.** Reexplore does not propose; \`/opsp:backlog\` and \`/opsp:propose\` do.
 `;

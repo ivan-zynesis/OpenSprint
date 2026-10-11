@@ -27,7 +27,7 @@ describe('the escalation ladder', () => {
     it('tests the Statement, not the whole driver-spec', () => {
       const text = instructions('opsp-repropose');
       expect(text).toMatch(/The test is a driver-spec's Statement/);
-      expect(text).toContain('/opsp:reideate');
+      expect(text).toContain('/opsp:reexplore');
     });
 
     it('may amend Measures, bounded the way attest is', () => {
@@ -83,8 +83,8 @@ describe('the escalation ladder', () => {
     });
 
     it('build and handoff can both fall back to the goal rung', () => {
-      expect(find('building', 'exploring', '/opsp:reideate')).toBeDefined();
-      expect(find('ready-for-attestation', 'exploring', '/opsp:reideate')).toBeDefined();
+      expect(find('building', 'exploring', '/opsp:reexplore')).toBeDefined();
+      expect(find('ready-for-attestation', 'exploring', '/opsp:reexplore')).toBeDefined();
     });
 
     it('attestation can fall back to the strategy rung', () => {
@@ -111,7 +111,7 @@ describe('the escalation ladder', () => {
       const tos = r!.legal.map((t) => t.to).sort();
       expect(tos).toEqual(['attested', 'building', 'exploring', 'proposed']);
       expect(r!.legal.map((t) => t.by)).toContain('/opsp:repropose');
-      expect(r!.legal.map((t) => t.by)).toContain('/opsp:reideate');
+      expect(r!.legal.map((t) => t.by)).toContain('/opsp:reexplore');
     });
 
     it('building can go forward to the handoff or back to either rung', () => {
@@ -147,7 +147,7 @@ describe('the escalation ladder', () => {
     it('says both rungs stop apply, and that both are hat changes', () => {
       expect(text()).toMatch(/Both rungs stop apply, and both are hat changes/);
       expect(text()).toContain('/opsp:repropose');
-      expect(text()).toContain('/opsp:reideate');
+      expect(text()).toContain('/opsp:reexplore');
       expect(text()).toContain('DEC-HAT-HANDOFFS');
     });
   });
@@ -162,7 +162,7 @@ describe('the escalation ladder', () => {
     it('offers all three exits', () => {
       expect(text()).toMatch(/request a change/);
       expect(text()).toContain('/opsp:repropose');
-      expect(text()).toContain('/opsp:reideate');
+      expect(text()).toContain('/opsp:reexplore');
     });
 
     it('says the hat change already happened at the handoff', () => {
@@ -183,12 +183,12 @@ describe('the escalation ladder', () => {
     });
   });
 
-  describe('reideate is explore, later', () => {
-    const text = () => instructions('opsp-reideate');
+  describe('reexplore is explore, later', () => {
+    const text = () => instructions('opsp-reexplore');
 
-    it('is registered in place of reexplore', () => {
-      expect([...OPSP_WORKFLOW_IDS]).toContain('opsp-reideate');
-      expect([...OPSP_WORKFLOW_IDS]).not.toContain('opsp-reexplore');
+    it('keeps its long-standing name (DEC-REEXPLORE-NAME)', () => {
+      expect([...OPSP_WORKFLOW_IDS]).toContain('opsp-reexplore');
+      expect([...OPSP_WORKFLOW_IDS]).not.toContain('opsp-reideate');
     });
 
     it('declares itself the goal rung', () => {

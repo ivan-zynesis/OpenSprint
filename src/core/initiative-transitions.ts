@@ -116,7 +116,7 @@ export const TRANSITIONS: readonly Transition[] = [
   {
     from: 'building',
     to: 'exploring',
-    by: '/opsp:reideate',
+    by: '/opsp:reexplore',
     when: 'the goal itself is in question',
     hat: ['product', 'maintainer'],
     handoff: true,
@@ -140,7 +140,7 @@ export const TRANSITIONS: readonly Transition[] = [
   {
     from: READY_FOR_ATTESTATION,
     to: 'exploring',
-    by: '/opsp:reideate',
+    by: '/opsp:reexplore',
     when: 'the goal no longer holds — back to thinking, writing nothing',
     hat: ['product', 'maintainer'],
     handoff: false,
