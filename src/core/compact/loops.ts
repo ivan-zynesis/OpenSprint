@@ -22,6 +22,7 @@ import {
   normalizeVerdict,
   verdictRequires,
   POSTURE_VERDICTS,
+  evidenceReferences,
 } from './measures.js';
 import type { SectionDef } from './sections.js';
 import type { InitiativeEntry } from '../initiatives.js';
@@ -44,6 +45,10 @@ export const OPEN_LOOP_KINDS = [
   'strategy-unimplemented',
   'exposure-unmitigated',
   'measure-unattested',
+  // An attestation that cites nothing addressable (DS-CI-ATTESTATION). It
+  // sits with the measure loops rather than the change loops because it is a
+  // property of one measure's evidence, not of the change as a whole.
+  'evidence-unresolvable',
   // Properties of a *change* rather than of a record (DEC-042). They fire
   // only once an initiative claims to have been attested — asking who holds
   // a risk before anyone has judged it would be noise.
@@ -147,7 +152,11 @@ export function deriveOpenLoops(
   sectionsFor: (hat: string) => readonly SectionDef[] = () => [],
   // Defaults to none, so a caller unaware of initiatives sees no attestation
   // loops rather than spurious ones.
-  initiatives: readonly InitiativeEntry[] = []
+  initiatives: readonly InitiativeEntry[] = [],
+  // Whether a repository-relative path exists. Defaults to "yes" — a caller
+  // that cannot answer must not manufacture a gap (DEC-007), and the same
+  // reasoning gives `readInitiativeGitState` its `undefined`.
+  resolvesLocally: (target: string) => boolean = () => true
 ): OpenLoop[] {
   const loops: OpenLoop[] = [];
   const activeDecisions = decisions.filter((d) => isActive(d.status));
@@ -379,6 +388,36 @@ export function deriveOpenLoops(
         hats,
         detail: `Records a verdict of '${verdict}' with no \`### Exposure\`. Nothing says what remains at risk.`,
       });
+    }
+
+    // DS-CI-ATTESTATION: evidence is an artifact the pipeline produced and
+    // the pull request can address. An `### Evidence` block of prose claims
+    // the bar was met and leaves nobody able to check, which is the failure
+    // the attested authority exists to rule out.
+    if (anatomy.evidence !== undefined) {
+      const refs = evidenceReferences(anatomy.evidence);
+      if (refs.length === 0) {
+        loops.push({
+          kind: 'evidence-unresolvable',
+          record: record.id,
+          hats,
+          detail:
+            'The `### Evidence` block names no addressable artifact. Write a markdown link ' +
+            'or a backticked repository-relative path; prose describing a belief is not evidence.',
+        });
+      } else {
+        const missing = refs
+          .filter((ref) => ref.form === 'local' && !resolvesLocally(ref.target))
+          .map((ref) => ref.target);
+        if (missing.length > 0) {
+          loops.push({
+            kind: 'evidence-unresolvable',
+            record: record.id,
+            hats,
+            detail: `Cites ${missing.map((t) => `\`${t}\``).join(', ')}, which is not in the tree.`,
+          });
+        }
+      }
     }
 
     // DS-FORWARD-CLOSURE: an exposure pointing at nothing is a confession;

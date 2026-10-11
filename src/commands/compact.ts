@@ -131,6 +131,22 @@ function scan(projectRoot: string): Scan {
 }
 
 /**
+ * Whether a repository-relative evidence path exists in the tree.
+ *
+ * Refuses anything that escapes the project root, and anything absolute.
+ * Both are answered `true` — the check has nothing to say about a path it
+ * will not look at, and reporting one as missing would be inventing a gap
+ * (DEC-007) about a reference that may well be valid outside the repository.
+ */
+function resolvesInTree(projectRoot: string, target: string): boolean {
+  if (path.isAbsolute(target)) return true;
+  const resolved = path.resolve(projectRoot, target);
+  const root = path.resolve(projectRoot);
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) return true;
+  return fs.existsSync(resolved);
+}
+
+/**
  * Harvests rule citations and derives open loops.
  *
  * Kept out of `scan()` because it walks the project's source tree — the most
@@ -146,7 +162,8 @@ function openLoopsFor(projectRoot: string, s: Scan): OpenLoop[] {
     index,
     (hat) => resolveHatRoles(projectRoot, hat),
     (hat) => resolveHatSections(projectRoot, hat),
-    readInitiatives(s.opensprintDir)
+    readInitiatives(s.opensprintDir),
+    (target) => resolvesInTree(projectRoot, target)
   );
 }
 

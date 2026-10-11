@@ -121,6 +121,16 @@ A record counts as **attested** only when it carries both an attestation date an
 verdict with nothing asserting it is an opinion, and the harvest keeps reporting until both are
 there.
 
+**Write the reference in one of two forms**, because the harvest reads them and nothing else:
+
+- a markdown link — \`[coverage report](https://ci.example.com/runs/4821/coverage)\`
+- a backticked repository-relative path — \`reports/2026-10-11-terraform-plan.txt\`
+
+A sentence saying the pipeline passed carries no reference, and \`evidence-unresolvable\` will say so
+on every compile until one is written. A backticked path that is not in the tree is reported the
+same way. A link with a scheme is taken on trust — the compiler does not go to the network, so a
+remote artifact is only as good as the person who cited it.
+
 \`cannot assess\` is a **complete attestation**, not a failure to finish. Name what the evidence could
 not answer, record the exposure, and stop looking.
 

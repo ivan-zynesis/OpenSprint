@@ -14,6 +14,8 @@ import {
   parseMeasureAnatomy,
   parseBar,
   statesNeighbour,
+  evidenceReferences,
+  EVIDENCE_REFERENCE_FORMS,
 } from '../../src/core/compact/measures.js';
 
 /**
@@ -305,6 +307,62 @@ ci/secret-scan run 4821
       for (const v of ['partially met', 'not met', 'cannot assess'] as const) {
         expect(verdictRequires(v)).toBe('exposure');
       }
+    });
+  });
+
+  describe('evidenceReferences (DS-CI-ATTESTATION)', () => {
+    it('recognises exactly two forms, by explicit list', () => {
+      expect([...EVIDENCE_REFERENCE_FORMS]).toEqual(['remote', 'local']);
+    });
+
+    it('takes the target of a markdown link, not its label', () => {
+      expect(evidenceReferences('[coverage/index.html](https://ci/4821)')).toEqual([
+        { form: 'remote', target: 'https://ci/4821' },
+      ]);
+    });
+
+    it('classifies a scheme-less link target as local', () => {
+      expect(evidenceReferences('[plan](reports/plan.txt)')).toEqual([
+        { form: 'local', target: 'reports/plan.txt' },
+      ]);
+    });
+
+    it('takes a backticked path', () => {
+      expect(evidenceReferences('produced at `reports/2026-10-11-plan.txt`')).toEqual([
+        { form: 'local', target: 'reports/2026-10-11-plan.txt' },
+      ]);
+    });
+
+    it('ignores a backticked token with no separator', () => {
+      expect(evidenceReferences('`deriveOpenLoops` asserts it')).toEqual([]);
+    });
+
+    it('ignores a backticked phrase', () => {
+      expect(evidenceReferences('`the CI job / the nightly run`')).toEqual([]);
+    });
+
+    it('finds nothing in prose, however confident', () => {
+      expect(evidenceReferences('every test passed on the pipeline, twice')).toEqual([]);
+    });
+
+    it('does not scan prose for things that look like filenames', () => {
+      expect(evidenceReferences('see coverage/index.html for details')).toEqual([]);
+    });
+
+    it('strips trailing sentence punctuation from a reference', () => {
+      expect(evidenceReferences('[run](https://ci/1).')[0].target).toBe('https://ci/1');
+    });
+
+    it('reports each reference once', () => {
+      expect(evidenceReferences('[a](https://ci/1) and again [b](https://ci/1)')).toHaveLength(1);
+    });
+
+    it('finds every reference in a block that cites several', () => {
+      const refs = evidenceReferences('[run](https://ci/1), plus `reports/plan.txt`');
+      expect(refs).toEqual([
+        { form: 'remote', target: 'https://ci/1' },
+        { form: 'local', target: 'reports/plan.txt' },
+      ]);
     });
   });
 });
