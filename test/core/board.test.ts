@@ -161,6 +161,72 @@ describe('board', () => {
     });
   });
 
+  describe('owners', () => {
+    const rowOf = (board: string, id: string) => board.split('\n').find((l) => l.includes(`[${id}]`)) ?? '';
+
+    it('gives every section with cards an Owner column', () => {
+      const b = renderBoard(
+        ['exploring', 'proposed', 'building', 'ready-for-attestation', 'completed', 'declined'].map((state) =>
+          entry({ id: state, state, milestones: state === 'exploring' || state === 'declined' ? [] : ms(1, 1) })
+        )
+      );
+      const headers = b.split('\n').filter((l) => l.startsWith('| Initiative |'));
+      expect(headers).toHaveLength(6);
+      for (const h of headers) expect(h).toBe('| Initiative | State | Owner | Milestones | Next |');
+    });
+
+    it('shows the owner of a card that has one', () => {
+      const b = renderBoard([entry({ id: 'a', state: 'building', owner: 'Nhat Cao', milestones: ms(0, 1) })]);
+      expect(rowOf(b, 'a')).toBe('| [a](initiatives/i.md) | building | Nhat Cao | 0/1 | m0 |');
+    });
+
+    it('shows a dash for a card nobody holds, including one written before owners existed', () => {
+      const b = renderBoard([entry({ id: 'a', status: 'completed', milestones: ms(1, 1) })]);
+      expect(rowOf(b, 'a')).toBe('| [a](initiatives/i.md) | _(none — status: completed)_ | — | 1/1 | — |');
+    });
+
+    it('escapes a pipe in an owner, so the table holds its shape', () => {
+      const b = renderBoard([entry({ id: 'a', state: 'building', owner: 'ops | night', milestones: ms(0, 1) })]);
+      expect(rowOf(b, 'a')).toContain('| ops \\| night |');
+    });
+
+    for (const state of ['building', 'ready-for-attestation', 'attested']) {
+      it(`reports ${state} with nobody named as owner-undeclared`, () => {
+        const b = renderBoard([entry({ id: 'a', state, milestones: ms(1, 1) })]);
+        expect(b).toContain(`- \`owner-undeclared\` **a** — \`${state}\` with nobody named as its owner.`);
+        expect(b).toContain('`opensprint claim a` takes it.');
+      });
+    }
+
+    it('says nothing about owners once the card is held', () => {
+      const b = renderBoard([entry({ id: 'a', state: 'building', owner: 'ivan', milestones: ms(0, 1) })]);
+      expect(b).not.toContain('owner-undeclared');
+      expect(b).toContain('_None._');
+    });
+
+    for (const state of ['exploring', 'proposed', 'completed', 'declined']) {
+      it(`does not ask an owner of a card that is ${state}`, () => {
+        const b = renderBoard([
+          entry({ id: 'a', state, milestones: state === 'proposed' ? ms(0, 1) : [], decisions: ['DEC-1'] }),
+        ]);
+        expect(b).not.toContain('owner-undeclared');
+      });
+    }
+
+    it('does not ask an owner of a stateless legacy initiative — state-undeclared already speaks for it', () => {
+      const b = renderBoard([entry({ id: 'a' })]);
+      expect(b).not.toContain('owner-undeclared');
+      expect(b).toContain('state-undeclared');
+    });
+
+    it('says how to see the cards on other branches, without listing them', () => {
+      const b = renderBoard([]);
+      expect(b).toContain('It shows the initiatives in this checkout.');
+      expect(b).toContain('`opensprint compact board --all-branches` prints the rest');
+      expect(b).not.toContain('| Branch |');
+    });
+  });
+
   describe('roadmap section', () => {
     it('always renders, naming the assurance gradient', () => {
       const b = renderBoard([]);

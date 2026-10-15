@@ -36,11 +36,15 @@ Planning and implementation are decided to happen in the initiative's own worktr
 `/opsp:backlog`, `/opsp:triage` and `/opsp:propose` are decided to create or switch to that worktree
 themselves, so an initiative is one branch from its first persisted thought (`DEC-029`). The record
 names its own unsolved cost: backlog items are scattered across branches, so the board shows only
-what the current branch knows (`DEC-029`).
+what the current branch knows (`DEC-029`). Observed since: the committed `BOARD.md` still shows the
+checkout, and `opensprint compact board --all-branches` prints every branch's cards without writing
+it (`src/core/board.ts`).
 
 Rendering a compiled view is decided to happen in the agent, at each milestone boundary inside
 `/opsp:apply`, for the `dev` and `devops` sections `compact plan` reports stale; product and
-maintainer are offered, not compiled silently (`DEC-COMPILE-ON-MILESTONE`). CI is ruled out as the
+maintainer are offered, not compiled silently (`DEC-COMPILE-ON-MILESTONE`). The skill then re-reads
+the sections it rendered, because the next milestone starts from them
+(`src/core/templates/workflows/opsp-apply.ts`). CI is ruled out as the
 place to render, because rendering is synthesis and a pipeline has no agent and no hat
 (`DEC-COMPILE-ON-MILESTONE`). The pipeline's decided role is to check views, not produce them
 (`DEC-030`).

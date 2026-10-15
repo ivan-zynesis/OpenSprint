@@ -22,11 +22,18 @@ import * as path from 'node:path';
 import {
   readInitiatives,
   checkInitiativeState,
+  OWNED_STATES,
   type InitiativeEntry,
+  type InitiativeState,
 } from './initiatives.js';
 import { readSourcedDriverSpecs } from './compact/records.js';
 import { parseMeasureAnatomy, mitigatedBy } from './compact/measures.js';
-import { readInitiativeGitState } from './initiative-git.js';
+import {
+  readInitiativeGitState,
+  readBranchInitiatives,
+  freshestCopy,
+  type BranchInitiative,
+} from './initiative-git.js';
 
 /** An exposure and the work, if any, planned to close it. */
 export interface RoadmapRow {
@@ -172,22 +179,59 @@ function nextMilestoneOf(entry: InitiativeEntry): string {
   return next.name || next.description.slice(0, 40);
 }
 
+/** The owner, escaped for a table cell, or a dash where nobody holds the card. */
+function ownerOf(entry: InitiativeEntry): string {
+  return entry.owner === undefined ? '—' : entry.owner.replace(/\|/g, '\\|');
+}
+
+/** Where a card was read from, when the board spans branches. */
+export const CHECKOUT_SOURCE = 'this checkout';
+
+export interface RenderBoardOptions {
+  /**
+   * Where each initiative was read from, keyed by its path. Present only for
+   * the cross-branch board, which adds a Branch column and is never written.
+   */
+  sources?: ReadonlyMap<string, string>;
+}
+
 /** Renders the board from the initiatives, deterministically. */
 export function renderBoard(
   initiatives: readonly InitiativeEntry[],
   roadmap: readonly RoadmapRow[] = [],
   /** What git says per initiative id, where it knows. */
-  gitStates: ReadonlyMap<string, import('./initiatives.js').InitiativeGitState> = new Map()
+  gitStates: ReadonlyMap<string, import('./initiatives.js').InitiativeGitState> = new Map(),
+  options: RenderBoardOptions = {}
 ): string {
-  const lines: string[] = [
-    '# Board',
-    '',
-    'Compiled by `/opsp:compact` from `opensprint/initiatives/`. **Derived — do not edit.**',
-    '',
-    '**Moving a card means changing a record\'s state**, not editing this file. A peer of',
-    '`DECISION-MAP.md`: cross-cutting rather than hat-scoped, so it is not a squad view (`DEC-026`).',
-    '',
-  ];
+  const { sources } = options;
+  const lines: string[] =
+    sources === undefined
+      ? [
+          '# Board',
+          '',
+          'Compiled by `/opsp:compact` from `opensprint/initiatives/`. **Derived — do not edit.**',
+          '',
+          '**Moving a card means changing a record\'s state**, not editing this file. A peer of',
+          '`DECISION-MAP.md`: cross-cutting rather than hat-scoped, so it is not a squad view (`DEC-026`).',
+          '',
+          'It shows the initiatives in this checkout. Each one lives on its own `opsp/<id>` branch until it',
+          'merges (`DEC-029`), so `opensprint compact board --all-branches` prints the rest without writing',
+          'this file.',
+          '',
+        ]
+      : [
+          '# Board — every branch',
+          '',
+          'Every initiative in this checkout and on each local and remote-tracking `opsp/<id>` branch.',
+          '**Printed, never written** — what it shows depends on what this machine has fetched.',
+          'Committed work only: a branch carries the card whose `id` it is named after.',
+          '',
+        ];
+
+  const sourceOf = (entry: InitiativeEntry): string => sources?.get(entry.path) ?? CHECKOUT_SOURCE;
+  // A card read from another branch has no file in this checkout to link to.
+  const titleOf = (entry: InitiativeEntry): string =>
+    sourceOf(entry) === CHECKOUT_SOURCE ? `[${entry.id}](initiatives/${entry.stem}.md)` : entry.id;
 
   if (initiatives.length === 0) {
     lines.push('No initiatives yet. `/opsp:backlog` creates the first one.', '');
@@ -199,10 +243,16 @@ export function renderBoard(
         lines.push('_Empty._', '');
         continue;
       }
-      lines.push('| Initiative | State | Milestones | Next |', '|---|---|---|---|');
+      if (sources === undefined) {
+        lines.push('| Initiative | State | Owner | Milestones | Next |', '|---|---|---|---|---|');
+      } else {
+        lines.push('| Initiative | Branch | State | Owner | Milestones | Next |', '|---|---|---|---|---|---|');
+      }
       for (const entry of members) {
+        const state = entry.state ?? `_(none — status: ${entry.status})_`;
+        const branch = sources === undefined ? '' : ` ${sourceOf(entry)} |`;
         lines.push(
-          `| [${entry.id}](initiatives/${entry.stem}.md) | ${entry.state ?? `_(none — status: ${entry.status})_`} | ${progressOf(entry)} | ${nextMilestoneOf(entry)} |`
+          `| ${titleOf(entry)} |${branch} ${state} | ${ownerOf(entry)} | ${progressOf(entry)} | ${nextMilestoneOf(entry)} |`
         );
       }
       lines.push('');
@@ -253,6 +303,19 @@ export function renderBoard(
           `lives under "${orphan.section}", so it is not counted in this initiative's progress.`
       );
     }
+    // Work in flight that nobody holds is the card a kanban exists to catch.
+    // Reported here rather than by the state check, which answers whether a
+    // state is possible, not whether someone is on it.
+    if (
+      entry.owner === undefined &&
+      entry.state !== undefined &&
+      OWNED_STATES.includes(entry.state as InitiativeState)
+    ) {
+      problems.push(
+        `- \`owner-undeclared\` **${entry.id}** — \`${entry.state}\` with nobody named as its owner. ` +
+          `\`opensprint claim ${entry.id}\` takes it.`
+      );
+    }
   }
 
   lines.push('## Problems', '', 'Ways this board would otherwise be quietly wrong.', '');
@@ -265,6 +328,19 @@ export function renderBoard(
   return lines.join('\n');
 }
 
+/** What git says about each initiative's branch, where it knows. */
+function gitStatesOf(
+  projectRoot: string,
+  initiatives: readonly InitiativeEntry[]
+): Map<string, import('./initiatives.js').InitiativeGitState> {
+  const gitStates = new Map<string, import('./initiatives.js').InitiativeGitState>();
+  for (const initiative of initiatives) {
+    const state = readInitiativeGitState(projectRoot, initiative.id);
+    if (state !== undefined) gitStates.set(initiative.id, state);
+  }
+  return gitStates;
+}
+
 /** Regenerates `BOARD.md`, mirroring `regenerateDecisionMap`. */
 export function regenerateBoard(opensprintDir: string): void {
   const initiatives = readInitiatives(opensprintDir);
@@ -272,11 +348,64 @@ export function regenerateBoard(opensprintDir: string): void {
   // no repository, no trunk — and the check then reports exactly what it
   // reported before.
   const projectRoot = path.dirname(opensprintDir);
-  const gitStates = new Map<string, import('./initiatives.js').InitiativeGitState>();
-  for (const initiative of initiatives) {
-    const state = readInitiativeGitState(projectRoot, initiative.id);
-    if (state !== undefined) gitStates.set(initiative.id, state);
-  }
-  const board = renderBoard(initiatives, roadmapRows(opensprintDir, initiatives), gitStates);
+  const board = renderBoard(
+    initiatives,
+    roadmapRows(opensprintDir, initiatives),
+    gitStatesOf(projectRoot, initiatives)
+  );
   fs.writeFileSync(path.join(opensprintDir, BOARD_FILENAME), board, 'utf-8');
+}
+
+/** Every card this machine can see, and where each was read from. */
+export interface AllBranchesBoard {
+  initiatives: InitiativeEntry[];
+  /** Keyed by initiative path: `this checkout`, `opsp/x`, `origin/opsp/x`. */
+  sources: Map<string, string>;
+}
+
+/**
+ * The initiatives in this checkout plus the card each `opsp/<id>` branch owns.
+ *
+ * Precedence is fixed so the same refs always give the same board. The
+ * checkout wins outright — it is what the reader is standing in. Among
+ * branches, the local one wins unless a remote-tracking copy is strictly
+ * ahead of it (`freshestCopy`), which is how a card someone else claimed and
+ * pushed shows as claimed rather than as this machine's stale copy.
+ */
+export function collectAllBranches(opensprintDir: string): AllBranchesBoard {
+  const projectRoot = path.dirname(opensprintDir);
+  const initiatives = readInitiatives(opensprintDir);
+  const sources = new Map<string, string>(initiatives.map((i) => [i.path, CHECKOUT_SOURCE]));
+  const inCheckout = new Set(initiatives.map((i) => i.id));
+
+  // Every branch copy of each card, in the order readBranchInitiatives
+  // returns them: local first, then remote-tracking by name.
+  const copies = new Map<string, BranchInitiative[]>();
+  for (const copy of readBranchInitiatives(projectRoot)) {
+    if (inCheckout.has(copy.entry.id)) continue;
+    copies.set(copy.entry.id, [...(copies.get(copy.entry.id) ?? []), copy]);
+  }
+  for (const candidates of copies.values()) {
+    const { entry, branch } = freshestCopy(projectRoot, candidates);
+    initiatives.push(entry);
+    sources.set(entry.path, branch);
+  }
+
+  // Filename stems carry the creation date (DEC-036), so this keeps the
+  // checkout's own reading order across branches. Code-unit order, as
+  // readInitiatives sorts, so no locale can reorder the board.
+  const byCodeUnit = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  initiatives.sort((a, b) => byCodeUnit(a.stem, b.stem) || byCodeUnit(a.id, b.id));
+  return { initiatives, sources };
+}
+
+/** Renders the cross-branch board. Never written: it depends on what was fetched. */
+export function renderAllBranchesBoard(opensprintDir: string): string {
+  const { initiatives, sources } = collectAllBranches(opensprintDir);
+  return renderBoard(
+    initiatives,
+    roadmapRows(opensprintDir, initiatives),
+    gitStatesOf(path.dirname(opensprintDir), initiatives),
+    { sources }
+  );
 }

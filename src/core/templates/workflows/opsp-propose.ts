@@ -49,7 +49,7 @@ Two paths reach here, and both are valid (\`DEC-034\`):
 written at backlog time and are not yours to rewrite.
 
 \`\`\`bash
-openspec compact board          # the Backlog column lists them
+opensprint compact board --all-branches   # the Backlog column, on every branch
 git branch --show-current       # be on opsp/<initiative> before writing
 \`\`\`
 
@@ -59,7 +59,53 @@ either way, and this step writes rather than thinks.
 
 ### 1. Analyze the Conversation
 
-Review everything discussed in the explore session (or the operator's description). Identify:
+First, orient on what is already recorded — the views, not every record (\`DS-SURROGATE-BUDGET\`):
+
+\`\`\`bash
+opensprint compact plan --json
+\`\`\`
+
+If \`opensprint compact\` cannot run — an older CLI, or no surrogate yet — fall back to reading
+\`opensprint/driver-specs/*.md\` and \`opensprint/ADRs/*.md\`, and skip the view rules below.
+
+**First, decide what there is to load** — the first case that holds wins:
+
+- **No records yet.** Where \`opensprint/driver-specs/\` and \`opensprint/ADRs/\`
+  hold no records at all, there are no records yet: nothing to load — say so, and carry on from
+  the conversation; the view rules below do not apply.
+- **Records that predate hats.** If every section other than \`open-loops\` is \`unsealed\` with no
+  \`inputs\` — and the plan lists at least one such section — while it lists records under
+  \`unassigned\`, the records predate hats: read every record, as before views existed, and skip
+  the views and the rules below for them. Compiling cannot place a record that declares no
+  hat, so tell the operator the records need \`hats:\` rather than offering \`/opsp:compact\`.
+- **Otherwise**, orient on the views, as follows.
+
+Read \`opensprint/squad/index.md\` (where it does not exist, go by hat), then \`opensprint/squad/product.md\` and
+\`opensprint/squad/maintainer.md\` before writing driver-specs, and \`opensprint/squad/dev.md\` and
+\`opensprint/squad/devops.md\` before writing ADRs. A new record must neither restate one that exists
+nor miss the record it depends on. **Open the full record only for the decision you are about to act
+on** — one you will cite in \`depends-on\`, or one you will supersede.
+
+\`index.md\` routes, and \`compact check\` does not cover it: use it to choose a hat, never as the
+source of a claim.
+
+The plan lists only the sections that are not fresh; a section it omits is fresh.
+An \`open-loops\` section, in any state, is answered by the plan's own \`openLoops\`, which is
+always current. **Where it reports any other section**, the view is not enough for it:
+- \`stale\` — read the view, then read in full what moved since it was compiled: the records under
+  \`added\` and \`modified\`, and the files under \`observedAdded\` and \`observedModified\`. Do not
+  rely on a claim citing an id under \`removed\`.
+  In a \`measures\` section those files are tests citing records: read only the ones a measure
+  cites as its evidence — the plan's own \`openLoops\` is already current for the rest.
+- \`unsealed\` — the section was never compiled; often its view file does not exist yet. Read
+  that section's \`inputs\` instead.
+- \`tampered\` — the view no longer says what was sealed: someone edited it by hand, or deleted
+  it. Set that section aside; read its \`inputs\`, and tell the operator.
+
+Records listed under \`unassigned\` declare no hat and appear in no view: read the ones a new
+record would depend on or restate.
+
+Then review everything discussed in the explore session (or the operator's description). Identify:
 
 - **External constraints** (things the operator stated as facts about the world) → these become **driver-specs**
   - Product requirements, legal mandates, compliance rules, performance targets, business constraints

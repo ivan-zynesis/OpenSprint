@@ -104,6 +104,12 @@ checks two, neither of them `attested` (**Guardrail**); and that a verdict with 
 Exposure as recorded: a compiled view may state present-tense claims with no attestation behind them,
 and the decided / observed / attested distinction is unverified in rendered output
 (`DS-ATTESTED-TRUTH`).
+Observed since: `/opsp:apply`, `/opsp:explore`, `/opsp:triage` and `/opsp:propose` orient on these
+views before any record, so a compiled claim is now the first thing an agent acts on. Where
+`compact plan` reports a section stale they also read what moved since it was compiled, and they set
+aside one it reports unsealed or tampered and read its records instead
+(`src/core/templates/workflows/opsp-apply.ts` and its siblings). The exposure stands as recorded:
+nothing checks the tense of a claim in a fresh view.
 
 **Measure — the strategy.** No operation that mutates the canonical surrogate is reachable from a
 pipeline, a sub-agent or another skill (`DS-HIGH-IMPACT-OPS`).
@@ -228,7 +234,9 @@ loop kinds (`DS-SURROGATE-GIT-CONTRACT`).
 
 The record names its own deliberate cost: no branch can see every backlog item, which breaks the one
 interaction non-technical stakeholders have — an agent reading the compiled board for them
-(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`).
+(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`). Observed since:
+`opensprint compact board --all-branches` prints the card each local and remote-tracking `opsp/<id>` branch carries, from committed work only, and never writes `BOARD.md` (`src/core/board.ts`). The
+record has not been revised, so the cost stands as recorded.
 
 ### Attestation reviews the implementation against the stated strategy
 

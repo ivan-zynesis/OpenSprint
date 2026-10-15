@@ -192,6 +192,28 @@ Most of these hats are worn by the same engineer. That is expected — the bound
 not who you are, and `/opsp:attest` takes it seriously enough to refuse a context that wrote the
 code.
 
+### What each workflow loads
+
+Agents orient on the compiled views in `opensprint/squad/`, not on every record
+(`DS-SURROGATE-BUDGET`). A view cites the record behind every claim, so an agent opens the full
+record only for the decision it is about to act on.
+
+| Workflow | Loads | Opens when it needs to |
+|---|---|---|
+| `/opsp:explore` | `index.md`, `product.md`, `maintainer.md`, `BOARD.md` | `dev.md` / `devops.md`; an initiative; a record about to be cited |
+| `/opsp:triage` | `index.md`, `product.md`, `maintainer.md` | `dev.md` / `devops.md`; a record the approach depends on or invalidates |
+| `/opsp:propose` | `index.md`, all four views | a record cited in `depends-on`, or superseded |
+| `/opsp:apply` | `index.md`, `dev.md`, `devops.md`, the initiative's own records | `product.md` / `maintainer.md` for their questions; a record a view cites |
+| `/opsp:attest` | the owning hat's posture or measures section only | — it reads the bar from the driver-spec itself |
+
+`opensprint compact plan --hat <hat> --json` says whether each view can be trusted. Where a section
+is `stale`, the agent also reads the records and observed files that moved — in a `measures`
+section, only the tests a measure cites as its evidence; where it is `unsealed` or `tampered`, it reads
+that section's inputs instead. An `open-loops` section is answered by the plan's own open loops. Records with no hat appear in no view, so
+they are read directly — all of them, where the records predate hats. `architecture.md` and
+`DECISION-MAP.md` are not loaded by default — the first is compiled from the same records as the
+views, and nothing checks the second.
+
 **Hand over produces nothing, and is a stage anyway.** It is the one point where accountability
 moves rather than work happening, and with the hats on one person that moment is invisible unless
 something marks it — so `ready-for-attestation` marks it, and `BOARD.md` gives it a column of its
@@ -252,6 +274,7 @@ an argument adopts it.
 | `/opsp:migrate` | report records the current hat shapes can no longer select |
 | `opensprint frame` | what this branch changes, and against what base |
 | `opensprint advance` | move an initiative to its next state |
+| `opensprint claim` | name who holds an initiative's card |
 | `/opsp:compact` | recompile the views |
 
 ### Intervention
@@ -317,6 +340,8 @@ opensprint compact seal            # record the current views in the provenance 
 opensprint compact check           # fail when a view is stale, tampered or unsealed
 opensprint compact loops           # report open loops
 opensprint compact board           # regenerate BOARD.md
+opensprint compact board --all-branches   # print every opsp/* branch's cards; writes nothing
+opensprint claim <initiative>      # take the card — git's user.name, or --owner <name>; --release puts it down
 
 opensprint list                    # changes, or --specs
 opensprint show <item>             # a change or a spec

@@ -8,8 +8,10 @@ import {
   checkTransition,
   nextStates,
   writeState,
+  writeOwner,
+  writeFrontmatterField,
 } from '../../src/core/initiative-transitions.js';
-import { INITIATIVE_STATES, checkInitiativeState } from '../../src/core/initiatives.js';
+import { INITIATIVE_STATES, checkInitiativeState, readInitiatives } from '../../src/core/initiatives.js';
 
 /**
  * DEC-STATE-MACHINE — every transition is a tool's side effect, and the
@@ -172,6 +174,102 @@ describe('initiative transitions', () => {
     it('refuses a file with no frontmatter', () => {
       fs.writeFileSync(file(), '# Just a heading\n');
       expect(() => writeState(file(), 'building')).toThrow(/no frontmatter/);
+    });
+
+    it('writes every state exactly as before, unquoted', () => {
+      for (const state of INITIATIVE_STATES) {
+        fs.writeFileSync(file(), '---\nid: a\nstatus: active\nstate: exploring\n---\n\nd\n');
+        writeState(file(), state);
+        expect(fs.readFileSync(file(), 'utf-8')).toBe(`---\nid: a\nstatus: active\nstate: ${state}\n---\n\nd\n`);
+      }
+    });
+  });
+
+  describe('writeOwner', () => {
+    let dir: string;
+
+    beforeEach(() => {
+      dir = fs.mkdtempSync(path.join(os.tmpdir(), 'openspec-writeowner-'));
+      fs.mkdirSync(path.join(dir, 'initiatives'));
+    });
+    afterEach(() => {
+      fs.rmSync(dir, { recursive: true, force: true });
+    });
+
+    const at = () => path.join(dir, 'initiatives', 'i.md');
+    const seed = (frontmatter: string, body = '\n## Description\n\nowner: in the prose stays put.\n') =>
+      fs.writeFileSync(at(), `---\n${frontmatter}\n---\n${body}`);
+    const ownerOf = () => readInitiatives(dir)[0].owner;
+
+    it('inserts the owner after state, so the two fields a board reads sit together', () => {
+      seed('id: a\nstatus: active\nstate: building\ncreated: 2026-10-15');
+      writeOwner(at(), 'ivan');
+      expect(fs.readFileSync(at(), 'utf-8')).toContain('state: building\nowner: ivan\ncreated:');
+      expect(ownerOf()).toBe('ivan');
+    });
+
+    it('falls back to after status, then to the end', () => {
+      seed('id: a\nstatus: active\ncreated: 2026-10-15');
+      writeOwner(at(), 'ivan');
+      expect(fs.readFileSync(at(), 'utf-8')).toContain('status: active\nowner: ivan\ncreated:');
+      seed('id: a');
+      writeOwner(at(), 'ivan');
+      expect(fs.readFileSync(at(), 'utf-8')).toMatch(/^---\nid: a\nowner: ivan\n---/);
+    });
+
+    it('replaces an existing owner in place', () => {
+      seed('id: a\nstatus: active\nstate: building\nowner: ivan\ncreated: 2026-10-15');
+      writeOwner(at(), 'Nhat Cao');
+      expect(fs.readFileSync(at(), 'utf-8')).toContain('state: building\nowner: Nhat Cao\ncreated:');
+      const frontmatter = fs.readFileSync(at(), 'utf-8').split('\n---\n')[0];
+      expect(frontmatter.match(/^owner:/gm)).toHaveLength(1);
+    });
+
+    it('removes the field on release, and only that line', () => {
+      seed('id: a\nstatus: active\nstate: building\nowner: ivan\ncreated: 2026-10-15');
+      writeOwner(at(), null);
+      expect(fs.readFileSync(at(), 'utf-8')).toMatch(/^---\nid: a\nstatus: active\nstate: building\ncreated: 2026-10-15\n---/);
+      expect(ownerOf()).toBeUndefined();
+    });
+
+    it('releasing an unowned card changes nothing', () => {
+      seed('id: a\nstatus: active\nstate: exploring');
+      const before = fs.readFileSync(at(), 'utf-8');
+      writeOwner(at(), null);
+      expect(fs.readFileSync(at(), 'utf-8')).toBe(before);
+    });
+
+    it('quotes a name YAML would misread, so it parses back to itself', () => {
+      for (const name of ['ops: night shift', '#oncall', 'yes', '1234', "it's me", '- dash', 'a "quoted" name']) {
+        seed('id: a\nstatus: active\nstate: building');
+        writeOwner(at(), name);
+        expect(ownerOf(), name).toBe(name);
+      }
+    });
+
+    it('never reads a dollar sign in a name as a replacement pattern', () => {
+      seed('id: a\nstatus: active\nstate: building');
+      writeOwner(at(), "$& and $' and $1");
+      expect(ownerOf()).toBe("$& and $' and $1");
+    });
+
+    it('keeps a long name on one line', () => {
+      const name = 'a'.repeat(30) + ' ' + 'b'.repeat(30) + ' ' + 'c'.repeat(30);
+      seed('id: a\nstatus: active\nstate: building');
+      writeOwner(at(), name);
+      expect(fs.readFileSync(at(), 'utf-8')).toContain(`owner: ${name}\n`);
+    });
+
+    it('touches nothing outside the frontmatter', () => {
+      seed('id: a\nstatus: active\nstate: building');
+      writeOwner(at(), 'ivan');
+      expect(fs.readFileSync(at(), 'utf-8')).toContain('\n## Description\n\nowner: in the prose stays put.\n');
+    });
+
+    it('writes any field through the same writer', () => {
+      seed('id: a\nstatus: active');
+      writeFrontmatterField(at(), 'completed', '2026-10-15', ['status']);
+      expect(fs.readFileSync(at(), 'utf-8')).toContain('status: active\ncompleted: 2026-10-15');
     });
   });
 

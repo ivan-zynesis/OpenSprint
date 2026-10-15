@@ -5,6 +5,10 @@ Compiled by `/opsp:compact` from `opensprint/initiatives/`. **Derived — do not
 **Moving a card means changing a record's state**, not editing this file. A peer of
 `DECISION-MAP.md`: cross-cutting rather than hat-scoped, so it is not a squad view (`DEC-026`).
 
+It shows the initiatives in this checkout. Each one lives on its own `opsp/<id>` branch until it
+merges (`DEC-029`), so `opensprint compact board --all-branches` prints the rest without writing
+this file.
+
 ## Backlog
 
 Ideas captured, not yet triaged.
@@ -33,13 +37,13 @@ _Empty._
 
 Closed.
 
-| Initiative | State | Milestones | Next |
-|---|---|---|---|
-| [parallel-universe-reconciliation](initiatives/20260522-parallel-universe-reconciliation.md) | _(none — status: completed)_ | 4/4 | — |
-| [compact-surrogate](initiatives/20260926-compact-surrogate.md) | _(none — status: completed)_ | 9/9 | — |
-| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | completed | 11/11 _(+1 superseded)_ | — |
-| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | completed | 12/12 | — |
-| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | completed | 5/5 | — |
+| Initiative | State | Owner | Milestones | Next |
+|---|---|---|---|---|
+| [parallel-universe-reconciliation](initiatives/20260522-parallel-universe-reconciliation.md) | _(none — status: completed)_ | — | 4/4 | — |
+| [compact-surrogate](initiatives/20260926-compact-surrogate.md) | _(none — status: completed)_ | — | 9/9 | — |
+| [lifecycle-beyond-build](initiatives/20261001-lifecycle-beyond-build.md) | completed | — | 11/11 _(+1 superseded)_ | — |
+| [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | completed | — | 12/12 | — |
+| [surrogate-currency](initiatives/20261010-surrogate-currency.md) | completed | — | 5/5 | — |
 
 ## Declined
 

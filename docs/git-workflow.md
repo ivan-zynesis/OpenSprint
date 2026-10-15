@@ -52,9 +52,18 @@ planning records sat **uncommitted** on `main`, so the branch meant to implement
 them. The only ways out were committing planning straight to `main`, bypassing review, or carrying
 uncommitted work between worktrees by hand.
 
-**The cost is real and we have not solved it.** With every initiative on its own branch from birth,
-backlog items included, no single branch can see them all. `BOARD.md` shows the current branch's
-view. For now: the forge's branch list, and `git worktree list`.
+**The cost is that no single branch can see every initiative.** With every initiative on its own
+branch from birth, backlog items included, `BOARD.md` shows the current checkout's cards and no
+others. `opensprint compact board --all-branches` closes the gap without moving anything onto
+`main`: it reads the card each local and remote-tracking `opsp/<id>` branch carries — the
+initiative whose `id` the branch is named after — and prints one board with a Branch column.
+
+It prints and never writes. What it shows depends on what this machine has fetched, so committing
+it would make `BOARD.md` differ by who regenerated it last. Run `git fetch --prune` first to see
+what others have pushed. It sees committed work only: an item still uncommitted in someone's
+worktree, or a branch never pushed from another machine, is invisible to it. Where both a local
+branch and a fetched copy carry the card, the fetched one is shown only when it is strictly ahead —
+someone claimed or moved the card and pushed — so a stale local branch does not hide their change.
 
 ---
 

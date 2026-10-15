@@ -47,17 +47,92 @@ ending in a decision about whether this becomes work.
 absorb it and would behave acceptably — but a phase that exists in practice and has no name is a
 phase nobody reasons about.
 
-## Step 1: Find the item and its worktree
+## Step 1: Find the item, its worktree, and pick it up
+
+Every backlog item lives on its own branch (\`DEC-029\`), so the board in this checkout cannot see
+items filed elsewhere. List every branch's cards — fetch first, so items others pushed are there:
 
 \`\`\`bash
-openspec compact board          # Backlog column
+git fetch --prune                          # skip it offline; the board then shows local branches
+opensprint compact board --all-branches    # Backlog column, with each card's branch and owner
 \`\`\`
 
-The initiative lives on its own branch (\`DEC-029\`). Switch to its worktree, or create one if the
-item was written before that rule. Verify with \`pwd\` and \`git branch --show-current\`.
+It prints and writes nothing. Switch to the item's worktree, and verify with \`pwd\` and
+\`git branch --show-current\` before writing anything. Where its branch exists only on the remote,
+create the worktree from it:
 
-Load the surrogate — driver-specs, ADRs, \`architecture.md\` — before judging anything. A backlog item
-that looked novel in isolation is frequently answered already.
+\`\`\`bash
+git worktree add ../<repo>-opsp-<initiative-name> -b opsp/<initiative-name> origin/opsp/<initiative-name>
+cd ../<repo>-opsp-<initiative-name>
+\`\`\`
+
+If the item has no branch at all — it was written before initiatives lived on branches — create
+one from the current checkout.
+
+Then pick it up, so nobody else triages it at the same time:
+
+\`\`\`bash
+opensprint claim <initiative-name>         # names you: git's user.name, or --owner <name>
+git add opensprint/initiatives/ opensprint/BOARD.md
+git commit -m "triage: claim <initiative-name>"
+\`\`\`
+
+If the board shows someone else as its owner, ask the operator before taking it over.
+
+**A claim others cannot fetch claims nothing.** Offer to push the branch (\`git push -u origin
+opsp/<initiative-name>\`); until it is pushed, nobody else's board shows it as taken.
+
+Load the surrogate before judging anything. A backlog item that looked novel in isolation is
+frequently answered already. Load the views, not every record (\`DS-SURROGATE-BUDGET\`):
+
+\`\`\`bash
+opensprint compact plan --hat product --hat maintainer --json
+\`\`\`
+
+If \`opensprint compact\` cannot run — an older CLI, or no surrogate yet — fall back to reading
+\`opensprint/driver-specs/*.md\` and \`opensprint/ADRs/*.md\`, and skip the view rules below.
+
+**First, decide what there is to load** — the first case that holds wins:
+
+- **No records yet.** Where \`opensprint/driver-specs/\` and \`opensprint/ADRs/\`
+  hold no records at all, there are no records yet: nothing to load — say so, and carry on from
+  the conversation; the view rules below do not apply.
+- **Records that predate hats.** If every section other than \`open-loops\` is \`unsealed\` with no
+  \`inputs\` — and the plan lists at least one such section — while it lists records under
+  \`unassigned\`, the records predate hats: read every record, as before views existed, and skip
+  the views and the rules below for them. Compiling cannot place a record that declares no
+  hat, so tell the operator the records need \`hats:\` rather than offering \`/opsp:compact\`.
+- **Otherwise**, orient on the views, as follows.
+
+Read \`opensprint/squad/index.md\` (where it does not exist, go by hat), \`opensprint/squad/product.md\` and
+\`opensprint/squad/maintainer.md\` — the item's objective and goal are product's question, and what
+it trades away is maintainer's. Open \`opensprint/squad/dev.md\` or \`opensprint/squad/devops.md\` when
+you weigh an approach against what is already built, checked the same way with
+\`opensprint compact plan --hat dev --hat devops --json\`.
+
+\`index.md\` routes, and \`compact check\` does not cover it: use it to choose a hat, never as the
+source of a claim.
+
+**Open the full record only for the decision you are about to act on** — a decision the approach
+would depend on, or one it would invalidate. Every claim in a view cites its record id.
+
+The plan lists only the sections that are not fresh; a section it omits is fresh.
+An \`open-loops\` section, in any state, is answered by the plan's own \`openLoops\`, which is
+always current. **Where it reports any other section**, the view is not enough for it:
+- \`stale\` — read the view, then read in full what moved since it was compiled: the records under
+  \`added\` and \`modified\`, and the files under \`observedAdded\` and \`observedModified\`. Do not
+  rely on a claim citing an id under \`removed\`.
+  In a \`measures\` section those files are tests citing records: read only the ones a measure
+  cites as its evidence — the plan's own \`openLoops\` is already current for the rest.
+- \`unsealed\` — the section was never compiled; often its view file does not exist yet. Read
+  that section's \`inputs\` instead.
+- \`tampered\` — the view no longer says what was sealed: someone edited it by hand, or deleted
+  it. Set that section aside; read its \`inputs\`, and tell the operator.
+
+Records the plan lists under \`unassigned\` declare no hat and appear in no view: read the ones
+the item touches.
+
+Do not compile product or maintainer here — say which views are not fresh and offer \`/opsp:compact\`.
 
 ## Step 2: Brainstorm the strategy
 
@@ -103,6 +178,16 @@ keeping its history including the earlier decline.
 
 The idea is worth keeping and not yet thought through. Leave it at \`exploring\`, note what is
 missing, and say what would need answering before it could be triaged again.
+
+Put the card down, so the board shows it is nobody's again:
+
+\`\`\`bash
+opensprint claim <initiative-name> --release
+git add opensprint/initiatives/ opensprint/BOARD.md
+git commit -m "triage: return <initiative-name>"
+\`\`\`
+
+Offer to push it, as you did the claim.
 
 ## Step 4: Stop
 

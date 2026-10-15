@@ -43,6 +43,11 @@ The system SHALL read every initiative in `opensprint/initiatives/` into a struc
 - **AND** an absent field SHALL be undefined rather than defaulted to a guess
 - **AND** `status` SHALL default to `active` when absent, matching how driver-specs default
 
+#### Scenario: An owner
+- **WHEN** an initiative declares `owner` as a non-empty string
+- **THEN** the entry SHALL carry it, trimmed
+- **AND** an empty `owner` SHALL be treated as absent
+
 #### Scenario: An initiative written by an older release
 - **WHEN** an initiative declares no `state` and no `depends-on`
 - **THEN** it SHALL still parse
@@ -391,3 +396,28 @@ The system SHALL record, for each transition, the accountability required to per
 - **THEN** it SHALL NOT be marked as a handoff
 - **AND** the reason SHALL be that the accountability already changed on the way in
 
+### Requirement: The owner is written by a command
+The system SHALL write an initiative's `owner` through `opensprint claim`, never by hand, and SHALL leave every other line of the file untouched.
+
+#### Scenario: Claiming
+- **WHEN** `opensprint claim <initiative>` runs without `--owner`
+- **THEN** it SHALL name git's `user.name` as the owner
+- **AND** SHALL refuse, asking for `--owner`, where git has no `user.name`
+
+#### Scenario: Naming someone else
+- **WHEN** `--owner <name>` is given
+- **THEN** that name SHALL be written, serialised so that it parses back to itself
+- **AND** reassigning a card that already has an owner SHALL be reported as a reassignment
+
+#### Scenario: Putting the card down
+- **WHEN** `--release` is given
+- **THEN** the `owner` field SHALL be removed
+
+#### Scenario: A finished initiative
+- **WHEN** the initiative is `completed` or `declined`
+- **THEN** claiming it SHALL be refused
+
+#### Scenario: Claiming moves nothing
+- **WHEN** an owner is written
+- **THEN** the initiative's state SHALL NOT change
+- **AND** `BOARD.md` SHALL be regenerated

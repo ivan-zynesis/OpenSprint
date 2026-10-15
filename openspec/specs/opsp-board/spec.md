@@ -150,3 +150,52 @@ The system SHALL render initiatives in the handoff state in a section of their o
 - **WHEN** an exposure is mitigated by an initiative in the handoff state
 - **THEN** the roadmap SHALL describe that assurance level
 
+### Requirement: Every card names its owner
+The board SHALL show, for every initiative in every section, the person holding its card, so that it answers who is on each piece of work as well as where it stands.
+
+#### Scenario: The Owner column
+- **WHEN** the board renders a section holding initiatives
+- **THEN** its table SHALL carry an Owner column
+- **AND** a card with an `owner` SHALL show it, and a card without one SHALL show a dash
+
+#### Scenario: An initiative written before owners existed
+- **WHEN** an initiative declares no `owner`
+- **THEN** the board SHALL still place it in its section
+
+### Requirement: Work in flight without an owner is a problem
+The board SHALL list, under its problems, every initiative in an owned state that names no owner. The owned states SHALL be an explicit list: `building`, `ready-for-attestation` and `attested`.
+
+#### Scenario: An unowned card in flight
+- **WHEN** an initiative in an owned state declares no `owner`
+- **THEN** the problems section SHALL list it as `owner-undeclared`
+- **AND** SHALL name the command that claims it
+
+#### Scenario: An unowned card waiting
+- **WHEN** an initiative that is `exploring`, `proposed`, terminal or stateless declares no `owner`
+- **THEN** no `owner-undeclared` problem SHALL be listed for it
+
+### Requirement: The cross-branch board is printed, never written
+The system SHALL print, on request, a board of every initiative in the checkout and on each local and remote-tracking `opsp/<id>` branch, and SHALL NOT write it to `opensprint/BOARD.md`, because what it shows depends on what the machine has fetched.
+
+#### Scenario: Reading a branch's card
+- **WHEN** an `opsp/<id>` branch exists locally or as a remote-tracking ref
+- **THEN** the system SHALL read, from that branch's committed tree, the initiative whose `id` is `<id>`
+- **AND** SHALL NOT read the other initiative files that branch carries
+
+#### Scenario: The same initiative in several places
+- **WHEN** an initiative appears in the checkout and on branches
+- **THEN** the checkout's copy SHALL win
+- **AND** among branches, the local copy SHALL win unless a remote-tracking copy is strictly ahead of it, in which case that copy SHALL be shown
+- **AND** copies that diverged SHALL show the local one, and remote-tracking copies SHALL be compared in name order
+
+#### Scenario: Where a card came from
+- **WHEN** the cross-branch board is printed
+- **THEN** each card SHALL name the branch it was read from, or the checkout
+
+#### Scenario: The committed board is untouched
+- **WHEN** the cross-branch board is printed
+- **THEN** `opensprint/BOARD.md` SHALL be byte-identical before and after
+
+#### Scenario: No git
+- **WHEN** git cannot answer
+- **THEN** the cross-branch board SHALL show the checkout's initiatives alone

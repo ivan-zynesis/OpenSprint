@@ -122,7 +122,7 @@ describe('OPSP skill generation', () => {
       expect(apply!.template.instructions).toContain('I know what needs to change');
       expect(apply!.template.instructions).toContain('I need to explore this first');
       // Surrogate reload after correction
-      expect(apply!.template.instructions).toContain('Reload the full surrogate');
+      expect(apply!.template.instructions).toContain('Reload the surrogate views');
       expect(apply!.template.instructions).toContain('Return to the same checkpoint');
       // References to existing opsx workflows
       expect(apply!.template.instructions).toContain('/opsx:propose');

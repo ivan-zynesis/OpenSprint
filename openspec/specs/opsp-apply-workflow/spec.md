@@ -10,7 +10,7 @@ The `/opsp:apply` skill SHALL read an initiative's milestone plan and execute a 
 #### Scenario: Loading initiative and surrogate
 - **WHEN** the operator invokes `/opsp:apply <initiative-name>`
 - **THEN** the agent SHALL read the initiative descriptor from `opensprint/initiatives/<name>.md`
-- **AND** load the surrogate context: all active driver-specs, ADRs, and architecture.md
+- **AND** load the surrogate context: `squad/index.md`, the `dev` and `devops` views, and the driver-specs and ADRs the initiative lists, in full
 - **AND** display the milestone plan and current progress
 - **AND** create the initiative branch `opsp/<initiative-name>` (or resume existing one)
 - **AND** ask the operator to select a review mode (per-milestone, per-change, or continuous)
@@ -35,7 +35,7 @@ The `/opsp:apply` skill SHALL read an initiative's milestone plan and execute a 
 - **WHEN** the operator selects "Raise change request" at any checkpoint
 - **THEN** the agent SHALL present sub-path options: "I know what needs to change" or "I need to explore this first"
 - **AND** delegate to `/opsx:propose` (direct path) or `/opsx:explore` then optionally `/opsx:propose` (explore path)
-- **AND** after any corrective opsx change is archived, reload the full surrogate context
+- **AND** after any corrective opsx change is archived, reload the `dev` and `devops` views and read the records the correction touched
 - **AND** return to the same checkpoint so the operator can approve, raise another change request, or take other actions
 
 #### Scenario: Milestone completion in continuous mode
@@ -43,10 +43,10 @@ The `/opsp:apply` skill SHALL read an initiative's milestone plan and execute a 
 - **THEN** the agent SHALL log a brief milestone summary and proceed to the next milestone without pausing
 
 ### Requirement: Surrogate-based question resolution
-The `/opsp:apply` skill SHALL attempt to resolve questions arising during opsx execution by consulting the operator surrogate (driver-specs + ADRs + architecture.md) before escalating to the operator. What it cannot answer SHALL be treated as a **hat handoff** rather than as an interruption.
+The `/opsp:apply` skill SHALL attempt to resolve questions arising during opsx execution by consulting the operator surrogate (the per-hat views, then the records they cite) before escalating to the operator. What it cannot answer SHALL be treated as a **hat handoff** rather than as an interruption.
 
 #### Scenario: Question auto-resolved by surrogate
-- **WHEN** a question arises during opsx execution that can be answered by existing driver-specs, ADRs, or architecture.md
+- **WHEN** a question arises during opsx execution that can be answered by a view, or by a driver-spec or ADR a view cites
 - **THEN** the agent SHALL resolve it without interrupting the operator
 - **AND** SHALL note the resolution in the opsx change context
 
@@ -70,7 +70,48 @@ The `/opsp:apply` skill SHALL execute milestones sequentially, carrying lessons 
 #### Scenario: Context management for long initiatives
 - **WHEN** processing milestones in a multi-milestone initiative
 - **THEN** the agent SHALL summarize completed milestones to conserve context window
-- **AND** retain full surrogate context (driver-specs, ADRs, architecture.md) across all milestones
+- **AND** retain the loaded views and the initiative's own driver-specs and ADRs across all milestones
+
+### Requirement: Apply loads the views, then the records it acts on
+The `/opsp:apply` skill SHALL orient on the compiled `dev` and `devops` views rather than loading every record, and SHALL open a full record only for the decision it is about to act on (`DS-SURROGATE-BUDGET`).
+
+#### Scenario: Loading at the start of an initiative
+- **WHEN** `/opsp:apply` loads the surrogate
+- **THEN** it SHALL run `opensprint compact plan --hat dev --hat devops --json` from the initiative's worktree, whose branch holds records the trunk does not have yet
+- **AND** read `opensprint/squad/index.md`, `opensprint/squad/dev.md` and `opensprint/squad/devops.md`
+- **AND** read in full the driver-specs and ADRs the initiative lists
+- **AND** SHALL NOT load every driver-spec and ADR, `architecture.md` or `DECISION-MAP.md`
+
+#### Scenario: A question belonging to another hat
+- **WHEN** a question belongs to `product` or `maintainer`
+- **THEN** the agent SHALL check that hat's view before escalating
+- **AND** SHALL ask `opensprint compact plan --hat <hat> --json` whether that view can be trusted, as for its own hats
+
+#### Scenario: A view section is not fresh
+- **WHEN** the plan reports an `open-loops` section, in any state
+- **THEN** the agent SHALL answer it from the plan's own `openLoops`
+- **WHEN** the plan reports any other section `stale`
+- **THEN** the agent SHALL read the view and, in full, the records listed as added or modified and the observed files listed as added or modified
+- **AND** in a `measures` section, whose observed files are tests, only those a measure cites as its evidence
+- **WHEN** the plan reports a section `unsealed` or `tampered`
+- **THEN** the agent SHALL read that section's inputs instead of the view
+- **AND** a `tampered` section SHALL be reported to the operator
+
+#### Scenario: Records with no hat
+- **WHEN** the plan lists records as `unassigned`
+- **AND** it lists at least one section other than `open-loops`, and every such section is `unsealed` with no inputs
+- **THEN** the records predate hats, and the agent SHALL read every record, as before views existed
+- **AND** SHALL NOT offer to compile, since compiling cannot place a record that declares no hat
+- **WHEN** the plan lists records as `unassigned` and some sections have inputs
+- **THEN** the agent SHALL read the unassigned records that bear on the initiative, since no view covers them
+
+#### Scenario: No compact engine
+- **WHEN** `opensprint compact` cannot run
+- **THEN** the agent SHALL fall back to reading every driver-spec and ADR
+
+#### Scenario: Re-reading after a boundary compile
+- **WHEN** the `dev` and `devops` sections are recompiled at a milestone boundary
+- **THEN** the agent SHALL re-read the sections it rendered before the next milestone
 
 ### Requirement: A milestone boundary compiles what the hat in the room owns
 The workflow SHALL compile stale `dev` and `devops` view sections at each milestone boundary, after the change branch merges into the initiative branch.

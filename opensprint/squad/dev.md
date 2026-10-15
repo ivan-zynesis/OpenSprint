@@ -73,8 +73,9 @@ re-run without a model, while condensing prose stays in a skill (`DEC-022`). Tha
 `src/core/board.ts`, `src/cli/index.ts`) — the single compile engine behind every compiled artifact (`DEC-014`), with
 `check` decided to fail CI on anything not fresh (`DEC-010`). Where a record found that prose was
 not enough, the stack gained a command rather than an instruction: initiative state moves through
-`opensprint advance` (`DEC-STATE-MACHINE`; `src/commands/advance.ts`), and attest's change frame is
-resolved by `opensprint frame` (`DEC-ATTEST-CHANGE-FRAME`; `src/commands/frame.ts`).
+`opensprint advance` (`DEC-STATE-MACHINE`; `src/commands/advance.ts`), who holds a card through
+`opensprint claim` (`src/commands/claim.ts`), and attest's change frame is resolved by
+`opensprint frame` (`DEC-ATTEST-CHANGE-FRAME`; `src/commands/frame.ts`).
 
 ## Runtime Topology
 
@@ -88,7 +89,7 @@ skill files, the `opensprint` CLI it calls, and a git worktree holding `openspri
   operator ──── wears a hat ────┐
                                 v
   ┌──────────────────────────────────────────┐
-  │ agent + generated skills (/opsp:*)       │   synthetic half: reads records,
+  │ agent + generated skills (/opsp:*)       │   synthetic half: reads views,
   │   explore · backlog · triage · propose   │   asks the operator, renders prose
   │   apply · attest · archive · compact     │
   │   reexplore · repropose · rebase · ...   │
@@ -98,7 +99,7 @@ skill files, the `opensprint` CLI it calls, and a git worktree holding `openspri
   ┌──────────────────────────────────────────┐
   │ opensprint CLI (Node, one process/call)  │   deterministic half: parse, hash,
   │   compact plan|seal|check|loops|board    │   check, refuse, regenerate
-  │   advance   frame   migrate              │
+  │   advance   claim   frame   migrate      │
   └───────────────────┬──────────────────────┘
                       │ reads / writes files
                       v
@@ -110,6 +111,12 @@ without a model, and judgement and condensation live in skills (`DEC-022`). Rend
 synthetic part. It needs a model and an agent wearing a hat, which is why no pipeline can render a
 view (`DEC-COMPILE-ON-MILESTONE`). The commands on the deterministic side are registered in
 `src/cli/index.ts`; the skill content is in `src/core/templates/workflows/opsp-*.ts`.
+
+The planning and build skills orient on the per-hat views and open a full record only for the
+decision they act on (`DS-SURROGATE-BUDGET`). `compact plan --hat <hat> --json` tells them which
+sections to trust; where one is stale, unsealed or tampered they read its records instead, and they
+fall back to every record where none declares a hat (observed in `opsp-apply.ts`, `opsp-explore.ts`,
+`opsp-triage.ts` and `opsp-propose.ts` under `src/core/templates/workflows/`).
 
 The CLI has one outbound network call: PostHog telemetry of the command path and version, which can
 be turned off with `OPENSPEC_TELEMETRY=0` or `DO_NOT_TRACK=1` (`src/telemetry/index.ts`,
@@ -138,7 +145,9 @@ checks whether a bar was met (`DEC-030`, `DEC-023`). A conflict in a derived art
 rebasing and recompiling, never by hand-merging (`DEC-030`, `DEC-006`).
 
 `DEC-029` records one cost it does not solve. A backlog that lives on branches cannot be read in one
-place, so the board shows only what the current branch knows.
+place, so the board shows only what the current branch knows. Observed since: the committed
+`BOARD.md` still shows the checkout, and `opensprint compact board --all-branches` prints the card each local and remote-tracking `opsp/<id>` branch carries
+— committed work only, never written to disk (`src/core/board.ts`, `src/core/initiative-git.ts`).
 
 Parallel worktrees can no longer collide on decision ids. New decisions take semantic ids, and
 initiatives take a date prefix on the filename while their `id:` stays the same (`DEC-036`). Both
@@ -170,6 +179,11 @@ State is a frontmatter field that tools write and code checks (`DEC-024`). It mo
 `opensprint advance <initiative> --to <state>`. That command validates the move against an explicit
 table, writes the field, regenerates `BOARD.md`, and reports any contradiction with the content
 instead of refusing the move (`DEC-STATE-MACHINE`; observed in `src/commands/advance.ts`).
+
+Who holds a card is a second field, `owner`, written only by `opensprint claim`, which never moves
+the state. The board shows it in every column and lists a card that is `building`,
+`ready-for-attestation` or `attested` with nobody named as `owner-undeclared` (observed in
+`src/commands/claim.ts`, `src/core/board.ts`, `src/core/initiatives.ts`).
 
 ```
   /opsp:backlog creates it

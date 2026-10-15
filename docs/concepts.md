@@ -245,6 +245,12 @@ It is also the only honest thing to put on a board. Work in progress and work wa
 to put a different hat on need different responses — one needs time, the other needs a person — so
 `BOARD.md` gives the handoff its own **Handoff** column rather than burying it in Doing.
 
+Every card also names its **owner** — the person holding it, set by `opensprint claim`. An owner is
+a person, not a hat: the hat says which accountability a move is made in, and the owner says who is
+making it. Triage claims an item when it picks it up, and `/opsp:apply` claims it before the first
+milestone. A card that is `building`, `ready-for-attestation` or `attested` with nobody named is
+listed under the board's **Problems** as `owner-undeclared`.
+
 `building ⇄ ready-for-attestation` runs both ways. A handed-over initiative goes back to `building`
 when attestation finds the work simply unfinished, which makes the handoff a door rather than a
 cliff. Where something above the work is wrong instead, it falls further — see the ladder below.

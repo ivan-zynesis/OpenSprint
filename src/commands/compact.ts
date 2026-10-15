@@ -15,7 +15,13 @@ import * as path from 'node:path';
 import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveHatRegistry, resolveHatSections, resolveHatRoles } from '../core/hats.js';
-import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
+import {
+  regenerateBoard,
+  collectAllBranches,
+  renderAllBranchesBoard,
+  BOARD_FILENAME,
+  CHECKOUT_SOURCE,
+} from '../core/board.js';
 
 /** Options for `compact seal` (DEC-SCOPED-SEAL). */
 export interface SealOptions {
@@ -393,11 +399,56 @@ export async function compactSealCommand(options: SealOptions = {}): Promise<voi
 // board — regenerate the board alone. Deterministic, so never gated.
 // -----------------------------------------------------------------------------
 
-export async function compactBoardCommand(): Promise<void> {
+export interface BoardOptions {
+  /** Print every branch's cards instead of regenerating the file. */
+  allBranches?: boolean;
+  /** Print the cards as JSON instead of regenerating the file. */
+  json?: boolean;
+}
+
+export async function compactBoardCommand(options: BoardOptions = {}): Promise<void> {
   const projectRoot = process.cwd();
   const { opensprintDir } = scan(projectRoot);
-  regenerateBoard(opensprintDir);
-  console.log(chalk.green(`Regenerated ${relative(projectRoot, path.join(opensprintDir, BOARD_FILENAME))}`));
+
+  if (options.allBranches !== true && options.json !== true) {
+    regenerateBoard(opensprintDir);
+    console.log(chalk.green(`Regenerated ${relative(projectRoot, path.join(opensprintDir, BOARD_FILENAME))}`));
+    return;
+  }
+
+  // Either flag prints and writes nothing. A board spanning branches depends
+  // on what this machine has fetched, so committing it would make BOARD.md
+  // differ by who regenerated it last.
+  if (options.json !== true) {
+    console.log(renderAllBranchesBoard(opensprintDir));
+    return;
+  }
+
+  const { initiatives, sources } =
+    options.allBranches === true
+      ? collectAllBranches(opensprintDir)
+      : { initiatives: readInitiatives(opensprintDir), sources: new Map<string, string>() };
+  console.log(
+    JSON.stringify(
+      {
+        initiatives: initiatives.map((i) => {
+          const branch = sources.get(i.path) ?? CHECKOUT_SOURCE;
+          const live = i.milestones.filter((m) => !m.superseded);
+          return {
+            id: i.id,
+            state: i.state ?? null,
+            owner: i.owner ?? null,
+            branch,
+            milestones: { done: live.filter((m) => m.done).length, total: live.length },
+            // A card from another branch has no file here; its path names the branch.
+            path: branch === CHECKOUT_SOURCE ? relative(projectRoot, i.path) : i.path,
+          };
+        }),
+      },
+      null,
+      2
+    )
+  );
 }
 
 // -----------------------------------------------------------------------------

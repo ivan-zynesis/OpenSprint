@@ -194,6 +194,9 @@ its own surrogate (`DS-PARALLEL-EXEC`). Four rules bind them to git (`DS-SURROGA
 - `main` is production grade by definition
 
 The record states the cost: no branch can see every backlog item (`DS-SURROGATE-GIT-CONTRACT`).
+Observed since: `opensprint compact board --all-branches` prints the card each local and remote-tracking `opsp/<id>` branch carries, from
+committed work only, and never writes `BOARD.md` (`src/core/board.ts`, `src/core/initiative-git.ts`).
+The record has not been revised to say so, so the cost stands as recorded.
 
 **What this deliberately does not reach.** Compaction stops at the surrogate. Certification, the
 governing half of change management (approving, gating, promoting) and release management are out
@@ -302,6 +305,11 @@ surrogate within budget      DS-SURROGATE-BUDGET         none                 n/
 `constraint-unmeasurable`. Its rationale records load sizes measured across three projects (ADRs at
 61–74% of every load). Those figures describe the problem. They do not set a bar, so nothing says
 how this goal is known to be met.
+
+Observed since: `test/core/opsp-load-views.test.ts` asserts that `/opsp:apply`, `/opsp:explore`,
+`/opsp:triage` and `/opsp:propose` load the per-hat views and open a full record only for the
+decision being acted on. It checks the instruction, not a load size, so it asserts the strategy
+rather than a bar. There is still no measure.
 
 ## Open Loops
 

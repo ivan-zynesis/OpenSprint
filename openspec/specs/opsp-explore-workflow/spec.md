@@ -11,7 +11,9 @@ The `/opsp:explore` skill SHALL provide an initiative-level brainstorming mode w
 
 #### Scenario: Entering explore mode
 - **WHEN** the operator invokes `/opsp:explore`
-- **THEN** the agent SHALL read all existing opensprint artifacts (driver-specs, ADRs, architecture.md) for context
+- **THEN** the agent SHALL read `squad/index.md`, the `product` and `maintainer` views and `BOARD.md` for context
+- **AND** SHALL open a `dev` or `devops` view, an initiative, or a full record only when the conversation turns to it
+- **AND** where a view section is not fresh, SHALL read that section's inputs instead, falling back to every driver-spec and ADR only when `opensprint compact` cannot run
 - **AND** engage in open-ended conversation about the initiative idea
 - **AND** SHALL NOT create any files or artifacts during exploration
 
