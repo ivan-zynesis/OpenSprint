@@ -9,7 +9,7 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 export function getOpspApplySkillTemplate(): SkillTemplate {
   return {
     name: 'opensprint-apply',
-    description: 'Execute an initiative — orchestrate opsx cycles for each milestone, auto-resolve questions via surrogate (driver-specs + ADRs + architecture.md), escalate to operator only when surrogate cannot answer.',
+    description: 'Execute an initiative — orchestrate opsx cycles for each milestone, auto-resolve questions via surrogate (the dev and devops views, then the records they cite), escalate to operator only when surrogate cannot answer.',
     instructions: OPSP_APPLY_INSTRUCTIONS,
     license: 'MIT',
     compatibility: 'Requires openspec CLI.',
@@ -37,15 +37,69 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
 
 1. **Read the initiative** in \`opensprint/initiatives/\` — **resolve by the \`id:\` in frontmatter, not by filename.**
    Filenames carry a creation-date prefix (\`20261011-<name>.md\`), so \`<name>.md\` will not exist.
-   \`openspec compact board\` lists every initiative with its path.
+   \`opensprint compact board\` lists every initiative with its path.
    - Get the milestone list and their completion status
    - Identify the next incomplete milestone
 
-2. **Load the operator surrogate** — read ALL of these:
-   - \`opensprint/driver-specs/*.md\` — external constraints
-   - \`opensprint/ADRs/*.md\` — architectural decisions
-   - \`opensprint/architecture.md\` — current architectural state
-   - \`opensprint/DECISION-MAP.md\` — decision tree
+2. **Load the operator surrogate — the views, not every record** (\`DS-SURROGATE-BUDGET\`). Do it
+   from the initiative's worktree: its branch holds records the trunk does not have yet, so where
+   step 3 has not made the worktree, make it first. Then:
+
+   \`\`\`bash
+   opensprint compact plan --hat dev --hat devops --json
+   \`\`\`
+
+   If \`opensprint compact\` cannot run — an older CLI, or no surrogate yet — fall back to reading
+   \`opensprint/driver-specs/*.md\` and \`opensprint/ADRs/*.md\`, and skip the view rules below.
+
+   **First, decide what there is to load** — the first case that holds wins:
+
+   - **No records yet.** Where \`opensprint/driver-specs/\` and \`opensprint/ADRs/\`
+     hold no records at all, there are no records yet: nothing to load — say so, and carry on from
+     the conversation; the view rules below do not apply.
+   - **Records that predate hats.** If every section other than \`open-loops\` is \`unsealed\` with no
+     \`inputs\` — and the plan lists at least one such section — while it lists records under
+     \`unassigned\`, the records predate hats: read every record, as before views existed, and skip
+     the views and the rules below for them. Compiling cannot place a record that declares no
+     hat, so tell the operator the records need \`hats:\` rather than offering \`/opsp:compact\`.
+   - **Otherwise**, orient on the views — read:
+     - \`opensprint/squad/index.md\` — which hat owns which question (where it does not exist, go by hat)
+     - \`opensprint/squad/dev.md\` — what the system is built from, how its parts run, what it stores
+     - \`opensprint/squad/devops.md\` — what is provisioned, and how a change reaches it
+     - the driver-specs and ADRs this initiative lists under \`## Driver Specs\` and \`## ADRs\`,
+       **in full** — they are the decisions you are about to act on
+
+   \`index.md\` routes, and \`compact check\` does not cover it: use it to choose a hat, never as the
+   source of a claim.
+
+   **Open the full record only for the decision you are about to act on.** Every claim in a view
+   cites its record id; follow the citation when the code you are changing depends on it. A
+   question that belongs to product or maintainer opens \`opensprint/squad/product.md\` or
+   \`opensprint/squad/maintainer.md\` first — check that hat the same way, with
+   \`opensprint compact plan --hat <hat> --json\`.
+
+   \`architecture.md\` and \`DECISION-MAP.md\` are not loaded. The first is compiled from the same
+   records as the views, and nothing checks the second; open \`DECISION-MAP.md\` only to work out a
+   blast radius, and confirm each edge against the record's \`depends-on\`.
+
+   The plan lists only the sections that are not fresh; a section it omits is fresh.
+   An \`open-loops\` section, in any state, is answered by the plan's own \`openLoops\`, which is
+   always current. **Where it reports any other section**, the view is not enough for it:
+   - \`stale\` — read the view, then read in full what moved since it was compiled: the records
+     under \`added\` and \`modified\`, and the files under \`observedAdded\` and
+     \`observedModified\`. Do not rely on a claim citing an id under \`removed\`.
+     In a \`measures\` section those files are tests citing records: read only the ones a measure
+     cites as its evidence — the plan's own \`openLoops\` is already current for the rest.
+   - \`unsealed\` — the section was never compiled; often its view file does not exist yet. Read
+     that section's \`inputs\` instead.
+   - \`tampered\` — the view no longer says what was sealed: someone edited it by hand, or deleted
+     it. Set that section aside; read its \`inputs\`, and tell the operator.
+
+   Records the plan lists under \`unassigned\` declare no hat and appear in no view: read the ones
+   that bear on this initiative.
+
+   You are wearing dev and devops, so where those sections have inputs you may compile them now
+   (\`/opsp:compact\`, sealed with \`--hat dev --hat devops\`) rather than reading around them.
 
    This is your "brain" for resolving questions during opsx execution.
    Think of it as: "what would the operator say?"
@@ -122,7 +176,7 @@ Think through the milestone at feature level. You already have the architect-lev
 ### Step 2b: OPSX Propose
 Create an opsx change:
 \`\`\`bash
-openspec new change "<milestone-name>"
+opensprint new change "<milestone-name>"
 \`\`\`
 Then generate the artifacts (proposal.md, specs, design.md, tasks.md) using the opsx workflow. The proposal should reference the parent initiative and relevant driver-specs/ADRs.
 
@@ -142,9 +196,9 @@ All implementation, edits, and test runs happen inside this change worktree. Do 
 When you encounter ambiguity during implementation:
 
 1. **Check the surrogate first:**
-   - Can driver-specs answer this? (external constraint)
-   - Can existing ADRs answer this? (prior decision)
-   - Can architecture.md answer this? (current state context)
+   - Can the dev or devops view answer this? (what is built, and why — each claim cites its record)
+   - Is it product's or maintainer's question? Check \`squad/product.md\` or \`squad/maintainer.md\`
+   - Does a cited driver-spec or ADR settle it? Open that record in full before acting on it
 
 2. **If YES** → resolve it silently, continue working. Note: "Resolved via DEC-001" or "Resolved via DS-PRICING" in your reasoning.
 
@@ -259,9 +313,9 @@ Then — and only then — you may compile that hat's view (\`DEC-COMPILE-ON-APP
 author is present and has just approved, which is the only condition \`DS-VIEW-AUTHORSHIP\` requires:
 
 \`\`\`bash
-openspec compact plan --hat product
+opensprint compact plan --hat product
 # render the stale sections
-openspec compact seal --hat product
+opensprint compact seal --hat product
 \`\`\`
 
 **Only the hat the escalation was classified into.** A product escalation says nothing about
@@ -332,14 +386,17 @@ compiled from exactly those things, so this is the moment they go stale — and 
 milestone will read them (\`DS-VIEW-AUTHORSHIP\`).
 
 \`\`\`bash
-openspec compact plan --hat dev --hat devops
+opensprint compact plan --hat dev --hat devops
 \`\`\`
 
 Render **only the sections it reports stale**, then:
 
 \`\`\`bash
-openspec compact seal --hat dev --hat devops
+opensprint compact seal --hat dev --hat devops
 \`\`\`
+
+**Then re-read the sections you just rendered.** They are what the next milestone starts from, and
+the copy in your context was loaded before this milestone changed anything.
 
 If nothing is stale, say nothing and move on. A milestone that touched no manifest and produced no
 decision renders nothing at all.
@@ -349,7 +406,7 @@ decision renders nothing at all.
 ### Offer product and maintainer — never compile them silently
 
 \`\`\`bash
-openspec compact plan --hat product --hat maintainer
+opensprint compact plan --hat product --hat maintainer
 \`\`\`
 
 Where those are stale, report it and **offer**:
@@ -414,7 +471,7 @@ Present two options:
 ### Path B: Explore First (operator needs clarification)
 
 1. Enter an \`/opsx:explore\` session inline
-   - The exploration has access to the full surrogate context and the current milestone's artifacts
+   - The exploration has access to the surrogate views, the records they cite, and the current milestone's artifacts
    - Act as a thinking partner — help the operator reason through what went wrong and why
 2. When the exploration concludes, ask the operator:
    - **"No changes needed"** → return to the checkpoint and present "Approve and continue" as the default option. Preserve the exploration notes in the initiative descriptor for context.
@@ -423,11 +480,13 @@ Present two options:
 ### Surrogate Reload
 
 After any corrective opsx change is archived:
-1. **Reload the full surrogate** — re-read ALL of:
-   - \`opensprint/driver-specs/*.md\`
-   - \`opensprint/ADRs/*.md\`
-   - \`opensprint/architecture.md\`
-   - \`opensprint/DECISION-MAP.md\`
+1. **Reload the surrogate views** — the correction moved records, so the views moved with them:
+   \`\`\`bash
+   opensprint compact plan --hat dev --hat devops --json
+   \`\`\`
+   - Re-read \`opensprint/squad/dev.md\` and \`opensprint/squad/devops.md\`, compiling them first
+     where the plan reports them stale
+   - Read in full every driver-spec or ADR the corrective change created, superseded or edited
 2. **Return to the same checkpoint** with the updated surrogate context
 3. The operator can now:
    - **Approve and continue** — satisfied with the correction
@@ -514,14 +573,16 @@ When processing multiple milestones, context window may get long. To manage this
 
 - After completing each milestone, summarize the completed work into a brief paragraph
 - Drop implementation details (specific code, file paths) from prior milestones
-- ALWAYS retain full surrogate context (driver-specs, ADRs, architecture.md) — this never gets trimmed
-- The surrogate grows across milestones as new ADRs/driver-specs are added
+- ALWAYS retain the loaded views and the initiative's own driver-specs and ADRs — these never get trimmed
+- Drop a full record opened for one decision once that decision is acted on; its view citation remains
+- The surrogate grows across milestones as new ADRs/driver-specs are added, and the views are recompiled at each boundary
 
 ---
 
 ## Guardrails
 
-- **Surrogate first** — Always check driver-specs, ADRs, and architecture.md before asking the operator
+- **Surrogate first** — Always check the views, and the records they cite, before asking the operator
+- **Views, then records** — Orient on the views; open a full record only for the decision you are about to act on
 - **Reformulate escalations** — Never present raw implementation questions. Elevate to architectural level.
 - **Sequential milestones** — Complete one before starting the next. Each cycle's learnings inform the next.
 - **Update initiative** — Keep the initiative descriptor current after each milestone
@@ -531,6 +592,6 @@ When processing multiple milestones, context window may get long. To manage this
 - **Pause at checkpoints** — Respect the operator's chosen review mode for pausing
 - **Approve explicitly** — Log approvals in the initiative descriptor for audit trail
 - **Change requests fix the surrogate** — When the operator raises a change request, ensure corrective changes update the root cause (ADRs/driver-specs), not just the symptoms (code)
-- **Reload after correction** — Always reload the full surrogate after a corrective change before returning to the checkpoint
+- **Reload after correction** — Always reload the surrogate views after a corrective change before returning to the checkpoint
 - **Corrections create new worktrees** — Never re-attach a worktree to a merged change branch; raise a change request to get a fresh worktree
 `;

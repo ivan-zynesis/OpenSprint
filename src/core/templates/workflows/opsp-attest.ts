@@ -60,7 +60,18 @@ the bars (given / when / then)       commit message bodies
 the TEST FILES                       the design discussion
 the maintainer rows in scope         the ADR rationales
 the CI evidence artifacts            the conversation that built it
+the owning hat's view, posture       the strategy blocks of any
+  and measures sections only           squad view
 \`\`\`
+
+**The owning hat's view, narrowly.** For a maintainer bar, \`## Posture\` in
+\`opensprint/squad/maintainer.md\` states the standard the project holds itself to, and a
+per-measure posture is a deviation from it. For a product bar, \`## Measures\` in
+\`opensprint/squad/product.md\` places it among the other goals. Find the section's heading and read
+only to the next \`## \` — nothing else of the view: a strategy block renders strength and weakness
+compiled from an ADR's
+Consideration Factors, which is the rationale this table keeps out (\`DEC-040\`). The bar itself
+you still read in full, from the driver-spec — it is the decision you are acting on.
 
 **Why tests and not source.** A test is the implementation's own restatement of a bar — \`DEC-038\`
 already writes bars as \`given / when / then\`, which is test syntax. Comparing a bar to its tests
@@ -113,7 +124,7 @@ expected and the frame does not show is a finding before you read a single bar.
 ## Step 2: Read the bars
 
 \`\`\`bash
-openspec compact plan --json
+opensprint compact plan --json
 \`\`\`
 
 For each driver-spec the initiative claims, read its \`## Measures\`. The **bar** states the
@@ -237,7 +248,7 @@ sure the question was asked and the answer landed somewhere durable rather than 
 nobody reopens.
 
 \`\`\`bash
-openspec config          # the configured documentation directory, docs/ by default
+opensprint config          # the configured documentation directory, docs/ by default
 \`\`\`
 
 **Write there and nowhere else.** The documentation directory is attest's one free write target
@@ -338,8 +349,8 @@ anonymous opinion, and a RACI row with no owner is a gap wearing a plan's clothe
 ## When you are done
 
 \`\`\`bash
-openspec compact plan --json   # records should now report authority: attested
-openspec compact loops         # measure-unattested should have moved
+opensprint compact plan --json   # records should now report authority: attested
+opensprint compact loops         # measure-unattested should have moved
 \`\`\`
 
 Report how many bars were met, how many could not be assessed, every exposure with the work planned

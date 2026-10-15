@@ -88,7 +88,7 @@ skill files, the `opensprint` CLI it calls, and a git worktree holding `openspri
   operator ──── wears a hat ────┐
                                 v
   ┌──────────────────────────────────────────┐
-  │ agent + generated skills (/opsp:*)       │   synthetic half: reads records,
+  │ agent + generated skills (/opsp:*)       │   synthetic half: reads views,
   │   explore · backlog · triage · propose   │   asks the operator, renders prose
   │   apply · attest · archive · compact     │
   │   reexplore · repropose · rebase · ...   │
@@ -110,6 +110,12 @@ without a model, and judgement and condensation live in skills (`DEC-022`). Rend
 synthetic part. It needs a model and an agent wearing a hat, which is why no pipeline can render a
 view (`DEC-COMPILE-ON-MILESTONE`). The commands on the deterministic side are registered in
 `src/cli/index.ts`; the skill content is in `src/core/templates/workflows/opsp-*.ts`.
+
+The planning and build skills orient on the per-hat views and open a full record only for the
+decision they act on (`DS-SURROGATE-BUDGET`). `compact plan --hat <hat> --json` tells them which
+sections to trust; where one is stale, unsealed or tampered they read its records instead, and they
+fall back to every record where none declares a hat (observed in `opsp-apply.ts`, `opsp-explore.ts`,
+`opsp-triage.ts` and `opsp-propose.ts` under `src/core/templates/workflows/`).
 
 The CLI has one outbound network call: PostHog telemetry of the command path and version, which can
 be turned off with `OPENSPEC_TELEMETRY=0` or `DO_NOT_TRACK=1` (`src/telemetry/index.ts`,

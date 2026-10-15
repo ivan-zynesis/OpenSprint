@@ -40,7 +40,9 @@ what the current branch knows (`DEC-029`).
 
 Rendering a compiled view is decided to happen in the agent, at each milestone boundary inside
 `/opsp:apply`, for the `dev` and `devops` sections `compact plan` reports stale; product and
-maintainer are offered, not compiled silently (`DEC-COMPILE-ON-MILESTONE`). CI is ruled out as the
+maintainer are offered, not compiled silently (`DEC-COMPILE-ON-MILESTONE`). The skill then re-reads
+the sections it rendered, because the next milestone starts from them
+(`src/core/templates/workflows/opsp-apply.ts`). CI is ruled out as the
 place to render, because rendering is synthesis and a pipeline has no agent and no hat
 (`DEC-COMPILE-ON-MILESTONE`). The pipeline's decided role is to check views, not produce them
 (`DEC-030`).

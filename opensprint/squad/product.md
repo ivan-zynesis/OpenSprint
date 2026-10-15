@@ -303,6 +303,11 @@ surrogate within budget      DS-SURROGATE-BUDGET         none                 n/
 61–74% of every load). Those figures describe the problem. They do not set a bar, so nothing says
 how this goal is known to be met.
 
+Observed since: `test/core/opsp-load-views.test.ts` asserts that `/opsp:apply`, `/opsp:explore`,
+`/opsp:triage` and `/opsp:propose` load the per-hat views and open a full record only for the
+decision being acted on. It checks the instruction, not a load size, so it asserts the strategy
+rather than a bar. There is still no measure.
+
 ## Open Loops
 
 23 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
