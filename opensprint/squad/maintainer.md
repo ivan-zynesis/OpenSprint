@@ -234,7 +234,9 @@ loop kinds (`DS-SURROGATE-GIT-CONTRACT`).
 
 The record names its own deliberate cost: no branch can see every backlog item, which breaks the one
 interaction non-technical stakeholders have — an agent reading the compiled board for them
-(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`).
+(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`). Observed since:
+`opensprint compact board --all-branches` prints the card each local and remote-tracking `opsp/<id>` branch carries, from committed work only, and never writes `BOARD.md` (`src/core/board.ts`). The
+record has not been revised, so the cost stands as recorded.
 
 ### Attestation reviews the implementation against the stated strategy
 

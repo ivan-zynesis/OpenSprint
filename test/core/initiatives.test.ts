@@ -13,6 +13,8 @@ import {
   stateIndex,
   checkInitiativeState,
   parseAttestation,
+  parseInitiative,
+  OWNED_STATES,
   DOORS,
   type InitiativeEntry,
 } from '../../src/core/initiatives.js';
@@ -98,6 +100,61 @@ describe('initiatives', () => {
     it('defaults status to active when absent', () => {
       write('a.md', '---\nid: a\n---\n\n## Description\n\nd\n');
       expect(readInitiatives(root)[0].status).toBe('active');
+    });
+  });
+
+  describe('owner', () => {
+    const owned = (line: string) => {
+      write('a.md', `---\nid: a\nstatus: active\nstate: building\n${line}---\n\n## Description\n\nd\n`);
+      return readInitiatives(root)[0].owner;
+    };
+
+    it('carries the owner a file declares', () => {
+      expect(owned('owner: Nhat Cao\n')).toBe('Nhat Cao');
+    });
+
+    it('leaves it undefined on a file written before owners existed', () => {
+      expect(owned('')).toBeUndefined();
+    });
+
+    it('treats an empty or blank owner as absent', () => {
+      expect(owned('owner: ""\n')).toBeUndefined();
+      expect(owned('owner: "   "\n')).toBeUndefined();
+    });
+
+    it('trims it', () => {
+      expect(owned('owner: "  ivan  "\n')).toBe('ivan');
+    });
+
+    it('reads a quoted value back to itself', () => {
+      expect(owned('owner: "ops: night shift"\n')).toBe('ops: night shift');
+    });
+
+    it('ignores an owner that is not a string', () => {
+      expect(owned('owner: [a, b]\n')).toBeUndefined();
+    });
+
+    it('owned states are the work in flight, named explicitly', () => {
+      expect([...OWNED_STATES]).toEqual(['building', 'ready-for-attestation', 'attested']);
+    });
+  });
+
+  describe('parseInitiative', () => {
+    it('gives the same entry readInitiatives does', () => {
+      initiative('alpha', { state: 'building', deps: ['beta'] });
+      const [fromDir] = readInitiatives(root);
+      const content = fs.readFileSync(fromDir.path, 'utf-8');
+      expect(parseInitiative(content, fromDir.path, fromDir.stem)).toEqual(fromDir);
+    });
+
+    it('returns null for a file with no id', () => {
+      expect(parseInitiative('# just a note\n', '/x.md', 'x')).toBeNull();
+    });
+
+    it('carries the path and stem it was given, so a branch can name itself', () => {
+      const e = parseInitiative('---\nid: a\n---\n', 'opsp/a:opensprint/initiatives/20261015-a.md', '20261015-a');
+      expect(e?.path).toBe('opsp/a:opensprint/initiatives/20261015-a.md');
+      expect(e?.stem).toBe('20261015-a');
     });
   });
 

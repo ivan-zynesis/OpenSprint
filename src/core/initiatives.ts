@@ -87,6 +87,14 @@ export interface InitiativeEntry {
   status: string;
   /** How far down OGSM this has crystallized (DEC-024). Absent on older files. */
   state?: string;
+  /**
+   * The person holding the card — who to ask where the work stands.
+   *
+   * A person, not a hat: a hat says which accountability a move is made in,
+   * and an owner says who is making it. Absent on files written before the
+   * field existed, and on a backlog item nobody has picked up.
+   */
+  owner?: string;
   created?: string;
   completed?: string;
   /** Other initiatives this one builds on. */
@@ -300,6 +308,44 @@ function parseMembership(content: string, heading: string): string[] {
 }
 
 /**
+ * Parses one initiative file, or returns null where it declares no `id`.
+ *
+ * Separate from reading the directory so that a file read from another
+ * branch goes through this same parser: two parsers for one artifact is how
+ * the board and the state check start to disagree about what it says.
+ */
+export function parseInitiative(
+  content: string,
+  filePath: string,
+  stem: string
+): InitiativeEntry | null {
+  const fm = parseFrontmatter(content);
+  if (!fm || !fm.id) return null;
+
+  const dependsOn = Array.isArray(fm['depends-on'])
+    ? (fm['depends-on'] as string[])
+    : [];
+  const owner = typeof fm.owner === 'string' ? fm.owner.trim() : '';
+
+  return {
+    id: fm.id as string,
+    status: (fm.status as string) || 'active',
+    ...(typeof fm.state === 'string' ? { state: fm.state } : {}),
+    ...(owner.length > 0 ? { owner } : {}),
+    ...(fm.created === undefined ? {} : { created: String(fm.created) }),
+    ...(fm.completed === undefined ? {} : { completed: String(fm.completed) }),
+    dependsOn,
+    milestones: parseMilestones(content),
+    orphanedMilestones: parseOrphanedMilestones(content),
+    ...(parseAttestation(content) === undefined ? {} : { attestation: parseAttestation(content) }),
+    driverSpecs: parseMembership(content, 'Driver Specs'),
+    decisions: parseMembership(content, 'ADRs'),
+    path: filePath,
+    stem,
+  };
+}
+
+/**
  * Reads every initiative, sorted by filename for a stable order.
  *
  * A file with no `id` is skipped rather than failing the read: an initiatives
@@ -314,29 +360,12 @@ export function readInitiatives(opensprintDir: string): InitiativeEntry[] {
   for (const file of fs.readdirSync(dir).sort()) {
     if (!file.endsWith('.md')) continue;
     const filePath = path.join(dir, file);
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const fm = parseFrontmatter(content);
-    if (!fm || !fm.id) continue;
-
-    const dependsOn = Array.isArray(fm['depends-on'])
-      ? (fm['depends-on'] as string[])
-      : [];
-
-    entries.push({
-      id: fm.id as string,
-      status: (fm.status as string) || 'active',
-      ...(typeof fm.state === 'string' ? { state: fm.state } : {}),
-      ...(fm.created === undefined ? {} : { created: String(fm.created) }),
-      ...(fm.completed === undefined ? {} : { completed: String(fm.completed) }),
-      dependsOn,
-      milestones: parseMilestones(content),
-      orphanedMilestones: parseOrphanedMilestones(content),
-      ...(parseAttestation(content) === undefined ? {} : { attestation: parseAttestation(content) }),
-      driverSpecs: parseMembership(content, 'Driver Specs'),
-      decisions: parseMembership(content, 'ADRs'),
-      path: filePath,
-      stem: file.slice(0, -'.md'.length),
-    });
+    const entry = parseInitiative(
+      fs.readFileSync(filePath, 'utf-8'),
+      filePath,
+      file.slice(0, -'.md'.length)
+    );
+    if (entry !== null) entries.push(entry);
   }
   return entries;
 }
@@ -402,6 +431,19 @@ export const INITIATIVE_STATES = [
 ] as const;
 
 export type InitiativeState = (typeof INITIATIVE_STATES)[number];
+
+/**
+ * The states in which a card must name an owner.
+ *
+ * Work in flight — building, waiting at the handoff, attested but not yet
+ * closed. A backlog item nobody has picked up is unowned by definition, and a
+ * proposal may wait for whoever starts it; neither is a problem.
+ */
+export const OWNED_STATES: readonly InitiativeState[] = [
+  'building',
+  'ready-for-attestation',
+  'attested',
+];
 
 /** States from which no further work is expected. */
 export function isTerminalState(state: string): boolean {

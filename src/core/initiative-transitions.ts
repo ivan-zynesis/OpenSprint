@@ -13,6 +13,7 @@
  */
 
 import * as fs from 'node:fs';
+import { stringify as stringifyYaml } from 'yaml';
 import { INITIATIVE_STATES, type InitiativeState } from './initiatives.js';
 
 /**
@@ -240,26 +241,66 @@ export function nextStates(from: string | undefined): Transition[] {
 }
 
 /**
+ * Writes one field into an initiative's frontmatter, in place.
+ *
+ * Rewrites the field's line, inserts it after the first of `after` that is
+ * present (appending where none is), or removes it when `value` is null.
+ * Nothing else in the file is touched: an initiative carries prose a
+ * transition has no business rewriting.
+ *
+ * The value is serialised as a YAML scalar, so a name holding a colon or a
+ * leading quote still parses back to itself.
+ */
+export function writeFrontmatterField(
+  filePath: string,
+  key: string,
+  value: string | null,
+  after: readonly string[] = ['status']
+): void {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (match === null) {
+    throw new Error(`${filePath} has no frontmatter to write ${key} into.`);
+  }
+
+  const lines = match[1].split('\n');
+  const at = (field: string) => lines.findIndex((line) => line.startsWith(`${field}:`));
+  const existing = at(key);
+
+  if (value === null) {
+    if (existing !== -1) lines.splice(existing, 1);
+  } else {
+    const line = `${key}: ${stringifyYaml(value, { lineWidth: 0 }).trimEnd()}`;
+    if (existing !== -1) {
+      lines[existing] = line;
+    } else {
+      const anchor = after.map(at).find((index) => index !== -1);
+      if (anchor === undefined) lines.push(line);
+      else lines.splice(anchor + 1, 0, line);
+    }
+  }
+
+  // A function replacer, so a `$` in a value is never read as a pattern.
+  const updated = `---\n${lines.join('\n')}\n---`;
+  fs.writeFileSync(filePath, content.replace(match[0], () => updated), 'utf-8');
+}
+
+/**
  * Writes `state:` into an initiative's frontmatter, in place.
  *
  * Rewrites the one line, or inserts the field after `status:` where it is
  * absent — which is the common repair, since `/opsp:propose` wrote initiatives
- * without it. Nothing else in the file is touched: an initiative carries
- * prose a transition has no business rewriting.
+ * without it.
  */
 export function writeState(filePath: string, to: string): void {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (match === null) {
-    throw new Error(`${filePath} has no frontmatter to write a state into.`);
-  }
+  writeFrontmatterField(filePath, 'state', to);
+}
 
-  const body = match[1];
-  const updated = /^state:.*$/m.test(body)
-    ? body.replace(/^state:.*$/m, `state: ${to}`)
-    : /^status:.*$/m.test(body)
-      ? body.replace(/^(status:.*)$/m, `$1\nstate: ${to}`)
-      : `${body}\nstate: ${to}`;
-
-  fs.writeFileSync(filePath, content.replace(match[0], `---\n${updated}\n---`), 'utf-8');
+/**
+ * Writes `owner:` into an initiative's frontmatter, or removes it on null.
+ *
+ * Placed after `state:` so the two fields a board reads sit together.
+ */
+export function writeOwner(filePath: string, owner: string | null): void {
+  writeFrontmatterField(filePath, 'owner', owner, ['state', 'status']);
 }

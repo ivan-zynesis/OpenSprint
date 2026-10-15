@@ -484,6 +484,24 @@ program
   });
 
 program
+  .command('claim [initiative]')
+  .description("Name who holds an initiative's card")
+  .option('--owner <name>', "Who takes it — defaults to git's user.name")
+  .option('--release', 'Put the card down: remove the owner')
+  .option('--dry-run', 'Report the change without writing it')
+  .option('--json', 'Output as JSON')
+  .action(async (initiative: string | undefined, options: { owner?: string; release?: boolean; dryRun?: boolean; json?: boolean }) => {
+    try {
+      const { claimCommand } = await import('../commands/claim.js');
+      await claimCommand(initiative, options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command('frame')
   .description('Report what this branch changes, and against what base')
   .option('--json', 'Output as JSON')
@@ -560,10 +578,12 @@ compactCmd
 compactCmd
   .command('board')
   .description('Regenerate BOARD.md from the initiatives')
-  .action(async () => {
+  .option('--all-branches', 'Print every opsp/* branch\'s cards too, and write nothing')
+  .option('--json', 'Print the cards as JSON, and write nothing')
+  .action(async (options: { allBranches?: boolean; json?: boolean }) => {
     try {
       const { compactBoardCommand } = await import('../commands/compact.js');
-      await compactBoardCommand();
+      await compactBoardCommand(options);
     } catch (error) {
       console.log();
       ora().fail(`Error: ${(error as Error).message}`);

@@ -274,6 +274,7 @@ an argument adopts it.
 | `/opsp:migrate` | report records the current hat shapes can no longer select |
 | `opensprint frame` | what this branch changes, and against what base |
 | `opensprint advance` | move an initiative to its next state |
+| `opensprint claim` | name who holds an initiative's card |
 | `/opsp:compact` | recompile the views |
 
 ### Intervention
@@ -339,6 +340,8 @@ opensprint compact seal            # record the current views in the provenance 
 opensprint compact check           # fail when a view is stale, tampered or unsealed
 opensprint compact loops           # report open loops
 opensprint compact board           # regenerate BOARD.md
+opensprint compact board --all-branches   # print every opsp/* branch's cards; writes nothing
+opensprint claim <initiative>      # take the card — git's user.name, or --owner <name>; --release puts it down
 
 opensprint list                    # changes, or --specs
 opensprint show <item>             # a change or a spec

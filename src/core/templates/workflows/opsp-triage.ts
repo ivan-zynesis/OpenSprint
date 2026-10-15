@@ -47,14 +47,40 @@ ending in a decision about whether this becomes work.
 absorb it and would behave acceptably — but a phase that exists in practice and has no name is a
 phase nobody reasons about.
 
-## Step 1: Find the item and its worktree
+## Step 1: Find the item, its worktree, and pick it up
+
+Every backlog item lives on its own branch (\`DEC-029\`), so the board in this checkout cannot see
+items filed elsewhere. List every branch's cards — fetch first, so items others pushed are there:
 
 \`\`\`bash
-opensprint compact board          # Backlog column
+git fetch --prune                          # skip it offline; the board then shows local branches
+opensprint compact board --all-branches    # Backlog column, with each card's branch and owner
 \`\`\`
 
-The initiative lives on its own branch (\`DEC-029\`). Switch to its worktree, or create one if the
-item was written before that rule. Verify with \`pwd\` and \`git branch --show-current\`.
+It prints and writes nothing. Switch to the item's worktree, and verify with \`pwd\` and
+\`git branch --show-current\` before writing anything. Where its branch exists only on the remote,
+create the worktree from it:
+
+\`\`\`bash
+git worktree add ../<repo>-opsp-<initiative-name> -b opsp/<initiative-name> origin/opsp/<initiative-name>
+cd ../<repo>-opsp-<initiative-name>
+\`\`\`
+
+If the item has no branch at all — it was written before initiatives lived on branches — create
+one from the current checkout.
+
+Then pick it up, so nobody else triages it at the same time:
+
+\`\`\`bash
+opensprint claim <initiative-name>         # names you: git's user.name, or --owner <name>
+git add opensprint/initiatives/ opensprint/BOARD.md
+git commit -m "triage: claim <initiative-name>"
+\`\`\`
+
+If the board shows someone else as its owner, ask the operator before taking it over.
+
+**A claim others cannot fetch claims nothing.** Offer to push the branch (\`git push -u origin
+opsp/<initiative-name>\`); until it is pushed, nobody else's board shows it as taken.
 
 Load the surrogate before judging anything. A backlog item that looked novel in isolation is
 frequently answered already. Load the views, not every record (\`DS-SURROGATE-BUDGET\`):
@@ -152,6 +178,16 @@ keeping its history including the earlier decline.
 
 The idea is worth keeping and not yet thought through. Leave it at \`exploring\`, note what is
 missing, and say what would need answering before it could be triaged again.
+
+Put the card down, so the board shows it is nobody's again:
+
+\`\`\`bash
+opensprint claim <initiative-name> --release
+git add opensprint/initiatives/ opensprint/BOARD.md
+git commit -m "triage: return <initiative-name>"
+\`\`\`
+
+Offer to push it, as you did the claim.
 
 ## Step 4: Stop
 
