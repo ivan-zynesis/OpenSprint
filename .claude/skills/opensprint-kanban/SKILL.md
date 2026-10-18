@@ -88,22 +88,28 @@ Then open `$OUT` — in your own browser pane if you have one, otherwise `open` 
 
 ## What the page shows
 
-Five columns, each card with its owner, state, branch, last change and history. A card in Dev or
-Attestation with no owner is marked in red.
+Five columns, each card with its owner, state, branch, last change and history. A card in flight
+with no owner is marked in red.
 
-**A card offers only the moves the state machine allows, each owned by one workflow** — backward on
-the left, work in place in the middle, forward on the right:
+**Each column is a stage, and each stage has one workflow that does it.** A card's column follows
+from its state — and before propose, from whether triage has picked it up:
 
-| Column | ← back | stays | forward → |
+| Column | Cards | Continue → | ← Escalate |
 |---|---|---|---|
-| Backlog | Decline (`triage`) | Triage | Propose |
-| Planning | | | Apply |
-| Dev | Reexplore, Repropose | Continue (`apply` — moves itself once the last milestone closes) | |
-| Attestation | Reexplore, Repropose, Request a change (`attest`) | | Attest, then Archive |
-| Done (declined) | Revive (`triage`) | | |
+| Backlog | `exploring`, nobody holds it | **triage** — the only way forward | |
+| Planning | `exploring`, claimed by triage | **propose** — how a plan completes | |
+| Dev | `proposed`, `building` | **apply** — on to Attestation once the last milestone closes | Repropose (product · maintainer), Reexplore (operator) |
+| Attestation | `ready-for-attestation`, `attested` | **attest**, then **archive** | Request a change (back to dev), Repropose, Reexplore |
+| Done | `completed`, `declined` | | Revive a declined idea (triage) |
 
-**A button never moves a card.** Hovering shows the workflow, the hat it is done in, the move and
-when it applies. Clicking copies a short script that opens the card's worktree — finding it, or
+**Forward is always "continue".** It resumes the stage's workflow from where it paused, and that
+workflow moves the card on when its work is done. **Backward is an escalation**: work goes up a
+rung — from dev/devops to product/maintainer, and from there to the operator — and jumps straight to
+the state that rung reopens. Those are the moves `initiative-transitions.ts` allows; the board offers
+nothing else.
+
+**A button never moves a card.** Hovering shows the workflow, the hat or rung, where the card lands
+and when. Clicking copies a short script that opens the card's worktree — finding it, or
 making it from the branch — and starts a **fresh** agent session there with the workflow already
 invoked. The workflow loads its hat's context itself, and moves the card when its work is done.
 Pasting it into a terminal is the operator's consent; the page itself can run nothing.

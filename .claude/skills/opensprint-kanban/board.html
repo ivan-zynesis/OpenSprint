@@ -76,14 +76,15 @@
   details summary { cursor: pointer; }
   details ol { margin: 6px 0 0; padding-left: 18px; }
 
-  /* Moves: backward on the left, staying put in the middle, forward on the right. */
+  /* Escalations on the left; the one way forward — continue the stage's workflow — on the right. */
   .moves { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px;
-           border-top: 1px dashed var(--border); }
-  .moves .back, .moves .stay, .moves .forward { display: flex; flex-wrap: wrap; gap: 6px; }
+           border-top: 1px dashed var(--border); position: relative; }
+  .moves .back, .moves .forward { display: flex; flex-wrap: wrap; gap: 6px; }
   .moves .forward { margin-left: auto; }
 
   button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer;
-           border: 1px solid var(--border); background: var(--card); color: var(--text); position: relative; }
+           border: 1px solid var(--border); background: var(--card); color: var(--text); }
+  .top button { position: relative; }
   button:hover { border-color: var(--accent); }
   button.forward { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
   button.back { border-color: var(--back); color: var(--back); background: var(--back-bg); }
@@ -93,7 +94,10 @@
     background: var(--tip-bg); color: var(--tip-text); padding: 7px 9px; border-radius: 6px;
     font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none;
   }
-  .moves .forward button[data-tip]:hover::after, .moves .forward button[data-tip]:focus-visible::after { left: auto; right: 0; }
+  /* On a card the tooltip spans the card, so it never runs off the edge of a column. */
+  .moves button[data-tip]:hover::after, .moves button[data-tip]:focus-visible::after {
+    left: 0; right: 0; width: auto; max-width: none; bottom: calc(100% + 4px);
+  }
   .top button[data-tip]:hover::after, .top button[data-tip]:focus-visible::after {
     left: auto; right: 0; bottom: auto; top: calc(100% + 6px);
   }
@@ -114,8 +118,9 @@
       <button type="button" id="refresh">Refresh</button>
       <button type="button" class="forward" id="add">+ Backlog an item</button>
     </div>
-    <div class="legend">A button copies the command that starts a fresh agent session in the card's worktree,
-      running the workflow that owns that move. Paste it into a terminal. Nothing moves until that workflow finishes its work.</div>
+    <div class="legend"><strong>Continue →</strong> resumes the stage's workflow where it paused; the card moves on when that work is done.
+      <strong>← back</strong> escalates — dev · devops to product · maintainer to the operator — and jumps to the state that reopens.
+      A button copies the command that starts a fresh agent session in the card's worktree; paste it into a terminal.</div>
   </div>
   <main class="board" id="board"></main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -124,57 +129,66 @@
 
 <script>
 (() => {
-  // Columns follow the initiative state machine; a card's column follows from its state.
+  // Each column is a stage of work, and each stage has one workflow that does it.
+  // A card's column follows from its state — and, before propose, from whether
+  // triage has picked it up (claimed it).
   const COLUMNS = [
-    { title: 'Backlog', states: ['exploring'] },
-    { title: 'Planning', states: ['proposed'] },
-    { title: 'Dev', states: ['building'] },
-    { title: 'Attestation', states: ['ready-for-attestation', 'attested'] },
-    { title: 'Done', states: ['completed', 'declined'] },
+    { key: 'backlog', title: 'Backlog' },
+    { key: 'planning', title: 'Planning' },
+    { key: 'dev', title: 'Dev' },
+    { key: 'attestation', title: 'Attestation' },
+    { key: 'done', title: 'Done' },
   ];
+  function columnOf(card) {
+    switch (card.state) {
+      case 'exploring': return card.owner ? 'planning' : 'backlog';
+      case 'proposed': case 'building': return 'dev';
+      case 'ready-for-attestation': case 'attested': return 'attestation';
+      default: return 'done';
+    }
+  }
   const OWNED = ['building', 'ready-for-attestation', 'attested'];
 
-  // Every move a card may make, and the workflow and hat that own it — the
-  // TRANSITIONS table in src/core/initiative-transitions.ts. `stay` is work
-  // that happens in place: the workflow moves the card itself when it is done.
-  const MOVES = {
-    exploring: [
-      { dir: 'back', label: 'Decline', workflow: 'triage', hat: 'product · maintainer', to: 'declined',
-        when: 'the idea is dropped, with the reason recorded' },
-      { dir: 'stay', label: 'Triage', workflow: 'triage', hat: 'product · maintainer',
-        when: 'pick it up: claim it, brainstorm the strategy' },
-      { dir: 'forward', label: 'Propose', workflow: 'propose', hat: 'product · maintainer · dev · devops', to: 'proposed',
-        when: 'the driver-specs, ADRs, milestones and the bar are written' },
-    ],
-    proposed: [
-      { dir: 'forward', label: 'Apply', workflow: 'apply', hat: 'dev · devops', to: 'building',
-        when: 'the first milestone starts' },
-    ],
+  // Forward is always the same move: continue the stage's workflow from where
+  // it paused. The workflow moves the card on when its work is done.
+  const CONTINUE = {
+    exploring: (card) => card.owner
+      ? { workflow: 'propose', hat: 'product · maintainer · dev · devops', lands: 'Dev, at proposed',
+          when: 'the plan is complete: driver-specs, ADRs, milestones and the bar are written' }
+      : { workflow: 'triage', hat: 'product · maintainer', lands: 'Planning, once claimed',
+          when: 'picked up: claimed, and the strategy brainstormed (or declined, with the reason)' },
+    proposed: () => ({ workflow: 'apply', hat: 'dev · devops', lands: 'Dev, at building',
+      when: 'the first milestone starts; on to Attestation once the last one closes' }),
+    building: () => ({ workflow: 'apply', hat: 'dev · devops', lands: 'Attestation, at ready-for-attestation',
+      when: 'the next milestone; on to Attestation by itself once the last one closes' }),
+    'ready-for-attestation': () => ({ workflow: 'attest', hat: 'product · maintainer', lands: 'Attestation, at attested',
+      when: 'every bar carries a posture, and the change questions are answered' }),
+    attested: () => ({ workflow: 'archive', hat: 'product · maintainer · dev · devops', lands: 'Done, at completed',
+      when: 'the views are compiled and the branch merges' }),
+  };
+
+  // Backward is an escalation: work goes up a rung — from dev/devops to
+  // product/maintainer, and from there to the operator — and jumps straight to
+  // the state that rung reopens. The edges are TRANSITIONS in
+  // src/core/initiative-transitions.ts.
+  const ESCALATE = {
     building: [
-      { dir: 'back', label: 'Reexplore', workflow: 'reexplore', hat: 'product · maintainer', to: 'exploring',
-        when: 'the goal itself is in question' },
-      { dir: 'back', label: 'Repropose', workflow: 'repropose', hat: 'product · maintainer', to: 'proposed',
-        when: 'the goal holds; what was decided about reaching it does not' },
-      { dir: 'stay', label: 'Continue', workflow: 'apply', hat: 'dev · devops', to: 'ready-for-attestation',
-        when: 'the next milestone; moves to Attestation by itself once the last one closes' },
+      { label: 'Reexplore', workflow: 'reexplore', to: 'exploring', rung: 'the operator — the goal itself',
+        lands: 'Planning', when: 'the goal itself is in question' },
+      { label: 'Repropose', workflow: 'repropose', to: 'proposed', rung: 'product · maintainer — the strategy',
+        lands: 'Dev, at proposed, once restated', when: 'the goal holds; what was decided about reaching it does not' },
     ],
     'ready-for-attestation': [
-      { dir: 'back', label: 'Reexplore', workflow: 'reexplore', hat: 'product · maintainer', to: 'exploring',
-        when: 'the goal no longer holds' },
-      { dir: 'back', label: 'Repropose', workflow: 'repropose', hat: 'product · maintainer', to: 'proposed',
-        when: 'the strategy must be restated, and its measures with it' },
-      { dir: 'back', label: 'Request a change', workflow: 'attest', hat: 'product · maintainer', to: 'building',
-        when: 'everything holds; the work was not finished' },
-      { dir: 'forward', label: 'Attest', workflow: 'attest', hat: 'product · maintainer', to: 'attested',
-        when: 'every bar carries a posture, and the change questions are answered' },
-    ],
-    attested: [
-      { dir: 'forward', label: 'Archive', workflow: 'archive', hat: 'product · maintainer · dev · devops', to: 'completed',
-        when: 'the views are compiled and the branch merges' },
+      { label: 'Reexplore', workflow: 'reexplore', to: 'exploring', rung: 'the operator — the goal itself',
+        lands: 'Planning', when: 'the goal no longer holds' },
+      { label: 'Repropose', workflow: 'repropose', to: 'proposed', rung: 'product · maintainer — the strategy',
+        lands: 'Dev, at proposed, once restated', when: 'the strategy must be restated, and its measures with it' },
+      { label: 'Request a change', workflow: 'attest', to: 'building', rung: 'back to dev · devops — the work',
+        lands: 'Dev, at building', when: 'everything holds; the work was not finished' },
     ],
     declined: [
-      { dir: 'back', label: 'Revive', workflow: 'triage', hat: 'product · maintainer', to: 'exploring',
-        when: 'a declined idea is revived, keeping its history' },
+      { label: 'Revive', workflow: 'triage', to: 'exploring', rung: 'product · maintainer',
+        lands: 'Backlog', when: 'a declined idea is revived, keeping its history' },
     ],
   };
 
@@ -283,36 +297,40 @@
     }
   }
 
-  function moveButton(card, move) {
-    const arrow = move.dir === 'back' ? '← ' : '';
-    const arrowAfter = move.dir === 'forward' ? ' →' : '';
-    const edge = move.to ? `${card.state} → ${move.to}` : `${card.state} (stays)`;
-    const tip = [
-      `${HARNESS.invoke(move.workflow, card.id)}`,
-      `hat: ${move.hat}`,
-      `move: ${edge}`,
-      `when: ${move.when}`,
-      '',
-      `click: copy the command that opens a fresh ${HARNESS.name} session in this card's worktree`,
-    ].join('\n');
+  function launchButton(card, move, cls, label, tipLines) {
+    const tip = [HARNESS.invoke(move.workflow, card.id), ...tipLines, '',
+      `click: copy the command that opens a fresh ${HARNESS.name} session in this card's worktree`].join('\n');
     return el('button', {
-      type: 'button', class: move.dir, 'data-tip': tip,
+      type: 'button', class: cls, 'data-tip': tip,
       onclick: async () => {
         const ok = await copy(launchScript(card, move));
         say(ok ? 'Copied — paste into a terminal to start ' : 'Could not copy. The command is ',
-            el('code', {}, HARNESS.invoke(move.workflow, card.id)),
-            ` in ${card.id}'s worktree, wearing ${move.hat}.`);
+            el('code', {}, HARNESS.invoke(move.workflow, card.id)), ` in ${card.id}'s worktree.`);
       },
-    }, `${arrow}${move.label}${arrowAfter}`);
+    }, label);
   }
+
+  const continueButton = (card, move) => launchButton(card, move, 'forward', `Continue: ${move.workflow} →`, [
+    `resumes ${move.workflow} where it paused`,
+    `hat: ${move.hat}`,
+    `lands: ${move.lands}`,
+    `when: ${move.when}`,
+  ]);
+
+  const escalateButton = (card, move) => launchButton(card, move, 'back', `← ${move.label}`, [
+    `escalates to ${move.rung}`,
+    `move: ${card.state} → ${move.to}`,
+    `lands: ${move.lands}`,
+    `when: ${move.when}`,
+  ]);
 
   function renderCard(card) {
     const ownerChip = card.owner
       ? el('span', { class: 'owner', title: card.owner }, card.owner)
       : el('span', { class: OWNED.includes(card.state) ? 'owner none missing' : 'owner none' },
            OWNED.includes(card.state) ? 'no owner' : 'unowned');
-    const moves = MOVES[card.state] || [];
-    const group = (dir) => el('div', { class: dir }, moves.filter((m) => m.dir === dir).map((m) => moveButton(card, m)));
+    const forward = CONTINUE[card.state] ? CONTINUE[card.state](card) : null;
+    const back = ESCALATE[card.state] || [];
     return el('article', { class: 'card' },
       el('header', {}, el('h3', {}, card.title || card.id), ownerChip),
       card.summary ? el('p', { class: 'summary' }, inline(card.summary)) : null,
@@ -325,7 +343,11 @@
         ? el('details', {}, el('summary', {}, `History (${card.history.length})`),
              el('ol', {}, card.history.map((h) => el('li', {}, h))))
         : null,
-      moves.length ? el('div', { class: 'moves' }, group('back'), group('stay'), group('forward')) : null);
+      forward || back.length
+        ? el('div', { class: 'moves' },
+            el('div', { class: 'back' }, back.map((m) => escalateButton(card, m))),
+            el('div', { class: 'forward' }, forward ? continueButton(card, forward) : null))
+        : null);
   }
 
   const cards = [...document.querySelectorAll('script.card')]
@@ -335,7 +357,7 @@
 
   const board = document.getElementById('board');
   for (const column of COLUMNS) {
-    const inColumn = cards.filter((c) => column.states.includes(c.state));
+    const inColumn = cards.filter((c) => columnOf(c) === column.key);
     board.append(el('section', { class: 'column' },
       el('h2', {}, column.title, el('span', {}, String(inColumn.length))),
       inColumn.length ? inColumn.map(renderCard) : el('p', { class: 'empty' }, 'Nothing here.')));
