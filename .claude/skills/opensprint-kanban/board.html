@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kanban</title>
+<!--
+  opensprint kanban board — a static template.
+
+  The page needs no server and loads nothing. The agent fills it by
+  replacing the opensprint:cards marker below with:
+
+    <script type="text/plain" id="board-meta">REF SHA READ-AT</script>
+    <script type="text/plain" class="card">BASE64 OF ONE cards/<id>.md</script>   (one per card)
+
+  Base64 keeps any card text from breaking the page; the script below decodes
+  it as UTF-8 and parses the frontmatter itself.
+-->
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #eceef2; --card: #ffffff; --text: #1d2027; --muted: #5f6775;
+    --border: #d9dde4; --accent: #3b5bdb; --accent-bg: #e7ecff; --warn: #b3261e;
+    --code-bg: #f1f3f6; --tip-bg: #1d2027; --tip-text: #f6f7f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --panel: #1c1f25; --card: #242830; --text: #e6e8ec; --muted: #9aa1ad;
+      --border: #333844; --accent: #8ca2ff; --accent-bg: #2a3352; --warn: #ff8a80;
+      --code-bg: #1b1e24; --tip-bg: #e6e8ec; --tip-text: #14161a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg);
+         padding: 1px 4px; border-radius: 4px; }
+
+  .top { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+         padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .top h1 { margin: 0; font-size: 18px; }
+  .meta { color: var(--muted); font-size: 12px; }
+  .actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+  @media (max-width: 1100px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .board { grid-template-columns: 1fr; } .actions { margin-left: 0; } }
+  .column { background: var(--panel); border-radius: 10px; padding: 10px; min-height: 120px; min-width: 0; }
+  .column h2 { margin: 2px 4px 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em;
+               display: flex; justify-content: space-between; color: var(--muted); }
+  .empty { color: var(--muted); margin: 4px; font-size: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+          padding: 10px 12px; margin-bottom: 10px; }
+  .card header { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+  .card h3 { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+  .owner { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+           background: var(--accent-bg); color: var(--accent); }
+  .owner.none { background: transparent; color: var(--muted); border: 1px dashed var(--border); }
+  .owner.missing { color: var(--warn); border-color: var(--warn); }
+  .summary { margin: 8px 0; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 4;
+             -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .summary strong { color: var(--text); }
+  dl { margin: 8px 0 0; display: grid; gap: 2px; font-size: 12px; }
+  dl div { display: flex; gap: 6px; min-width: 0; }
+  dt { color: var(--muted); width: 56px; flex: none; }
+  dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  details { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  details summary { cursor: pointer; }
+  details ol { margin: 6px 0 0; padding-left: 18px; }
+  .card .buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px;
+                   border-top: 1px dashed var(--border); }
+
+  /* Buttons are placeholders: aria-disabled keeps them hoverable for the tooltip. */
+  button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: not-allowed;
+           border: 1px solid var(--border); background: var(--card); color: var(--muted); position: relative; }
+  button.primary { border-color: var(--accent); color: var(--accent); }
+  button[data-tip]:hover::after, button[data-tip]:focus-visible::after {
+    content: attr(data-tip); position: absolute; z-index: 10; left: 0; bottom: calc(100% + 6px);
+    width: max-content; max-width: 280px; white-space: pre-line; text-align: left;
+    background: var(--tip-bg); color: var(--tip-text); padding: 6px 8px; border-radius: 6px;
+    font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none;
+  }
+  .top button[data-tip]:hover::after, .top button[data-tip]:focus-visible::after {
+    left: auto; right: 0; bottom: auto; top: calc(100% + 6px);
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>Kanban</h1>
+    <span class="meta" id="meta">no board data — render this template with the opensprint-kanban skill</span>
+    <div class="actions">
+      <button type="button" aria-disabled="true" id="refresh">Refresh</button>
+      <button type="button" aria-disabled="true" class="primary" id="add">+ Backlog an item</button>
+    </div>
+  </div>
+  <main class="board" id="board"></main>
+
+<!-- opensprint:cards -->
+
+<script>
+(() => {
+  // Columns follow the initiative state machine; a card's column follows from its state.
+  const COLUMNS = [
+    { title: 'Backlog', states: ['exploring'] },
+    { title: 'Planning', states: ['proposed'] },
+    { title: 'Dev', states: ['building'] },
+    { title: 'Attestation', states: ['ready-for-attestation', 'attested'] },
+    { title: 'Done', states: ['completed', 'declined'] },
+  ];
+  // States where a card must name an owner.
+  const OWNED = ['building', 'ready-for-attestation', 'attested'];
+  const NOT_WIRED = 'Not wired up in this proof of concept.';
+
+  // The tool each button would run, by state.
+  const ACTIONS = {
+    exploring: [
+      { label: 'Claim', primary: true, run: (id) => `opensprint kanban claim ${id}`, what: 'take the card; it moves to Planning' },
+    ],
+    proposed: [
+      { label: 'Start building', primary: true, run: (id) => `opensprint kanban advance ${id} --to building`, what: 'Planning → Dev' },
+      { label: 'Claim', run: (id) => `opensprint kanban claim ${id}`, what: 'name yourself as owner' },
+    ],
+    building: [
+      { label: 'Ready for attestation', primary: true, run: (id) => `opensprint kanban ready ${id}`, what: 'Dev → Attestation; usually automatic once milestones complete' },
+      { label: 'Back to planning', run: (id) => `opensprint kanban advance ${id} --to proposed`, what: 'Dev → Planning' },
+    ],
+    'ready-for-attestation': [
+      { label: 'Complete', primary: true, run: (id) => `opensprint kanban complete ${id}`, what: 'attest and archive, together; → Done' },
+      { label: 'Request a change', run: (id) => `opensprint kanban advance ${id} --to building`, what: 'Attestation → Dev' },
+    ],
+    attested: [
+      { label: 'Complete', primary: true, run: (id) => `opensprint kanban complete ${id}`, what: 'archive; → Done' },
+    ],
+  };
+
+  const decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.trim()), (c) => c.charCodeAt(0)));
+
+  function parseCard(text) {
+    const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+    const card = { history: [] };
+    if (!match) return null;
+    for (const line of match[1].split(/\r?\n/)) {
+      const kv = line.match(/^([a-z-]+):\s?(.*)$/);
+      if (kv) card[kv[1]] = kv[2].trim();
+    }
+    const [summary = '', history = ''] = match[2].split(/^## History\s*$/m);
+    card.summary = summary.trim();
+    card.history = history.split(/\r?\n/).map((l) => l.replace(/^- /, '').trim()).filter(Boolean);
+    return card.id ? card : null;
+  }
+
+  function el(tag, attrs = {}, ...children) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k === 'class') node.className = v;
+      else node.setAttribute(k, v);
+    }
+    for (const child of children.flat()) {
+      if (child === null || child === undefined || child === false) continue;
+      node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+    }
+    return node;
+  }
+
+  // The little Markdown a summary carries: `code`, **bold**, [[record]] — built as nodes, never as HTML.
+  function inline(text) {
+    const out = [];
+    const re = /`([^`]+)`|\*\*([^*]+)\*\*|\[\[([A-Za-z0-9-]+)\]\]/g;
+    let last = 0;
+    for (let m; (m = re.exec(text)); ) {
+      out.push(text.slice(last, m.index));
+      if (m[1] !== undefined) out.push(el('code', {}, m[1]));
+      else if (m[2] !== undefined) out.push(el('strong', {}, m[2]));
+      else out.push(el('code', {}, m[3]));
+      last = re.lastIndex;
+    }
+    out.push(text.slice(last));
+    return out;
+  }
+
+  const placeholder = (label, run, what, primary) =>
+    el('button', { type: 'button', 'aria-disabled': 'true', class: primary ? 'primary' : null,
+                   'data-tip': `Would run:\n${run}\n${what}\n\n${NOT_WIRED}` }, label);
+
+  function renderCard(card) {
+    const ownerChip = card.owner
+      ? el('span', { class: 'owner' }, card.owner)
+      : el('span', { class: OWNED.includes(card.state) ? 'owner none missing' : 'owner none' },
+           OWNED.includes(card.state) ? 'no owner' : 'unowned');
+    const actions = (ACTIONS[card.state] || []).map((a) => placeholder(a.label, a.run(card.id), a.what, a.primary));
+    return el('article', { class: 'card' },
+      el('header', {}, el('h3', {}, card.title || card.id), ownerChip),
+      card.summary ? el('p', { class: 'summary' }, inline(card.summary)) : null,
+      el('dl', {},
+        el('div', {}, el('dt', {}, 'id'), el('dd', {}, el('code', {}, card.id))),
+        el('div', {}, el('dt', {}, 'state'), el('dd', {}, card.state || '—')),
+        el('div', {}, el('dt', {}, 'branch'), el('dd', {}, el('code', {}, card.branch || '—'))),
+        el('div', {}, el('dt', {}, 'updated'), el('dd', {}, (card.updated || '—').replace('T', ' ').replace('Z', ' UTC')))),
+      card.history.length
+        ? el('details', {}, el('summary', {}, `History (${card.history.length})`),
+             el('ol', {}, card.history.map((h) => el('li', {}, h))))
+        : null,
+      actions.length ? el('div', { class: 'buttons' }, actions) : null);
+  }
+
+  const cards = [...document.querySelectorAll('script.card')]
+    .map((s) => { try { return parseCard(decode(s.textContent)); } catch { return null; } })
+    .filter(Boolean)
+    .sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
+
+  const board = document.getElementById('board');
+  for (const column of COLUMNS) {
+    const inColumn = cards.filter((c) => column.states.includes(c.state));
+    board.append(el('section', { class: 'column' },
+      el('h2', {}, column.title, el('span', {}, String(inColumn.length))),
+      inColumn.length ? inColumn.map(renderCard) : el('p', { class: 'empty' }, 'Nothing here.')));
+  }
+
+  const meta = document.getElementById('board-meta');
+  if (meta) {
+    const [ref, sha, at] = meta.textContent.trim().split(/\s+/);
+    const metaLine = document.getElementById('meta');
+    metaLine.replaceChildren(`${ref} @ `, el('code', {}, sha || '?'),
+      ` · ${cards.length} card(s) · read ${(at || '').replace('T', ' ').replace('Z', ' UTC')}`);
+  }
+
+  document.getElementById('refresh').dataset.tip =
+    'Would run: the opensprint-kanban render playbook\n(git fetch origin kanban, then fill this template again)\n\n' + NOT_WIRED;
+  document.getElementById('add').dataset.tip =
+    'Would run:\nopensprint kanban backlog <id> --title … --summary …\nadds a card to Backlog\n\n' + NOT_WIRED;
+})();
+</script>
+</body>
+</html>
