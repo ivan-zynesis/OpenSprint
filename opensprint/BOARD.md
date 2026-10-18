@@ -13,15 +13,15 @@ this file.
 
 Ideas captured, not yet triaged.
 
-| Initiative | State | Owner | Milestones | Next |
-|---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | exploring | — | — | — |
+_Empty._
 
 ## Next
 
 Proposed — a bar is set, no work started.
 
-_Empty._
+| Initiative | State | Owner | Milestones | Next |
+|---|---|---|---|---|
+| [kanban](initiatives/20261018-kanban.md) | proposed | — | 0/6 | board-store |
 
 ## Doing
 
