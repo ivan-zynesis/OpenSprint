@@ -10,23 +10,28 @@
   The page needs no server and loads nothing. The agent fills it by
   replacing the opensprint:cards marker below with:
 
-    <script type="text/plain" id="board-meta">REF SHA READ-AT</script>
+    <script type="text/plain" id="board-meta">BASE64 OF key=value LINES</script>
+        keys: ref, sha, at, repo, main, parent
     <script type="text/plain" class="card">BASE64 OF ONE cards/<id>.md</script>   (one per card)
 
-  Base64 keeps any card text from breaking the page; the script below decodes
-  it as UTF-8 and parses the frontmatter itself.
+  Base64 keeps any text from breaking the page; the script below decodes it as
+  UTF-8 and parses the frontmatter itself.
+
+  A button never moves a card. It copies the command that starts a fresh agent
+  session, in the card's worktree, running the workflow that owns that move —
+  the workflow loads its hat's context and moves the card when its work is done.
 -->
 <style>
   :root {
     --bg: #f6f7f9; --panel: #eceef2; --card: #ffffff; --text: #1d2027; --muted: #5f6775;
-    --border: #d9dde4; --accent: #3b5bdb; --accent-bg: #e7ecff; --warn: #b3261e;
-    --code-bg: #f1f3f6; --tip-bg: #1d2027; --tip-text: #f6f7f9;
+    --border: #cfd4dc; --accent: #3b5bdb; --accent-bg: #e7ecff; --back: #8a5a00; --back-bg: #fff4e0;
+    --warn: #b3261e; --code-bg: #f1f3f6; --tip-bg: #1d2027; --tip-text: #f6f7f9;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #14161a; --panel: #1c1f25; --card: #242830; --text: #e6e8ec; --muted: #9aa1ad;
-      --border: #333844; --accent: #8ca2ff; --accent-bg: #2a3352; --warn: #ff8a80;
-      --code-bg: #1b1e24; --tip-bg: #e6e8ec; --tip-text: #14161a;
+      --border: #454b58; --accent: #8ca2ff; --accent-bg: #2a3352; --back: #f0b45a; --back-bg: #3a2e1a;
+      --warn: #ff8a80; --code-bg: #1b1e24; --tip-bg: #e6e8ec; --tip-text: #14161a;
     }
   }
   * { box-sizing: border-box; }
@@ -40,6 +45,7 @@
   .top h1 { margin: 0; font-size: 18px; }
   .meta { color: var(--muted); font-size: 12px; }
   .actions { margin-left: auto; display: flex; gap: 8px; }
+  .legend { width: 100%; color: var(--muted); font-size: 12px; }
 
   .board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; padding: 16px; }
   @media (max-width: 1100px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -53,10 +59,12 @@
           padding: 10px 12px; margin-bottom: 10px; }
   .card header { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
   .card h3 { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
-  .owner { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  .owner { flex: 0 1 auto; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+           font-size: 11px; padding: 2px 8px; border-radius: 999px;
            background: var(--accent-bg); color: var(--accent); }
+  .card h3 { flex: 1 1 auto; min-width: 0; }
   .owner.none { background: transparent; color: var(--muted); border: 1px dashed var(--border); }
-  .owner.missing { color: var(--warn); border-color: var(--warn); }
+  .owner.missing { color: var(--warn); border-color: var(--warn); flex: none; max-width: none; }
   .summary { margin: 8px 0; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 4;
              -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
   .summary strong { color: var(--text); }
@@ -67,22 +75,35 @@
   details { margin-top: 8px; font-size: 12px; color: var(--muted); }
   details summary { cursor: pointer; }
   details ol { margin: 6px 0 0; padding-left: 18px; }
-  .card .buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px;
-                   border-top: 1px dashed var(--border); }
 
-  /* Buttons are placeholders: aria-disabled keeps them hoverable for the tooltip. */
-  button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: not-allowed;
-           border: 1px solid var(--border); background: var(--card); color: var(--muted); position: relative; }
-  button.primary { border-color: var(--accent); color: var(--accent); }
+  /* Moves: backward on the left, staying put in the middle, forward on the right. */
+  .moves { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px;
+           border-top: 1px dashed var(--border); }
+  .moves .back, .moves .stay, .moves .forward { display: flex; flex-wrap: wrap; gap: 6px; }
+  .moves .forward { margin-left: auto; }
+
+  button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer;
+           border: 1px solid var(--border); background: var(--card); color: var(--text); position: relative; }
+  button:hover { border-color: var(--accent); }
+  button.forward { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  button.back { border-color: var(--back); color: var(--back); background: var(--back-bg); }
   button[data-tip]:hover::after, button[data-tip]:focus-visible::after {
     content: attr(data-tip); position: absolute; z-index: 10; left: 0; bottom: calc(100% + 6px);
-    width: max-content; max-width: 280px; white-space: pre-line; text-align: left;
-    background: var(--tip-bg); color: var(--tip-text); padding: 6px 8px; border-radius: 6px;
-    font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none;
+    width: max-content; max-width: 300px; white-space: pre-line; text-align: left;
+    background: var(--tip-bg); color: var(--tip-text); padding: 7px 9px; border-radius: 6px;
+    font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none;
   }
+  .moves .forward button[data-tip]:hover::after, .moves .forward button[data-tip]:focus-visible::after { left: auto; right: 0; }
   .top button[data-tip]:hover::after, .top button[data-tip]:focus-visible::after {
     left: auto; right: 0; bottom: auto; top: calc(100% + 6px);
   }
+
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 20;
+           max-width: min(640px, calc(100% - 32px)); background: var(--tip-bg); color: var(--tip-text);
+           padding: 10px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .15s;
+           pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .toast code { background: transparent; color: inherit; padding: 0; }
 </style>
 </head>
 <body>
@@ -90,11 +111,14 @@
     <h1>Kanban</h1>
     <span class="meta" id="meta">no board data — render this template with the opensprint-kanban skill</span>
     <div class="actions">
-      <button type="button" aria-disabled="true" id="refresh">Refresh</button>
-      <button type="button" aria-disabled="true" class="primary" id="add">+ Backlog an item</button>
+      <button type="button" id="refresh">Refresh</button>
+      <button type="button" class="forward" id="add">+ Backlog an item</button>
     </div>
+    <div class="legend">A button copies the command that starts a fresh agent session in the card's worktree,
+      running the workflow that owns that move. Paste it into a terminal. Nothing moves until that workflow finishes its work.</div>
   </div>
   <main class="board" id="board"></main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- opensprint:cards -->
 
@@ -108,38 +132,78 @@
     { title: 'Attestation', states: ['ready-for-attestation', 'attested'] },
     { title: 'Done', states: ['completed', 'declined'] },
   ];
-  // States where a card must name an owner.
   const OWNED = ['building', 'ready-for-attestation', 'attested'];
-  const NOT_WIRED = 'Not wired up in this proof of concept.';
 
-  // The tool each button would run, by state.
-  const ACTIONS = {
+  // Every move a card may make, and the workflow and hat that own it — the
+  // TRANSITIONS table in src/core/initiative-transitions.ts. `stay` is work
+  // that happens in place: the workflow moves the card itself when it is done.
+  const MOVES = {
     exploring: [
-      { label: 'Claim', primary: true, run: (id) => `opensprint kanban claim ${id}`, what: 'take the card; it moves to Planning' },
+      { dir: 'back', label: 'Decline', workflow: 'triage', hat: 'product · maintainer', to: 'declined',
+        when: 'the idea is dropped, with the reason recorded' },
+      { dir: 'stay', label: 'Triage', workflow: 'triage', hat: 'product · maintainer',
+        when: 'pick it up: claim it, brainstorm the strategy' },
+      { dir: 'forward', label: 'Propose', workflow: 'propose', hat: 'product · maintainer · dev · devops', to: 'proposed',
+        when: 'the driver-specs, ADRs, milestones and the bar are written' },
     ],
     proposed: [
-      { label: 'Start building', primary: true, run: (id) => `opensprint kanban advance ${id} --to building`, what: 'Planning → Dev' },
-      { label: 'Claim', run: (id) => `opensprint kanban claim ${id}`, what: 'name yourself as owner' },
+      { dir: 'forward', label: 'Apply', workflow: 'apply', hat: 'dev · devops', to: 'building',
+        when: 'the first milestone starts' },
     ],
     building: [
-      { label: 'Ready for attestation', primary: true, run: (id) => `opensprint kanban ready ${id}`, what: 'Dev → Attestation; usually automatic once milestones complete' },
-      { label: 'Back to planning', run: (id) => `opensprint kanban advance ${id} --to proposed`, what: 'Dev → Planning' },
+      { dir: 'back', label: 'Reexplore', workflow: 'reexplore', hat: 'product · maintainer', to: 'exploring',
+        when: 'the goal itself is in question' },
+      { dir: 'back', label: 'Repropose', workflow: 'repropose', hat: 'product · maintainer', to: 'proposed',
+        when: 'the goal holds; what was decided about reaching it does not' },
+      { dir: 'stay', label: 'Continue', workflow: 'apply', hat: 'dev · devops', to: 'ready-for-attestation',
+        when: 'the next milestone; moves to Attestation by itself once the last one closes' },
     ],
     'ready-for-attestation': [
-      { label: 'Complete', primary: true, run: (id) => `opensprint kanban complete ${id}`, what: 'attest and archive, together; → Done' },
-      { label: 'Request a change', run: (id) => `opensprint kanban advance ${id} --to building`, what: 'Attestation → Dev' },
+      { dir: 'back', label: 'Reexplore', workflow: 'reexplore', hat: 'product · maintainer', to: 'exploring',
+        when: 'the goal no longer holds' },
+      { dir: 'back', label: 'Repropose', workflow: 'repropose', hat: 'product · maintainer', to: 'proposed',
+        when: 'the strategy must be restated, and its measures with it' },
+      { dir: 'back', label: 'Request a change', workflow: 'attest', hat: 'product · maintainer', to: 'building',
+        when: 'everything holds; the work was not finished' },
+      { dir: 'forward', label: 'Attest', workflow: 'attest', hat: 'product · maintainer', to: 'attested',
+        when: 'every bar carries a posture, and the change questions are answered' },
     ],
     attested: [
-      { label: 'Complete', primary: true, run: (id) => `opensprint kanban complete ${id}`, what: 'archive; → Done' },
+      { dir: 'forward', label: 'Archive', workflow: 'archive', hat: 'product · maintainer · dev · devops', to: 'completed',
+        when: 'the views are compiled and the branch merges' },
+    ],
+    declined: [
+      { dir: 'back', label: 'Revive', workflow: 'triage', hat: 'product · maintainer', to: 'exploring',
+        when: 'a declined idea is revived, keeping its history' },
     ],
   };
 
+  // How the agent is started. One entry per harness; the board only needs to
+  // know how to start a session with a prompt, and what a workflow is called
+  // there. Claude Code: `claude "<prompt>"` starts an interactive session with
+  // the prompt already sent, and the generated commands are /opsp:opsp-<name>.
+  const HARNESS = {
+    name: 'Claude Code',
+    start: (prompt) => `claude ${shellQuote(prompt)}`,
+    invoke: (workflow, id) => `/opsp:opsp-${workflow}${id ? ` ${id}` : ''}`,
+  };
+
+  const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
   const decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.trim()), (c) => c.charCodeAt(0)));
+
+  function parseKeyValues(text) {
+    const out = {};
+    for (const line of text.split(/\r?\n/)) {
+      const i = line.indexOf('=');
+      if (i > 0) out[line.slice(0, i)] = line.slice(i + 1);
+    }
+    return out;
+  }
 
   function parseCard(text) {
     const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-    const card = { history: [] };
     if (!match) return null;
+    const card = { history: [] };
     for (const line of match[1].split(/\r?\n/)) {
       const kv = line.match(/^([a-z-]+):\s?(.*)$/);
       if (kv) card[kv[1]] = kv[2].trim();
@@ -155,6 +219,7 @@
     for (const [k, v] of Object.entries(attrs)) {
       if (v === undefined || v === null || v === false) continue;
       if (k === 'class') node.className = v;
+      else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
       else node.setAttribute(k, v);
     }
     for (const child of children.flat()) {
@@ -171,25 +236,83 @@
     let last = 0;
     for (let m; (m = re.exec(text)); ) {
       out.push(text.slice(last, m.index));
-      if (m[1] !== undefined) out.push(el('code', {}, m[1]));
-      else if (m[2] !== undefined) out.push(el('strong', {}, m[2]));
-      else out.push(el('code', {}, m[3]));
+      out.push(m[2] !== undefined ? el('strong', {}, m[2]) : el('code', {}, m[1] ?? m[3]));
       last = re.lastIndex;
     }
     out.push(text.slice(last));
     return out;
   }
 
-  const placeholder = (label, run, what, primary) =>
-    el('button', { type: 'button', 'aria-disabled': 'true', class: primary ? 'primary' : null,
-                   'data-tip': `Would run:\n${run}\n${what}\n\n${NOT_WIRED}` }, label);
+  const metaNode = document.getElementById('board-meta');
+  const META = metaNode ? parseKeyValues(decode(metaNode.textContent)) : {};
+
+  /** The commands that open the card's worktree — or make it — and start the workflow there. */
+  function launchScript(card, move) {
+    const branch = card.branch || `opsp/${card.id}`;
+    const fallback = `${META.parent || '..'}/${META.repo || 'repo'}-opsp-${card.id}`;
+    const pattern = `refs/heads/${branch}`.replace(/\//g, '\\/');
+    return [
+      `cd ${shellQuote(META.main || '.')} && git fetch -q origin`,
+      `WT=$(git worktree list --porcelain | awk '/^worktree /{w=substr($0,10)} /^branch ${pattern}$/{print w}')`,
+      `[ -n "$WT" ] || { WT=${shellQuote(fallback)}; git worktree add -q "$WT" ${branch} 2>/dev/null || git worktree add -q "$WT" -b ${branch} origin/${branch}; }`,
+      `cd "$WT" && ${HARNESS.start(HARNESS.invoke(move.workflow, card.id))}`,
+    ].join('\n');
+  }
+
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function say(...parts) {
+    toast.replaceChildren(...parts);
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 4500);
+  }
+
+  async function copy(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const area = el('textarea', { style: 'position:fixed;opacity:0' });
+      area.value = text;
+      document.body.append(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      area.remove();
+      return ok;
+    }
+  }
+
+  function moveButton(card, move) {
+    const arrow = move.dir === 'back' ? '← ' : '';
+    const arrowAfter = move.dir === 'forward' ? ' →' : '';
+    const edge = move.to ? `${card.state} → ${move.to}` : `${card.state} (stays)`;
+    const tip = [
+      `${HARNESS.invoke(move.workflow, card.id)}`,
+      `hat: ${move.hat}`,
+      `move: ${edge}`,
+      `when: ${move.when}`,
+      '',
+      `click: copy the command that opens a fresh ${HARNESS.name} session in this card's worktree`,
+    ].join('\n');
+    return el('button', {
+      type: 'button', class: move.dir, 'data-tip': tip,
+      onclick: async () => {
+        const ok = await copy(launchScript(card, move));
+        say(ok ? 'Copied — paste into a terminal to start ' : 'Could not copy. The command is ',
+            el('code', {}, HARNESS.invoke(move.workflow, card.id)),
+            ` in ${card.id}'s worktree, wearing ${move.hat}.`);
+      },
+    }, `${arrow}${move.label}${arrowAfter}`);
+  }
 
   function renderCard(card) {
     const ownerChip = card.owner
-      ? el('span', { class: 'owner' }, card.owner)
+      ? el('span', { class: 'owner', title: card.owner }, card.owner)
       : el('span', { class: OWNED.includes(card.state) ? 'owner none missing' : 'owner none' },
            OWNED.includes(card.state) ? 'no owner' : 'unowned');
-    const actions = (ACTIONS[card.state] || []).map((a) => placeholder(a.label, a.run(card.id), a.what, a.primary));
+    const moves = MOVES[card.state] || [];
+    const group = (dir) => el('div', { class: dir }, moves.filter((m) => m.dir === dir).map((m) => moveButton(card, m)));
     return el('article', { class: 'card' },
       el('header', {}, el('h3', {}, card.title || card.id), ownerChip),
       card.summary ? el('p', { class: 'summary' }, inline(card.summary)) : null,
@@ -202,7 +325,7 @@
         ? el('details', {}, el('summary', {}, `History (${card.history.length})`),
              el('ol', {}, card.history.map((h) => el('li', {}, h))))
         : null,
-      actions.length ? el('div', { class: 'buttons' }, actions) : null);
+      moves.length ? el('div', { class: 'moves' }, group('back'), group('stay'), group('forward')) : null);
   }
 
   const cards = [...document.querySelectorAll('script.card')]
@@ -218,18 +341,26 @@
       inColumn.length ? inColumn.map(renderCard) : el('p', { class: 'empty' }, 'Nothing here.')));
   }
 
-  const meta = document.getElementById('board-meta');
-  if (meta) {
-    const [ref, sha, at] = meta.textContent.trim().split(/\s+/);
-    const metaLine = document.getElementById('meta');
-    metaLine.replaceChildren(`${ref} @ `, el('code', {}, sha || '?'),
-      ` · ${cards.length} card(s) · read ${(at || '').replace('T', ' ').replace('Z', ' UTC')}`);
+  if (META.ref) {
+    document.getElementById('meta').replaceChildren(`${META.ref} @ `, el('code', {}, META.sha || '?'),
+      ` · ${cards.length} card(s) · read ${(META.at || '').replace('T', ' ').replace('Z', ' UTC')}`);
   }
 
-  document.getElementById('refresh').dataset.tip =
-    'Would run: the opensprint-kanban render playbook\n(git fetch origin kanban, then fill this template again)\n\n' + NOT_WIRED;
-  document.getElementById('add').dataset.tip =
-    'Would run:\nopensprint kanban backlog <id> --title … --summary …\nadds a card to Backlog\n\n' + NOT_WIRED;
+  // Header actions: backlog starts in the main checkout — the workflow makes the item's own branch.
+  const add = document.getElementById('add');
+  const backlogPrompt = HARNESS.invoke('backlog');
+  add.dataset.tip = `${backlogPrompt}\nhat: product · maintainer\nmove: → exploring\n\nclick: copy the command that opens a fresh ${HARNESS.name} session in the main checkout`;
+  add.addEventListener('click', async () => {
+    const ok = await copy(`cd ${shellQuote(META.main || '.')} && ${HARNESS.start(backlogPrompt)}`);
+    say(ok ? 'Copied — paste into a terminal to start ' : 'Could not copy. The command is ', el('code', {}, backlogPrompt), '.');
+  });
+  const refresh = document.getElementById('refresh');
+  const refreshPrompt = 'Render the kanban board with the opensprint-kanban skill';
+  refresh.dataset.tip = `re-run the render playbook (git fetch, fill this template)\n\nclick: copy the command that asks ${HARNESS.name} to do it`;
+  refresh.addEventListener('click', async () => {
+    const ok = await copy(`cd ${shellQuote(META.main || '.')} && ${HARNESS.start(refreshPrompt)}`);
+    say(ok ? 'Copied — paste into a terminal to re-render the board.' : 'Could not copy.');
+  });
 })();
 </script>
 </body>
