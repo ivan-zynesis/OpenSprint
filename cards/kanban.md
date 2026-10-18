@@ -1,10 +1,10 @@
 ---
 id: kanban
 title: kanban
-state: proposed
+state: building
 owner: Ivan Lee
 created: 2026-10-18
-updated: 2026-10-18T06:38:55Z
+updated: 2026-10-18T06:39:05Z
 branch: opsp/kanban
 ---
 
@@ -15,3 +15,4 @@ branch: opsp/kanban
 - 2026-10-18T06:38:46Z  imported at exploring from opensprint/initiatives/20261018-kanban.md  by Ivan Lee
 - 2026-10-18T06:38:55Z  owner unowned → Ivan Lee  by Ivan Lee
 - 2026-10-18T06:38:55Z  exploring → proposed  by Ivan Lee — picked up
+- 2026-10-18T06:39:05Z  proposed → building  by Ivan Lee — proof of concept started on opsp/kanban
