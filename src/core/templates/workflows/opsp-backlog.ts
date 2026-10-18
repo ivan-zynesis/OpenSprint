@@ -96,6 +96,23 @@ worth riding, an operation worth optimising, an open loop the last compile
 reported.>
 \`\`\`
 
+Then commit it on the item's branch and put it on the board — \`opensprint compact board
+--all-branches\` reads committed branches, so an uncommitted item is on nobody's board:
+
+\`\`\`bash
+git add opensprint/initiatives/
+git commit -m "backlog: <initiative-name>"
+opensprint compact board
+git add opensprint/BOARD.md
+git commit --amend --no-edit
+\`\`\`
+
+Regenerate the board **after** the first commit. Until the branch has a commit of its own, git
+cannot tell it from a branch that already merged, and the board would report the item as landed.
+
+Offer to push the branch (\`git push -u origin opsp/<initiative-name>\`). Until it is pushed,
+nobody else can see the item.
+
 **Driver-specs and ADRs are not written here.** They are \`/opsp:propose\`'s output, and a premature
 record is a false claim that something later will depend on. An initiative claims nothing — it
 records that someone is thinking about something, which is both true and useful.
@@ -133,6 +150,8 @@ Picked up later with /opsp:triage.
 - **Never on \`main\`.** Create or switch to the initiative's worktree first.
 - **Never interview.** One question at most, then write.
 - **Never advance it.** \`state: exploring\` is where this leaves it.
+- **Leave it unowned.** Filing an idea is not committing to build it; whoever picks it up at
+  \`/opsp:triage\` takes the card.
 - **Dying here is fine.** Most backlog items are never picked up; \`/opsp:triage\` can decline it, and
   why it was declined is worth more than the idea.
 `;

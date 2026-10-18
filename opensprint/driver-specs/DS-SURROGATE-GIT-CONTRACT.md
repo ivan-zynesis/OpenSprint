@@ -70,6 +70,9 @@ unit-tested with injected state and wired into no check. **Hygiene** is instruct
 
 Re-reviewed against `a018238`: unchanged. The state machine adds a transition rule, not a merge gate — no new test touches git, a pull request or CI. `opensprint advance --to attested` succeeds on an initiative with no `## Attestation` and no posture (`test/cli-e2e/advance.test.ts`), and an initiative with no state may move straight to `completed` (`test/core/initiative-transitions.test.ts`), so the state the documentation recommends gating on can be reached without attesting.
 
+Re-reviewed against `634670f` on 2026-10-18, by Claude Opus 5.5 for Ivan Lee: unchanged. The range
+adds owners and a cross-branch board; no test in it touches a merge gate, a pull request or CI.
+
 ### Exposure
 
 An `opsp/*` branch can merge to `main` unattested, this one included. The CI snippet in

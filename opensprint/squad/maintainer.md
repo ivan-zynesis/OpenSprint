@@ -189,6 +189,13 @@ one initiative, one branch, one pull request, attested before main     (DS-SURRO
     opportunity: planning on main
     threat:      cross-branch listing proves unsolvable — mitigated by moving the backlog alone to
                  main, splitting the decision; the signal is a stakeholder who cannot see candidates
+  → DEC-BOARD-ALL-BRANCHES (dev)   the cross-branch board is printed on demand, never committed
+    strength:    any checkout sees every initiative after a fetch; the committed board stays
+                 deterministic and `compact check` meaningful; the one-branch initiative is kept
+    weakness:    a stakeholder reading BOARD.md still sees one branch — they must run the command
+    opportunity: commit a board aggregating every branch; the backlog on main
+    threat:      stakeholders reading BOARD.md routinely miss other branches' work, or teams stop
+                 fetching opsp/* refs and the printed board is stale by construction
   → DEC-030 (dev, devops)   rebase, attest, archive, merge — one PR, gated on state consistency
     strength:    dangling initiatives prevented by the gate; derived artifacts correct on arrival
     weakness:    the branch must be current before closing
@@ -224,8 +231,9 @@ and `docs/git-workflow.md` recommends a state-is-attested check that no command 
 half is unit-tested with injected state and wired into no check. **Hygiene** is instruction text only.
 Re-reviewed against `a018238`: unchanged — `opensprint advance --to attested` succeeds on an
 initiative with no `## Attestation` and no posture (`test/cli-e2e/advance.test.ts`), and an initiative
-with no state may move straight to `completed` (`test/core/initiative-transitions.test.ts`)
-(`DS-SURROGATE-GIT-CONTRACT`).
+with no state may move straight to `completed` (`test/core/initiative-transitions.test.ts`). Re-reviewed
+again against `634670f` on 2026-10-18: unchanged — that range adds owners and a cross-branch board,
+and no test in it touches a merge gate, a pull request or CI (`DS-SURROGATE-GIT-CONTRACT`).
 
 So the gate `DEC-030` decides is, per this attestation, not wired anywhere. Exposure as recorded: an
 `opsp/*` branch can merge to `main` unattested, this one included, and the CI snippet in
@@ -234,7 +242,10 @@ loop kinds (`DS-SURROGATE-GIT-CONTRACT`).
 
 The record names its own deliberate cost: no branch can see every backlog item, which breaks the one
 interaction non-technical stakeholders have — an agent reading the compiled board for them
-(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`).
+(`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`, `DEC-029`). That cost is now answered by a
+printed cross-branch board, read from committed work only and never written to `BOARD.md`
+(`DEC-BOARD-ALL-BRANCHES`), and attested under its own goal (`DS-BOARD-VISIBILITY`). The record
+itself has not been revised, and the committed board still shows one branch.
 
 ### Attestation reviews the implementation against the stated strategy
 

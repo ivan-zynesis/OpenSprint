@@ -1,13 +1,14 @@
 # Architecture
 
-> **How to read this document.** It is compiled from 26 active driver-specs and 56 active ADRs
-> (60 ADR files, four of them superseded). Every claim cites the record it derives from, inline.
+> **How to read this document.** It is compiled from 27 active driver-specs and 58 active ADRs
+> (62 ADR files, four of them superseded). Every claim cites the record it derives from, inline.
 >
-> **One record is attested.** Fourteen driver-specs carry a `### Posture` verdict. Thirteen were
+> **Two records are attested.** Fifteen driver-specs carry a `### Posture` verdict. Thirteen were
 > recorded on 2026-10-11 by Ivan Lee: ten **partially met**, two **cannot assess**, one **not met**,
-> and none **met**; none of them carries evidence, so none is `attested`. `DS-SURROGATE-BUDGET` was
-> recorded **partially met** on 2026-10-18 with evidence, which makes it the one `attested` record.
-> No sentence below is a present-tense claim about how the running system behaves. A sentence citing a record id states what was **decided** (`DEC-021`,
+> and none **met**; none of them carries evidence, so none is `attested`. On 2026-10-18,
+> `DS-SURROGATE-BUDGET` was recorded **partially met** and `DS-BOARD-VISIBILITY` **met**, both with
+> evidence, which makes them the two `attested` records. Apart from what `DS-BOARD-VISIBILITY`'s
+> evidence asserts, no sentence below is a present-tense claim about how the running system behaves. A sentence citing a record id states what was **decided** (`DEC-021`,
 > `DS-ATTESTED-TRUTH`). Where a record carries a posture, that posture is given next to the decision,
 > because the gap between the two is the information.
 
@@ -68,6 +69,7 @@ are taken from each record. "—" means the record carries no `### Posture` verd
 | `DS-DOCUMENTATION-AS-OUTPUT` | the compacted surrogate *is* the documentation; no second effort | — |
 | `DS-SURROGATE-BUDGET` | loading the surrogate must not consume the session budget; a compacted second tier of progressive discovery | **partially met** |
 | `DS-ATTESTED-TRUTH` | a compiled claim is present-tense only when a human asserted it with evidence | **partially met** |
+| `DS-BOARD-VISIBILITY` | every initiative is visible from any checkout, and work in flight names its owner | **met** |
 
 ### Posture
 
@@ -256,6 +258,14 @@ are cited.
 - **Planning happens in the initiative's worktree**, which the planning tools create themselves.
   The cost, stated as unsolved, is that no branch sees every backlog item (`DEC-029`,
   `DS-SURROGATE-GIT-CONTRACT`).
+- **Every branch's cards, printed on demand.** `compact board --all-branches` reads the card each
+  local and remote-tracking `opsp/<id>` branch carries from committed trees and writes nothing; the
+  committed `BOARD.md` is decided to show the checkout alone, so it stays deterministic
+  (`DEC-BOARD-ALL-BRANCHES`, `DS-BOARD-VISIBILITY`). *Posture:* `DS-BOARD-VISIBILITY` is **met** and
+  attested on 2026-10-18.
+- **Initiatives name an owner.** An optional `owner:` is written by `opensprint claim`, which never
+  moves the state; triage and apply claim at pick-up, backlog never does, and a card in flight with no
+  owner is reported `owner-undeclared` (`DEC-INITIATIVE-OWNER`, `DS-BOARD-VISIBILITY`).
 - **Closing order.** The order is rebase, attest, archive, merge, as one PR. The PR is gated on
   state consistency, never on whether a bar was met, and a derived-artifact conflict is resolved by
   recompiling (`DEC-030`, reconciled with `DEC-023`).
@@ -328,7 +338,9 @@ These conflicts are reported, not resolved. Resolving any of them is a record ch
   their hats.
 - **Stakeholder entry point.** `DS-HATS-AS-CONTEXT` requires that a stakeholder without repository
   access can file a backlog item. `DEC-029` has `/opsp:backlog` create a worktree. `DEC-029` and
-  `DS-SURROGATE-GIT-CONTRACT` both record this as unsolved.
+  `DS-SURROGATE-GIT-CONTRACT` both record the related cost — no branch sees every backlog item — as
+  unsolved; `DEC-BOARD-ALL-BRANCHES` now answers reading across branches, but filing without
+  repository access is still contradicted.
 - **Status vocabulary.** `DEC-ATTEST-CHANGE-FRAME`, `DEC-BAR-AT-PROPOSE`, `DEC-ESCALATION-LADDER`,
   `DEC-HAT-HANDOFFS`, `DEC-REEXPLORE-NAME` and `DEC-STATE-MACHINE` carry `status: accepted`. Every
   other live record carries `status: active`.

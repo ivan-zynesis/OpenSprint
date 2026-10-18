@@ -49,7 +49,7 @@ Two paths reach here, and both are valid (\`DEC-034\`):
 written at backlog time and are not yours to rewrite.
 
 \`\`\`bash
-opensprint compact board          # the Backlog column lists them
+opensprint compact board --all-branches   # the Backlog column, on every branch
 git branch --show-current       # be on opsp/<initiative> before writing
 \`\`\`
 

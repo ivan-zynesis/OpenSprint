@@ -73,8 +73,9 @@ re-run without a model, while condensing prose stays in a skill (`DEC-022`). Tha
 `src/core/board.ts`, `src/cli/index.ts`) — the single compile engine behind every compiled artifact (`DEC-014`), with
 `check` decided to fail CI on anything not fresh (`DEC-010`). Where a record found that prose was
 not enough, the stack gained a command rather than an instruction: initiative state moves through
-`opensprint advance` (`DEC-STATE-MACHINE`; `src/commands/advance.ts`), and attest's change frame is
-resolved by `opensprint frame` (`DEC-ATTEST-CHANGE-FRAME`; `src/commands/frame.ts`).
+`opensprint advance` (`DEC-STATE-MACHINE`; `src/commands/advance.ts`), who holds a card through
+`opensprint claim` (`DEC-INITIATIVE-OWNER`; `src/commands/claim.ts`), and attest's change frame is resolved by
+`opensprint frame` (`DEC-ATTEST-CHANGE-FRAME`; `src/commands/frame.ts`).
 
 ## Runtime Topology
 
@@ -98,7 +99,7 @@ skill files, the `opensprint` CLI it calls, and a git worktree holding `openspri
   ┌──────────────────────────────────────────┐
   │ opensprint CLI (Node, one process/call)  │   deterministic half: parse, hash,
   │   compact plan|seal|check|loops|board    │   check, refuse, regenerate
-  │   advance   frame   migrate              │
+  │   advance   claim   frame   migrate      │
   └───────────────────┬──────────────────────┘
                       │ reads / writes files
                       v
@@ -146,8 +147,13 @@ merge. The gate checks that the initiative is `attested` and that the views are 
 checks whether a bar was met (`DEC-030`, `DEC-023`). A conflict in a derived artifact is resolved by
 rebasing and recompiling, never by hand-merging (`DEC-030`, `DEC-006`).
 
-`DEC-029` records one cost it does not solve. A backlog that lives on branches cannot be read in one
-place, so the board shows only what the current branch knows.
+`DEC-029` records one cost it does not solve: a backlog that lives on branches cannot be read in one
+place. That cost is now answered without moving the backlog: the committed `BOARD.md` is decided to
+show the checkout alone, and `opensprint compact board --all-branches` prints the card each local and
+remote-tracking `opsp/<id>` branch carries, read from committed trees and never written to disk
+(`DEC-BOARD-ALL-BRANCHES`; `src/core/board.ts`, `src/core/initiative-git.ts`). Where two copies of a
+card differ, the checkout wins, and a fetched copy wins over a local branch only when it is strictly
+ahead (`DEC-BOARD-ALL-BRANCHES`).
 
 Parallel worktrees can no longer collide on decision ids. New decisions take semantic ids, and
 initiatives take a date prefix on the filename while their `id:` stays the same (`DEC-036`). Both
@@ -179,6 +185,13 @@ State is a frontmatter field that tools write and code checks (`DEC-024`). It mo
 `opensprint advance <initiative> --to <state>`. That command validates the move against an explicit
 table, writes the field, regenerates `BOARD.md`, and reports any contradiction with the content
 instead of refusing the move (`DEC-STATE-MACHINE`; observed in `src/commands/advance.ts`).
+
+Who holds a card is a second field, `owner`, written only by `opensprint claim`, which never moves
+the state. The board shows it in every column and lists a card that is `building`,
+`ready-for-attestation` or `attested` with nobody named as `owner-undeclared`. Triage claims an item
+at pick-up and releases it on return, apply claims before building, and backlog never claims
+(`DEC-INITIATIVE-OWNER`; observed in `src/commands/claim.ts`, `src/core/board.ts`,
+`src/core/initiatives.ts`).
 
 ```
   /opsp:backlog creates it
@@ -404,10 +417,11 @@ compiled from them (`DEC-006`, `DEC-014`).
 **Initiative** (`opensprint/initiatives/YYYYMMDD-<id>.md`). This is a container that tracks work. It
 is not a record that constrains or decides (`src/core/initiatives.ts`).
 
-- **Frontmatter.** `id`, `status`, `state`, `created`, `completed` and `depends-on` are read
-  (`InitiativeEntry`, `src/core/initiatives.ts`). `state` holds the lifecycle position and `status`
-  stays a separate field (`DEC-STATE-MACHINE`). Older files without `state` still parse (`DEC-024`).
-  Two of the five initiatives in this repository carry only `status` (`opensprint/initiatives/`).
+- **Frontmatter.** `id`, `status`, `state`, `owner`, `created`, `completed` and `depends-on` are
+  read (`InitiativeEntry`, `src/core/initiatives.ts`). `state` holds the lifecycle position and
+  `status` stays a separate field (`DEC-STATE-MACHINE`). `owner` is optional, and a file without it
+  behaves as before (`DEC-INITIATIVE-OWNER`). Older files without `state` still parse (`DEC-024`).
+  Two of the seven initiatives in this repository carry only `status` (`opensprint/initiatives/`).
 - **`## Milestones`.** This is a checkbox list where `[ ]` is open, `[x]` is done and `[~]` is
   superseded. Superseded items are kept and excluded from progress (`src/core/initiatives.ts`).
 - **`## Attestation`.** Attest writes this section. `door` is `one-way` or `two-way`, there is a
@@ -456,7 +470,7 @@ No record decides anything about this layer. It is described here only as observ
 
 ## Open Loops
 
-10 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+12 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
 
 ### `decision-unguarded` — a decision no rule cites
 
@@ -468,6 +482,8 @@ No record decides anything about this layer. It is described here only as observ
 - `DEC-031`
 - `DEC-032`
 - `DEC-ATTEST-OWNING-SECTION`
+- `DEC-BOARD-ALL-BRANCHES`
+- `DEC-INITIATIVE-OWNER`
 - `DEC-NO-DEFAULT-ARCHITECTURE-LOAD`
 - `DEC-VIEWS-FIRST-LOAD`
 

@@ -54,7 +54,9 @@ const OPSP_REVIEW_INSTRUCTIONS = `Review an initiative's branches and commit his
 
 3. **Read the initiative descriptor** in \`opensprint/initiatives/\` — **resolve by the \`id:\` in frontmatter, not by filename.**
    Filenames carry a creation-date prefix (\`20261011-<name>.md\`), so \`<name>.md\` will not exist.
-   \`openspec compact board\` lists every initiative with its path.
+   \`opensprint compact board --all-branches --json\` lists every initiative with its path and the
+   branch holding it; a path on another branch is a git object name — read it with
+   \`git show <path>\`.
    - Get the milestone list and their completion status
    - Get the opsx change names associated with each milestone
 

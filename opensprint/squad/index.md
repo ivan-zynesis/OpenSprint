@@ -6,9 +6,9 @@ not with a text editor.
 
 | Wearing | Owns the question | Start with | Shape | Records |
 |---|---|---|---|---|
-| **product** | what must it **do**? | [product.md](product.md) | objective · goals · strategies · measures | 23 |
+| **product** | what must it **do**? | [product.md](product.md) | objective · goals · strategies · measures | 24 |
 | **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | posture · seven inherited objectives | 15 |
-| **dev** | how is it **built**? | [dev.md](dev.md) | tech-stack · runtime-topology · entity-schema | 56 |
+| **dev** | how is it **built**? | [dev.md](dev.md) | tech-stack · runtime-topology · entity-schema | 58 |
 | **devops** | how is it **stood up and kept running**? | [devops.md](devops.md) | infra-architecture · gitops | 4 |
 
 Each hat has its own shape, because the four accountabilities produce different *kinds* of knowledge

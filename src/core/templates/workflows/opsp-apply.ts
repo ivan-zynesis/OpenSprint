@@ -37,7 +37,10 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
 
 1. **Read the initiative** in \`opensprint/initiatives/\` — **resolve by the \`id:\` in frontmatter, not by filename.**
    Filenames carry a creation-date prefix (\`20261011-<name>.md\`), so \`<name>.md\` will not exist.
-   \`opensprint compact board\` lists every initiative with its path.
+   \`opensprint compact board --all-branches --json\` lists every initiative with its path and the
+   branch holding it. For one that lives only on its \`opsp/<initiative-name>\` branch, that path
+   is a git object name: \`git show <path>\` reads the committed copy, and the initiative's
+   worktree (step 3) the current one, with anything not yet committed.
    - Get the milestone list and their completion status
    - Identify the next incomplete milestone
 
@@ -136,11 +139,21 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
 
    **The operator's main checkout is not modified.**
 
-4. **Open the initiative** — the first milestone starting is what makes it \`building\`:
+4. **Claim it, then open it** — whoever builds it holds the card, and the first milestone starting
+   is what makes it \`building\`:
 
    \`\`\`bash
-   opensprint advance <initiative-name> --to building
+   opensprint claim <initiative-name>
+   opensprint advance <initiative-name> --to building --hat dev
    \`\`\`
+
+   \`claim\` names you — git's \`user.name\`, or \`--owner <name>\`. If the board shows someone else as
+   its owner, ask the operator before taking it over. Both write the initiative and \`BOARD.md\`;
+   commit them on the initiative branch, and offer to push it
+   (\`git push -u origin opsp/<initiative-name>\`): until it is pushed, nobody else's board shows
+   the card as taken. \`proposed\` → \`building\` is a handoff, so
+   \`advance\` refuses it without \`--hat\`; name \`devops\` instead where the
+   work is infrastructure.
 
    Skip this where it already declares \`building\` — the command says so and changes nothing.
    Never edit \`state:\` by hand (\`DEC-STATE-MACHINE\`).
@@ -519,7 +532,7 @@ Escalation **borrows** a hat for one question and gives it back. This is the oth
 hat comes off and does not go back on. Mark it:
 
 \`\`\`bash
-opensprint advance <initiative-name> --to ready-for-attestation
+opensprint advance <initiative-name> --to ready-for-attestation --hat dev
 \`\`\`
 
 Then say so, in those terms:

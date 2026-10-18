@@ -9,20 +9,21 @@
       },
       "observed": {},
       "inputHash": "f9cb821c9ab74faa7541a0f1b990f42131348ce91ba2a66733d3b3e1ed3db828",
-      "outputHash": "1748d99d9ce9969efa01392d422b422b342a6b80e0fab1183ba7966a3516d657"
+      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
     },
     {
       "hat": "product",
       "section": "goals",
       "inputs": {
         "DS-ATTESTED-TRUTH": "50ab0ebdf7f24e3c4fc7e7f262f55c4bd3704a26da3c4142fc3069b171bbddf4",
+        "DS-BOARD-VISIBILITY": "6ad67de307bbbaab62790dd05c22317766697dd081b0043920549ee8bf54206e",
         "DS-DOCUMENTATION-AS-OUTPUT": "3a14f1416125fba8b0a505898d27789926d2d723aa644112ff47efc32d684a93",
         "DS-FULL-COVERAGE": "c26cfb2019c3de8c82200a69383f7947ccaff00b90120f75227d60ae2aa59335",
         "DS-SURROGATE-BUDGET": "1f4a58a23fd6234c41bf7b70de166eb390f19e44b27411269713041eb1209446"
       },
       "observed": {},
-      "inputHash": "c3ecb3237955f2bf40aa17f0bd23a66190fd966c3560acb8cf1cd5b58d6600e0",
-      "outputHash": "1748d99d9ce9969efa01392d422b422b342a6b80e0fab1183ba7966a3516d657"
+      "inputHash": "78c6928f0c6682ea54fac08acc1e71e0a436679718896ffd853ec8e52d82c9fc",
+      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
     },
     {
       "hat": "product",
@@ -34,7 +35,7 @@
         "DS-DOCUMENTATION-REVIEWED": "b46ed7af85dc7e83c505ae49b3a2403720e2a4090913de72f0df857f7c0bd8b5",
         "DS-ESCALATION-HANDOFF": "be0f53b874c7179130886793208434731b2b413f6571a0e915dc75586afb0d98",
         "DS-FORWARD-CLOSURE": "1bae79376b2199bd81be53c38374d923f9a17074a741286f4f6adf49bba8137e",
-        "DS-HATS-AS-CONTEXT": "0ddddeef84168e7739c1f5da0ae3e04c611b19e08a953eca6fd4cf0de72f04c5",
+        "DS-HATS-AS-CONTEXT": "31aeb5318d3789305e4eefd8bb7ba28923f4175e306b9d25fbdf31e1f274b27c",
         "DS-LOOP-CLOSURE": "bf0aa9654a8008011a8acc477379ad01bdeea0bda16f947fd0d791e7f2754ba7",
         "DS-MAINTAINER-INHERITED": "be79b74de81ba998f0bd1d136da4433298b7fcb493d847e128b66efab1bada5d",
         "DS-MEASURE-ANATOMY": "d507fee1181a2c9dbe57be6833bf782d44c9c5bc992f606332c10ca2d06a9a7c",
@@ -43,19 +44,20 @@
         "DS-SME-OWNERSHIP": "13151f5ddbcc670347888d12755ff52fee4ebb4c25b46e5cd0f1625f5d983fe5",
         "DS-SQUAD-HATS": "bd96dab38e2e530f10cb379f2285a2099799685e074ab1a06345267c7ce5d478",
         "DS-STRATEGY-ALTITUDE": "387a4d7c4869dfa3a8742741a9f3c9e0584a99c5ac6424d5c7200241a360c044",
-        "DS-SURROGATE-GIT-CONTRACT": "3c007eee08a6257b73854dd53b992b54381c45625ec8d0f22774ee1f5dacb3f9",
+        "DS-SURROGATE-GIT-CONTRACT": "a585bd386a312b3d756de1475476ca1634c583c5a5207e91c5f08520da0c19e6",
         "DS-SURROGATE-SCOPE": "6d762f2b190b0ff37775c55963ea9bb398c66d345fabb8de1762baa21be4bce4",
         "DS-VIEW-AUTHORSHIP": "cdd098a8e65ed14efb6013814067cfc0a41c81490154aaf52046985fc3796bef"
       },
       "observed": {},
-      "inputHash": "a259bcc82dbf3732d28c344c5b0cbe06252aa0faa8986fa2933a815f74d07ba8",
-      "outputHash": "1748d99d9ce9969efa01392d422b422b342a6b80e0fab1183ba7966a3516d657"
+      "inputHash": "ebc846fe798d360197030fe3f142d4cdbee489783fb1e2eac437110d95aa736b",
+      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
     },
     {
       "hat": "product",
       "section": "measures",
       "inputs": {
         "DS-ATTESTED-TRUTH": "50ab0ebdf7f24e3c4fc7e7f262f55c4bd3704a26da3c4142fc3069b171bbddf4",
+        "DS-BOARD-VISIBILITY": "6ad67de307bbbaab62790dd05c22317766697dd081b0043920549ee8bf54206e",
         "DS-DOCUMENTATION-AS-OUTPUT": "3a14f1416125fba8b0a505898d27789926d2d723aa644112ff47efc32d684a93",
         "DS-FULL-COVERAGE": "c26cfb2019c3de8c82200a69383f7947ccaff00b90120f75227d60ae2aa59335",
         "DS-SURROGATE-BUDGET": "1f4a58a23fd6234c41bf7b70de166eb390f19e44b27411269713041eb1209446"
@@ -63,7 +65,8 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/compact.test.ts": "ed1e843e862d934f5b506898523b37b7e895b80f4b17e0ce7d747aaf72ea4df0",
+        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
         "test/commands/change.interactive-show.test.ts": "6ee955fdc2a690de2208f4c10bba86e9f980cab4353fd65e5d5859ae0c24d53b",
@@ -92,7 +95,8 @@
         "test/core/available-tools.test.ts": "9bbc9c9816243f7a7f8e720aa25eef655fca494b8727b6848003e6a2271bfeb3",
         "test/core/backlog-seam.test.ts": "12f5c91353fd1ae8935a69206630164408ac1f0ea39abcfd3cc750facf794c02",
         "test/core/bar-at-propose.test.ts": "faee0be2a8e5764d29428d31d27e190d43319cc7b14a1f4bb69888b16cfcb0f9",
-        "test/core/board.test.ts": "b0f4e61d2173672509153d32a749cde420dd503c6bb4a924e46f6f7067ad6919",
+        "test/core/board-branches.test.ts": "4bc2840f206290510a91e02e45eb344e2dc0bd6d2595a223bfed610444bc509a",
+        "test/core/board.test.ts": "4650667d434b49589446e22dd3000b00640780082d49a872d7dd6be4e4e40177",
         "test/core/change-frame.test.ts": "569ea6d4bcd9cff5e14af0572548f5cd123e0e4f82def9f3a4b4f735d6e6cbb4",
         "test/core/classification.test.ts": "183b7e54968110a102a0d42bb8904462ed5fdbf9c8f3a77a60614031679d47ef",
         "test/core/command-generation/adapters.test.ts": "5e87ca4ad55c5b8ffc7667f8972950cb12603d9130a12b83dd71330c1fa49439",
@@ -125,9 +129,9 @@
         "test/core/hats.test.ts": "e524c5ee66c0152eae76426cc656b12af2a4db778ac7959ec793b77dd3332281",
         "test/core/init-opensprint.test.ts": "05581072099ccedbdccd9ae08ed9562e72b7cb534c9b0f0726465d2ee626df5f",
         "test/core/init.test.ts": "09d8a1b6445c774fa932a0df1a3159613d0c945f96dcef18defe0dfee75f4d1e",
-        "test/core/initiative-git.test.ts": "5609add3a323e4702ebf8fc6021a92df2188aa8100a3b839984ffe89326f012d",
-        "test/core/initiative-transitions.test.ts": "b82218f8b4d41fcf41bd7326626845a8ec5ceca1df28453fe7a14103080e4802",
-        "test/core/initiatives.test.ts": "8ed961d2fb56731559dcfef54a04ab6c1763c73672a627c3b3dc72559b5f4797",
+        "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
+        "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
+        "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -136,6 +140,7 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
+        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
@@ -166,8 +171,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "93cd725ecd77e874787b9f311cfa0d9717d4508d3f4eef3cdf5185d7c37392ab",
-      "outputHash": "1748d99d9ce9969efa01392d422b422b342a6b80e0fab1183ba7966a3516d657"
+      "inputHash": "e001ca0f53acf7ab7705dd1d1c728baba330ac9eca1d7fe57a050162e9ce071e",
+      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
     },
     {
       "hat": "product",
@@ -176,7 +181,8 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/compact.test.ts": "ed1e843e862d934f5b506898523b37b7e895b80f4b17e0ce7d747aaf72ea4df0",
+        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
         "test/commands/change.interactive-show.test.ts": "6ee955fdc2a690de2208f4c10bba86e9f980cab4353fd65e5d5859ae0c24d53b",
@@ -205,7 +211,8 @@
         "test/core/available-tools.test.ts": "9bbc9c9816243f7a7f8e720aa25eef655fca494b8727b6848003e6a2271bfeb3",
         "test/core/backlog-seam.test.ts": "12f5c91353fd1ae8935a69206630164408ac1f0ea39abcfd3cc750facf794c02",
         "test/core/bar-at-propose.test.ts": "faee0be2a8e5764d29428d31d27e190d43319cc7b14a1f4bb69888b16cfcb0f9",
-        "test/core/board.test.ts": "b0f4e61d2173672509153d32a749cde420dd503c6bb4a924e46f6f7067ad6919",
+        "test/core/board-branches.test.ts": "4bc2840f206290510a91e02e45eb344e2dc0bd6d2595a223bfed610444bc509a",
+        "test/core/board.test.ts": "4650667d434b49589446e22dd3000b00640780082d49a872d7dd6be4e4e40177",
         "test/core/change-frame.test.ts": "569ea6d4bcd9cff5e14af0572548f5cd123e0e4f82def9f3a4b4f735d6e6cbb4",
         "test/core/classification.test.ts": "183b7e54968110a102a0d42bb8904462ed5fdbf9c8f3a77a60614031679d47ef",
         "test/core/command-generation/adapters.test.ts": "5e87ca4ad55c5b8ffc7667f8972950cb12603d9130a12b83dd71330c1fa49439",
@@ -238,9 +245,9 @@
         "test/core/hats.test.ts": "e524c5ee66c0152eae76426cc656b12af2a4db778ac7959ec793b77dd3332281",
         "test/core/init-opensprint.test.ts": "05581072099ccedbdccd9ae08ed9562e72b7cb534c9b0f0726465d2ee626df5f",
         "test/core/init.test.ts": "09d8a1b6445c774fa932a0df1a3159613d0c945f96dcef18defe0dfee75f4d1e",
-        "test/core/initiative-git.test.ts": "5609add3a323e4702ebf8fc6021a92df2188aa8100a3b839984ffe89326f012d",
-        "test/core/initiative-transitions.test.ts": "b82218f8b4d41fcf41bd7326626845a8ec5ceca1df28453fe7a14103080e4802",
-        "test/core/initiatives.test.ts": "8ed961d2fb56731559dcfef54a04ab6c1763c73672a627c3b3dc72559b5f4797",
+        "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
+        "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
+        "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -249,6 +256,7 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
+        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
@@ -279,8 +287,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "63dee51b3e42c51a87cdf8bf2a75b2522a8107e8380e29bbb7ef360bf64ce60b",
-      "outputHash": "1748d99d9ce9969efa01392d422b422b342a6b80e0fab1183ba7966a3516d657"
+      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
+      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
     },
     {
       "hat": "dev",
@@ -329,12 +337,14 @@
         "DEC-ATTEST-CHANGE-FRAME": "f4ad8c5c91b493a0cbbc9a4ea0f80789642b509b454316b4c272777229ae5954",
         "DEC-ATTEST-OWNING-SECTION": "3fd1feb2cfdd1dd206968f2cf4f70989ec62db04cc32b6b478b6275955a56e1a",
         "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
+        "DEC-BOARD-ALL-BRANCHES": "cce798e3cc00080b95fe11033c0402f6f712c9b75cee1b7197de8caa0f9ccf48",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
         "DEC-ESCALATION-IS-A-STAGE": "86cfa763bde45dd6c2e3d9bb636338601a8e3881e4e068a17186aa5455b7a7da",
         "DEC-ESCALATION-LADDER": "42d0f993372665f509b8d1eb5aa02190cd5358ea1c9bfe589efbd961940ff051",
         "DEC-HAT-HANDOFFS": "3127bdd655d9ec900ea5dcc2db0018a29db8bc7f8efc140bf5ab4f62c65810ab",
+        "DEC-INITIATIVE-OWNER": "180b6a386a71219750a5ba1b976cb6632b4f20189f720972c89201989df0bf05",
         "DEC-KNOCKDOWN-ALL-VIEWS": "ae6c704484182f8cab756221ae5c858a6af903cba54d3cef5235b9e53b7c662d",
         "DEC-MIGRATE-SEPARATE-TOOL": "2a51607574aca62165152917bd874b489216ab28be42e7c87b30d2be277ffd16",
         "DEC-NO-DEFAULT-ARCHITECTURE-LOAD": "762bef3f0fc0b4d87ff1f6fe7d1af80621a5ab65b227dde7dcf5843ce38ae645",
@@ -349,8 +359,8 @@
         "pnpm-lock.yaml": "45b56ccda98c7359a62262e1359c7bad01c3712886e09ec4411f3574d108c00d",
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
-      "inputHash": "0c62f66aece17fc775451a1cdabe8bf72feeb0b07bbb0cc0dff33d232cc18dbc",
-      "outputHash": "78b8ade1ec1f02556da769f7efb3e6443050576bec7fe61a02b703d994753b9b"
+      "inputHash": "5d1890f6ec88dfc45cd066362431efbd6e8ab0c1a6bcc6b6bbac47f7a4c747bf",
+      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
     },
     {
       "hat": "dev",
@@ -399,12 +409,14 @@
         "DEC-ATTEST-CHANGE-FRAME": "f4ad8c5c91b493a0cbbc9a4ea0f80789642b509b454316b4c272777229ae5954",
         "DEC-ATTEST-OWNING-SECTION": "3fd1feb2cfdd1dd206968f2cf4f70989ec62db04cc32b6b478b6275955a56e1a",
         "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
+        "DEC-BOARD-ALL-BRANCHES": "cce798e3cc00080b95fe11033c0402f6f712c9b75cee1b7197de8caa0f9ccf48",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
         "DEC-ESCALATION-IS-A-STAGE": "86cfa763bde45dd6c2e3d9bb636338601a8e3881e4e068a17186aa5455b7a7da",
         "DEC-ESCALATION-LADDER": "42d0f993372665f509b8d1eb5aa02190cd5358ea1c9bfe589efbd961940ff051",
         "DEC-HAT-HANDOFFS": "3127bdd655d9ec900ea5dcc2db0018a29db8bc7f8efc140bf5ab4f62c65810ab",
+        "DEC-INITIATIVE-OWNER": "180b6a386a71219750a5ba1b976cb6632b4f20189f720972c89201989df0bf05",
         "DEC-KNOCKDOWN-ALL-VIEWS": "ae6c704484182f8cab756221ae5c858a6af903cba54d3cef5235b9e53b7c662d",
         "DEC-MIGRATE-SEPARATE-TOOL": "2a51607574aca62165152917bd874b489216ab28be42e7c87b30d2be277ffd16",
         "DEC-NO-DEFAULT-ARCHITECTURE-LOAD": "762bef3f0fc0b4d87ff1f6fe7d1af80621a5ab65b227dde7dcf5843ce38ae645",
@@ -414,8 +426,8 @@
         "DEC-VIEWS-FIRST-LOAD": "c677c0193c33f8bf74f3c2d1bac0a3bdc1adff1a7b16b0fa905979f45bae166f"
       },
       "observed": {},
-      "inputHash": "72b0425646a14059abb6698991c81f13d72313f34eee2e7444f46ffa1f9ed74c",
-      "outputHash": "78b8ade1ec1f02556da769f7efb3e6443050576bec7fe61a02b703d994753b9b"
+      "inputHash": "211425cd2c7799e11f989d1106114c1cf7255ef03bfefecc5773a1546eefb25c",
+      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
     },
     {
       "hat": "dev",
@@ -464,12 +476,14 @@
         "DEC-ATTEST-CHANGE-FRAME": "f4ad8c5c91b493a0cbbc9a4ea0f80789642b509b454316b4c272777229ae5954",
         "DEC-ATTEST-OWNING-SECTION": "3fd1feb2cfdd1dd206968f2cf4f70989ec62db04cc32b6b478b6275955a56e1a",
         "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
+        "DEC-BOARD-ALL-BRANCHES": "cce798e3cc00080b95fe11033c0402f6f712c9b75cee1b7197de8caa0f9ccf48",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
         "DEC-ESCALATION-IS-A-STAGE": "86cfa763bde45dd6c2e3d9bb636338601a8e3881e4e068a17186aa5455b7a7da",
         "DEC-ESCALATION-LADDER": "42d0f993372665f509b8d1eb5aa02190cd5358ea1c9bfe589efbd961940ff051",
         "DEC-HAT-HANDOFFS": "3127bdd655d9ec900ea5dcc2db0018a29db8bc7f8efc140bf5ab4f62c65810ab",
+        "DEC-INITIATIVE-OWNER": "180b6a386a71219750a5ba1b976cb6632b4f20189f720972c89201989df0bf05",
         "DEC-KNOCKDOWN-ALL-VIEWS": "ae6c704484182f8cab756221ae5c858a6af903cba54d3cef5235b9e53b7c662d",
         "DEC-MIGRATE-SEPARATE-TOOL": "2a51607574aca62165152917bd874b489216ab28be42e7c87b30d2be277ffd16",
         "DEC-NO-DEFAULT-ARCHITECTURE-LOAD": "762bef3f0fc0b4d87ff1f6fe7d1af80621a5ab65b227dde7dcf5843ce38ae645",
@@ -483,8 +497,8 @@
         "src/core/schemas/change.schema.ts": "88726513993f66a29594b996a31340e3741c41cae0ff31d7f2da40348efc4106",
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
-      "inputHash": "71b7977356e5011948124196ee74097afe18607c959b3607738fd469911a6ce4",
-      "outputHash": "78b8ade1ec1f02556da769f7efb3e6443050576bec7fe61a02b703d994753b9b"
+      "inputHash": "857762dce6f17a2ab09c6fdbf169065e56c3ad38310b2ffe1214dec5a9f007b1",
+      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
     },
     {
       "hat": "dev",
@@ -493,7 +507,8 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/compact.test.ts": "ed1e843e862d934f5b506898523b37b7e895b80f4b17e0ce7d747aaf72ea4df0",
+        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
         "test/commands/change.interactive-show.test.ts": "6ee955fdc2a690de2208f4c10bba86e9f980cab4353fd65e5d5859ae0c24d53b",
@@ -522,7 +537,8 @@
         "test/core/available-tools.test.ts": "9bbc9c9816243f7a7f8e720aa25eef655fca494b8727b6848003e6a2271bfeb3",
         "test/core/backlog-seam.test.ts": "12f5c91353fd1ae8935a69206630164408ac1f0ea39abcfd3cc750facf794c02",
         "test/core/bar-at-propose.test.ts": "faee0be2a8e5764d29428d31d27e190d43319cc7b14a1f4bb69888b16cfcb0f9",
-        "test/core/board.test.ts": "b0f4e61d2173672509153d32a749cde420dd503c6bb4a924e46f6f7067ad6919",
+        "test/core/board-branches.test.ts": "4bc2840f206290510a91e02e45eb344e2dc0bd6d2595a223bfed610444bc509a",
+        "test/core/board.test.ts": "4650667d434b49589446e22dd3000b00640780082d49a872d7dd6be4e4e40177",
         "test/core/change-frame.test.ts": "569ea6d4bcd9cff5e14af0572548f5cd123e0e4f82def9f3a4b4f735d6e6cbb4",
         "test/core/classification.test.ts": "183b7e54968110a102a0d42bb8904462ed5fdbf9c8f3a77a60614031679d47ef",
         "test/core/command-generation/adapters.test.ts": "5e87ca4ad55c5b8ffc7667f8972950cb12603d9130a12b83dd71330c1fa49439",
@@ -555,9 +571,9 @@
         "test/core/hats.test.ts": "e524c5ee66c0152eae76426cc656b12af2a4db778ac7959ec793b77dd3332281",
         "test/core/init-opensprint.test.ts": "05581072099ccedbdccd9ae08ed9562e72b7cb534c9b0f0726465d2ee626df5f",
         "test/core/init.test.ts": "09d8a1b6445c774fa932a0df1a3159613d0c945f96dcef18defe0dfee75f4d1e",
-        "test/core/initiative-git.test.ts": "5609add3a323e4702ebf8fc6021a92df2188aa8100a3b839984ffe89326f012d",
-        "test/core/initiative-transitions.test.ts": "b82218f8b4d41fcf41bd7326626845a8ec5ceca1df28453fe7a14103080e4802",
-        "test/core/initiatives.test.ts": "8ed961d2fb56731559dcfef54a04ab6c1763c73672a627c3b3dc72559b5f4797",
+        "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
+        "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
+        "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -566,6 +582,7 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
+        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
@@ -596,8 +613,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "63dee51b3e42c51a87cdf8bf2a75b2522a8107e8380e29bbb7ef360bf64ce60b",
-      "outputHash": "78b8ade1ec1f02556da769f7efb3e6443050576bec7fe61a02b703d994753b9b"
+      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
+      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
     },
     {
       "hat": "devops",
@@ -610,7 +627,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "7e52d458e5f9983ec0e9dc8a3486fc8de3e2766e5e0e3cab8ad7bfbefbe0a880"
+      "outputHash": "c1c97ba18228a98f5d85910c21b4240df67329a5e351227724204c65c48a1b00"
     },
     {
       "hat": "devops",
@@ -626,7 +643,7 @@
         ".github/workflows/release-prepare.yml": "bc7d747b777da48bee2a5ad59e48e433e3a374b0f76960f575182cf76497152a"
       },
       "inputHash": "2fd187f7995c1d2f332dee8c6167da270a5b5a95815f57e1f1ef1dcec54705c4",
-      "outputHash": "7e52d458e5f9983ec0e9dc8a3486fc8de3e2766e5e0e3cab8ad7bfbefbe0a880"
+      "outputHash": "c1c97ba18228a98f5d85910c21b4240df67329a5e351227724204c65c48a1b00"
     },
     {
       "hat": "devops",
@@ -635,7 +652,8 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/compact.test.ts": "ed1e843e862d934f5b506898523b37b7e895b80f4b17e0ce7d747aaf72ea4df0",
+        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
         "test/commands/change.interactive-show.test.ts": "6ee955fdc2a690de2208f4c10bba86e9f980cab4353fd65e5d5859ae0c24d53b",
@@ -664,7 +682,8 @@
         "test/core/available-tools.test.ts": "9bbc9c9816243f7a7f8e720aa25eef655fca494b8727b6848003e6a2271bfeb3",
         "test/core/backlog-seam.test.ts": "12f5c91353fd1ae8935a69206630164408ac1f0ea39abcfd3cc750facf794c02",
         "test/core/bar-at-propose.test.ts": "faee0be2a8e5764d29428d31d27e190d43319cc7b14a1f4bb69888b16cfcb0f9",
-        "test/core/board.test.ts": "b0f4e61d2173672509153d32a749cde420dd503c6bb4a924e46f6f7067ad6919",
+        "test/core/board-branches.test.ts": "4bc2840f206290510a91e02e45eb344e2dc0bd6d2595a223bfed610444bc509a",
+        "test/core/board.test.ts": "4650667d434b49589446e22dd3000b00640780082d49a872d7dd6be4e4e40177",
         "test/core/change-frame.test.ts": "569ea6d4bcd9cff5e14af0572548f5cd123e0e4f82def9f3a4b4f735d6e6cbb4",
         "test/core/classification.test.ts": "183b7e54968110a102a0d42bb8904462ed5fdbf9c8f3a77a60614031679d47ef",
         "test/core/command-generation/adapters.test.ts": "5e87ca4ad55c5b8ffc7667f8972950cb12603d9130a12b83dd71330c1fa49439",
@@ -697,9 +716,9 @@
         "test/core/hats.test.ts": "e524c5ee66c0152eae76426cc656b12af2a4db778ac7959ec793b77dd3332281",
         "test/core/init-opensprint.test.ts": "05581072099ccedbdccd9ae08ed9562e72b7cb534c9b0f0726465d2ee626df5f",
         "test/core/init.test.ts": "09d8a1b6445c774fa932a0df1a3159613d0c945f96dcef18defe0dfee75f4d1e",
-        "test/core/initiative-git.test.ts": "5609add3a323e4702ebf8fc6021a92df2188aa8100a3b839984ffe89326f012d",
-        "test/core/initiative-transitions.test.ts": "b82218f8b4d41fcf41bd7326626845a8ec5ceca1df28453fe7a14103080e4802",
-        "test/core/initiatives.test.ts": "8ed961d2fb56731559dcfef54a04ab6c1763c73672a627c3b3dc72559b5f4797",
+        "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
+        "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
+        "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -708,6 +727,7 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
+        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
@@ -738,8 +758,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "63dee51b3e42c51a87cdf8bf2a75b2522a8107e8380e29bbb7ef360bf64ce60b",
-      "outputHash": "7e52d458e5f9983ec0e9dc8a3486fc8de3e2766e5e0e3cab8ad7bfbefbe0a880"
+      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
+      "outputHash": "c1c97ba18228a98f5d85910c21b4240df67329a5e351227724204c65c48a1b00"
     },
     {
       "hat": "maintainer",
@@ -749,7 +769,7 @@
       },
       "observed": {},
       "inputHash": "a602fa7e930ac7b8b5aa33755141c87c0c1989c3bed65c44ca38f424c45bc295",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -757,7 +777,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -765,7 +785,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -773,7 +793,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -784,7 +804,7 @@
       },
       "observed": {},
       "inputHash": "a0c490d7d5e574f07af6a619dbbb7d3c06589bddca29fe783a2aded1e0788102",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -797,12 +817,12 @@
         "DS-ESCALATION-HANDOFF": "be0f53b874c7179130886793208434731b2b413f6571a0e915dc75586afb0d98",
         "DS-MEASURE-ANATOMY": "d507fee1181a2c9dbe57be6833bf782d44c9c5bc992f606332c10ca2d06a9a7c",
         "DS-STRATEGY-ALTITUDE": "387a4d7c4869dfa3a8742741a9f3c9e0584a99c5ac6424d5c7200241a360c044",
-        "DS-SURROGATE-GIT-CONTRACT": "3c007eee08a6257b73854dd53b992b54381c45625ec8d0f22774ee1f5dacb3f9",
+        "DS-SURROGATE-GIT-CONTRACT": "a585bd386a312b3d756de1475476ca1634c583c5a5207e91c5f08520da0c19e6",
         "DS-VIEW-AUTHORSHIP": "cdd098a8e65ed14efb6013814067cfc0a41c81490154aaf52046985fc3796bef"
       },
       "observed": {},
-      "inputHash": "d20a2e3a08fa9a9d479634670f2e7232480497e2177561bcab3aa0eb247f1228",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "inputHash": "ce50376decd7aaa1ed8bcee6242e2035159880746186a5ddb6c8bd3f03d0c0d5",
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -810,7 +830,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -818,7 +838,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     },
     {
       "hat": "maintainer",
@@ -827,7 +847,8 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/compact.test.ts": "ed1e843e862d934f5b506898523b37b7e895b80f4b17e0ce7d747aaf72ea4df0",
+        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
         "test/commands/change.interactive-show.test.ts": "6ee955fdc2a690de2208f4c10bba86e9f980cab4353fd65e5d5859ae0c24d53b",
@@ -856,7 +877,8 @@
         "test/core/available-tools.test.ts": "9bbc9c9816243f7a7f8e720aa25eef655fca494b8727b6848003e6a2271bfeb3",
         "test/core/backlog-seam.test.ts": "12f5c91353fd1ae8935a69206630164408ac1f0ea39abcfd3cc750facf794c02",
         "test/core/bar-at-propose.test.ts": "faee0be2a8e5764d29428d31d27e190d43319cc7b14a1f4bb69888b16cfcb0f9",
-        "test/core/board.test.ts": "b0f4e61d2173672509153d32a749cde420dd503c6bb4a924e46f6f7067ad6919",
+        "test/core/board-branches.test.ts": "4bc2840f206290510a91e02e45eb344e2dc0bd6d2595a223bfed610444bc509a",
+        "test/core/board.test.ts": "4650667d434b49589446e22dd3000b00640780082d49a872d7dd6be4e4e40177",
         "test/core/change-frame.test.ts": "569ea6d4bcd9cff5e14af0572548f5cd123e0e4f82def9f3a4b4f735d6e6cbb4",
         "test/core/classification.test.ts": "183b7e54968110a102a0d42bb8904462ed5fdbf9c8f3a77a60614031679d47ef",
         "test/core/command-generation/adapters.test.ts": "5e87ca4ad55c5b8ffc7667f8972950cb12603d9130a12b83dd71330c1fa49439",
@@ -889,9 +911,9 @@
         "test/core/hats.test.ts": "e524c5ee66c0152eae76426cc656b12af2a4db778ac7959ec793b77dd3332281",
         "test/core/init-opensprint.test.ts": "05581072099ccedbdccd9ae08ed9562e72b7cb534c9b0f0726465d2ee626df5f",
         "test/core/init.test.ts": "09d8a1b6445c774fa932a0df1a3159613d0c945f96dcef18defe0dfee75f4d1e",
-        "test/core/initiative-git.test.ts": "5609add3a323e4702ebf8fc6021a92df2188aa8100a3b839984ffe89326f012d",
-        "test/core/initiative-transitions.test.ts": "b82218f8b4d41fcf41bd7326626845a8ec5ceca1df28453fe7a14103080e4802",
-        "test/core/initiatives.test.ts": "8ed961d2fb56731559dcfef54a04ab6c1763c73672a627c3b3dc72559b5f4797",
+        "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
+        "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
+        "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -900,6 +922,7 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
+        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
@@ -930,8 +953,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "63dee51b3e42c51a87cdf8bf2a75b2522a8107e8380e29bbb7ef360bf64ce60b",
-      "outputHash": "7f46f56785d076ec74dcf968c77bb678d7e6ceecefeedfdb0b5f534f5c26b696"
+      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
+      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
     }
   ]
 }

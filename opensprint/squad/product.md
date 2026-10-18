@@ -1,8 +1,10 @@
 # product — what must it do?
 
-**Nothing below is attested** (`DS-ATTESTED-TRUTH`). Every claim rests on a decision, not on
-evidence that it holds. `/opsp:attest` first ran on 2026-10-11: thirteen measures now carry a
-posture, none of them `met`, so none is attested — each records what remains exposed instead.
+**Two records are attested; everything else here rests on a decision** (`DS-ATTESTED-TRUTH`).
+`/opsp:attest` first ran on 2026-10-11: thirteen measures carry a posture from then, none of them
+`met` and none with evidence, so none of those is attested — each records what remains exposed
+instead. `DS-SURROGATE-BUDGET` (**partially met**) and `DS-BOARD-VISIBILITY` (**met**) were attested
+on 2026-10-18 with evidence (`DS-SURROGATE-BUDGET`, `DS-BOARD-VISIBILITY`).
 
 ## Objective
 
@@ -22,8 +24,10 @@ What this deliberately does *not* reach is in the strategies below (`DS-SURROGAT
 
 ## Goals
 
-Four goals stand between the objective and the work. All four are decided. Only one carries a
-posture, and it is `partially met` (`DS-ATTESTED-TRUTH`), so none of them is stated here as reached.
+Five goals stand between the objective and the work. All five are decided. Three carry a posture:
+`DS-ATTESTED-TRUTH` and `DS-SURROGATE-BUDGET` are `partially met`, and `DS-BOARD-VISIBILITY` is
+`met` and attested — the one goal stated here as reached (`DS-ATTESTED-TRUTH`,
+`DS-SURROGATE-BUDGET`, `DS-BOARD-VISIBILITY`).
 
 ### Cover all four accountabilities
 
@@ -81,6 +85,19 @@ it reads, falls back to every record only where the engine cannot run, opens a f
 decision it acts on, and says what to do with each section `compact plan` reports not fresh
 (`DS-SURROGATE-BUDGET`). It is attested **partially met** on 2026-10-18 (`DS-SURROGATE-BUDGET`). See
 Measures.
+
+### Every initiative is visible from any checkout, and work in flight names its owner
+
+The decision: any checkout must be able to see every initiative, on whichever branch it lives, and
+every card in flight must name the person who holds it (`DS-BOARD-VISIBILITY`). It formalises the
+cost `DS-SURROGATE-GIT-CONTRACT` and `DEC-029` recorded as unsolved — no branch could see every
+backlog item — and gives a name to the engineer who, per `DS-HATS-AS-CONTEXT`, steps up for
+accountability past the board (`DS-BOARD-VISIBILITY`).
+
+It is attested **met** on 2026-10-18: `opensprint compact board --all-branches` prints every
+branch's card and writes nothing, an unowned card in flight is reported, and the planning and build
+skills claim at pick-up (`DS-BOARD-VISIBILITY`). What it traded: the committed `BOARD.md` still shows
+one branch, and a claim is visible only once pushed (`DS-BOARD-VISIBILITY`). See Measures.
 
 ## Strategies
 
@@ -197,7 +214,12 @@ its own surrogate (`DS-PARALLEL-EXEC`). Four rules bind them to git (`DS-SURROGA
 - attestation happens before that pull request merges
 - `main` is production grade by definition
 
-The record states the cost: no branch can see every backlog item (`DS-SURROGATE-GIT-CONTRACT`).
+The record states the cost: no branch can see every backlog item (`DS-SURROGATE-GIT-CONTRACT`). It
+is now answered without moving anything onto `main`: `opensprint compact board --all-branches`
+prints the card every local and remote-tracking `opsp/<id>` branch carries, from committed work
+only, and never writes `BOARD.md` (`DEC-BOARD-ALL-BRANCHES`, attested under `DS-BOARD-VISIBILITY`).
+Initiatives name an owner, which triage and apply claim at pick-up (`DEC-INITIATIVE-OWNER`). The
+committed board still shows the checkout alone, by decision (`DEC-BOARD-ALL-BRANCHES`).
 
 **What this deliberately does not reach.** Compaction stops at the surrogate. Certification, the
 governing half of change management (approving, gating, promoting) and release management are out
@@ -210,13 +232,16 @@ of scope (`DS-SURROGATE-SCOPE`). The *recording* half of change management was b
 > - `DS-HATS-AS-CONTEXT` decides that a stakeholder with no repository access can file a backlog
 >   item through an agent. Its own posture says the backlog skill runs `git worktree add`, which
 >   needs repository access. `DS-SURROGATE-GIT-CONTRACT` also records that no branch can see every
->   backlog item, which breaks that same interaction.
+>   backlog item; that half is now answered by `compact board --all-branches`
+>   (`DEC-BOARD-ALL-BRANCHES`), though a stakeholder reading the committed `BOARD.md` still sees one
+>   branch.
 > - `DS-PROGRESSIVE-CRYSTALLIZATION` sets a primary bar that `/opsp:explore` leaves an initiative
 >   behind. Its posture records that explore writes nothing and that this step moved to
 >   `/opsp:backlog`. The record says revising the bar is a decision, not an attestation.
 
 **Where the attested strategies stand.** Each verdict below was given by Ivan Lee on 2026-10-11, and
-no exposure names a `mitigated-by`. `DS-SQUAD-HATS`, `DS-SME-OWNERSHIP`, `DS-LOOP-CLOSURE`,
+no exposure names a `mitigated-by`. `DS-SURROGATE-GIT-CONTRACT` and `DS-HATS-AS-CONTEXT` were
+re-reviewed on 2026-10-18 and are unchanged (`DS-SURROGATE-GIT-CONTRACT`, `DS-HATS-AS-CONTEXT`). `DS-SQUAD-HATS`, `DS-SME-OWNERSHIP`, `DS-LOOP-CLOSURE`,
 `DS-BIG-PICTURE`, `DS-PARALLEL-EXEC` and `DS-SURROGATE-SCOPE` have no posture.
 
 | Strategy | Verdict | What remains exposed, as recorded |
@@ -237,11 +262,11 @@ no exposure names a `mitigated-by`. `DS-SQUAD-HATS`, `DS-SME-OWNERSHIP`, `DS-LOO
 ## Measures
 
 For each goal: what measures it, and what asserts that measure. The plan classifies three of the
-four goal records as **decided**; only `DS-SURROGATE-BUDGET` is `attested`. So every other bar below
-is a commitment, not a property the system is known to have. Where a check exists, it is cited by
-path, and that citation is **observed** (it shows what the test exercises), not a verdict on the bar.
-Only `DS-SURROGATE-BUDGET` says what its bar traded away; for the other three **the trade is
-unrecorded**.
+five goal records as **decided**; `DS-SURROGATE-BUDGET` and `DS-BOARD-VISIBILITY` are `attested`.
+So every other bar below is a commitment, not a property the system is known to have. Where a check
+exists, it is cited by path, and that citation is **observed** (it shows what the test exercises),
+not a verdict on the bar. Only `DS-SURROGATE-BUDGET` and `DS-BOARD-VISIBILITY` say what their bars
+traded away; for the other three **the trade is unrecorded**.
 
 ```
 goal                         record                      measures             posture
@@ -252,6 +277,8 @@ true only once attested      DS-ATTESTED-TRUTH           primary, guardrail,  pa
                                                          freshness            evidence: decided
 surrogate within budget      DS-SURROGATE-BUDGET         primary, guardrail,  partially met,
                                                          trust                attested
+every branch, named owners   DS-BOARD-VISIBILITY         primary, guardrail,  met, attested
+                                                         workflow
 ```
 
 ### Cover all four accountabilities
@@ -333,9 +360,41 @@ for     the session budget to go to the work rather than to loading every record
   it saves (`DS-SURROGATE-BUDGET`). It names no `mitigated-by`, and the plan reports it as
   `exposure-unmitigated`.
 
+### Every initiative is visible from any checkout, and work in flight names its owner
+
+```
+as a    lead picking up backlog work, in any checkout
+I want  to see every initiative on every branch, and who holds each card in flight
+for     nobody to build what someone else already holds, or to miss what was filed elsewhere
+```
+
+- **Primary**: `opensprint compact board --all-branches` lists the card every local and
+  remote-tracking `opsp/*` branch carries, alongside the checkout's own, picks the copy that is ahead
+  where two differ, and writes nothing (`DS-BOARD-VISIBILITY`).
+- **Guardrail**: a card at `building`, `ready-for-attestation` or `attested` with no owner is
+  reported `owner-undeclared` on the board (`DS-BOARD-VISIBILITY`).
+- **Workflow**: `/opsp:triage` claims an item when it picks it up and releases it when it returns
+  it, `/opsp:apply` claims before it starts building, and `/opsp:backlog` never claims
+  (`DS-BOARD-VISIBILITY`).
+- **Bar**: on the axis of cross-branch visibility against a committed board that stays
+  deterministic, the chosen point is a committed `BOARD.md` showing the checkout alone and a
+  cross-branch board printed on demand, as current as the last fetch. It trades away a stakeholder
+  reading `BOARD.md` seeing every branch, and enforced ownership: two people can claim one card on
+  different branches before either pushes. The neighbour is the backlog on `main`, the split
+  `DEC-029`'s Invalidation Trigger names (`DS-BOARD-VISIBILITY`).
+- **Posture**: **met**, attested on 2026-10-18 by Claude Opus 5.5 for Ivan Lee. The attesting
+  session also removed two citations from these templates and wrote this bar, and the operator
+  overrode `DEC-043` (`DS-BOARD-VISIBILITY`). Primary is asserted in the library and through the
+  CLI, for every combination of same, ahead and diverged copies; Guardrail for exactly the three
+  owned states; Workflow as instruction text, in order. Nothing measures whether an agent follows
+  those instructions.
+- **Evidence**: `test/core/board-branches.test.ts`, `test/cli-e2e/compact.test.ts`,
+  `test/core/board.test.ts`, `test/core/opsp-board-owners.test.ts` and
+  `test/cli-e2e/claim.test.ts` (`DS-BOARD-VISIBILITY`).
+
 ## Open Loops
 
-23 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+24 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
 
 ### `constraint-unanswered` — a constraint no active decision answers
 
@@ -347,6 +406,7 @@ _No active decision answers this constraint._
 
 ### `constraint-unasserted` — answered, but no rule cites any answering decision
 
+- `DS-BOARD-VISIBILITY` — Answered by `DEC-BOARD-ALL-BRANCHES`, `DEC-INITIATIVE-OWNER`, but no rule cites any of them.
 - `DS-STRATEGY-ALTITUDE` — Answered by `DEC-020`, but no rule cites any of them.
 
 ### `strategy-unimplemented` — an approach with no decision descending from it

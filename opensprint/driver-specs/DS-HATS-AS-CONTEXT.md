@@ -52,6 +52,12 @@ asserts the backlog skill runs `git worktree add`, which needs repository access
 
 Re-reviewed against `a018238`: unchanged. *"Refuses to attest in the same session"* (`test/core/state-machine-workflows.test.ts`) is instruction text.
 
+Re-reviewed against `634670f` on 2026-10-18, by Claude Opus 5.5 for Ivan Lee: unchanged. The
+backlog skill now commits the item and offers to push it (`test/core/opsp-board-owners.test.ts`), but
+still runs `git worktree add` (`test/core/opsp-backlog-triage.test.ts`), so **Entry point** still
+needs repository access. A stakeholder's agent can now print every branch's cards with
+`compact board --all-branches`, which bears on reading the board — not on any measure stated here.
+
 ### Exposure
 
 Excluding the implementation from an attest context depends on the agent obeying instructions. A

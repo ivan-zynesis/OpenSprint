@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import { execFileSync } from 'node:child_process';
 import { runCLI } from '../helpers/run-cli.js';
 
 describe('opensprint compact (e2e)', () => {
@@ -428,5 +429,120 @@ describe('opensprint compact loops (e2e)', () => {
     expect(check.exitCode).toBe(0);
   });
 
+  });
+});
+
+describe('opensprint compact board (e2e)', () => {
+  let root: string;
+  const initiatives = () => path.join(root, 'opensprint', 'initiatives');
+  const boardFile = () => path.join(root, 'opensprint', 'BOARD.md');
+  const git = (...args: string[]) => execFileSync('git', args, { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] });
+  const card = (id: string, state: string, owner?: string) =>
+    `---\nid: ${id}\nstatus: active\nstate: ${state}\n${owner ? `owner: ${owner}\n` : ''}---\n\n## Description\n\nd\n\n## Milestones\n\n- [ ] m1: d\n`;
+  const put = (file: string, content: string) => {
+    fs.mkdirSync(initiatives(), { recursive: true });
+    fs.writeFileSync(path.join(initiatives(), file), content);
+  };
+
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'openspec-board-e2e-'));
+    fs.mkdirSync(path.join(root, 'openspec'), { recursive: true });
+    fs.writeFileSync(path.join(root, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
+    git('init', '-q', '-b', 'main');
+    git('config', 'user.email', 'test@example.com');
+    git('config', 'user.name', 'Test');
+    put('20261001-here.md', card('here', 'building', 'ivan'));
+    git('add', '.');
+    git('commit', '-q', '-m', 'first');
+    // A backlog item somebody filed on its own branch, and one only on the remote.
+    git('checkout', '-q', '-b', 'opsp/filed-elsewhere');
+    put('20261002-filed-elsewhere.md', card('filed-elsewhere', 'exploring'));
+    git('add', '.');
+    git('commit', '-q', '-m', 'backlog');
+    git('checkout', '-q', '-b', 'opsp/pushed-by-someone', 'main');
+    put('20261003-pushed-by-someone.md', card('pushed-by-someone', 'building', 'nhat'));
+    git('add', '.');
+    git('commit', '-q', '-m', 'pushed');
+    git('update-ref', 'refs/remotes/origin/opsp/pushed-by-someone', 'HEAD');
+    git('checkout', '-q', 'main');
+    git('branch', '-q', '-D', 'opsp/pushed-by-someone');
+  });
+
+  afterEach(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('still regenerates BOARD.md from the checkout alone by default', async () => {
+    const r = await runCLI(['compact', 'board'], { cwd: root });
+    expect(r.exitCode).toBe(0);
+    expect(fs.readFileSync(boardFile(), 'utf-8')).toContain('| [here](initiatives/20261001-here.md) | building | ivan | 0/1 | m1 |');
+    expect(fs.readFileSync(boardFile(), 'utf-8')).not.toContain('filed-elsewhere');
+  });
+
+  it('--all-branches prints the cards on other branches, and writes nothing', async () => {
+    await runCLI(['compact', 'board'], { cwd: root });
+    const before = fs.readFileSync(boardFile(), 'utf-8');
+    const r = await runCLI(['compact', 'board', '--all-branches'], { cwd: root });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('# Board — every branch');
+    expect(r.stdout).toContain('| filed-elsewhere | opsp/filed-elsewhere | exploring | — | 0/1 | m1 |');
+    expect(r.stdout).toContain('| pushed-by-someone | origin/opsp/pushed-by-someone | building | nhat | 0/1 | m1 |');
+    expect(r.stdout).not.toContain('Regenerated');
+    expect(fs.readFileSync(boardFile(), 'utf-8')).toBe(before);
+  });
+
+  it('--all-branches creates no BOARD.md where there was none', async () => {
+    const r = await runCLI(['compact', 'board', '--all-branches'], { cwd: root });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('filed-elsewhere');
+    expect(fs.existsSync(boardFile())).toBe(false);
+  });
+
+  it('--all-branches --json lists every card with its branch, path and owner', async () => {
+    const r = await runCLI(['compact', 'board', '--all-branches', '--json'], { cwd: root });
+    expect(r.exitCode).toBe(0);
+    expect(JSON.parse(r.stdout)).toEqual({
+      initiatives: [
+        {
+          id: 'here',
+          state: 'building',
+          owner: 'ivan',
+          branch: 'this checkout',
+          milestones: { done: 0, total: 1 },
+          path: path.join('opensprint', 'initiatives', '20261001-here.md'),
+        },
+        {
+          id: 'filed-elsewhere',
+          state: 'exploring',
+          owner: null,
+          branch: 'opsp/filed-elsewhere',
+          milestones: { done: 0, total: 1 },
+          path: 'opsp/filed-elsewhere:opensprint/initiatives/20261002-filed-elsewhere.md',
+        },
+        {
+          id: 'pushed-by-someone',
+          state: 'building',
+          owner: 'nhat',
+          branch: 'origin/opsp/pushed-by-someone',
+          milestones: { done: 0, total: 1 },
+          path: 'origin/opsp/pushed-by-someone:opensprint/initiatives/20261003-pushed-by-someone.md',
+        },
+      ],
+    });
+    expect(fs.existsSync(boardFile())).toBe(false);
+  });
+
+  it('--json alone lists this checkout\'s cards and writes nothing', async () => {
+    const r = await runCLI(['compact', 'board', '--json'], { cwd: root });
+    expect(JSON.parse(r.stdout).initiatives.map((i: { id: string }) => i.id)).toEqual(['here']);
+    expect(fs.existsSync(boardFile())).toBe(false);
+  });
+
+  it('prints the same board twice for the same refs', async () => {
+    const a = await runCLI(['compact', 'board', '--all-branches'], { cwd: root });
+    const b = await runCLI(['compact', 'board', '--all-branches'], { cwd: root });
+    expect(a.exitCode).toBe(0);
+    expect(a.stdout).toContain('# Board — every branch');
+    expect(a.stdout).toBe(b.stdout);
   });
 });

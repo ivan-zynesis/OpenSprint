@@ -94,7 +94,10 @@ implementation.
 
 Read the initiative in \`opensprint/initiatives/\` — **resolve by the \`id:\` in frontmatter, not by
 filename.** Filenames carry a creation-date prefix (\`20261011-<name>.md\`), so \`<name>.md\` will not
-exist; \`openspec compact board\` lists every initiative with its path.
+exist; \`opensprint compact board --all-branches --json\` lists every initiative with its path and
+the branch holding it. One that lives only on its \`opsp/<initiative-name>\` branch is read with
+\`git show <path>\`, and its state is moved from that branch's worktree — make one with
+\`git worktree add ../<repo>-opsp-<initiative-name> opsp/<initiative-name>\` where none exists.
 
 \`\`\`
   LOAD                                 DO NOT LOAD
