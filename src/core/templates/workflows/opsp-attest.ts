@@ -121,7 +121,31 @@ If the range is empty, or git cannot answer, say so and stop. There is nothing t
 **The frame scopes the review.** Every initiative it names is in scope; an initiative the operator
 expected and the frame does not show is a finding before you read a single bar.
 
-## Step 2: Read the bars
+## Step 2: Read the bars — and resume where this pass stopped
+
+Attest may be continuing in a fresh session, started from the board. **The frame is confirmed again
+in every session** — Step 1 is the premise, and resuming never skips it. What resuming skips is bars
+already judged. First, the state:
+
+- **\`attested\`** — the judgement is recorded. Say so, name \`/opsp:archive\`, and stop.
+- **\`building\`** — a change was requested and the work has not been handed over again. There is
+  nothing to attest yet; say so and stop.
+- **\`ready-for-attestation\`** — find where this pass began: the commit that handed it over.
+
+\`\`\`bash
+F=opensprint/initiatives/<file>.md                                   # the initiative, by its id
+H=$(git log -1 --format=%H -S'state: ready-for-attestation' -- "$F")  # the latest handoff
+git log -1 --format=%cs "$H"                                         # its date
+git log --format='%h %cs %s' "$H"..HEAD -- . ':!opensprint'          # the change since it
+\`\`\`
+
+A bar whose \`### Posture\` has \`attested-on\` on or after the handoff's date — and no commit to the
+change dated after that \`attested-on\` — **was judged in this pass**. Present it as done, and judge
+the rest. A posture older than the handoff belongs to an earlier pass: judge that bar again, and say
+it is a re-attestation. Where \`git log\` finds no handoff, it is not committed yet; every posture is
+from an earlier pass.
+
+Then read them:
 
 \`\`\`bash
 opensprint compact plan --json

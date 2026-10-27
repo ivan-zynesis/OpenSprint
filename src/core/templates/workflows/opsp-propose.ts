@@ -42,11 +42,24 @@ Two paths reach here, and both are valid (\`DEC-034\`):
 | Path | What you are given |
 |---|---|
 | straight from \`/opsp:explore\` | a conversation |
-| from \`/opsp:triage\` | an **initiative already on disk** at \`state: exploring\`, holding an objective and a goal, plus the strategy that triage worked out |
+| from \`/opsp:triage\` | an **initiative already on disk** at \`state: exploring\`, holding an objective and a goal, and a \`## Triage\` section with the strategy triage worked out |
 
 **Where an initiative already exists, do not create a second one.** Read it, switch to its worktree
 (\`DEC-029\`), and fill in what it is missing — Strategy and Measure. Its Objective and Goal were
 written at backlog time and are not yours to rewrite.
+
+**Read what it already holds before anything else.** Propose may be continuing in a fresh session,
+started from the board, with no conversation to analyze:
+
+- **It is \`proposed\` or later** — propose is done. Say so, name the next workflow (\`/opsp:apply\`
+  for \`proposed\`), and stop. Restating a plan that exists is \`/opsp:repropose\`, not this.
+- **It has a \`## Triage\` section** — that is triage's thinking, written for this moment. Its
+  **Leaning** is the strategy you formalize, and its **Open** questions are what you must close with
+  the operator or record as \`unstated\`. Read it where you would otherwise read the conversation.
+- **It already lists driver-specs or ADRs that exist on disk** — a previous propose wrote them, and
+  propose writes only after the operator confirms. They are confirmed. **Never recreate or rewrite
+  them.** Show them as done in Step 2, classify only what is still missing, and write only that in
+  Step 3.
 
 \`\`\`bash
 opensprint compact board --all-branches   # the Backlog column, on every branch
