@@ -361,12 +361,12 @@
       },
       "observed": {
         "package-lock.json": "d0e14cbf15efc7c1893999e89d0332905c539741d0a1578679527bdf6c5b6cb3",
-        "package.json": "ae8960d13353a2645093bbcc617417eada4ed7816bc7eabf84daf80a6f80ebfb",
+        "package.json": "3e3195091a43f3b93b97e25ab7bd26d933d0ed11e045ca3c64d3065e9f33ef0a",
         "pnpm-lock.yaml": "45b56ccda98c7359a62262e1359c7bad01c3712886e09ec4411f3574d108c00d",
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
-      "inputHash": "a5029e86a334181a328483e4238a7ccddc0d8b0760a1d6232870f4c5f1240a3a",
-      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
+      "inputHash": "23b805f086e7ce773f5e1d3b91e8a6c54f6d0fd2d9dc688cfce8aa374cb2a1d7",
+      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
     },
     {
       "hat": "dev",
@@ -439,7 +439,7 @@
       },
       "observed": {},
       "inputHash": "1e039cbff659282c13e8ea3cbed3e790b12a3ddfb40a70be50c448d7d8f5ef83",
-      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
+      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
     },
     {
       "hat": "dev",
@@ -516,7 +516,7 @@
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
       "inputHash": "83c118c70c237d4b5985d010708a0d042c9a68d3b0d1076669923f7a5cdd194c",
-      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
+      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
     },
     {
       "hat": "dev",
@@ -592,6 +592,7 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban-skill.test.ts": "dbc262a89f5da7b3428e3f803636dd8069ef8e386c4814d03f8b529cda41d39d",
         "test/core/kanban.test.ts": "e91e2341a0521c32a0a063361272e9e07c02a6f19a1892f80279127d5e558d0e",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
@@ -606,7 +607,7 @@
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
         "test/core/opsp-rebase-abandon.test.ts": "941d2612aba0fb2f79d3ea421340148e5c011bc63ebd36cb40b27cb8e3931046",
-        "test/core/opsp-skill-generation.test.ts": "4eee339836fcc05ccf499b0502c3033f6e9f8f075d768cfbd52db0fb4f9ea301",
+        "test/core/opsp-skill-generation.test.ts": "4f3e51e85dc35d66276c668e1ea8b60b43bccb29ce0c184bb79cbc7c163fd333",
         "test/core/parsers/change-parser.test.ts": "a5b556328d5fcce210d8cc86d21f5c5e3e33c2c7812f260817b01de53932e54e",
         "test/core/parsers/markdown-parser.test.ts": "9148302c72639ab1dfff15a577ebb30ce94c263e751d83a477cd0e1546955047",
         "test/core/profile-sync-drift.test.ts": "6a0ae469125e24d6a1984533b1af37f9db479d88599c3bd2177d650a3be8a97c",
@@ -632,8 +633,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "76b1bb9181a5d38b8d2c656f1837f1643d99f6e6ca480a6cd2da1ee653bd089e",
-      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
+      "inputHash": "a10fb76d8712204021d85ff3c403cb09d2faf2cee3d2e1cf82d525a976caf1aa",
+      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
     },
     {
       "hat": "devops",
@@ -646,7 +647,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "d62e8eb5654a3dad67c2b430c46ec73ecb50cbeb79d9dfa4a2fafb1f6ebe36b7"
+      "outputHash": "fce89b75d1bb0fc7d465a92daa47992d068220773b26d77e59ade60ab8e37911"
     },
     {
       "hat": "devops",
@@ -662,7 +663,7 @@
         ".github/workflows/release-prepare.yml": "bc7d747b777da48bee2a5ad59e48e433e3a374b0f76960f575182cf76497152a"
       },
       "inputHash": "2fd187f7995c1d2f332dee8c6167da270a5b5a95815f57e1f1ef1dcec54705c4",
-      "outputHash": "d62e8eb5654a3dad67c2b430c46ec73ecb50cbeb79d9dfa4a2fafb1f6ebe36b7"
+      "outputHash": "fce89b75d1bb0fc7d465a92daa47992d068220773b26d77e59ade60ab8e37911"
     },
     {
       "hat": "devops",
@@ -738,6 +739,7 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban-skill.test.ts": "dbc262a89f5da7b3428e3f803636dd8069ef8e386c4814d03f8b529cda41d39d",
         "test/core/kanban.test.ts": "e91e2341a0521c32a0a063361272e9e07c02a6f19a1892f80279127d5e558d0e",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
@@ -752,7 +754,7 @@
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
         "test/core/opsp-rebase-abandon.test.ts": "941d2612aba0fb2f79d3ea421340148e5c011bc63ebd36cb40b27cb8e3931046",
-        "test/core/opsp-skill-generation.test.ts": "4eee339836fcc05ccf499b0502c3033f6e9f8f075d768cfbd52db0fb4f9ea301",
+        "test/core/opsp-skill-generation.test.ts": "4f3e51e85dc35d66276c668e1ea8b60b43bccb29ce0c184bb79cbc7c163fd333",
         "test/core/parsers/change-parser.test.ts": "a5b556328d5fcce210d8cc86d21f5c5e3e33c2c7812f260817b01de53932e54e",
         "test/core/parsers/markdown-parser.test.ts": "9148302c72639ab1dfff15a577ebb30ce94c263e751d83a477cd0e1546955047",
         "test/core/profile-sync-drift.test.ts": "6a0ae469125e24d6a1984533b1af37f9db479d88599c3bd2177d650a3be8a97c",
@@ -778,8 +780,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "76b1bb9181a5d38b8d2c656f1837f1643d99f6e6ca480a6cd2da1ee653bd089e",
-      "outputHash": "d62e8eb5654a3dad67c2b430c46ec73ecb50cbeb79d9dfa4a2fafb1f6ebe36b7"
+      "inputHash": "a10fb76d8712204021d85ff3c403cb09d2faf2cee3d2e1cf82d525a976caf1aa",
+      "outputHash": "fce89b75d1bb0fc7d465a92daa47992d068220773b26d77e59ade60ab8e37911"
     },
     {
       "hat": "maintainer",

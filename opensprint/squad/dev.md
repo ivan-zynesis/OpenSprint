@@ -10,60 +10,109 @@ possibly accidental. Claims citing a record are *decided* — binding, and not n
 
 ## Tech Stack
 
-A TypeScript command-line tool, published as `@ivan-lee/opensprint` with one binary, `opensprint`,
-pointing at `bin/openspec.js`; an ES module package requiring Node `>=20.19.0` (`package.json`).
-`tsc` compiles `src/` to `dist/` at ES2022 with `NodeNext` modules, `strict`, declarations and source
-maps (`tsconfig.json`); `build` runs `node build.js` (`package.json`).
+A TypeScript command-line tool published as `@ivan-lee/opensprint`. It is an ES module package with
+one binary, `opensprint`, which points at `bin/openspec.js`, and it requires Node `>=20.19.0`
+(`package.json`). `tsc` compiles `src/` into `dist/` for ES2022, with `NodeNext` modules, `strict`,
+and declarations and source maps (`tsconfig.json`). The `build` script runs `node build.js`
+(`package.json`).
 
-**No decision in this hat chooses a package.** The stack below is observed, not decided. The project
-is a fork of Fission AI's OpenSpec (`CLAUDE.md`), and the npm lockfile still names the upstream
-package (see below).
+**What the package ships** is `dist`, `bin`, `schemas`, `assets` and `scripts/postinstall.js`, minus
+compiled tests and source maps (`package.json`). `assets` is new. It carries the board template,
+which the compiled code finds relative to its own location as `assets/kanban/board.html`, the same
+way it finds `schemas/` (`src/core/kanban-board.ts`). The Nix flake's source set gained `./assets`
+too (`flake.nix`).
+
+**No decision in this hat chooses a package**, so the dependency list below is observed rather than
+decided. This repository is a fork of Fission AI's OpenSpec (`CLAUDE.md`), and its npm lockfile
+still describes the upstream package (see below).
 
 | Package | Declared | Resolved | Seen in |
 |---|---|---|---|
 | `commander` | `^14.0.0` | 14.0.3 | the command tree (`src/cli/index.ts`) |
-| `zod` | `^4.0.17` | 4.3.6 | the OpenSpec schemas (`src/core/schemas/`) and config parsing (`src/core/project-config.ts`) |
+| `zod` | `^4.0.17` | 4.3.6 | the opsx schemas (`src/core/schemas/`) and config parsing (`src/core/project-config.ts`) |
 | `yaml` | `^2.8.2` | 2.8.3 | record frontmatter and config (`src/core/decision-map.ts`, `src/core/project-config.ts`) |
 | `fast-glob` | `^3.3.3` | 3.3.3 | file matching (`src/utils/file-system.ts`, `src/core/artifact-graph/outputs.ts`) |
-| `chalk` · `ora` | `^5.5.0` · `^8.2.0` | 5.6.2 · 8.2.0 | terminal output and failure lines (`src/commands/kanban.ts`, `src/cli/index.ts`) |
-| `@inquirer/core` · `@inquirer/prompts` | `^10.2.2` · `^7.8.0` | 10.3.2 · 7.10.1 | interactive prompts, imported dynamically by convention (`CLAUDE.md`) |
+| `chalk`, `ora` | `^5.5.0`, `^8.2.0` | 5.6.2, 8.2.0 | terminal output and failure lines (`src/commands/kanban.ts`, `src/cli/index.ts`) |
+| `@inquirer/core`, `@inquirer/prompts` | `^10.2.2`, `^7.8.0` | 10.3.2, 7.10.1 | interactive prompts, always imported dynamically (`CLAUDE.md`) |
 | `posthog-node` | `^5.20.0` | 5.29.2 | usage telemetry (`src/telemetry/index.ts`) |
 
-Development: TypeScript 5.9.3, Vitest 3.2.4 with `@vitest/ui`, ESLint 9.39.4 with
+The development tools are TypeScript 5.9.3, Vitest 3.2.4 with `@vitest/ui`, ESLint 9.39.4 with
 `typescript-eslint` 8.58.2, `@types/node` 24.12.2, and Changesets 2.30.0 with its GitHub changelog
-0.5.2 (`package.json`, `pnpm-lock.yaml`).
+plugin 0.5.2 (`package.json`, `pnpm-lock.yaml`).
 
-**The live board added no dependency.** `src/core/kanban.ts` imports only `node:child_process`,
-`node:fs`, `node:os` and `node:path`, and does all of its work by running the `git` executable.
-That is the decided shape: card writes go through the CLI because it is the tool that installed the
-skills, so it adds nothing (`DEC-CARD-WRITES-THROUGH-CLI`), and the reading client needs only git,
-the installed skill and a browser — node is explicitly ruled out there (`DEC-BOARD-READ-BY-GIT`,
-answering `DS-RUNTIME-LESS-BOARD`).
+**The board has added no package to either side.** On the CLI side, `src/core/kanban.ts` and
+`src/core/kanban-board.ts` import only Node built-ins and run the `git` executable. The records
+require this: card writes go through the CLI because the CLI is already installed
+(`DEC-CARD-WRITES-THROUGH-CLI`). On the reading side, the client needs only git, the installed
+skill and a browser, and node is ruled out (`DEC-BOARD-READ-BY-GIT`, answering
+`DS-RUNTIME-LESS-BOARD`). The generated playbooks use git plus `sed`, `awk`, `base64`, `tr` and
+`date` from a POSIX shell (`src/core/templates/workflows/opsp-kanban.ts`). That is the case
+`DEC-BOARD-READ-BY-GIT`'s invalidation trigger names: a system with no POSIX shell would need a
+second form of the playbook.
 
 ### Package manager and lockfiles
 
-- **pnpm is the declared manager** — `packageManager: pnpm@9.15.9` (`package.json`) — and CI
+- **pnpm is the declared package manager**, `packageManager: pnpm@9.15.9` (`package.json`). CI
   installs with `pnpm install --frozen-lockfile` (`CLAUDE.md`).
-- **`pnpm-lock.yaml` is `lockfileVersion: '6.0'`** (`pnpm-lock.yaml`), an older format than the one
-  pnpm 9 writes.
-- **A second lockfile is present and stale.** `package-lock.json` names `@fission-ai/openspec`
-  1.2.0 with a binary called `openspec` (`package-lock.json`) — the upstream package, not this one.
-  Its dependency ranges match `package.json`; nothing records why it is kept.
+- **`pnpm-lock.yaml` declares `lockfileVersion: '6.0'`** (`pnpm-lock.yaml`), which is older than
+  the format pnpm 9 writes.
+- **There is a second, stale lockfile.** `package-lock.json` describes `@fission-ai/openspec` 1.2.0
+  with a binary called `openspec` (`package-lock.json`). That is the upstream package, not this one.
+  Its dependency ranges match `package.json`, and nothing records why it is kept.
 
 ### What the stack is used to generate
 
-The product surface is the CLI plus the skill and command files it writes into a downstream project;
-there is no GUI and the tool ships no CI/CD product (`DEC-017`). Workflow content is TypeScript
-template strings, one file per workflow (`src/core/templates/workflows/`), formatted per agent tool
-by the command adapters (`src/core/command-generation/adapters/`).
+The product's surface is the CLI plus the skill and command files it writes into a downstream
+project. There is no GUI, and the tool ships no CI/CD product (`DEC-017`). Workflow content is
+written as TypeScript template strings, one file per workflow (`src/core/templates/workflows/`).
+The command adapters then format it for each agent tool (`src/core/command-generation/adapters/`).
 
-**The board's skill and template are not generated yet.** Decided: the template ships with
-opensprint (`DEC-BOARD-READ-BY-GIT`), and each agent's launch command comes from the command adapters
-(`DEC-BOARD-BUTTON-LAUNCHES-SESSION`). Observed: the only copy is a hand-written proof of concept in
-this repository's own agent directory (`.claude/skills/opensprint-kanban/SKILL.md`,
-`.claude/skills/opensprint-kanban/board.html`), and no workflow template under
-`src/core/templates/` mentions the board. Shipping it through `init` and `update` is the open
-`board-skill-template` milestone (`opensprint/initiatives/20261018-kanban.md`).
+**The opsp layer is twenty workflows**, six of them utilities. `/opsp:kanban` is the newest
+utility (`src/core/shared/skill-generation.ts`). One writer, `writeOpspLayer`, emits every opsp
+skill, every opsp command and the board template (`src/core/shared/opsp-layer.ts`). `init` calls
+it (`src/core/init.ts`), and so do both of `update`'s paths (`src/core/update.ts`). Before this
+milestone, `update` never wrote the opsp layer (`test/core/kanban-skill.test.ts`). This
+repository's own `.claude/skills/opensprint-kanban/` and `.claude/commands/opsp/kanban.md` are
+that generated output.
+
+**The board template is filled in two passes**, which follows the split `DEC-BOARD-READ-BY-GIT`
+decides:
+
+```
+  assets/kanban/board.html            shipped in the package
+        │  opensprint init / update: writeOpspLayer → renderBoardTemplate
+        │    <!-- opensprint:config -->  →  JSON { columns: KANBAN_COLUMNS, owned: OWNED_STATES }
+        ▼
+  <toolDir>/skills/opensprint-kanban/board.html     written in every delivery mode,
+        │                                           commands-only included
+        │  /opsp:kanban render playbook (git + POSIX shell)
+        │    <!-- opensprint:cards -->   →  board-meta (ref, sha, at, repo, main, parent)
+        │                                   + one base64 <script> per card
+        ▼
+  $TMPDIR/opensprint-kanban.html      opened in a browser; refreshing means rendering again
+```
+
+(`src/core/kanban-board.ts`, `src/core/shared/opsp-layer.ts`,
+`src/core/templates/workflows/opsp-kanban.ts`.) Each generated playbook names the template path
+for the tool it was written for (`src/core/shared/opsp-layer.ts`). The page loads nothing, builds
+every node with `createElement`, and decodes cards with `atob` and `TextDecoder`
+(`assets/kanban/board.html`). The columns are data in `KANBAN_COLUMNS`, so the page and the code
+cannot place a card differently (`src/core/kanban-board.ts`). The record that column placement
+follows is `DEC-CONTINUE-FORWARD-ESCALATE-BACK`. The skill only reads: it never writes the board
+(`src/core/templates/workflows/opsp-kanban.ts`).
+
+**Still decided, and not yet generated:** the agent table that turns a button into a launch
+command, built from the command adapters (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`). The shipped page has
+no buttons (`assets/kanban/board.html`).
+
+**Surfaced, not resolved:**
+
+- **The page and the commands assume different remotes.** The playbooks fetch only
+  `origin/kanban` (`src/core/templates/workflows/opsp-kanban.ts`), matching
+  `DEC-BOARD-ON-REMOTE-BRANCH`. `opensprint kanban init` and `seed` accept `--remote <name>`
+  (`src/cli/index.ts`). A board written to any other remote is one the skill cannot find.
+- **The generated files now include an HTML page.** That sharpens the `DEC-017` tension described
+  under Runtime Topology.
 
 ## Runtime Topology
 
@@ -502,27 +551,26 @@ them (`src/core/schemas/`):
 
 ## Open Loops
 
-Only what the harvest reported for this hat. Open loops are the backlog, and `/opsp:explore` →
-`/opsp:propose` is the triage that turns them into work (`DEC-007`).
+This section lists only what the harvest reported for this hat. Open loops are the backlog.
+Running `/opsp:explore` and then `/opsp:propose` is the triage that turns them into work
+(`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-Fifteen decisions. A rule is a test or check that cites the record id (`DEC-013`).
+Thirteen decisions. A rule is a test or a check that cites the record's id (`DEC-013`).
 
 | Area | Decisions |
 |---|---|
-| the live board | `DEC-BOARD-READ-BY-GIT`, `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
+| the live board's launch command | `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
 | ownership and the cross-branch board | `DEC-INITIATIVE-OWNER`, `DEC-BOARD-ALL-BRANCHES` |
 | what a workflow loads | `DEC-VIEWS-FIRST-LOAD`, `DEC-NO-DEFAULT-ARCHITECTURE-LOAD`, `DEC-ATTEST-OWNING-SECTION` |
-| compile and harvest | `DEC-008`, `DEC-013`, `DEC-031` |
-| surface and reconciliation | `DEC-017`, `DEC-005` |
+| compiling and harvesting | `DEC-008`, `DEC-013`, `DEC-031` |
+| the product surface and reconciliation | `DEC-017`, `DEC-005` |
 | shared with another hat | `DEC-020` (maintainer), `DEC-032` (devops) |
 
-The three live-board decisions here are the ones whose milestones are still open — the read
-playbook and template, the stage buttons, the launch command (`opensprint/initiatives/20261018-kanban.md`).
-The three the first milestone built against — `DEC-BOARD-ON-REMOTE-BRANCH`,
-`DEC-CARD-WRITES-THROUGH-CLI`, `DEC-MILESTONE-BOARD` — are absent because `test/core/kanban.test.ts`,
-new since the last compile, cites them; for `DEC-MILESTONE-BOARD` what it asserts is the stage
-vocabulary on a card, not the milestone board. `src/commands/kanban.ts` names
-`DEC-BOARD-READ-BY-GIT` in a comment, which is source rather than a rule, so it guards nothing
-(`DEC-013`).
+`DEC-BOARD-READ-BY-GIT` and `DEC-CONTINUE-FORWARD-ESCALATE-BACK` are no longer on this list,
+because `test/core/kanban-skill.test.ts` cites them. That test is new at this milestone. For
+`DEC-CONTINUE-FORWARD-ESCALATE-BACK`, the test checks only that every state lands in exactly one
+column. The continue and escalate moves the record also decides are not built, so nothing tests
+them yet. `DEC-BOARD-BUTTON-LAUNCHES-SESSION` belongs to the open `stage-actions` milestone
+(`opensprint/initiatives/20261018-kanban.md`).

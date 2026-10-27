@@ -195,16 +195,18 @@ CI (`DEC-COMPILE-ON-MILESTONE`).
 
 ## Open Loops
 
-Only what the harvest reported for this hat. Open loops are the backlog, and `/opsp:explore` →
-`/opsp:propose` is the triage that turns them into work (`DEC-007`).
+The harvest reported one loop for this hat, and nothing below is inferred beyond it. The backlog
+is made of open loops like this one. Triage happens in `/opsp:explore`, followed by
+`/opsp:propose` (`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-One decision. A rule is a test or check that cites the record id (`DEC-013`).
+- **`DEC-032`**: no test or check cites this record's id, and a citation like that is what counts
+  as a rule (`DEC-013`). The record decides two things. First, an `### Evidence` block must point
+  at an artifact a pipeline produced. Second, a bar that cannot be judged before merge is attested
+  as `pending`, then re-attested by the next initiative that works in the same area. The `dev` view
+  lists this decision too, and shows the same loop.
 
-- **`DEC-032`** — an `### Evidence` block references a pipeline artifact, and a bar that cannot be
-  assessed before merge is attested `pending` and re-attested by the next initiative to touch that
-  area. No test or check cites it. It is shared with `dev`, which reports the same loop.
-
-The other three decisions routed to this hat — `DEC-029`, `DEC-030` and `DEC-COMPILE-ON-MILESTONE` —
-are not on the harvest's list, so a rule cites each.
+Rules cite the other decisions routed here, `DEC-029`, `DEC-030` and `DEC-COMPILE-ON-MILESTONE`.
+That is why the harvest left them off the list. The test files added and changed at this milestone
+cite none of the four.
