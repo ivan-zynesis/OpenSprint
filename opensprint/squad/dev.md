@@ -551,26 +551,41 @@ them (`src/core/schemas/`):
 
 ## Open Loops
 
-This section lists only what the harvest reported for this hat. Open loops are the backlog.
-Running `/opsp:explore` and then `/opsp:propose` is the triage that turns them into work
-(`DEC-007`).
+This section lists only what the harvest reports for this hat, and nothing is inferred here. Open
+loops are the backlog, and they reach real work through triage: `/opsp:explore`, then
+`/opsp:propose` (`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-Thirteen decisions. A rule is a test or a check that cites the record's id (`DEC-013`).
+Twelve decisions are unguarded. A rule is a test or check that cites a record id (`DEC-013`).
 
 | Area | Decisions |
 |---|---|
-| the live board's launch command | `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
 | ownership and the cross-branch board | `DEC-INITIATIVE-OWNER`, `DEC-BOARD-ALL-BRANCHES` |
 | what a workflow loads | `DEC-VIEWS-FIRST-LOAD`, `DEC-NO-DEFAULT-ARCHITECTURE-LOAD`, `DEC-ATTEST-OWNING-SECTION` |
-| compiling and harvesting | `DEC-008`, `DEC-013`, `DEC-031` |
-| the product surface and reconciliation | `DEC-017`, `DEC-005` |
+| compile and harvest | `DEC-008`, `DEC-013`, `DEC-031` |
+| surface and reconciliation | `DEC-017`, `DEC-005` |
 | shared with another hat | `DEC-020` (maintainer), `DEC-032` (devops) |
 
-`DEC-BOARD-READ-BY-GIT` and `DEC-CONTINUE-FORWARD-ESCALATE-BACK` are no longer on this list,
-because `test/core/kanban-skill.test.ts` cites them. That test is new at this milestone. For
-`DEC-CONTINUE-FORWARD-ESCALATE-BACK`, the test checks only that every state lands in exactly one
-column. The continue and escalate moves the record also decides are not built, so nothing tests
-them yet. `DEC-BOARD-BUTTON-LAUNCHES-SESSION` belongs to the open `stage-actions` milestone
-(`opensprint/initiatives/20261018-kanban.md`).
+**No live-board decision is on the list now.** `test/core/kanban-actions.test.ts` was added at this
+milestone and cites `DEC-BOARD-BUTTON-LAUNCHES-SESSION` and `DEC-CONTINUE-FORWARD-ESCALATE-BACK`.
+It asserts four things:
+
+- the moves are derived from the transition table;
+- escalations are labelled by rung;
+- only legal transitions are offered;
+- the agent table comes from the command adapters, with Claude Code the one tool that launches a
+  session.
+
+The other four live-board decisions were already cited: by `test/core/kanban.test.ts` and
+`test/core/kanban-skill.test.ts`.
+
+A citation means some test asserts part of a decision, not all of it. Two decisions are not fully
+built yet:
+
+- `DEC-CARD-WRITES-THROUGH-CLI`: no workflow writes cards yet; that is the open
+  `workflow-moves-card` milestone.
+- `DEC-MILESTONE-BOARD`: the board does not render milestones yet; that is the open
+  `milestone-board` milestone.
+
+Both milestones are listed in `opensprint/initiatives/20261018-kanban.md`.

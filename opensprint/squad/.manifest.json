@@ -366,7 +366,7 @@
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
       "inputHash": "23b805f086e7ce773f5e1d3b91e8a6c54f6d0fd2d9dc688cfce8aa374cb2a1d7",
-      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
+      "outputHash": "16aa7f4b2d3e1cb826bb86aebe5e71b346704989c65792db17e45bbd2adb2f8f"
     },
     {
       "hat": "dev",
@@ -439,7 +439,7 @@
       },
       "observed": {},
       "inputHash": "1e039cbff659282c13e8ea3cbed3e790b12a3ddfb40a70be50c448d7d8f5ef83",
-      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
+      "outputHash": "16aa7f4b2d3e1cb826bb86aebe5e71b346704989c65792db17e45bbd2adb2f8f"
     },
     {
       "hat": "dev",
@@ -516,7 +516,7 @@
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
       "inputHash": "83c118c70c237d4b5985d010708a0d042c9a68d3b0d1076669923f7a5cdd194c",
-      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
+      "outputHash": "16aa7f4b2d3e1cb826bb86aebe5e71b346704989c65792db17e45bbd2adb2f8f"
     },
     {
       "hat": "dev",
@@ -592,7 +592,8 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
-        "test/core/kanban-skill.test.ts": "dbc262a89f5da7b3428e3f803636dd8069ef8e386c4814d03f8b529cda41d39d",
+        "test/core/kanban-actions.test.ts": "b74e3c5bc6636dc7dd6fc098f3ec325737ac6f38708617980dd71f3951979269",
+        "test/core/kanban-skill.test.ts": "33684eb893a3157b7fce776ccf17ca708fbae4b1d3c30bb0459b890e0879bbfd",
         "test/core/kanban.test.ts": "e91e2341a0521c32a0a063361272e9e07c02a6f19a1892f80279127d5e558d0e",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
@@ -633,8 +634,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "a10fb76d8712204021d85ff3c403cb09d2faf2cee3d2e1cf82d525a976caf1aa",
-      "outputHash": "34fb58033a0daae2ff72a9f2713f4d3bcb3079d7c54f6be7042d57f8023f2af0"
+      "inputHash": "e9d850671a437bcb5cb9039ee570261ebebbe05fed09834127da482986bc9618",
+      "outputHash": "16aa7f4b2d3e1cb826bb86aebe5e71b346704989c65792db17e45bbd2adb2f8f"
     },
     {
       "hat": "devops",
@@ -647,7 +648,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "fce89b75d1bb0fc7d465a92daa47992d068220773b26d77e59ade60ab8e37911"
+      "outputHash": "8fdb095c96a111f2d357eaecb17ab15fd8d5023519d2e14145a7358bd817c2be"
     },
     {
       "hat": "devops",
@@ -663,7 +664,7 @@
         ".github/workflows/release-prepare.yml": "bc7d747b777da48bee2a5ad59e48e433e3a374b0f76960f575182cf76497152a"
       },
       "inputHash": "2fd187f7995c1d2f332dee8c6167da270a5b5a95815f57e1f1ef1dcec54705c4",
-      "outputHash": "fce89b75d1bb0fc7d465a92daa47992d068220773b26d77e59ade60ab8e37911"
+      "outputHash": "8fdb095c96a111f2d357eaecb17ab15fd8d5023519d2e14145a7358bd817c2be"
     },
     {
       "hat": "devops",
@@ -739,7 +740,8 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
-        "test/core/kanban-skill.test.ts": "dbc262a89f5da7b3428e3f803636dd8069ef8e386c4814d03f8b529cda41d39d",
+        "test/core/kanban-actions.test.ts": "b74e3c5bc6636dc7dd6fc098f3ec325737ac6f38708617980dd71f3951979269",
+        "test/core/kanban-skill.test.ts": "33684eb893a3157b7fce776ccf17ca708fbae4b1d3c30bb0459b890e0879bbfd",
         "test/core/kanban.test.ts": "e91e2341a0521c32a0a063361272e9e07c02a6f19a1892f80279127d5e558d0e",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
@@ -780,8 +782,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "a10fb76d8712204021d85ff3c403cb09d2faf2cee3d2e1cf82d525a976caf1aa",
-      "outputHash": "fce89b75d1bb0fc7d465a92daa47992d068220773b26d77e59ade60ab8e37911"
+      "inputHash": "e9d850671a437bcb5cb9039ee570261ebebbe05fed09834127da482986bc9618",
+      "outputHash": "8fdb095c96a111f2d357eaecb17ab15fd8d5023519d2e14145a7358bd817c2be"
     },
     {
       "hat": "maintainer",
