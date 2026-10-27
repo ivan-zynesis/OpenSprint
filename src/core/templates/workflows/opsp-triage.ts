@@ -77,7 +77,9 @@ git add opensprint/initiatives/ opensprint/BOARD.md
 git commit -m "triage: claim <initiative-name>"
 \`\`\`
 
-If the board shows someone else as its owner, ask the operator before taking it over.
+\`claim\` writes the card on the live board (\`origin/kanban\`) before the file, and **refuses a card the
+board shows someone else holding** — nothing is written. Ask the operator; if they agree to take it
+over, re-run with \`--take-over\`.
 
 **A claim others cannot fetch claims nothing.** Offer to push the branch (\`git push -u origin
 opsp/<initiative-name>\`); until it is pushed, nobody else's board shows it as taken.
@@ -160,11 +162,12 @@ The approach is clear enough to formalize. Say what the strategy is, in a senten
 
 ### Decline
 
-\`\`\`markdown
-state: declined
+\`\`\`bash
+opensprint advance <initiative-name> --to declined
 \`\`\`
 
-…and **record why**, in the initiative. The reason is worth more than the idea:
+**Never write \`state:\` by hand** — the command checks the move and moves the card on the live
+board with it (\`DEC-STATE-MACHINE\`). Then **record why**, in the initiative. The reason is worth more than the idea:
 
 > Declined 2026-10-11 — the licensing cost of the managed option exceeds the operational saving at
 > our volume. Revisit if volume triples or the pricing model changes.
@@ -172,7 +175,7 @@ state: declined
 The same proposal returns in six months. One recorded line ends that conversation in a minute.
 
 \`declined\` is terminal but **not permanent** (\`DEC-035\`). Reviving it returns it to \`exploring\`,
-keeping its history including the earlier decline.
+keeping its history including the earlier decline — \`opensprint advance <initiative-name> --to exploring\`.
 
 ### Return it
 

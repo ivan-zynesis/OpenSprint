@@ -113,6 +113,16 @@ cannot tell it from a branch that already merged, and the board would report the
 Offer to push the branch (\`git push -u origin opsp/<initiative-name>\`). Until it is pushed,
 nobody else can see the item.
 
+Then put its card on the live board, so it is in everybody's Backlog column without anyone fetching
+the branch:
+
+\`\`\`bash
+opensprint kanban seed <initiative-name>
+\`\`\`
+
+It adds this one card and nothing else. Where the project has no live board it says so and changes
+nothing; that is not an error.
+
 **Driver-specs and ADRs are not written here.** They are \`/opsp:propose\`'s output, and a premature
 record is a false claim that something later will depend on. An initiative claims nothing — it
 records that someone is thinking about something, which is both true and useful.

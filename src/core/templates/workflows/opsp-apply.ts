@@ -147,8 +147,10 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
    opensprint advance <initiative-name> --to building --hat dev
    \`\`\`
 
-   \`claim\` names you — git's \`user.name\`, or \`--owner <name>\`. If the board shows someone else as
-   its owner, ask the operator before taking it over. Both write the initiative and \`BOARD.md\`;
+   \`claim\` names you — git's \`user.name\`, or \`--owner <name>\`. It claims the card on the live
+   board first and **refuses a card someone else holds**, writing nothing; ask the operator, and
+   re-run with \`--take-over\` if they agree. Both commands move the card on \`origin/kanban\` as
+   well as the initiative. Both write the initiative and \`BOARD.md\`;
    commit them on the initiative branch, and offer to push it
    (\`git push -u origin opsp/<initiative-name>\`): until it is pushed, nobody else's board shows
    the card as taken. \`proposed\` → \`building\` is a handoff, so

@@ -297,7 +297,7 @@ describe('the store, against a remote', () => {
   it('seed --resync rewrites the card that differs, with a history line', async () => {
     await quietly(() => kanbanInitCommand());
     putInitiative('20261001-alpha.md', initiativeText('alpha', 'state: proposed\nowner: nhat\n'));
-    await quietly(() => kanbanSeedCommand({ resync: true }));
+    await quietly(() => kanbanSeedCommand(undefined, { resync: true }));
 
     const alpha = readBoard(root, 'origin').cards.find((c) => c.id === 'alpha')!;
     expect(alpha.state).toBe('proposed');
@@ -308,7 +308,7 @@ describe('the store, against a remote', () => {
   it('seed pushes nothing when every card agrees', async () => {
     await quietly(() => kanbanInitCommand());
     const before = remoteBoard();
-    const out = await quietly(() => kanbanSeedCommand({ resync: true }));
+    const out = await quietly(() => kanbanSeedCommand(undefined, { resync: true }));
     expect(remoteBoard()).toBe(before);
     expect(out).toContain('nothing to write');
   });
@@ -322,7 +322,7 @@ describe('the store, against a remote', () => {
     await quietly(() => kanbanInitCommand());
     putInitiative('20261001-alpha.md', initiativeText('alpha', 'state: proposed\nowner: nhat\n'));
     const before = remoteBoard();
-    const resync = await quietly(() => kanbanSeedCommand({ resync: true, dryRun: true }));
+    const resync = await quietly(() => kanbanSeedCommand(undefined, { resync: true, dryRun: true }));
     expect(remoteBoard()).toBe(before);
     expect(resync).toContain('alpha  would be resynced: state building → proposed');
   });

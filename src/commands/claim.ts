@@ -8,6 +8,11 @@
  *
  * Claiming moves nothing. The state stays where it is; `opensprint advance`
  * moves it.
+ *
+ * Where there is a live board, the card is claimed first and the file
+ * second: the remote is what decides between two people claiming at once,
+ * so a card someone else holds is refused before anything is written
+ * (`DEC-CARD-WRITES-THROUGH-CLI`).
  */
 
 import * as path from 'node:path';
@@ -17,6 +22,7 @@ import { resolveInitiative, readInitiatives, isTerminalState } from '../core/ini
 import { gitUserName } from '../core/initiative-git.js';
 import { writeOwner } from '../core/initiative-transitions.js';
 import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
+import { claimCard, describeBoardWrite, type BoardWrite } from '../core/kanban-sync.js';
 
 export interface ClaimOptions {
   /** Who takes the card. Defaults to git's `user.name`. */
@@ -26,6 +32,10 @@ export interface ClaimOptions {
   json?: boolean;
   /** Report the change without writing it. */
   dryRun?: boolean;
+  /** Take a card the live board shows someone else holding. */
+  takeOver?: boolean;
+  /** False with `--no-board`: write the file without contacting the live board. */
+  board?: boolean;
 }
 
 export async function claimCommand(
@@ -77,6 +87,15 @@ export async function claimCommand(
     to = named;
   }
 
+  // The board first: a refused claim throws here, before the file is touched.
+  const board: BoardWrite | null =
+    options.dryRun === true || options.board === false
+      ? null
+      : claimCard(projectRoot, entry, to, {
+          by: gitUserName(projectRoot) ?? to ?? 'unknown',
+          takeOver: options.takeOver === true,
+        });
+
   const changed = from !== to;
   if (changed && options.dryRun !== true) {
     writeOwner(entry.path, to);
@@ -92,6 +111,7 @@ export async function claimCommand(
           to,
           changed,
           dryRun: options.dryRun === true,
+          board,
         },
         null,
         2
@@ -116,5 +136,7 @@ export async function claimCommand(
       console.log(chalk.dim(`  ${path.relative(projectRoot, entry.path)} · ${BOARD_FILENAME} regenerated`));
     }
   }
+  const said = board === null ? null : describeBoardWrite(board);
+  if (said !== null) console.log(said.tone === 'warn' ? chalk.yellow(`  ${said.text}`) : chalk.dim(`  ${said.text}`));
   console.log();
 }

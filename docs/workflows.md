@@ -274,7 +274,7 @@ an argument adopts it.
 | `/opsp:migrate` | report records the current hat shapes can no longer select |
 | `/opsp:kanban` | list the live board, or render it in a browser — git and a shell, nothing that runs |
 | `opensprint frame` | what this branch changes, and against what base |
-| `opensprint advance` | move an initiative to its next state |
+| `opensprint advance` | move an initiative to its next state, and its card on the live board — `--no-board` to skip it |
 | `opensprint claim` | name who holds an initiative's card |
 | `opensprint kanban` | the live board on its own remote branch — `init` creates and seeds it, `seed` adds and reports drift |
 | `/opsp:compact` | recompile the views |
@@ -344,8 +344,9 @@ opensprint compact loops           # report open loops
 opensprint compact board           # regenerate BOARD.md
 opensprint compact board --all-branches   # print every opsp/* branch's cards; writes nothing
 opensprint claim <initiative>      # take the card — git's user.name, or --owner <name>; --release puts it down
+                                   #   claims the card on origin/kanban first; --take-over takes one someone else holds
 opensprint kanban init             # create origin/kanban and seed it with every initiative this machine knows
-opensprint kanban seed             # add missing cards, report drift; --resync rewrites the cards that differ
+opensprint kanban seed [id]        # add missing cards — or just this one — and report drift; --resync rewrites them
 
 opensprint list                    # changes, or --specs
 opensprint show <item>             # a change or a spec
