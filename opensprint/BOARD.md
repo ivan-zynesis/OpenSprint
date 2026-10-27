@@ -25,15 +25,15 @@ _Empty._
 
 In flight.
 
-| Initiative | State | Owner | Milestones | Next |
-|---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | building | Ivan Lee | 6/6 | — |
+_Empty._
 
 ## Handoff
 
 Every milestone done, nothing judged yet. **Waiting on a person, not on work** — somebody must put the product or maintainer hat on and run `/opsp:attest`.
 
-_Empty._
+| Initiative | State | Owner | Milestones | Next |
+|---|---|---|---|---|
+| [kanban](initiatives/20261018-kanban.md) | ready-for-attestation | Ivan Lee | 6/6 | — |
 
 ## Done
 
@@ -83,4 +83,4 @@ risk, and **that initiative's state is the assurance level**.
 
 Ways this board would otherwise be quietly wrong.
 
-- `state-contradicted` **kanban** — Declares 'building' but all 6 milestone(s) are done. /opsp:apply advances to 'ready-for-attestation' when the last one closes.
+_None._
