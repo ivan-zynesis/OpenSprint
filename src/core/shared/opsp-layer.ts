@@ -12,7 +12,8 @@ import * as path from 'node:path';
 import { FileSystemUtils } from '../../utils/file-system.js';
 import { transformToHyphenCommands } from '../../utils/command-references.js';
 import { generateCommands, CommandAdapterRegistry } from '../command-generation/index.js';
-import { BOARD_TEMPLATE_FILE, renderBoardTemplate } from '../kanban-board.js';
+import { AI_TOOLS } from '../config.js';
+import { BOARD_TEMPLATE_FILE, boardConfig, renderBoardTemplate, type KanbanAgent } from '../kanban-board.js';
 import { KANBAN_TEMPLATE_PLACEHOLDER } from '../templates/workflows/opsp-kanban.js';
 import { generateSkillContent, getOpspCommandContents, getOpspSkillTemplates } from './skill-generation.js';
 
@@ -37,6 +38,30 @@ export interface OpspLayerOptions {
  */
 export function kanbanTemplatePath(tool: OpspLayerTool): string {
   return path.posix.join(tool.skillsDir.split(path.sep).join('/'), 'skills', KANBAN_SKILL_DIR, BOARD_TEMPLATE_FILE);
+}
+
+/**
+ * How the board generated for this tool starts its agent.
+ *
+ * The prompt invokes the generated command where the adapter says how and
+ * commands are delivered, and names the skill otherwise — a prompt that is
+ * right everywhere beats a guessed syntax that types the wrong thing
+ * (DEC-BOARD-BUTTON-LAUNCHES-SESSION).
+ */
+export function kanbanAgent(tool: OpspLayerTool, commandsDelivered: boolean): KanbanAgent {
+  const adapter = CommandAdapterRegistry.get(tool.value);
+  const workflows: KanbanAgent['workflows'] = {};
+  for (const { workflowId, dirName } of getOpspSkillTemplates()) {
+    const reference = commandsDelivered ? adapter?.commandReference?.(workflowId) : undefined;
+    // The opsp layer maps the adapter's opsx naming as it maps its paths.
+    workflows[workflowId.replace(/^opsp-/, '')] =
+      reference === undefined ? { skill: dirName } : { command: reference.replace(/opsx/g, 'opsp') };
+  }
+  return {
+    name: AI_TOOLS.find((t) => t.value === tool.value)?.name ?? tool.value,
+    launcher: adapter?.sessionLauncher ?? null,
+    workflows,
+  };
 }
 
 /**
@@ -87,7 +112,7 @@ export async function writeOpspLayer(
   if (options.skills || options.commands) {
     await FileSystemUtils.writeFile(
       path.join(projectPath, tool.skillsDir, 'skills', KANBAN_SKILL_DIR, BOARD_TEMPLATE_FILE),
-      renderBoardTemplate()
+      renderBoardTemplate(boardConfig(kanbanAgent(tool, options.commands)))
     );
   }
 

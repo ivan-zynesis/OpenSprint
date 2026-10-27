@@ -74,7 +74,7 @@ describe('the board template', () => {
     expect(html).not.toContain(BOARD_CONFIG_MARKER);
     expect(html).toContain(BOARD_CARDS_MARKER);
     const json = html.match(/<script type="application\/json" id="board-config">([\s\S]*?)<\/script>/)![1];
-    expect(JSON.parse(json)).toEqual({ columns: KANBAN_COLUMNS, owned: OWNED_STATES });
+    expect(JSON.parse(json)).toEqual({ ...boardConfig(), columns: KANBAN_COLUMNS, owned: OWNED_STATES });
   });
 
   it('cannot be broken by a configuration value', () => {

@@ -35,6 +35,7 @@ export {
 
 export {
   KANBAN_SKILL_DIR,
+  kanbanAgent,
   kanbanTemplatePath,
   writeOpspLayer,
 } from './opsp-layer.js';
