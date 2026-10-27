@@ -9,7 +9,7 @@
       },
       "observed": {},
       "inputHash": "f9cb821c9ab74faa7541a0f1b990f42131348ce91ba2a66733d3b3e1ed3db828",
-      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
+      "outputHash": "ea05945e3a301e151770405f5ea53f5883fa2f51e7fea0ebfe0674c90936b92c"
     },
     {
       "hat": "product",
@@ -19,11 +19,12 @@
         "DS-BOARD-VISIBILITY": "6ad67de307bbbaab62790dd05c22317766697dd081b0043920549ee8bf54206e",
         "DS-DOCUMENTATION-AS-OUTPUT": "3a14f1416125fba8b0a505898d27789926d2d723aa644112ff47efc32d684a93",
         "DS-FULL-COVERAGE": "c26cfb2019c3de8c82200a69383f7947ccaff00b90120f75227d60ae2aa59335",
+        "DS-LIVE-BOARD": "fb96cb6ce89bbae66e0e4b4bf0ae1addf781e3088d1a86a20737b6c5b3b93ccb",
         "DS-SURROGATE-BUDGET": "1f4a58a23fd6234c41bf7b70de166eb390f19e44b27411269713041eb1209446"
       },
       "observed": {},
-      "inputHash": "78c6928f0c6682ea54fac08acc1e71e0a436679718896ffd853ec8e52d82c9fc",
-      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
+      "inputHash": "4822792ca45a6ea568d8650fd8101c5a5234ece9613cfa6f0a1a8b24c7c0cfc6",
+      "outputHash": "ea05945e3a301e151770405f5ea53f5883fa2f51e7fea0ebfe0674c90936b92c"
     },
     {
       "hat": "product",
@@ -50,7 +51,7 @@
       },
       "observed": {},
       "inputHash": "ebc846fe798d360197030fe3f142d4cdbee489783fb1e2eac437110d95aa736b",
-      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
+      "outputHash": "ea05945e3a301e151770405f5ea53f5883fa2f51e7fea0ebfe0674c90936b92c"
     },
     {
       "hat": "product",
@@ -60,12 +61,13 @@
         "DS-BOARD-VISIBILITY": "6ad67de307bbbaab62790dd05c22317766697dd081b0043920549ee8bf54206e",
         "DS-DOCUMENTATION-AS-OUTPUT": "3a14f1416125fba8b0a505898d27789926d2d723aa644112ff47efc32d684a93",
         "DS-FULL-COVERAGE": "c26cfb2019c3de8c82200a69383f7947ccaff00b90120f75227d60ae2aa59335",
+        "DS-LIVE-BOARD": "fb96cb6ce89bbae66e0e4b4bf0ae1addf781e3088d1a86a20737b6c5b3b93ccb",
         "DS-SURROGATE-BUDGET": "1f4a58a23fd6234c41bf7b70de166eb390f19e44b27411269713041eb1209446"
       },
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/claim.test.ts": "ab4af22100a89a455b0f0103263a8be6220c7c2fa86fc401a68af9f6de36067c",
         "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
@@ -132,6 +134,11 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban-actions.test.ts": "b74e3c5bc6636dc7dd6fc098f3ec325737ac6f38708617980dd71f3951979269",
+        "test/core/kanban-milestones.test.ts": "e2cdf559487b36b8d0b4d895bcc945d50133ac078e49d8dfe605de39237885a9",
+        "test/core/kanban-skill.test.ts": "33684eb893a3157b7fce776ccf17ca708fbae4b1d3c30bb0459b890e0879bbfd",
+        "test/core/kanban-sync.test.ts": "b380856f2f99bc856686495c7fda814fe362252547e25cfceda86a41027fb1c1",
+        "test/core/kanban.test.ts": "8bed503c3dac7103b98f9f7da5b224b413e581922b1ebcbddddde18eebd79ae5",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -140,12 +147,13 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
-        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
+        "test/core/opsp-board-owners.test.ts": "2d966a7c058ea465a9caaa0c489b0224e7cba8d3d22e79b12a54eeaff2bacea0",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
         "test/core/opsp-rebase-abandon.test.ts": "941d2612aba0fb2f79d3ea421340148e5c011bc63ebd36cb40b27cb8e3931046",
-        "test/core/opsp-skill-generation.test.ts": "4eee339836fcc05ccf499b0502c3033f6e9f8f075d768cfbd52db0fb4f9ea301",
+        "test/core/opsp-resume.test.ts": "19d00de17ea7099ffcdbfdb862c1733716c00932795d3d08e6409cb19272a003",
+        "test/core/opsp-skill-generation.test.ts": "4f3e51e85dc35d66276c668e1ea8b60b43bccb29ce0c184bb79cbc7c163fd333",
         "test/core/parsers/change-parser.test.ts": "a5b556328d5fcce210d8cc86d21f5c5e3e33c2c7812f260817b01de53932e54e",
         "test/core/parsers/markdown-parser.test.ts": "9148302c72639ab1dfff15a577ebb30ce94c263e751d83a477cd0e1546955047",
         "test/core/profile-sync-drift.test.ts": "6a0ae469125e24d6a1984533b1af37f9db479d88599c3bd2177d650a3be8a97c",
@@ -171,8 +179,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "e001ca0f53acf7ab7705dd1d1c728baba330ac9eca1d7fe57a050162e9ce071e",
-      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
+      "inputHash": "80bdc9eab5fc907232e0e1b6b8037aba0debfeaef9a441f56c5841fdece3a7fe",
+      "outputHash": "ea05945e3a301e151770405f5ea53f5883fa2f51e7fea0ebfe0674c90936b92c"
     },
     {
       "hat": "product",
@@ -181,7 +189,7 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/claim.test.ts": "ab4af22100a89a455b0f0103263a8be6220c7c2fa86fc401a68af9f6de36067c",
         "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
@@ -248,6 +256,11 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban-actions.test.ts": "b74e3c5bc6636dc7dd6fc098f3ec325737ac6f38708617980dd71f3951979269",
+        "test/core/kanban-milestones.test.ts": "e2cdf559487b36b8d0b4d895bcc945d50133ac078e49d8dfe605de39237885a9",
+        "test/core/kanban-skill.test.ts": "33684eb893a3157b7fce776ccf17ca708fbae4b1d3c30bb0459b890e0879bbfd",
+        "test/core/kanban-sync.test.ts": "b380856f2f99bc856686495c7fda814fe362252547e25cfceda86a41027fb1c1",
+        "test/core/kanban.test.ts": "8bed503c3dac7103b98f9f7da5b224b413e581922b1ebcbddddde18eebd79ae5",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -256,12 +269,13 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
-        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
+        "test/core/opsp-board-owners.test.ts": "2d966a7c058ea465a9caaa0c489b0224e7cba8d3d22e79b12a54eeaff2bacea0",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
         "test/core/opsp-rebase-abandon.test.ts": "941d2612aba0fb2f79d3ea421340148e5c011bc63ebd36cb40b27cb8e3931046",
-        "test/core/opsp-skill-generation.test.ts": "4eee339836fcc05ccf499b0502c3033f6e9f8f075d768cfbd52db0fb4f9ea301",
+        "test/core/opsp-resume.test.ts": "19d00de17ea7099ffcdbfdb862c1733716c00932795d3d08e6409cb19272a003",
+        "test/core/opsp-skill-generation.test.ts": "4f3e51e85dc35d66276c668e1ea8b60b43bccb29ce0c184bb79cbc7c163fd333",
         "test/core/parsers/change-parser.test.ts": "a5b556328d5fcce210d8cc86d21f5c5e3e33c2c7812f260817b01de53932e54e",
         "test/core/parsers/markdown-parser.test.ts": "9148302c72639ab1dfff15a577ebb30ce94c263e751d83a477cd0e1546955047",
         "test/core/profile-sync-drift.test.ts": "6a0ae469125e24d6a1984533b1af37f9db479d88599c3bd2177d650a3be8a97c",
@@ -287,8 +301,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
-      "outputHash": "b8b4c0171b38100316f6bcfd4bc6312c7b18e5ffc778ade363e91271f101fd10"
+      "inputHash": "f6eeb30dd8624da601db0b41d5cff91de31583cbcdaa10e02d9fa88ca1d1445c",
+      "outputHash": "ea05945e3a301e151770405f5ea53f5883fa2f51e7fea0ebfe0674c90936b92c"
     },
     {
       "hat": "dev",
@@ -799,7 +813,7 @@
       },
       "observed": {},
       "inputHash": "a602fa7e930ac7b8b5aa33755141c87c0c1989c3bed65c44ca38f424c45bc295",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -807,7 +821,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -815,7 +829,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -823,7 +837,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -834,7 +848,7 @@
       },
       "observed": {},
       "inputHash": "a0c490d7d5e574f07af6a619dbbb7d3c06589bddca29fe783a2aded1e0788102",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -852,15 +866,17 @@
       },
       "observed": {},
       "inputHash": "ce50376decd7aaa1ed8bcee6242e2035159880746186a5ddb6c8bd3f03d0c0d5",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
       "section": "availability-continuity",
-      "inputs": {},
+      "inputs": {
+        "DS-RUNTIME-LESS-BOARD": "1d59e14d63c29868728c64bd159582915cfaf36682a243d951bb373429dad1ea"
+      },
       "observed": {},
-      "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "inputHash": "fe7075759759fc90299d12281ca3cbb848d776d92430426054069c2a1a958962",
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -868,7 +884,7 @@
       "inputs": {},
       "observed": {},
       "inputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     },
     {
       "hat": "maintainer",
@@ -877,7 +893,7 @@
       "observed": {
         "test/cli-e2e/advance.test.ts": "8d530a8bcf943091566c1dbe2439b8a8a83f4fc36a72d3a2d916ad942ed65087",
         "test/cli-e2e/basic.test.ts": "e61ef8f61df11fe95ae9559693889316c31e5f7c091173f8f73641b5f3ff9fb6",
-        "test/cli-e2e/claim.test.ts": "bc68bb6820fb886c72c78a3ebeb9cf889ad5271502596068cd14cb71e2d6b17d",
+        "test/cli-e2e/claim.test.ts": "ab4af22100a89a455b0f0103263a8be6220c7c2fa86fc401a68af9f6de36067c",
         "test/cli-e2e/compact.test.ts": "0789388c2890ce21942e3b4205bb65e47e9caf1d3f5bd4335dba97054fd367df",
         "test/cli-e2e/frame.test.ts": "8ce433eae13564dbc0ad7ab67cfc81516a7cefdf24002d6b68c353ec8e13e2d1",
         "test/commands/artifact-workflow.test.ts": "b4eb6f5547e5294172fd766047daa0cc3cfdaf56b1690da63375ae0ffb5f419b",
@@ -944,6 +960,11 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban-actions.test.ts": "b74e3c5bc6636dc7dd6fc098f3ec325737ac6f38708617980dd71f3951979269",
+        "test/core/kanban-milestones.test.ts": "e2cdf559487b36b8d0b4d895bcc945d50133ac078e49d8dfe605de39237885a9",
+        "test/core/kanban-skill.test.ts": "33684eb893a3157b7fce776ccf17ca708fbae4b1d3c30bb0459b890e0879bbfd",
+        "test/core/kanban-sync.test.ts": "b380856f2f99bc856686495c7fda814fe362252547e25cfceda86a41027fb1c1",
+        "test/core/kanban.test.ts": "8bed503c3dac7103b98f9f7da5b224b413e581922b1ebcbddddde18eebd79ae5",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -952,12 +973,13 @@
         "test/core/opsp-apply-escalation.test.ts": "db67e95117c34e00686d0ffa2976eaca25b3f97163f078976958b4dc819bd27c",
         "test/core/opsp-archive-sequence.test.ts": "cd298141ca0af3109f942fe46202eefc7b855010efc788fd261a8d1b13b06da2",
         "test/core/opsp-backlog-triage.test.ts": "c85ba70aacbabfed34ac99cd01f85733735444f91410f3aebc9fe453faa4884a",
-        "test/core/opsp-board-owners.test.ts": "a3d6a25993ab8d847c5f0babe790f4d84d8514a37352e732f8228e1b811bdb8d",
+        "test/core/opsp-board-owners.test.ts": "2d966a7c058ea465a9caaa0c489b0224e7cba8d3d22e79b12a54eeaff2bacea0",
         "test/core/opsp-compact-skill.test.ts": "b07ecc96f144b91f839237cae125b96baa25d6cb525fcdce3386a33dfa710f2f",
         "test/core/opsp-knockdown-views.test.ts": "a4d5ce98c0cd8fedbf6f555278e1faf590aee6afdb7430491c0b509496213b98",
         "test/core/opsp-load-views.test.ts": "977cae9648a0c8b9208a6a4df131093a41168558476a41d7ac81e07c1fae51ed",
         "test/core/opsp-rebase-abandon.test.ts": "941d2612aba0fb2f79d3ea421340148e5c011bc63ebd36cb40b27cb8e3931046",
-        "test/core/opsp-skill-generation.test.ts": "4eee339836fcc05ccf499b0502c3033f6e9f8f075d768cfbd52db0fb4f9ea301",
+        "test/core/opsp-resume.test.ts": "19d00de17ea7099ffcdbfdb862c1733716c00932795d3d08e6409cb19272a003",
+        "test/core/opsp-skill-generation.test.ts": "4f3e51e85dc35d66276c668e1ea8b60b43bccb29ce0c184bb79cbc7c163fd333",
         "test/core/parsers/change-parser.test.ts": "a5b556328d5fcce210d8cc86d21f5c5e3e33c2c7812f260817b01de53932e54e",
         "test/core/parsers/markdown-parser.test.ts": "9148302c72639ab1dfff15a577ebb30ce94c263e751d83a477cd0e1546955047",
         "test/core/profile-sync-drift.test.ts": "6a0ae469125e24d6a1984533b1af37f9db479d88599c3bd2177d650a3be8a97c",
@@ -983,8 +1005,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
-      "outputHash": "55dbf76cdfb3f21b200e9d586e892b088157680b179239bc610c80c203139a91"
+      "inputHash": "f6eeb30dd8624da601db0b41d5cff91de31583cbcdaa10e02d9fa88ca1d1445c",
+      "outputHash": "87dc632ab4127088b635f60b6396f70d3f201e4a1693f84ebcb4303da26b27ed"
     }
   ]
 }
