@@ -64,6 +64,40 @@ export type MilestoneStage = (typeof MILESTONE_STAGES)[number];
  */
 const IN_PROGRESS_STAGES: readonly MilestoneStage[] = ['specifying', 'building', 'review'];
 
+/** One move of a milestone's stage, as `/opsp:apply` makes it (DEC-MILESTONE-BOARD). */
+export interface StageMove {
+  from: MilestoneStage;
+  to: MilestoneStage;
+  /** When it fires, in the words the operator would use. */
+  when: string;
+}
+
+/**
+ * Every legal stage move. An explicit table, as `TRANSITIONS` is for
+ * initiatives: forward through the opsx cycle, and back from Review only, as
+ * a change request. `superseded` is reached through the initiative file, by a
+ * repropose, never by a stage move.
+ */
+export const MILESTONE_STAGE_MOVES: readonly StageMove[] = [
+  { from: 'todo', to: 'specifying', when: 'its opsx change is created' },
+  { from: 'specifying', to: 'building', when: 'its change worktree is made' },
+  { from: 'building', to: 'review', when: 'its change is archived and merged, waiting at the checkpoint' },
+  { from: 'review', to: 'done', when: 'the checkpoint approves it and it is checked off' },
+  { from: 'review', to: 'specifying', when: 'a change request: a corrective opsx change' },
+];
+
+/** Null where the move is legal; otherwise why not, naming the moves that are. */
+export function checkStageMove(from: string, to: string): string | null {
+  if (MILESTONE_STAGE_MOVES.some((m) => m.from === from && m.to === to)) return null;
+  const legal = MILESTONE_STAGE_MOVES.filter((m) => m.from === from);
+  return (
+    `'${from}' does not move to '${to}'.` +
+    (legal.length === 0
+      ? ` Nothing moves from '${from}'.`
+      : ` From '${from}': ${legal.map((m) => `${m.to} — ${m.when}`).join('; ')}.`)
+  );
+}
+
 export interface CardMilestone {
   name: string;
   description: string;

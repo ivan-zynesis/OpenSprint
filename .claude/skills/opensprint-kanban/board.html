@@ -117,6 +117,20 @@
            pointer-events: none; }
   .toast.show { opacity: 1; }
   .toast code { background: transparent; color: inherit; padding: 0; }
+
+  /* An initiative opens onto its milestones: the same kind of board, one level down (DEC-MILESTONE-BOARD). */
+  .card h3 button.open { all: unset; cursor: pointer; overflow-wrap: anywhere; }
+  .card h3 button.open:hover, .card h3 button.open:focus-visible { text-decoration: underline; color: var(--accent); }
+  .overlay { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .45); overflow: auto; padding: 24px 16px; }
+  .overlay[hidden] { display: none; }
+  .panel { max-width: 1400px; margin: 0 auto; background: var(--bg); border-radius: 12px; border: 1px solid var(--border); }
+  .panel .top { border-bottom: 1px solid var(--border); }
+  .panel .top button.close { margin-left: auto; }
+  .ticket { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+  .ticket h4 { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+  .ticket p { margin: 4px 0 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+  .ticket.superseded h4 { text-decoration: line-through; color: var(--muted); }
+  .ticket.next { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -127,9 +141,10 @@
     <div class="legend" id="legend"></div>
   </div>
   <main class="board" id="board"></main>
+  <div class="overlay" id="overlay" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script type="application/json" id="board-config">{"columns":[{"key":"backlog","title":"Backlog","states":["exploring"],"held":false},{"key":"planning","title":"Planning","states":["exploring"],"held":true},{"key":"dev","title":"Dev","states":["proposed","building"]},{"key":"attestation","title":"Attestation","states":["ready-for-attestation","attested"]},{"key":"done","title":"Done","states":["completed","declined"]}],"owned":["building","ready-for-attestation","attested"],"moves":{"continue":{"exploring":{"unheld":{"workflow":"triage","label":"Continue: triage","from":"exploring","to":"exploring","hat":["product","maintainer"],"when":"picked up: claimed and its strategy brainstormed, or declined with the reason","claims":true},"held":{"workflow":"propose","label":"Continue: propose","from":"exploring","to":"proposed","hat":["product","maintainer","dev","devops"],"when":"the driver-specs, ADRs, milestones and the bar are written"}},"proposed":{"unheld":{"workflow":"apply","label":"Continue: apply","from":"proposed","to":"building","hat":["dev","devops"],"when":"the first milestone starts"},"held":{"workflow":"apply","label":"Continue: apply","from":"proposed","to":"building","hat":["dev","devops"],"when":"the first milestone starts"}},"building":{"unheld":{"workflow":"apply","label":"Continue: apply","from":"building","to":"ready-for-attestation","hat":["dev","devops"],"when":"the last milestone closes — the dev hat is set down"},"held":{"workflow":"apply","label":"Continue: apply","from":"building","to":"ready-for-attestation","hat":["dev","devops"],"when":"the last milestone closes — the dev hat is set down"}},"ready-for-attestation":{"unheld":{"workflow":"attest","label":"Continue: attest","from":"ready-for-attestation","to":"attested","hat":["product","maintainer"],"when":"every bar carries a posture, and the change questions are answered"},"held":{"workflow":"attest","label":"Continue: attest","from":"ready-for-attestation","to":"attested","hat":["product","maintainer"],"when":"every bar carries a posture, and the change questions are answered"}},"attested":{"unheld":{"workflow":"archive","label":"Continue: archive","from":"attested","to":"completed","hat":["product","maintainer","dev","devops"],"when":"the views are compiled and the branch merges"},"held":{"workflow":"archive","label":"Continue: archive","from":"attested","to":"completed","hat":["product","maintainer","dev","devops"],"when":"the views are compiled and the branch merges"}}},"escalate":{"building":[{"workflow":"repropose","label":"Repropose","from":"building","to":"proposed","hat":["product","maintainer"],"when":"the strategy does not survive contact — the goal holds, what was decided does not"},{"workflow":"reexplore","label":"Reexplore","from":"building","to":"exploring","hat":["product","maintainer"],"when":"the goal itself is in question"}],"ready-for-attestation":[{"workflow":"attest","label":"Request a change","from":"ready-for-attestation","to":"building","hat":["product","maintainer"],"when":"a change is requested — everything holds, the work was not finished"},{"workflow":"repropose","label":"Repropose","from":"ready-for-attestation","to":"proposed","hat":["product","maintainer"],"when":"the strategy must be restated, and its measures with it"},{"workflow":"reexplore","label":"Reexplore","from":"ready-for-attestation","to":"exploring","hat":["product","maintainer"],"when":"the goal no longer holds — back to thinking, writing nothing"}],"declined":[{"workflow":"triage","label":"Revive","from":"declined","to":"exploring","hat":["product","maintainer"],"when":"a declined idea is revived, keeping its history"}]}},"agent":{"name":"Claude Code","launcher":["claude"],"workflows":{"driver":{"command":"/opsp:driver"},"decide":{"command":"/opsp:decide"},"tree":{"command":"/opsp:tree"},"rebuild-assess":{"command":"/opsp:rebuild-assess"},"migrate":{"command":"/opsp:migrate"},"kanban":{"command":"/opsp:kanban"},"explore":{"command":"/opsp:opsp-explore"},"backlog":{"command":"/opsp:opsp-backlog"},"triage":{"command":"/opsp:opsp-triage"},"propose":{"command":"/opsp:opsp-propose"},"apply":{"command":"/opsp:opsp-apply"},"attest":{"command":"/opsp:opsp-attest"},"archive":{"command":"/opsp:opsp-archive"},"review":{"command":"/opsp:opsp-review"},"reexplore":{"command":"/opsp:opsp-reexplore"},"repropose":{"command":"/opsp:opsp-repropose"},"knockdown":{"command":"/opsp:opsp-knockdown"},"rebase":{"command":"/opsp:opsp-rebase"},"abandon":{"command":"/opsp:opsp-abandon"},"compact":{"command":"/opsp:opsp-compact"}}}}</script>
+<script type="application/json" id="board-config">{"columns":[{"key":"backlog","title":"Backlog","states":["exploring"],"held":false},{"key":"planning","title":"Planning","states":["exploring"],"held":true},{"key":"dev","title":"Dev","states":["proposed","building"]},{"key":"attestation","title":"Attestation","states":["ready-for-attestation","attested"]},{"key":"done","title":"Done","states":["completed","declined"]}],"owned":["building","ready-for-attestation","attested"],"moves":{"continue":{"exploring":{"unheld":{"workflow":"triage","label":"Continue: triage","from":"exploring","to":"exploring","hat":["product","maintainer"],"when":"picked up: claimed and its strategy brainstormed, or declined with the reason","claims":true},"held":{"workflow":"propose","label":"Continue: propose","from":"exploring","to":"proposed","hat":["product","maintainer","dev","devops"],"when":"the driver-specs, ADRs, milestones and the bar are written"}},"proposed":{"unheld":{"workflow":"apply","label":"Continue: apply","from":"proposed","to":"building","hat":["dev","devops"],"when":"the first milestone starts"},"held":{"workflow":"apply","label":"Continue: apply","from":"proposed","to":"building","hat":["dev","devops"],"when":"the first milestone starts"}},"building":{"unheld":{"workflow":"apply","label":"Continue: apply","from":"building","to":"ready-for-attestation","hat":["dev","devops"],"when":"the last milestone closes — the dev hat is set down"},"held":{"workflow":"apply","label":"Continue: apply","from":"building","to":"ready-for-attestation","hat":["dev","devops"],"when":"the last milestone closes — the dev hat is set down"}},"ready-for-attestation":{"unheld":{"workflow":"attest","label":"Continue: attest","from":"ready-for-attestation","to":"attested","hat":["product","maintainer"],"when":"every bar carries a posture, and the change questions are answered"},"held":{"workflow":"attest","label":"Continue: attest","from":"ready-for-attestation","to":"attested","hat":["product","maintainer"],"when":"every bar carries a posture, and the change questions are answered"}},"attested":{"unheld":{"workflow":"archive","label":"Continue: archive","from":"attested","to":"completed","hat":["product","maintainer","dev","devops"],"when":"the views are compiled and the branch merges"},"held":{"workflow":"archive","label":"Continue: archive","from":"attested","to":"completed","hat":["product","maintainer","dev","devops"],"when":"the views are compiled and the branch merges"}}},"escalate":{"building":[{"workflow":"repropose","label":"Repropose","from":"building","to":"proposed","hat":["product","maintainer"],"when":"the strategy does not survive contact — the goal holds, what was decided does not"},{"workflow":"reexplore","label":"Reexplore","from":"building","to":"exploring","hat":["product","maintainer"],"when":"the goal itself is in question"}],"ready-for-attestation":[{"workflow":"attest","label":"Request a change","from":"ready-for-attestation","to":"building","hat":["product","maintainer"],"when":"a change is requested — everything holds, the work was not finished"},{"workflow":"repropose","label":"Repropose","from":"ready-for-attestation","to":"proposed","hat":["product","maintainer"],"when":"the strategy must be restated, and its measures with it"},{"workflow":"reexplore","label":"Reexplore","from":"ready-for-attestation","to":"exploring","hat":["product","maintainer"],"when":"the goal no longer holds — back to thinking, writing nothing"}],"declined":[{"workflow":"triage","label":"Revive","from":"declined","to":"exploring","hat":["product","maintainer"],"when":"a declined idea is revived, keeping its history"}]}},"agent":{"name":"Claude Code","launcher":["claude"],"workflows":{"driver":{"command":"/opsp:driver"},"decide":{"command":"/opsp:decide"},"tree":{"command":"/opsp:tree"},"rebuild-assess":{"command":"/opsp:rebuild-assess"},"migrate":{"command":"/opsp:migrate"},"kanban":{"command":"/opsp:kanban"},"explore":{"command":"/opsp:opsp-explore"},"backlog":{"command":"/opsp:opsp-backlog"},"triage":{"command":"/opsp:opsp-triage"},"propose":{"command":"/opsp:opsp-propose"},"apply":{"command":"/opsp:opsp-apply"},"attest":{"command":"/opsp:opsp-attest"},"archive":{"command":"/opsp:opsp-archive"},"review":{"command":"/opsp:opsp-review"},"reexplore":{"command":"/opsp:opsp-reexplore"},"repropose":{"command":"/opsp:opsp-repropose"},"knockdown":{"command":"/opsp:opsp-knockdown"},"rebase":{"command":"/opsp:opsp-rebase"},"abandon":{"command":"/opsp:opsp-abandon"},"compact":{"command":"/opsp:opsp-compact"}}},"milestoneColumns":[{"key":"todo","title":"To do","stages":["todo"]},{"key":"specifying","title":"Specifying","stages":["specifying"]},{"key":"building","title":"Building","stages":["building"]},{"key":"review","title":"Review","stages":["review"]},{"key":"done","title":"Done","stages":["done","superseded"]}],"changeRequest":{"from":"review","to":"specifying","when":"a change request: a corrective opsx change"}}</script>
 
 <!-- opensprint:cards -->
 
@@ -350,13 +365,79 @@
       el('div', { class: 'forward' }, next ? moveButton(card, next, 'forward') : null));
   }
 
+  // ── the milestone board ───────────────────────────────────────────────────
+  // Read from the card alone, so it renders with no initiative branch
+  // fetched. Forward on every ticket is "continue: apply", offered only on the
+  // next open milestone, since apply runs them in order. Back is a change
+  // request, from Review. Escalations move the initiative, so they stay on
+  // its card.
+
+  const overlay = document.getElementById('overlay');
+  const closeMilestones = () => { overlay.hidden = true; overlay.replaceChildren(); };
+  overlay.addEventListener('click', (event) => { if (event.target === overlay) closeMilestones(); });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !overlay.hidden) closeMilestones(); });
+
+  function ticketMoves(card, milestone, isNext) {
+    if (!AGENT) return null;
+    const label = milestone.name || milestone.description;
+    const back = [];
+    const forward = [];
+    if (milestone.stage === 'review') {
+      const request = CONFIG.changeRequest;
+      const prompt = `${promptFor('apply', card.id)} — raise a change request on ${label}`;
+      back.push(copyButton('back', '← Change request', [
+        `sends ${label} back: ${request.from} → ${request.to}`,
+        `when: ${request.when}`,
+      ], launchScript(card, prompt), prompt));
+    }
+    if (isNext) {
+      const prompt = promptFor('apply', card.id);
+      forward.push(copyButton('forward', 'Continue: apply →', [
+        `resumes apply at ${label}, the next milestone`,
+        'hat: dev · devops',
+        milestone.stage === 'review' ? 'move: review → done, once the checkpoint approves it' : `stage: ${milestone.stage}`,
+      ], launchScript(card, prompt), prompt));
+    }
+    if (back.length === 0 && forward.length === 0) return null;
+    return el('div', { class: 'moves' }, el('div', { class: 'back' }, back), el('div', { class: 'forward' }, forward));
+  }
+
+  function openMilestones(card) {
+    const live = card.milestones.filter((m) => m.stage !== 'superseded');
+    const next = live.find((m) => m.stage !== 'done');
+    const board = el('main', { class: 'board' });
+    board.style.setProperty('--columns', String(CONFIG.milestoneColumns.length || 1));
+    for (const column of CONFIG.milestoneColumns) {
+      const tickets = card.milestones.filter((m) => column.stages.includes(m.stage));
+      board.append(el('section', { class: 'column', 'data-column': column.key },
+        el('h2', {}, column.title, el('span', {}, String(tickets.length))),
+        tickets.length
+          ? tickets.map((m) => el('article', { class: `ticket ${m.stage}${m === next ? ' next' : ''}`, 'data-milestone': m.name },
+              el('h4', {}, m.name || m.description),
+              m.name ? el('p', {}, m.description) : null,
+              ticketMoves(card, m, m === next)))
+          : el('p', { class: 'empty' }, 'Nothing here.')));
+    }
+    const done = live.filter((m) => m.stage === 'done').length;
+    overlay.replaceChildren(el('div', { class: 'panel', role: 'dialog', 'aria-label': `${card.id} milestones` },
+      el('div', { class: 'top' },
+        el('h1', {}, card.title || card.id),
+        el('span', { class: 'meta' }, `${card.state} · milestones ${done}/${live.length}` + (next ? ` · next: ${next.name || next.description}` : '')),
+        el('button', { type: 'button', class: 'close', onclick: closeMilestones }, 'Close')),
+      board));
+    overlay.hidden = false;
+  }
+
   function renderCard(card) {
     const owned = CONFIG.owned.includes(card.state);
     const ownerChip = card.owner
       ? el('span', { class: 'owner', title: card.owner }, card.owner)
       : el('span', { class: owned ? 'owner none missing' : 'owner none' }, owned ? 'no owner' : 'unowned');
+    const title = card.milestones.length
+      ? el('button', { type: 'button', class: 'open', title: 'Open its milestones', onclick: () => openMilestones(card) }, card.title || card.id)
+      : card.title || card.id;
     return el('article', { class: 'card', 'data-id': card.id, 'data-state': card.state },
-      el('header', {}, el('h3', {}, card.title || card.id), ownerChip),
+      el('header', {}, el('h3', {}, title), ownerChip),
       card.summary ? el('p', { class: 'summary' }, inline(card.summary)) : null,
       el('dl', {},
         el('div', {}, el('dt', {}, 'id'), el('dd', {}, el('code', {}, card.id))),

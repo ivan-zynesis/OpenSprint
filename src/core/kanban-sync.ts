@@ -21,17 +21,21 @@ import {
   KANBAN_BRANCH,
   cardFromInitiative,
   cardPath,
+  checkStageMove,
   historyLine,
   kanbanNow,
+  mirrorMilestones,
   renderCard,
   transact,
   type BoardSnapshot,
   type Card,
+  type MilestoneStage,
 } from './kanban.js';
 
 /**
  * What happened to the card. Never thrown, so a move is never lost to the
- * board — except a refused claim, which is meant to stop the claim.
+ * board — except a refusal, which is the caller asking for something the
+ * board must not do.
  */
 export type BoardWrite =
   | { outcome: 'written'; commit: string; detail: string }
@@ -42,8 +46,11 @@ export type BoardWrite =
   | { outcome: 'no-board'; detail: string }
   | { outcome: 'failed'; detail: string };
 
+/** A write the board refuses on its merits, not for want of a network. Thrown, and never swallowed. */
+export class BoardRefusalError extends Error {}
+
 /** A claim on a card someone else holds. Thrown so that the claim stops before the file is written. */
-export class ClaimRefusedError extends Error {
+export class ClaimRefusedError extends BoardRefusalError {
   constructor(readonly id: string, readonly holder: string) {
     super(
       `'${id}' is held by ${holder} on ${DEFAULT_KANBAN_REMOTE}/${KANBAN_BRANCH}. ` +
@@ -111,7 +118,7 @@ function write(
     const value = result.value;
     return value.outcome === 'written' ? { ...value, commit: result.commit ?? '' } : value;
   } catch (error) {
-    if (error instanceof ClaimRefusedError) throw error;
+    if (error instanceof BoardRefusalError) throw error;
     return { outcome: 'failed', detail: (error as Error).message };
   }
 }
@@ -188,6 +195,81 @@ export function claimCard(
       card: claimed,
       message: owner === null ? `kanban: ${card.id} put down` : `kanban: ${owner} claims ${card.id}`,
       detail: `card owner ${from ?? 'unowned'} → ${owner ?? 'unowned'}`,
+    };
+  });
+}
+
+/**
+ * Moves one milestone's stage on the card, as apply reaches each step of its
+ * opsx cycle (DEC-MILESTONE-BOARD).
+ *
+ * The card's milestones are mirrored from the file first, so a milestone a
+ * repropose added or superseded appears without a seed. The file decides two
+ * things: a milestone is done only where it is checked off, and one leaves
+ * `todo` only when every live milestone before it is done. The rest is the
+ * stage table's.
+ */
+export function stageCard(
+  root: string,
+  entry: InitiativeEntry,
+  milestone: string,
+  stage: MilestoneStage,
+  options: CardWriteOptions
+): BoardWrite {
+  return write(root, options, (board, at) => {
+    const { card, isNew } = cardFor(root, board, entry, at, options.by);
+    const milestones = mirrorMilestones(card.milestones, entry.milestones);
+    const index = milestones.findIndex((m) => m.name === milestone);
+    if (index === -1) {
+      const names = milestones.map((m) => m.name).filter((n) => n.length > 0);
+      throw new BoardRefusalError(
+        `'${entry.id}' has no milestone '${milestone}'.` + (names.length === 0 ? '' : ` Its milestones: ${names.join(', ')}.`)
+      );
+    }
+    const mirrored = isNew || JSON.stringify(milestones) !== JSON.stringify(card.milestones);
+    const from = milestones[index].stage;
+
+    if (from === stage) {
+      if (!mirrored) return { outcome: 'unchanged', detail: `${milestone} is already ${stage}` };
+      // The file moved it — most often to done, once apply checks it off. One history line, as every write gets.
+      const before = card.milestones.find((m) => m.name === milestone)?.stage;
+      const what =
+        before !== undefined && before !== stage
+          ? `milestone ${milestone}: ${before} → ${stage}`
+          : 'milestones follow the initiative';
+      return {
+        card: { ...card, milestones, updated: at, history: [...card.history, historyLine(at, what, options.by)] },
+        message: `kanban: ${card.id} ${what}`,
+        detail: before !== undefined && before !== stage ? `${milestone} ${before} → ${stage}` : what,
+      };
+    }
+    if (stage === 'done') {
+      // Mirroring already made a checked milestone done, so this one is not checked.
+      throw new BoardRefusalError(
+        `'${milestone}' is not checked off in the initiative. Check it off there first — the file says what is done.`
+      );
+    }
+    const refusal = checkStageMove(from, stage);
+    if (refusal !== null) throw new BoardRefusalError(`${milestone}: ${refusal}`);
+    if (from === 'todo') {
+      const earlier = milestones.slice(0, index).find((m) => m.stage !== 'done' && m.stage !== 'superseded');
+      if (earlier !== undefined) {
+        throw new BoardRefusalError(
+          `'${earlier.name || earlier.description}' comes first: milestones run in order, and it is ${earlier.stage}.`
+        );
+      }
+    }
+
+    const moved = milestones.map((m, i) => (i === index ? { ...m, stage } : m));
+    return {
+      card: {
+        ...card,
+        milestones: moved,
+        updated: at,
+        history: [...card.history, historyLine(at, `milestone ${milestone}: ${from} → ${stage}`, options.by)],
+      },
+      message: `kanban: ${card.id} ${milestone} → ${stage}`,
+      detail: `${milestone} ${from} → ${stage}`,
     };
   });
 }
