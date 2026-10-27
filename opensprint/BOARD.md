@@ -19,15 +19,15 @@ _Empty._
 
 Proposed — a bar is set, no work started.
 
-| Initiative | State | Owner | Milestones | Next |
-|---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | proposed | — | 0/6 | board-store |
+_Empty._
 
 ## Doing
 
 In flight.
 
-_Empty._
+| Initiative | State | Owner | Milestones | Next |
+|---|---|---|---|---|
+| [kanban](initiatives/20261018-kanban.md) | building | Ivan Lee | 0/6 | board-store |
 
 ## Handoff
 
