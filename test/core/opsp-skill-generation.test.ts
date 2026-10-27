@@ -30,11 +30,11 @@ vi.mock('../../src/prompts/searchable-multi-select.js', () => ({
 
 describe('OPSP skill generation', () => {
   describe('template functions', () => {
-    it('should return 19 OPSP skill templates (5 utility + 11 lifecycle + 2 reconciliation + 1 compaction)', () => {
+    it('should return 20 OPSP skill templates (6 utility + 11 lifecycle + 2 reconciliation + 1 compaction)', () => {
       const templates = getOpspSkillTemplates();
-      expect(templates).toHaveLength(19);
+      expect(templates).toHaveLength(20);
       expect(templates.map(t => t.workflowId)).toEqual([
-        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
+        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate', 'kanban',
         'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
@@ -48,20 +48,20 @@ describe('OPSP skill generation', () => {
       }
     });
 
-    it('should return 19 OPSP command contents (5 utility + 11 lifecycle + 2 reconciliation + 1 compaction)', () => {
+    it('should return 20 OPSP command contents (6 utility + 11 lifecycle + 2 reconciliation + 1 compaction)', () => {
       const contents = getOpspCommandContents();
-      expect(contents).toHaveLength(19);
+      expect(contents).toHaveLength(20);
       expect(contents.map(c => c.id)).toEqual([
-        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
+        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate', 'kanban',
         'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',
       ]);
     });
 
-    it('should have correct OPSP workflow IDs (19 total)', () => {
+    it('should have correct OPSP workflow IDs (20 total)', () => {
       expect(OPSP_WORKFLOW_IDS).toEqual([
-        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
+        'driver', 'decide', 'tree', 'rebuild-assess', 'migrate', 'kanban',
         'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
         'opsp-rebase', 'opsp-abandon',
         'opsp-compact',

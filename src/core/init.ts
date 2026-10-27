@@ -40,8 +40,7 @@ import {
   getSkillTemplates,
   getCommandContents,
   generateSkillContent,
-  getOpspSkillTemplates,
-  getOpspCommandContents,
+  writeOpspLayer,
   type ToolSkillStatus,
 } from './shared/index.js';
 import { getGlobalConfig, type Delivery, type Profile } from './global-config.js';
@@ -595,10 +594,6 @@ export class InitCommand {
     const skillTemplates = shouldGenerateSkills ? getSkillTemplates(workflows) : [];
     const commandContents = shouldGenerateCommands ? getCommandContents(workflows) : [];
 
-    // OPSP skills and commands are always generated (opensprint = both layers active)
-    const opspSkillTemplates = shouldGenerateSkills ? getOpspSkillTemplates() : [];
-    const opspCommandContents = shouldGenerateCommands ? getOpspCommandContents() : [];
-
     // Process each tool
     for (const tool of tools) {
       const spinner = ora(`Setting up ${tool.name}...`).start();
@@ -622,15 +617,6 @@ export class InitCommand {
             // Write the skill file
             await FileSystemUtils.writeFile(skillFile, skillContent);
           }
-
-          // Generate OPSP skills if sprint-driven schema is active
-          for (const { template, dirName } of opspSkillTemplates) {
-            const skillDir = path.join(skillsDir, dirName);
-            const skillFile = path.join(skillDir, 'SKILL.md');
-            const transformer = (tool.value === 'opencode' || tool.value === 'pi') ? transformToHyphenCommands : undefined;
-            const skillContent = generateSkillContent(template, OPENSPEC_VERSION, transformer);
-            await FileSystemUtils.writeFile(skillFile, skillContent);
-          }
         }
         if (!shouldGenerateSkills) {
           const skillsDir = path.join(projectPath, tool.skillsDir, 'skills');
@@ -647,17 +633,6 @@ export class InitCommand {
               const commandFile = path.isAbsolute(cmd.path) ? cmd.path : path.join(projectPath, cmd.path);
               await FileSystemUtils.writeFile(commandFile, cmd.fileContent);
             }
-
-            // Generate OPSP commands (always — opensprint = both layers)
-            if (opspCommandContents.length > 0) {
-              const opspCommands = generateCommands(opspCommandContents, adapter);
-              for (const cmd of opspCommands) {
-                // Replace 'opsx' with 'opsp' in the path for OPSP commands
-                const opspPath = cmd.path.replace(/opsx/g, 'opsp');
-                const commandFile = path.isAbsolute(opspPath) ? opspPath : path.join(projectPath, opspPath);
-                await FileSystemUtils.writeFile(commandFile, cmd.fileContent);
-              }
-            }
           } else {
             commandsSkipped.push(tool.value);
           }
@@ -665,6 +640,13 @@ export class InitCommand {
         if (!shouldGenerateCommands) {
           removedCommandCount += await this.removeCommandFiles(projectPath, tool.value);
         }
+
+        // The opsp layer is always written: opensprint means both layers are active.
+        await writeOpspLayer(projectPath, tool, {
+          skills: shouldGenerateSkills,
+          commands: shouldGenerateCommands,
+          version: OPENSPEC_VERSION,
+        });
 
         spinner.succeed(`Setup complete for ${tool.name}`);
 

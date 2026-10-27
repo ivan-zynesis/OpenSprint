@@ -41,6 +41,7 @@ import {
   getOpspArchiveSkillTemplate,
   getOpspAttestSkillTemplate,
   getOpspMigrateSkillTemplate,
+  getKanbanSkillTemplate,
   getOpspBacklogSkillTemplate,
   getOpspTriageSkillTemplate,
   getOpspReviewSkillTemplate,
@@ -53,6 +54,7 @@ import {
   getOpspArchiveCommandTemplate,
   getOpspAttestCommandTemplate,
   getOpspMigrateCommandTemplate,
+  getOpspKanbanCommandTemplate,
   getOpspBacklogCommandTemplate,
   getOpspTriageCommandTemplate,
   getOpspReviewCommandTemplate,
@@ -164,7 +166,7 @@ export function getCommandContents(workflowFilter?: readonly string[]): CommandC
  */
 export const OPSP_WORKFLOW_IDS = [
   // Utility commands
-  'driver', 'decide', 'tree', 'rebuild-assess', 'migrate',
+  'driver', 'decide', 'tree', 'rebuild-assess', 'migrate', 'kanban',
   // Lifecycle commands
   'opsp-explore', 'opsp-backlog', 'opsp-triage', 'opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-review', 'opsp-reexplore', 'opsp-repropose', 'opsp-knockdown',
   // Universe reconciliation commands
@@ -184,6 +186,7 @@ export function getOpspSkillTemplates(): SkillTemplateEntry[] {
     { template: getTreeSkillTemplate(), dirName: 'opensprint-tree', workflowId: 'tree' },
     { template: getRebuildAssessSkillTemplate(), dirName: 'opensprint-rebuild-assess', workflowId: 'rebuild-assess' },
     { template: getOpspMigrateSkillTemplate(), dirName: 'opensprint-migrate', workflowId: 'migrate' },
+    { template: getKanbanSkillTemplate(), dirName: 'opensprint-kanban', workflowId: 'kanban' },
     // Lifecycle skills
     { template: getOpspExploreSkillTemplate(), dirName: 'opensprint-explore', workflowId: 'opsp-explore' },
     { template: getOpspBacklogSkillTemplate(), dirName: 'opensprint-backlog', workflowId: 'opsp-backlog' },
@@ -215,6 +218,7 @@ export function getOpspCommandTemplates(): CommandTemplateEntry[] {
     { template: getOpspTreeCommandTemplate(), id: 'tree' },
     { template: getOpspRebuildAssessCommandTemplate(), id: 'rebuild-assess' },
     { template: getOpspMigrateCommandTemplate(), id: 'migrate' },
+    { template: getOpspKanbanCommandTemplate(), id: 'kanban' },
     // Lifecycle commands
     { template: getOpspExploreCommandTemplate(), id: 'opsp-explore' },
     { template: getOpspBacklogCommandTemplate(), id: 'opsp-backlog' },

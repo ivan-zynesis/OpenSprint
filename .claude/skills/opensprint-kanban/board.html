@@ -5,33 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kanban</title>
 <!--
-  opensprint kanban board — a static template.
+  opensprint live board — a static template (DEC-BOARD-READ-BY-GIT).
 
-  The page needs no server and loads nothing. The agent fills it by
-  replacing the opensprint:cards marker below with:
+  The page needs no server and loads nothing (DS-RUNTIME-LESS-BOARD). It is
+  filled twice:
 
-    <script type="text/plain" id="board-meta">BASE64 OF key=value LINES</script>
-        keys: ref, sha, at, repo, main, parent
-    <script type="text/plain" class="card">BASE64 OF ONE cards/<id>.md</script>   (one per card)
+    when opensprint writes it, the opensprint:config marker becomes an
+      application/json script element, id board-config: { columns, owned, ... }
 
-  Base64 keeps any text from breaking the page; the script below decodes it as
-  UTF-8 and parses the frontmatter itself.
+    when the /opsp:kanban render playbook runs, the opensprint:cards marker becomes
+      a text/plain script element, id board-meta: base64 of key=value lines
+          keys: ref, sha, at, repo, main, parent
+      one text/plain script element, class card, per card: base64 of cards/(id).md
 
-  A button never moves a card. It copies the command that starts a fresh agent
-  session, in the card's worktree, running the workflow that owns that move —
-  the workflow loads its hat's context and moves the card when its work is done.
+  Base64 keeps any card text from breaking the page. The script below decodes
+  it as UTF-8 and parses each card itself, building every node with
+  createElement — card text is never read as HTML.
 -->
 <style>
   :root {
     --bg: #f6f7f9; --panel: #eceef2; --card: #ffffff; --text: #1d2027; --muted: #5f6775;
     --border: #cfd4dc; --accent: #3b5bdb; --accent-bg: #e7ecff; --back: #8a5a00; --back-bg: #fff4e0;
-    --warn: #b3261e; --code-bg: #f1f3f6; --tip-bg: #1d2027; --tip-text: #f6f7f9;
+    --warn: #b3261e; --ok: #2b7a3d; --code-bg: #f1f3f6; --tip-bg: #1d2027; --tip-text: #f6f7f9;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #14161a; --panel: #1c1f25; --card: #242830; --text: #e6e8ec; --muted: #9aa1ad;
       --border: #454b58; --accent: #8ca2ff; --accent-bg: #2a3352; --back: #f0b45a; --back-bg: #3a2e1a;
-      --warn: #ff8a80; --code-bg: #1b1e24; --tip-bg: #e6e8ec; --tip-text: #14161a;
+      --warn: #ff8a80; --ok: #7fd18f; --code-bg: #1b1e24; --tip-bg: #e6e8ec; --tip-text: #14161a;
     }
   }
   * { box-sizing: border-box; }
@@ -46,8 +47,9 @@
   .meta { color: var(--muted); font-size: 12px; }
   .actions { margin-left: auto; display: flex; gap: 8px; }
   .legend { width: 100%; color: var(--muted); font-size: 12px; }
+  .legend:empty { display: none; }
 
-  .board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+  .board { display: grid; grid-template-columns: repeat(var(--columns, 5), minmax(0, 1fr)); gap: 12px; padding: 16px; }
   @media (max-width: 1100px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 640px) { .board { grid-template-columns: 1fr; } .actions { margin-left: 0; } }
   .column { background: var(--panel); border-radius: 10px; padding: 10px; min-height: 120px; min-width: 0; }
@@ -58,11 +60,10 @@
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
           padding: 10px 12px; margin-bottom: 10px; }
   .card header { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
-  .card h3 { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+  .card h3 { margin: 0; font-size: 14px; overflow-wrap: anywhere; flex: 1 1 auto; min-width: 0; }
   .owner { flex: 0 1 auto; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
            font-size: 11px; padding: 2px 8px; border-radius: 999px;
            background: var(--accent-bg); color: var(--accent); }
-  .card h3 { flex: 1 1 auto; min-width: 0; }
   .owner.none { background: transparent; color: var(--muted); border: 1px dashed var(--border); }
   .owner.missing { color: var(--warn); border-color: var(--warn); flex: none; max-width: none; }
   .summary { margin: 8px 0; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 4;
@@ -70,139 +71,39 @@
   .summary strong { color: var(--text); }
   dl { margin: 8px 0 0; display: grid; gap: 2px; font-size: 12px; }
   dl div { display: flex; gap: 6px; min-width: 0; }
-  dt { color: var(--muted); width: 56px; flex: none; }
+  dt { color: var(--muted); width: 64px; flex: none; }
   dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  .progress { height: 4px; border-radius: 2px; background: var(--panel); margin: 8px 0 2px; overflow: hidden; }
+  .progress span { display: block; height: 100%; background: var(--ok); }
   details { margin-top: 8px; font-size: 12px; color: var(--muted); }
   details summary { cursor: pointer; }
-  details ol { margin: 6px 0 0; padding-left: 18px; }
-
-  /* Escalations on the left; the one way forward — continue the stage's workflow — on the right. */
-  .moves { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px;
-           border-top: 1px dashed var(--border); position: relative; }
-  .moves .back, .moves .forward { display: flex; flex-wrap: wrap; gap: 6px; }
-  .moves .forward { margin-left: auto; }
-
-  button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer;
-           border: 1px solid var(--border); background: var(--card); color: var(--text); }
-  .top button { position: relative; }
-  button:hover { border-color: var(--accent); }
-  button.forward { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
-  button.back { border-color: var(--back); color: var(--back); background: var(--back-bg); }
-  button[data-tip]:hover::after, button[data-tip]:focus-visible::after {
-    content: attr(data-tip); position: absolute; z-index: 10; left: 0; bottom: calc(100% + 6px);
-    width: max-content; max-width: 300px; white-space: pre-line; text-align: left;
-    background: var(--tip-bg); color: var(--tip-text); padding: 7px 9px; border-radius: 6px;
-    font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none;
-  }
-  /* On a card the tooltip spans the card, so it never runs off the edge of a column. */
-  .moves button[data-tip]:hover::after, .moves button[data-tip]:focus-visible::after {
-    left: 0; right: 0; width: auto; max-width: none; bottom: calc(100% + 4px);
-  }
-  .top button[data-tip]:hover::after, .top button[data-tip]:focus-visible::after {
-    left: auto; right: 0; bottom: auto; top: calc(100% + 6px);
-  }
-
-  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 20;
-           max-width: min(640px, calc(100% - 32px)); background: var(--tip-bg); color: var(--tip-text);
-           padding: 10px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .15s;
-           pointer-events: none; }
-  .toast.show { opacity: 1; }
-  .toast code { background: transparent; color: inherit; padding: 0; }
+  details ol, details ul { margin: 6px 0 0; padding-left: 18px; }
+  .milestones li { margin: 2px 0; }
+  .stage { font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 0 5px; border-radius: 4px;
+           border: 1px solid var(--border); margin-right: 4px; }
+  .stage.done { color: var(--ok); border-color: var(--ok); }
+  .stage.specifying, .stage.building, .stage.review { color: var(--accent); border-color: var(--accent); }
+  .milestones li.superseded .name { text-decoration: line-through; }
 </style>
 </head>
 <body>
   <div class="top">
     <h1>Kanban</h1>
-    <span class="meta" id="meta">no board data — render this template with the opensprint-kanban skill</span>
-    <div class="actions">
-      <button type="button" id="refresh">Refresh</button>
-      <button type="button" class="forward" id="add">+ Backlog an item</button>
-    </div>
-    <div class="legend"><strong>Continue →</strong> resumes the stage's workflow where it paused; the card moves on when that work is done.
-      <strong>← back</strong> escalates — dev · devops to product · maintainer to the operator — and jumps to the state that reopens.
-      A button copies the command that starts a fresh agent session in the card's worktree; paste it into a terminal.</div>
+    <span class="meta" id="meta">no board data — render this template with /opsp:kanban</span>
+    <div class="actions" id="actions"></div>
+    <div class="legend" id="legend"></div>
   </div>
   <main class="board" id="board"></main>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="board-config">{"columns":[{"key":"backlog","title":"Backlog","states":["exploring"],"held":false},{"key":"planning","title":"Planning","states":["exploring"],"held":true},{"key":"dev","title":"Dev","states":["proposed","building"]},{"key":"attestation","title":"Attestation","states":["ready-for-attestation","attested"]},{"key":"done","title":"Done","states":["completed","declined"]}],"owned":["building","ready-for-attestation","attested"]}</script>
 
 <!-- opensprint:cards -->
 
 <script>
 (() => {
-  // Each column is a stage of work, and each stage has one workflow that does it.
-  // A card's column follows from its state — and, before propose, from whether
-  // triage has picked it up (claimed it).
-  const COLUMNS = [
-    { key: 'backlog', title: 'Backlog' },
-    { key: 'planning', title: 'Planning' },
-    { key: 'dev', title: 'Dev' },
-    { key: 'attestation', title: 'Attestation' },
-    { key: 'done', title: 'Done' },
-  ];
-  function columnOf(card) {
-    switch (card.state) {
-      case 'exploring': return card.owner ? 'planning' : 'backlog';
-      case 'proposed': case 'building': return 'dev';
-      case 'ready-for-attestation': case 'attested': return 'attestation';
-      default: return 'done';
-    }
-  }
-  const OWNED = ['building', 'ready-for-attestation', 'attested'];
+  const configNode = document.getElementById('board-config');
+  const CONFIG = configNode ? JSON.parse(configNode.textContent) : { columns: [], owned: [] };
 
-  // Forward is always the same move: continue the stage's workflow from where
-  // it paused. The workflow moves the card on when its work is done.
-  const CONTINUE = {
-    exploring: (card) => card.owner
-      ? { workflow: 'propose', hat: 'product · maintainer · dev · devops', lands: 'Dev, at proposed',
-          when: 'the plan is complete: driver-specs, ADRs, milestones and the bar are written' }
-      : { workflow: 'triage', hat: 'product · maintainer', lands: 'Planning, once claimed',
-          when: 'picked up: claimed, and the strategy brainstormed (or declined, with the reason)' },
-    proposed: () => ({ workflow: 'apply', hat: 'dev · devops', lands: 'Dev, at building',
-      when: 'the first milestone starts; on to Attestation once the last one closes' }),
-    building: () => ({ workflow: 'apply', hat: 'dev · devops', lands: 'Attestation, at ready-for-attestation',
-      when: 'the next milestone; on to Attestation by itself once the last one closes' }),
-    'ready-for-attestation': () => ({ workflow: 'attest', hat: 'product · maintainer', lands: 'Attestation, at attested',
-      when: 'every bar carries a posture, and the change questions are answered' }),
-    attested: () => ({ workflow: 'archive', hat: 'product · maintainer · dev · devops', lands: 'Done, at completed',
-      when: 'the views are compiled and the branch merges' }),
-  };
-
-  // Backward is an escalation: work goes up a rung — from dev/devops to
-  // product/maintainer, and from there to the operator — and jumps straight to
-  // the state that rung reopens. The edges are TRANSITIONS in
-  // src/core/initiative-transitions.ts.
-  const ESCALATE = {
-    building: [
-      { label: 'Reexplore', workflow: 'reexplore', to: 'exploring', rung: 'the operator — the goal itself',
-        lands: 'Planning', when: 'the goal itself is in question' },
-      { label: 'Repropose', workflow: 'repropose', to: 'proposed', rung: 'product · maintainer — the strategy',
-        lands: 'Dev, at proposed, once restated', when: 'the goal holds; what was decided about reaching it does not' },
-    ],
-    'ready-for-attestation': [
-      { label: 'Reexplore', workflow: 'reexplore', to: 'exploring', rung: 'the operator — the goal itself',
-        lands: 'Planning', when: 'the goal no longer holds' },
-      { label: 'Repropose', workflow: 'repropose', to: 'proposed', rung: 'product · maintainer — the strategy',
-        lands: 'Dev, at proposed, once restated', when: 'the strategy must be restated, and its measures with it' },
-      { label: 'Request a change', workflow: 'attest', to: 'building', rung: 'back to dev · devops — the work',
-        lands: 'Dev, at building', when: 'everything holds; the work was not finished' },
-    ],
-    declined: [
-      { label: 'Revive', workflow: 'triage', to: 'exploring', rung: 'product · maintainer',
-        lands: 'Backlog', when: 'a declined idea is revived, keeping its history' },
-    ],
-  };
-
-  // How the agent is started. One entry per harness; the board only needs to
-  // know how to start a session with a prompt, and what a workflow is called
-  // there. Claude Code: `claude "<prompt>"` starts an interactive session with
-  // the prompt already sent, and the generated commands are /opsp:opsp-<name>.
-  const HARNESS = {
-    name: 'Claude Code',
-    start: (prompt) => `claude ${shellQuote(prompt)}`,
-    invoke: (workflow, id) => `/opsp:opsp-${workflow}${id ? ` ${id}` : ''}`,
-  };
-
-  const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
   const decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.trim()), (c) => c.charCodeAt(0)));
 
   function parseKeyValues(text) {
@@ -214,18 +115,42 @@
     return out;
   }
 
+  // The card format src/core/kanban.ts writes: frontmatter, a summary, then
+  // "## Milestones" ("- [stage] name: description") and "## History".
   function parseCard(text) {
     const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
     if (!match) return null;
-    const card = { history: [] };
+    const card = { milestones: [], history: [] };
     for (const line of match[1].split(/\r?\n/)) {
-      const kv = line.match(/^([a-z-]+):\s?(.*)$/);
+      const kv = line.match(/^([a-z]+):\s?(.*)$/);
       if (kv) card[kv[1]] = kv[2].trim();
     }
-    const [summary = '', history = ''] = match[2].split(/^## History\s*$/m);
-    card.summary = summary.trim();
-    card.history = history.split(/\r?\n/).map((l) => l.replace(/^- /, '').trim()).filter(Boolean);
+    const sections = { '': [] };
+    let current = '';
+    for (const line of match[2].split(/\r?\n/)) {
+      if (line === '## Milestones' || line === '## History') { current = line; sections[current] = []; continue; }
+      sections[current].push(line);
+    }
+    const items = (heading) => (sections[heading] || []).filter((l) => l.startsWith('- ')).map((l) => l.slice(2));
+    card.summary = sections[''].join('\n').trim();
+    for (const item of items('## Milestones')) {
+      const m = item.match(/^\[([a-z]+)\]\s?(.*)$/);
+      if (!m) continue;
+      const colon = m[2].indexOf(':');
+      card.milestones.push(colon === -1
+        ? { name: '', description: m[2].trim(), stage: m[1] }
+        : { name: m[2].slice(0, colon).trim(), description: m[2].slice(colon + 1).trim(), stage: m[1] });
+    }
+    card.history = items('## History');
     return card.id ? card : null;
+  }
+
+  // A card goes in the first column whose states hold its state and, where the
+  // column says, whether anyone holds the card (KANBAN_COLUMNS).
+  function columnOf(card) {
+    const held = Boolean(card.owner);
+    const column = CONFIG.columns.find((c) => c.states.includes(card.state) && (c.held === undefined || c.held === held));
+    return column ? column.key : null;
   }
 
   function el(tag, attrs = {}, ...children) {
@@ -259,95 +184,49 @@
 
   const metaNode = document.getElementById('board-meta');
   const META = metaNode ? parseKeyValues(decode(metaNode.textContent)) : {};
+  const when = (iso) => (iso || '—').replace('T', ' ').replace('Z', ' UTC');
 
-  /** The commands that open the card's worktree — or make it — and start the workflow there. */
-  function launchScript(card, move) {
-    const branch = card.branch || `opsp/${card.id}`;
-    const fallback = `${META.parent || '..'}/${META.repo || 'repo'}-opsp-${card.id}`;
-    const pattern = `refs/heads/${branch}`.replace(/\//g, '\\/');
-    return [
-      `cd ${shellQuote(META.main || '.')} && git fetch -q origin`,
-      `WT=$(git worktree list --porcelain | awk '/^worktree /{w=substr($0,10)} /^branch ${pattern}$/{print w}')`,
-      `[ -n "$WT" ] || { WT=${shellQuote(fallback)}; git worktree add -q "$WT" ${branch} 2>/dev/null || git worktree add -q "$WT" -b ${branch} origin/${branch}; }`,
-      `cd "$WT" && ${HARNESS.start(HARNESS.invoke(move.workflow, card.id))}`,
-    ].join('\n');
+  // Superseded milestones are kept on the card and left out of progress, as BOARD.md counts them.
+  function milestoneSummary(card) {
+    if (card.milestones.length === 0) return null;
+    const live = card.milestones.filter((m) => m.stage !== 'superseded');
+    const done = live.filter((m) => m.stage === 'done').length;
+    const next = live.find((m) => m.stage !== 'done');
+    const percent = live.length === 0 ? 100 : Math.round((done / live.length) * 100);
+    return el('div', {},
+      el('div', { class: 'progress', title: `${done} of ${live.length} done` }, el('span', { style: `width:${percent}%` })),
+      el('details', { class: 'milestones' },
+        el('summary', {}, `Milestones ${done}/${live.length}` + (next ? ` · next: ${next.name || next.description}` : '')),
+        el('ul', {}, card.milestones.map((m) =>
+          el('li', { class: m.stage, title: m.description },
+            el('span', { class: `stage ${m.stage}` }, m.stage),
+            el('span', { class: 'name' }, m.name || m.description))))));
   }
 
-  const toast = document.getElementById('toast');
-  let toastTimer;
-  function say(...parts) {
-    toast.replaceChildren(...parts);
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 4500);
+  // Filled in by stage-actions: the moves a card offers from its column.
+  function moves(card) {
+    return null;
   }
-
-  async function copy(text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      const area = el('textarea', { style: 'position:fixed;opacity:0' });
-      area.value = text;
-      document.body.append(area);
-      area.select();
-      const ok = document.execCommand('copy');
-      area.remove();
-      return ok;
-    }
-  }
-
-  function launchButton(card, move, cls, label, tipLines) {
-    const tip = [HARNESS.invoke(move.workflow, card.id), ...tipLines, '',
-      `click: copy the command that opens a fresh ${HARNESS.name} session in this card's worktree`].join('\n');
-    return el('button', {
-      type: 'button', class: cls, 'data-tip': tip,
-      onclick: async () => {
-        const ok = await copy(launchScript(card, move));
-        say(ok ? 'Copied — paste into a terminal to start ' : 'Could not copy. The command is ',
-            el('code', {}, HARNESS.invoke(move.workflow, card.id)), ` in ${card.id}'s worktree.`);
-      },
-    }, label);
-  }
-
-  const continueButton = (card, move) => launchButton(card, move, 'forward', `Continue: ${move.workflow} →`, [
-    `resumes ${move.workflow} where it paused`,
-    `hat: ${move.hat}`,
-    `lands: ${move.lands}`,
-    `when: ${move.when}`,
-  ]);
-
-  const escalateButton = (card, move) => launchButton(card, move, 'back', `← ${move.label}`, [
-    `escalates to ${move.rung}`,
-    `move: ${card.state} → ${move.to}`,
-    `lands: ${move.lands}`,
-    `when: ${move.when}`,
-  ]);
 
   function renderCard(card) {
+    const owned = CONFIG.owned.includes(card.state);
     const ownerChip = card.owner
       ? el('span', { class: 'owner', title: card.owner }, card.owner)
-      : el('span', { class: OWNED.includes(card.state) ? 'owner none missing' : 'owner none' },
-           OWNED.includes(card.state) ? 'no owner' : 'unowned');
-    const forward = CONTINUE[card.state] ? CONTINUE[card.state](card) : null;
-    const back = ESCALATE[card.state] || [];
-    return el('article', { class: 'card' },
+      : el('span', { class: owned ? 'owner none missing' : 'owner none' }, owned ? 'no owner' : 'unowned');
+    return el('article', { class: 'card', 'data-id': card.id, 'data-state': card.state },
       el('header', {}, el('h3', {}, card.title || card.id), ownerChip),
       card.summary ? el('p', { class: 'summary' }, inline(card.summary)) : null,
       el('dl', {},
         el('div', {}, el('dt', {}, 'id'), el('dd', {}, el('code', {}, card.id))),
         el('div', {}, el('dt', {}, 'state'), el('dd', {}, card.state || '—')),
         el('div', {}, el('dt', {}, 'branch'), el('dd', {}, el('code', {}, card.branch || '—'))),
-        el('div', {}, el('dt', {}, 'updated'), el('dd', {}, (card.updated || '—').replace('T', ' ').replace('Z', ' UTC')))),
+        el('div', {}, el('dt', {}, 'updated'), el('dd', {}, when(card.updated)))),
+      milestoneSummary(card),
       card.history.length
         ? el('details', {}, el('summary', {}, `History (${card.history.length})`),
              el('ol', {}, card.history.map((h) => el('li', {}, h))))
         : null,
-      forward || back.length
-        ? el('div', { class: 'moves' },
-            el('div', { class: 'back' }, back.map((m) => escalateButton(card, m))),
-            el('div', { class: 'forward' }, forward ? continueButton(card, forward) : null))
-        : null);
+      moves(card));
   }
 
   const cards = [...document.querySelectorAll('script.card')]
@@ -356,33 +235,18 @@
     .sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
 
   const board = document.getElementById('board');
-  for (const column of COLUMNS) {
+  board.style.setProperty('--columns', String(CONFIG.columns.length || 1));
+  for (const column of CONFIG.columns) {
     const inColumn = cards.filter((c) => columnOf(c) === column.key);
-    board.append(el('section', { class: 'column' },
+    board.append(el('section', { class: 'column', 'data-column': column.key },
       el('h2', {}, column.title, el('span', {}, String(inColumn.length))),
       inColumn.length ? inColumn.map(renderCard) : el('p', { class: 'empty' }, 'Nothing here.')));
   }
 
   if (META.ref) {
     document.getElementById('meta').replaceChildren(`${META.ref} @ `, el('code', {}, META.sha || '?'),
-      ` · ${cards.length} card(s) · read ${(META.at || '').replace('T', ' ').replace('Z', ' UTC')}`);
+      ` · ${cards.length} card(s) · read ${when(META.at)}`);
   }
-
-  // Header actions: backlog starts in the main checkout — the workflow makes the item's own branch.
-  const add = document.getElementById('add');
-  const backlogPrompt = HARNESS.invoke('backlog');
-  add.dataset.tip = `${backlogPrompt}\nhat: product · maintainer\nmove: → exploring\n\nclick: copy the command that opens a fresh ${HARNESS.name} session in the main checkout`;
-  add.addEventListener('click', async () => {
-    const ok = await copy(`cd ${shellQuote(META.main || '.')} && ${HARNESS.start(backlogPrompt)}`);
-    say(ok ? 'Copied — paste into a terminal to start ' : 'Could not copy. The command is ', el('code', {}, backlogPrompt), '.');
-  });
-  const refresh = document.getElementById('refresh');
-  const refreshPrompt = 'Render the kanban board with the opensprint-kanban skill';
-  refresh.dataset.tip = `re-run the render playbook (git fetch, fill this template)\n\nclick: copy the command that asks ${HARNESS.name} to do it`;
-  refresh.addEventListener('click', async () => {
-    const ok = await copy(`cd ${shellQuote(META.main || '.')} && ${HARNESS.start(refreshPrompt)}`);
-    say(ok ? 'Copied — paste into a terminal to re-render the board.' : 'Could not copy.');
-  });
 })();
 </script>
 </body>

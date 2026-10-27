@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kanban</title>
+<!--
+  opensprint live board — a static template (DEC-BOARD-READ-BY-GIT).
+
+  The page needs no server and loads nothing (DS-RUNTIME-LESS-BOARD). It is
+  filled twice:
+
+    when opensprint writes it, the opensprint:config marker becomes an
+      application/json script element, id board-config: { columns, owned, ... }
+
+    when the /opsp:kanban render playbook runs, the opensprint:cards marker becomes
+      a text/plain script element, id board-meta: base64 of key=value lines
+          keys: ref, sha, at, repo, main, parent
+      one text/plain script element, class card, per card: base64 of cards/(id).md
+
+  Base64 keeps any card text from breaking the page. The script below decodes
+  it as UTF-8 and parses each card itself, building every node with
+  createElement — card text is never read as HTML.
+-->
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #eceef2; --card: #ffffff; --text: #1d2027; --muted: #5f6775;
+    --border: #cfd4dc; --accent: #3b5bdb; --accent-bg: #e7ecff; --back: #8a5a00; --back-bg: #fff4e0;
+    --warn: #b3261e; --ok: #2b7a3d; --code-bg: #f1f3f6; --tip-bg: #1d2027; --tip-text: #f6f7f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --panel: #1c1f25; --card: #242830; --text: #e6e8ec; --muted: #9aa1ad;
+      --border: #454b58; --accent: #8ca2ff; --accent-bg: #2a3352; --back: #f0b45a; --back-bg: #3a2e1a;
+      --warn: #ff8a80; --ok: #7fd18f; --code-bg: #1b1e24; --tip-bg: #e6e8ec; --tip-text: #14161a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg);
+         padding: 1px 4px; border-radius: 4px; }
+
+  .top { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+         padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .top h1 { margin: 0; font-size: 18px; }
+  .meta { color: var(--muted); font-size: 12px; }
+  .actions { margin-left: auto; display: flex; gap: 8px; }
+  .legend { width: 100%; color: var(--muted); font-size: 12px; }
+  .legend:empty { display: none; }
+
+  .board { display: grid; grid-template-columns: repeat(var(--columns, 5), minmax(0, 1fr)); gap: 12px; padding: 16px; }
+  @media (max-width: 1100px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .board { grid-template-columns: 1fr; } .actions { margin-left: 0; } }
+  .column { background: var(--panel); border-radius: 10px; padding: 10px; min-height: 120px; min-width: 0; }
+  .column h2 { margin: 2px 4px 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em;
+               display: flex; justify-content: space-between; color: var(--muted); }
+  .empty { color: var(--muted); margin: 4px; font-size: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+          padding: 10px 12px; margin-bottom: 10px; }
+  .card header { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+  .card h3 { margin: 0; font-size: 14px; overflow-wrap: anywhere; flex: 1 1 auto; min-width: 0; }
+  .owner { flex: 0 1 auto; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+           font-size: 11px; padding: 2px 8px; border-radius: 999px;
+           background: var(--accent-bg); color: var(--accent); }
+  .owner.none { background: transparent; color: var(--muted); border: 1px dashed var(--border); }
+  .owner.missing { color: var(--warn); border-color: var(--warn); flex: none; max-width: none; }
+  .summary { margin: 8px 0; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 4;
+             -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .summary strong { color: var(--text); }
+  dl { margin: 8px 0 0; display: grid; gap: 2px; font-size: 12px; }
+  dl div { display: flex; gap: 6px; min-width: 0; }
+  dt { color: var(--muted); width: 64px; flex: none; }
+  dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  .progress { height: 4px; border-radius: 2px; background: var(--panel); margin: 8px 0 2px; overflow: hidden; }
+  .progress span { display: block; height: 100%; background: var(--ok); }
+  details { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  details summary { cursor: pointer; }
+  details ol, details ul { margin: 6px 0 0; padding-left: 18px; }
+  .milestones li { margin: 2px 0; }
+  .stage { font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 0 5px; border-radius: 4px;
+           border: 1px solid var(--border); margin-right: 4px; }
+  .stage.done { color: var(--ok); border-color: var(--ok); }
+  .stage.specifying, .stage.building, .stage.review { color: var(--accent); border-color: var(--accent); }
+  .milestones li.superseded .name { text-decoration: line-through; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>Kanban</h1>
+    <span class="meta" id="meta">no board data — render this template with /opsp:kanban</span>
+    <div class="actions" id="actions"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <main class="board" id="board"></main>
+
+<!-- opensprint:config -->
+
+<!-- opensprint:cards -->
+
+<script>
+(() => {
+  const configNode = document.getElementById('board-config');
+  const CONFIG = configNode ? JSON.parse(configNode.textContent) : { columns: [], owned: [] };
+
+  const decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.trim()), (c) => c.charCodeAt(0)));
+
+  function parseKeyValues(text) {
+    const out = {};
+    for (const line of text.split(/\r?\n/)) {
+      const i = line.indexOf('=');
+      if (i > 0) out[line.slice(0, i)] = line.slice(i + 1);
+    }
+    return out;
+  }
+
+  // The card format src/core/kanban.ts writes: frontmatter, a summary, then
+  // "## Milestones" ("- [stage] name: description") and "## History".
+  function parseCard(text) {
+    const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+    if (!match) return null;
+    const card = { milestones: [], history: [] };
+    for (const line of match[1].split(/\r?\n/)) {
+      const kv = line.match(/^([a-z]+):\s?(.*)$/);
+      if (kv) card[kv[1]] = kv[2].trim();
+    }
+    const sections = { '': [] };
+    let current = '';
+    for (const line of match[2].split(/\r?\n/)) {
+      if (line === '## Milestones' || line === '## History') { current = line; sections[current] = []; continue; }
+      sections[current].push(line);
+    }
+    const items = (heading) => (sections[heading] || []).filter((l) => l.startsWith('- ')).map((l) => l.slice(2));
+    card.summary = sections[''].join('\n').trim();
+    for (const item of items('## Milestones')) {
+      const m = item.match(/^\[([a-z]+)\]\s?(.*)$/);
+      if (!m) continue;
+      const colon = m[2].indexOf(':');
+      card.milestones.push(colon === -1
+        ? { name: '', description: m[2].trim(), stage: m[1] }
+        : { name: m[2].slice(0, colon).trim(), description: m[2].slice(colon + 1).trim(), stage: m[1] });
+    }
+    card.history = items('## History');
+    return card.id ? card : null;
+  }
+
+  // A card goes in the first column whose states hold its state and, where the
+  // column says, whether anyone holds the card (KANBAN_COLUMNS).
+  function columnOf(card) {
+    const held = Boolean(card.owner);
+    const column = CONFIG.columns.find((c) => c.states.includes(card.state) && (c.held === undefined || c.held === held));
+    return column ? column.key : null;
+  }
+
+  function el(tag, attrs = {}, ...children) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k === 'class') node.className = v;
+      else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
+      else node.setAttribute(k, v);
+    }
+    for (const child of children.flat()) {
+      if (child === null || child === undefined || child === false) continue;
+      node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+    }
+    return node;
+  }
+
+  // The little Markdown a summary carries: `code`, **bold**, [[record]] — built as nodes, never as HTML.
+  function inline(text) {
+    const out = [];
+    const re = /`([^`]+)`|\*\*([^*]+)\*\*|\[\[([A-Za-z0-9-]+)\]\]/g;
+    let last = 0;
+    for (let m; (m = re.exec(text)); ) {
+      out.push(text.slice(last, m.index));
+      out.push(m[2] !== undefined ? el('strong', {}, m[2]) : el('code', {}, m[1] ?? m[3]));
+      last = re.lastIndex;
+    }
+    out.push(text.slice(last));
+    return out;
+  }
+
+  const metaNode = document.getElementById('board-meta');
+  const META = metaNode ? parseKeyValues(decode(metaNode.textContent)) : {};
+  const when = (iso) => (iso || '—').replace('T', ' ').replace('Z', ' UTC');
+
+  // Superseded milestones are kept on the card and left out of progress, as BOARD.md counts them.
+  function milestoneSummary(card) {
+    if (card.milestones.length === 0) return null;
+    const live = card.milestones.filter((m) => m.stage !== 'superseded');
+    const done = live.filter((m) => m.stage === 'done').length;
+    const next = live.find((m) => m.stage !== 'done');
+    const percent = live.length === 0 ? 100 : Math.round((done / live.length) * 100);
+    return el('div', {},
+      el('div', { class: 'progress', title: `${done} of ${live.length} done` }, el('span', { style: `width:${percent}%` })),
+      el('details', { class: 'milestones' },
+        el('summary', {}, `Milestones ${done}/${live.length}` + (next ? ` · next: ${next.name || next.description}` : '')),
+        el('ul', {}, card.milestones.map((m) =>
+          el('li', { class: m.stage, title: m.description },
+            el('span', { class: `stage ${m.stage}` }, m.stage),
+            el('span', { class: 'name' }, m.name || m.description))))));
+  }
+
+  // Filled in by stage-actions: the moves a card offers from its column.
+  function moves(card) {
+    return null;
+  }
+
+  function renderCard(card) {
+    const owned = CONFIG.owned.includes(card.state);
+    const ownerChip = card.owner
+      ? el('span', { class: 'owner', title: card.owner }, card.owner)
+      : el('span', { class: owned ? 'owner none missing' : 'owner none' }, owned ? 'no owner' : 'unowned');
+    return el('article', { class: 'card', 'data-id': card.id, 'data-state': card.state },
+      el('header', {}, el('h3', {}, card.title || card.id), ownerChip),
+      card.summary ? el('p', { class: 'summary' }, inline(card.summary)) : null,
+      el('dl', {},
+        el('div', {}, el('dt', {}, 'id'), el('dd', {}, el('code', {}, card.id))),
+        el('div', {}, el('dt', {}, 'state'), el('dd', {}, card.state || '—')),
+        el('div', {}, el('dt', {}, 'branch'), el('dd', {}, el('code', {}, card.branch || '—'))),
+        el('div', {}, el('dt', {}, 'updated'), el('dd', {}, when(card.updated)))),
+      milestoneSummary(card),
+      card.history.length
+        ? el('details', {}, el('summary', {}, `History (${card.history.length})`),
+             el('ol', {}, card.history.map((h) => el('li', {}, h))))
+        : null,
+      moves(card));
+  }
+
+  const cards = [...document.querySelectorAll('script.card')]
+    .map((s) => { try { return parseCard(decode(s.textContent)); } catch { return null; } })
+    .filter(Boolean)
+    .sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
+
+  const board = document.getElementById('board');
+  board.style.setProperty('--columns', String(CONFIG.columns.length || 1));
+  for (const column of CONFIG.columns) {
+    const inColumn = cards.filter((c) => columnOf(c) === column.key);
+    board.append(el('section', { class: 'column', 'data-column': column.key },
+      el('h2', {}, column.title, el('span', {}, String(inColumn.length))),
+      inColumn.length ? inColumn.map(renderCard) : el('p', { class: 'empty' }, 'Nothing here.')));
+  }
+
+  if (META.ref) {
+    document.getElementById('meta').replaceChildren(`${META.ref} @ `, el('code', {}, META.sha || '?'),
+      ` · ${cards.length} card(s) · read ${when(META.at)}`);
+  }
+})();
+</script>
+</body>
+</html>

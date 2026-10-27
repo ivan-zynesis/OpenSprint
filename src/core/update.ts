@@ -23,6 +23,7 @@ import {
   getCommandContents,
   generateSkillContent,
   getToolsWithSkillsDir,
+  writeOpspLayer,
   type ToolVersionStatus,
 } from './shared/index.js';
 import {
@@ -231,6 +232,13 @@ export class UpdateCommand {
         if (!shouldGenerateCommands) {
           removedCommandCount += await this.removeCommandFiles(resolvedProjectPath, toolId);
         }
+
+        // The opsp layer, as init writes it: every opsp skill, command and the board template.
+        await writeOpspLayer(resolvedProjectPath, { value: tool.value, skillsDir: tool.skillsDir }, {
+          skills: shouldGenerateSkills,
+          commands: shouldGenerateCommands,
+          version: OPENSPEC_VERSION,
+        });
 
         spinner.succeed(`Updated ${tool.name}`);
         updatedTools.push(tool.name);
@@ -684,6 +692,12 @@ export class UpdateCommand {
             }
           }
         }
+
+        await writeOpspLayer(projectPath, { value: tool.value, skillsDir: tool.skillsDir }, {
+          skills: shouldGenerateSkills,
+          commands: shouldGenerateCommands,
+          version: OPENSPEC_VERSION,
+        });
 
         spinner.succeed(`Setup complete for ${tool.name}`);
         newlyConfigured.push(toolId);
