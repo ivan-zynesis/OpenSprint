@@ -338,15 +338,21 @@
         "DEC-ATTEST-OWNING-SECTION": "3fd1feb2cfdd1dd206968f2cf4f70989ec62db04cc32b6b478b6275955a56e1a",
         "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
         "DEC-BOARD-ALL-BRANCHES": "cce798e3cc00080b95fe11033c0402f6f712c9b75cee1b7197de8caa0f9ccf48",
+        "DEC-BOARD-BUTTON-LAUNCHES-SESSION": "45e07a03ca390b307c8f62e35ac8c6b5356ee54d3e6fd5146651bd5f2c0b998d",
+        "DEC-BOARD-ON-REMOTE-BRANCH": "2d6f4b2d3e803d6bac0f60cdfdee8f9bdb62bff18eeee83dc5eae42ae4e5a894",
+        "DEC-BOARD-READ-BY-GIT": "6349dd0197ec820f632dfe191a830fdd032b5b8dec3d3245f49ec9ade7cf5acd",
+        "DEC-CARD-WRITES-THROUGH-CLI": "6d01c8769ffc7e1eac8e5b492419e16d803adb42c2f32be8b2dc34fc10b5d439",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
+        "DEC-CONTINUE-FORWARD-ESCALATE-BACK": "66ad0c06cb48d4b2080532e78356ec03b9facbcb22a684da5e9a7e1f14d96483",
         "DEC-ESCALATION-IS-A-STAGE": "86cfa763bde45dd6c2e3d9bb636338601a8e3881e4e068a17186aa5455b7a7da",
         "DEC-ESCALATION-LADDER": "42d0f993372665f509b8d1eb5aa02190cd5358ea1c9bfe589efbd961940ff051",
         "DEC-HAT-HANDOFFS": "3127bdd655d9ec900ea5dcc2db0018a29db8bc7f8efc140bf5ab4f62c65810ab",
         "DEC-INITIATIVE-OWNER": "180b6a386a71219750a5ba1b976cb6632b4f20189f720972c89201989df0bf05",
         "DEC-KNOCKDOWN-ALL-VIEWS": "ae6c704484182f8cab756221ae5c858a6af903cba54d3cef5235b9e53b7c662d",
         "DEC-MIGRATE-SEPARATE-TOOL": "2a51607574aca62165152917bd874b489216ab28be42e7c87b30d2be277ffd16",
+        "DEC-MILESTONE-BOARD": "f26c6f554b2bd934934971db66e274356a4067307a78343a04a9a57b25afa9fd",
         "DEC-NO-DEFAULT-ARCHITECTURE-LOAD": "762bef3f0fc0b4d87ff1f6fe7d1af80621a5ab65b227dde7dcf5843ce38ae645",
         "DEC-REEXPLORE-NAME": "321aee06d5dc5e342b1b8981b7691868d1358e2f891e1f3fa7528a2843934ca8",
         "DEC-SCOPED-SEAL": "d6de4f4d15f9430743c326f86decb5affd280ee70cd15b85a235b94e559a5391",
@@ -359,8 +365,8 @@
         "pnpm-lock.yaml": "45b56ccda98c7359a62262e1359c7bad01c3712886e09ec4411f3574d108c00d",
         "tsconfig.json": "6293ae6dcdd69d5e58c61528c3ca38763d87f26e20471b03b2e2a474ad2fbc76"
       },
-      "inputHash": "5d1890f6ec88dfc45cd066362431efbd6e8ab0c1a6bcc6b6bbac47f7a4c747bf",
-      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
+      "inputHash": "a5029e86a334181a328483e4238a7ccddc0d8b0760a1d6232870f4c5f1240a3a",
+      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
     },
     {
       "hat": "dev",
@@ -410,15 +416,21 @@
         "DEC-ATTEST-OWNING-SECTION": "3fd1feb2cfdd1dd206968f2cf4f70989ec62db04cc32b6b478b6275955a56e1a",
         "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
         "DEC-BOARD-ALL-BRANCHES": "cce798e3cc00080b95fe11033c0402f6f712c9b75cee1b7197de8caa0f9ccf48",
+        "DEC-BOARD-BUTTON-LAUNCHES-SESSION": "45e07a03ca390b307c8f62e35ac8c6b5356ee54d3e6fd5146651bd5f2c0b998d",
+        "DEC-BOARD-ON-REMOTE-BRANCH": "2d6f4b2d3e803d6bac0f60cdfdee8f9bdb62bff18eeee83dc5eae42ae4e5a894",
+        "DEC-BOARD-READ-BY-GIT": "6349dd0197ec820f632dfe191a830fdd032b5b8dec3d3245f49ec9ade7cf5acd",
+        "DEC-CARD-WRITES-THROUGH-CLI": "6d01c8769ffc7e1eac8e5b492419e16d803adb42c2f32be8b2dc34fc10b5d439",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
+        "DEC-CONTINUE-FORWARD-ESCALATE-BACK": "66ad0c06cb48d4b2080532e78356ec03b9facbcb22a684da5e9a7e1f14d96483",
         "DEC-ESCALATION-IS-A-STAGE": "86cfa763bde45dd6c2e3d9bb636338601a8e3881e4e068a17186aa5455b7a7da",
         "DEC-ESCALATION-LADDER": "42d0f993372665f509b8d1eb5aa02190cd5358ea1c9bfe589efbd961940ff051",
         "DEC-HAT-HANDOFFS": "3127bdd655d9ec900ea5dcc2db0018a29db8bc7f8efc140bf5ab4f62c65810ab",
         "DEC-INITIATIVE-OWNER": "180b6a386a71219750a5ba1b976cb6632b4f20189f720972c89201989df0bf05",
         "DEC-KNOCKDOWN-ALL-VIEWS": "ae6c704484182f8cab756221ae5c858a6af903cba54d3cef5235b9e53b7c662d",
         "DEC-MIGRATE-SEPARATE-TOOL": "2a51607574aca62165152917bd874b489216ab28be42e7c87b30d2be277ffd16",
+        "DEC-MILESTONE-BOARD": "f26c6f554b2bd934934971db66e274356a4067307a78343a04a9a57b25afa9fd",
         "DEC-NO-DEFAULT-ARCHITECTURE-LOAD": "762bef3f0fc0b4d87ff1f6fe7d1af80621a5ab65b227dde7dcf5843ce38ae645",
         "DEC-REEXPLORE-NAME": "321aee06d5dc5e342b1b8981b7691868d1358e2f891e1f3fa7528a2843934ca8",
         "DEC-SCOPED-SEAL": "d6de4f4d15f9430743c326f86decb5affd280ee70cd15b85a235b94e559a5391",
@@ -426,8 +438,8 @@
         "DEC-VIEWS-FIRST-LOAD": "c677c0193c33f8bf74f3c2d1bac0a3bdc1adff1a7b16b0fa905979f45bae166f"
       },
       "observed": {},
-      "inputHash": "211425cd2c7799e11f989d1106114c1cf7255ef03bfefecc5773a1546eefb25c",
-      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
+      "inputHash": "1e039cbff659282c13e8ea3cbed3e790b12a3ddfb40a70be50c448d7d8f5ef83",
+      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
     },
     {
       "hat": "dev",
@@ -477,15 +489,21 @@
         "DEC-ATTEST-OWNING-SECTION": "3fd1feb2cfdd1dd206968f2cf4f70989ec62db04cc32b6b478b6275955a56e1a",
         "DEC-BAR-AT-PROPOSE": "f4a314e79e7ad70edbca023f2da5a02335b15c93269bbc95c57ced5c1423cf50",
         "DEC-BOARD-ALL-BRANCHES": "cce798e3cc00080b95fe11033c0402f6f712c9b75cee1b7197de8caa0f9ccf48",
+        "DEC-BOARD-BUTTON-LAUNCHES-SESSION": "45e07a03ca390b307c8f62e35ac8c6b5356ee54d3e6fd5146651bd5f2c0b998d",
+        "DEC-BOARD-ON-REMOTE-BRANCH": "2d6f4b2d3e803d6bac0f60cdfdee8f9bdb62bff18eeee83dc5eae42ae4e5a894",
+        "DEC-BOARD-READ-BY-GIT": "6349dd0197ec820f632dfe191a830fdd032b5b8dec3d3245f49ec9ade7cf5acd",
+        "DEC-CARD-WRITES-THROUGH-CLI": "6d01c8769ffc7e1eac8e5b492419e16d803adb42c2f32be8b2dc34fc10b5d439",
         "DEC-CLASSIFY-IN-QUESTION": "cab27acc1733dbde50d68ed1b7885238a4d1fd68641cd3f19003e69bd11424ad",
         "DEC-COMPILE-ON-APPROVAL": "e98a2efd0f849f5930177cfe2b742555d754237be488569aa1df47f90049205b",
         "DEC-COMPILE-ON-MILESTONE": "f31f82587550a80a008c555c563f0dc0cefe1fd9e3118a81e827ba24eaa40603",
+        "DEC-CONTINUE-FORWARD-ESCALATE-BACK": "66ad0c06cb48d4b2080532e78356ec03b9facbcb22a684da5e9a7e1f14d96483",
         "DEC-ESCALATION-IS-A-STAGE": "86cfa763bde45dd6c2e3d9bb636338601a8e3881e4e068a17186aa5455b7a7da",
         "DEC-ESCALATION-LADDER": "42d0f993372665f509b8d1eb5aa02190cd5358ea1c9bfe589efbd961940ff051",
         "DEC-HAT-HANDOFFS": "3127bdd655d9ec900ea5dcc2db0018a29db8bc7f8efc140bf5ab4f62c65810ab",
         "DEC-INITIATIVE-OWNER": "180b6a386a71219750a5ba1b976cb6632b4f20189f720972c89201989df0bf05",
         "DEC-KNOCKDOWN-ALL-VIEWS": "ae6c704484182f8cab756221ae5c858a6af903cba54d3cef5235b9e53b7c662d",
         "DEC-MIGRATE-SEPARATE-TOOL": "2a51607574aca62165152917bd874b489216ab28be42e7c87b30d2be277ffd16",
+        "DEC-MILESTONE-BOARD": "f26c6f554b2bd934934971db66e274356a4067307a78343a04a9a57b25afa9fd",
         "DEC-NO-DEFAULT-ARCHITECTURE-LOAD": "762bef3f0fc0b4d87ff1f6fe7d1af80621a5ab65b227dde7dcf5843ce38ae645",
         "DEC-REEXPLORE-NAME": "321aee06d5dc5e342b1b8981b7691868d1358e2f891e1f3fa7528a2843934ca8",
         "DEC-SCOPED-SEAL": "d6de4f4d15f9430743c326f86decb5affd280ee70cd15b85a235b94e559a5391",
@@ -497,8 +515,8 @@
         "src/core/schemas/change.schema.ts": "88726513993f66a29594b996a31340e3741c41cae0ff31d7f2da40348efc4106",
         "src/core/schemas/spec.schema.ts": "183e3f0b819fb5c866cde38dce59bc3a100889f3dc0fd86bc0401a8e0c07c5f1"
       },
-      "inputHash": "857762dce6f17a2ab09c6fdbf169065e56c3ad38310b2ffe1214dec5a9f007b1",
-      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
+      "inputHash": "83c118c70c237d4b5985d010708a0d042c9a68d3b0d1076669923f7a5cdd194c",
+      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
     },
     {
       "hat": "dev",
@@ -574,6 +592,7 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban.test.ts": "e91e2341a0521c32a0a063361272e9e07c02a6f19a1892f80279127d5e558d0e",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -613,8 +632,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
-      "outputHash": "4bcdb41b4246f0142111237874bf24288ac3e0e663f530bd2883c1880ece5a9d"
+      "inputHash": "76b1bb9181a5d38b8d2c656f1837f1643d99f6e6ca480a6cd2da1ee653bd089e",
+      "outputHash": "5d248ab99c96c5a90aa74e35e74d611a8da0efe3533a6830d1352af935e83430"
     },
     {
       "hat": "devops",
@@ -627,7 +646,7 @@
       },
       "observed": {},
       "inputHash": "b7d8ac731f3faf2521cdd5d35fbf41f9f42b2fab6cc08ff1680ae2004537a22b",
-      "outputHash": "c1c97ba18228a98f5d85910c21b4240df67329a5e351227724204c65c48a1b00"
+      "outputHash": "d62e8eb5654a3dad67c2b430c46ec73ecb50cbeb79d9dfa4a2fafb1f6ebe36b7"
     },
     {
       "hat": "devops",
@@ -643,7 +662,7 @@
         ".github/workflows/release-prepare.yml": "bc7d747b777da48bee2a5ad59e48e433e3a374b0f76960f575182cf76497152a"
       },
       "inputHash": "2fd187f7995c1d2f332dee8c6167da270a5b5a95815f57e1f1ef1dcec54705c4",
-      "outputHash": "c1c97ba18228a98f5d85910c21b4240df67329a5e351227724204c65c48a1b00"
+      "outputHash": "d62e8eb5654a3dad67c2b430c46ec73ecb50cbeb79d9dfa4a2fafb1f6ebe36b7"
     },
     {
       "hat": "devops",
@@ -719,6 +738,7 @@
         "test/core/initiative-git.test.ts": "8a2955299baeb9ce4f4026664d3812d5e10b8380b28be6bb6deac2dcc4cfc46c",
         "test/core/initiative-transitions.test.ts": "e1a866f5b64a129094ee91ea65b959e01fa84b7db680db3b5f7fd399b6425fab",
         "test/core/initiatives.test.ts": "8b07f3b90296c0b009a06dc5e30168078f8e892b4f883677a2dcd3eae3b03959",
+        "test/core/kanban.test.ts": "e91e2341a0521c32a0a063361272e9e07c02a6f19a1892f80279127d5e558d0e",
         "test/core/legacy-cleanup.test.ts": "120cea8c384751edf3089c1bda2bdbdcb52e3915b1314eeacafebeb6749c3a30",
         "test/core/list.test.ts": "3294cbe84da6493c4b771678e8d4b15e0319ec19340f3ff05455aa63ee7500e3",
         "test/core/migrate.test.ts": "5b4918b9c672fbd526f305adcada2a58a1e752d0d6c21555dae09f0b3ac5ce7a",
@@ -758,8 +778,8 @@
         "test/utils/marker-updates.test.ts": "396976228e13c62b5d96e20218f1c5e1da760d16e6e96365d70a2414770a426b",
         "test/utils/shell-detection.test.ts": "e02594aade050afbdf5d2063b0a11b87fae070760ec139d5f5a496bf40bfd092"
       },
-      "inputHash": "00a84ffaf1fd8f1b9ab6c471ce0346bc27728d444ce2ea1836b786ae5882306d",
-      "outputHash": "c1c97ba18228a98f5d85910c21b4240df67329a5e351227724204c65c48a1b00"
+      "inputHash": "76b1bb9181a5d38b8d2c656f1837f1643d99f6e6ca480a6cd2da1ee653bd089e",
+      "outputHash": "d62e8eb5654a3dad67c2b430c46ec73ecb50cbeb79d9dfa4a2fafb1f6ebe36b7"
     },
     {
       "hat": "maintainer",

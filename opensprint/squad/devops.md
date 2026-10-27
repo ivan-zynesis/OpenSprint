@@ -195,10 +195,16 @@ CI (`DEC-COMPILE-ON-MILESTONE`).
 
 ## Open Loops
 
-1 loop the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+Only what the harvest reported for this hat. Open loops are the backlog, and `/opsp:explore` →
+`/opsp:propose` is the triage that turns them into work (`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-- `DEC-032`
+One decision. A rule is a test or check that cites the record id (`DEC-013`).
 
-_No rule cites this decision._
+- **`DEC-032`** — an `### Evidence` block references a pipeline artifact, and a bar that cannot be
+  assessed before merge is attested `pending` and re-attested by the next initiative to touch that
+  area. No test or check cites it. It is shared with `dev`, which reports the same loop.
+
+The other three decisions routed to this hat — `DEC-029`, `DEC-030` and `DEC-COMPILE-ON-MILESTONE` —
+are not on the harvest's list, so a rule cites each.
