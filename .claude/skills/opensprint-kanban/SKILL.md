@@ -1,50 +1,59 @@
 ---
 name: opensprint-kanban
-description: Proof of concept — read the live board from the remote kanban branch with plain git, list every backlog item, and render the board in a browser from a static template. No server, no script.
+description: Show the live board — list every card on the remote kanban branch with plain git, or render the board in a browser from a static template. Reads only; nothing runs in the background.
 license: MIT
-compatibility: Requires git and a POSIX shell (Git Bash on Windows). Experimental.
+compatibility: Requires git and a POSIX shell (Git Bash on Windows).
 metadata:
   author: opensprint
-  version: "0.0.2-poc"
+  version: "1.0"
+  generatedBy: "0.1.0"
 ---
 
-Read the live board and show it. The board lives on **one branch of the remote** — `origin/kanban` —
-as one Markdown file per card, so every checkout, branch and pull request reads the same cards.
+Show the live board: list its cards, or render it in a browser.
 
-**This is a proof of concept** for the `kanban` backlog item, on branch `opsp/kanban`. It reads and
-renders only. Writing — backlog, claim, advance, ready, complete — is meant to go through
-`opensprint kanban …` commands that enforce the state machine (`DEC-STATE-MACHINE`); in this proof of
-concept those buttons are placeholders that say what they would run.
+The board lives on **one branch of the remote**, `origin/kanban`, as one Markdown file per card, so
+every checkout, branch and pull request reads the same cards (`DEC-BOARD-ON-REMOTE-BRANCH`). This
+skill only reads it. The page it renders is a **visualisation** for people; an agent works from the
+list, and through the `opensprint` CLI.
 
 ## How the board is stored
 
 ```
 origin/kanban
   README.md
-  cards/<id>.md      frontmatter: id, title, state, owner, created, updated, branch
-                     then a summary, then a "## History" list, one line per move
+  cards/<id>.md     frontmatter: id, title, state, owner, created, updated, branch
+                    then a summary, "## Milestones" — one "- [stage] name: description" per milestone —
+                    and "## History", one line per write
 ```
 
-| Column | States |
+| Column | Cards |
 |---|---|
-| Backlog | `exploring` |
-| Planning | `proposed` |
-| Dev | `building` |
+| Backlog | `exploring`, nobody holds it |
+| Planning | `exploring`, held — triage has claimed it |
+| Dev | `proposed`, `building` |
 | Attestation | `ready-for-attestation`, `attested` |
 | Done | `completed`, `declined` |
 
-## Playbook 1 — list the backlog (triage)
+A milestone's stage is one of `todo`, `specifying`, `building`, `review`, `done` or
+`superseded`.
 
-Always fetch first: the remote is the board, and a stale copy is not.
+## Playbook 1 — list the board
+
+Always fetch first: the remote is the board, and a copy read earlier is not.
 
 ```bash
-git fetch --quiet origin kanban
-for f in $(git ls-tree --name-only origin/kanban cards/); do
-  git show "origin/kanban:$f" | awk '
-    /^---$/ { n++; next }
-    n == 1 && /^(id|state|owner):/ { sub(/^[a-z]+: */, ""); printf "%-36s", $0 }
-    END { print "" }'
-done
+if git fetch --quiet origin +refs/heads/kanban:refs/remotes/origin/kanban 2>/dev/null; then
+  for f in $(git ls-tree --name-only origin/kanban cards/); do
+    git show "origin/kanban:$f" | awk '
+      /^---$/ { n++; next }
+      n == 1 && /^id:/    { id = substr($0, 5) }
+      n == 1 && /^state:/ { state = substr($0, 8) }
+      n == 1 && /^owner:/ { owner = substr($0, 8) }
+      END { printf "%-36s %-22s %s\n", id, state, (owner == "" ? "-" : owner) }'
+  done
+else
+  echo "origin has no board yet. 'opensprint kanban init' creates it and seeds every initiative."
+fi
 ```
 
 That prints `id  state  owner` for every card. To read one card in full:
@@ -53,70 +62,54 @@ That prints `id  state  owner` for every card. To read one card in full:
 git show origin/kanban:cards/<id>.md
 ```
 
-Backlog items are the cards at `exploring`. If a card names someone else as its owner, ask the
-operator before picking it up.
+Backlog items are the cards at `exploring` that nobody holds. If a card names someone else as its
+owner, ask the operator before picking it up.
 
 ## Playbook 2 — render the board
 
-Fill the static template with the cards and open it. Each card goes in **base64**, so no card text
+Fill the static template with the cards and open it. Each card goes in as **base64**, so no card text
 can break the page; the page decodes and parses the cards itself.
 
 ```bash
-git fetch --quiet origin kanban
-REF=origin/kanban
-TPL=.claude/skills/opensprint-kanban/board.html
-OUT="${TMPDIR:-/tmp}/opensprint-kanban.html"
-MARK='<!-- opensprint:cards -->'
-MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")   # the main checkout
-{
-  sed "/$MARK/,\$d" "$TPL"
-  printf '<script type="text/plain" id="board-meta">%s</script>\n' "$(
-    printf 'ref=%s\nsha=%s\nat=%s\nrepo=%s\nmain=%s\nparent=%s\n' \
-      "$REF" "$(git rev-parse --short "$REF")" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-      "$(basename "$MAIN")" "$MAIN" "$(dirname "$MAIN")" | base64 | tr -d '\n')"
-  for f in $(git ls-tree --name-only "$REF" cards/); do
-    printf '<script type="text/plain" class="card">%s</script>\n' \
-      "$(git show "$REF:$f" | base64 | tr -d '\n')"
-  done
-  sed "1,/$MARK/d" "$TPL"
-} > "$OUT"
-echo "$OUT"
+if git fetch --quiet origin +refs/heads/kanban:refs/remotes/origin/kanban 2>/dev/null; then
+  REF=origin/kanban
+  TPL="$(git rev-parse --show-toplevel)/.claude/skills/opensprint-kanban/board.html"
+  OUT="${TMPDIR:-/tmp}/opensprint-kanban.html"
+  MARK='<!-- opensprint:cards -->'
+  MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")   # the main checkout
+  {
+    sed "/$MARK/,\$d" "$TPL"
+    printf '<script type="text/plain" id="board-meta">%s</script>\n' "$(
+      printf 'ref=%s\nsha=%s\nat=%s\nrepo=%s\nmain=%s\nparent=%s\n' \
+        "$REF" "$(git rev-parse --short "$REF")" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        "$(basename "$MAIN")" "$MAIN" "$(dirname "$MAIN")" | base64 | tr -d '\n')"
+    for f in $(git ls-tree --name-only "$REF" cards/); do
+      printf '<script type="text/plain" class="card">%s</script>\n' \
+        "$(git show "$REF:$f" | base64 | tr -d '\n')"
+    done
+    sed "1,/$MARK/d" "$TPL"
+  } > "$OUT"
+  echo "$OUT"
+else
+  echo "origin has no board yet. 'opensprint kanban init' creates it and seeds every initiative."
+fi
 ```
 
-Then open `$OUT` — in your own browser pane if you have one, otherwise `open` (macOS), `xdg-open`
-(Linux) or `start` (Windows). To refresh, run the playbook again; nothing keeps running in between.
+Then open the file it printed — in your own browser pane if you have one, otherwise `open` (macOS),
+`xdg-open` (Linux) or `start` (Windows). To refresh, run the playbook again; nothing keeps running
+in between.
 
 ## What the page shows
 
-Five columns, each card with its owner, state, branch, last change and history. A card in flight
-with no owner is marked in red.
-
-**Each column is a stage, and each stage has one workflow that does it.** A card's column follows
-from its state — and before propose, from whether triage has picked it up:
-
-| Column | Cards | Continue → | ← Escalate |
-|---|---|---|---|
-| Backlog | `exploring`, nobody holds it | **triage** — the only way forward | |
-| Planning | `exploring`, claimed by triage | **propose** — how a plan completes | |
-| Dev | `proposed`, `building` | **apply** — on to Attestation once the last milestone closes | Repropose (product · maintainer), Reexplore (operator) |
-| Attestation | `ready-for-attestation`, `attested` | **attest**, then **archive** | Request a change (back to dev), Repropose, Reexplore |
-| Done | `completed`, `declined` | | Revive a declined idea (triage) |
-
-**Forward is always "continue".** It resumes the stage's workflow from where it paused, and that
-workflow moves the card on when its work is done. **Backward is an escalation**: work goes up a
-rung — from dev/devops to product/maintainer, and from there to the operator — and jumps straight to
-the state that rung reopens. Those are the moves `initiative-transitions.ts` allows; the board offers
-nothing else.
-
-**A button never moves a card.** Hovering shows the workflow, the hat or rung, where the card lands
-and when. Clicking copies a short script that opens the card's worktree — finding it, or
-making it from the branch — and starts a **fresh** agent session there with the workflow already
-invoked. The workflow loads its hat's context itself, and moves the card when its work is done.
-Pasting it into a terminal is the operator's consent; the page itself can run nothing.
+One column per stage, each card with its owner, state, branch, last change, its milestones — how
+many are done and which is next — and its history. A card in flight with nobody holding it is marked
+in red.
 
 ## Guardrails
 
 - **Read-only.** This skill never writes to `origin/kanban`, and never touches the working tree or
   the current branch.
 - **Fetch before you read.** Do not act on a list you made earlier; read again.
-- **Never edit a card by hand.** Moves belong to the tool that enforces the state machine.
+- **Never edit a card by hand.** A card moves through the workflow that owns the move, and is created
+  or corrected through `opensprint kanban init` and `opensprint kanban seed`.
+

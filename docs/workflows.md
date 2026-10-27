@@ -1,6 +1,6 @@
 # Workflows
 
-OpenSprint ships nineteen agent workflows. They are invoked by name in your agent
+OpenSprint ships twenty agent workflows. They are invoked by name in your agent
 (`/opsp:propose`), not from the shell — the CLI underneath them is in the
 [reference](#cli-reference) at the bottom.
 
@@ -272,6 +272,7 @@ an argument adopts it.
 | `/opsp:tree` | visualize the decision tree with blast radius |
 | `/opsp:rebuild-assess` | a driver-spec changed — cascade the re-evaluation |
 | `/opsp:migrate` | report records the current hat shapes can no longer select |
+| `/opsp:kanban` | list the live board, or render it in a browser — git and a shell, nothing that runs |
 | `opensprint frame` | what this branch changes, and against what base |
 | `opensprint advance` | move an initiative to its next state |
 | `opensprint claim` | name who holds an initiative's card |
