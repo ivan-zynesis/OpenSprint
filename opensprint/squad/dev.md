@@ -551,13 +551,12 @@ them (`src/core/schemas/`):
 
 ## Open Loops
 
-This section lists what the harvest reported for this hat and infers nothing beyond it. Open loops
-are the backlog, and they are triaged into work through `/opsp:explore` and then `/opsp:propose`
-(`DEC-007`).
+Only the loops the harvest reported for this hat appear here. None is inferred. Open loops are the
+backlog, and `/opsp:explore` → `/opsp:propose` is the triage that turns them into work (`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-Twelve decisions are unguarded. A rule is a test or a check that cites the record id (`DEC-013`).
+Twelve decisions are unguarded. A rule is a test or check that cites a record's id (`DEC-013`).
 
 | Area | Decisions |
 |---|---|
@@ -567,23 +566,20 @@ Twelve decisions are unguarded. A rule is a test or a check that cites the recor
 | surface and reconciliation | `DEC-017`, `DEC-005` |
 | shared with another hat | `DEC-020` (maintainer), `DEC-032` (devops) |
 
-**`DEC-INITIATIVE-OWNER` stays unguarded even though this milestone changed claiming.**
-`test/cli-e2e/claim.test.ts` was modified, but it cites no record id, so it guards nothing
-(`DEC-013`).
+`DEC-INITIATIVE-OWNER` is unguarded even though claiming writes the owner. The claim tests cite no
+record id (`test/cli-e2e/claim.test.ts`), and a test that cites nothing guards nothing (`DEC-013`).
 
-**Every live-board decision now has a test that cites it:**
+**Every live-board decision is cited by at least one test:**
 
-| Test | Decisions it cites |
+| Test | Cites |
 |---|---|
 | `test/core/kanban.test.ts` | `DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-MILESTONE-BOARD` |
 | `test/core/kanban-skill.test.ts` | `DEC-BOARD-READ-BY-GIT`, `DEC-CONTINUE-FORWARD-ESCALATE-BACK` |
 | `test/core/kanban-actions.test.ts` | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
-| `test/core/kanban-sync.test.ts` (new at this milestone) | `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE` |
+| `test/core/kanban-sync.test.ts` | `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE` |
+| `test/core/opsp-resume.test.ts` (new) | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
 
-A citation means some test asserts part of a decision, not necessarily all of it. Two kanban
-milestones are still open (`opensprint/initiatives/20261018-kanban.md`):
-
-- **`milestone-board`**: the board that `DEC-MILESTONE-BOARD` decides. Today the test covers only the
-  stage vocabulary on a card.
-- **`resumable-workflows`**: the resume path that "continue" depends on. `DEC-CONTINUE-FORWARD-ESCALATE-BACK`
-  names that dependency in its invalidation trigger.
+A citation means part of a decision is asserted, not necessarily all of it. One kanban milestone
+is still open: `milestone-board` (`opensprint/initiatives/20261018-kanban.md`). It builds the board
+`DEC-MILESTONE-BOARD` decides. For now, the test citing that record asserts only the stage
+vocabulary on a card.
