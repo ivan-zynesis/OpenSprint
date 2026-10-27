@@ -195,24 +195,18 @@ CI (`DEC-COMPILE-ON-MILESTONE`).
 
 ## Open Loops
 
-This section lists only what the harvest reports for this hat, and it reports one loop. Open
-loops are the backlog. `/opsp:explore` → `/opsp:propose` triages them into work (`DEC-007`).
+The harvest reports one loop for this hat, and it is listed here as reported, with nothing
+added. Open loops are the backlog. `/opsp:explore`, then `/opsp:propose`, triages them into work
+(`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-- **`DEC-032`** — no test or check cites this record's id. A citation like that is what counts as
-  a rule (`DEC-013`). The record decides two things:
-  - Evidence must reference an artifact that a pipeline produced.
-  - A bar that cannot be assessed before merge is attested as `pending`. The next initiative to
-    work in that area re-attests it.
+- **`DEC-032`**: no test or check cites this record id, and such a citation is what counts as a
+  rule (`DEC-013`). The record decides two things. Evidence must be a reference to a pipeline
+  artifact. A bar that cannot be assessed before merge is attested `pending`, and the next
+  initiative in that area attests it again. The record declares both `dev` and `devops`, so the
+  `dev` view lists the same loop (`DEC-028`).
 
-  The record declares both `dev` and `devops`, so the same loop also appears in the `dev` view
-  (`DEC-028`).
-
-The other three decisions routed here are guarded, because a rule cites each:
-
-- `DEC-029`
-- `DEC-030`
-- `DEC-COMPILE-ON-MILESTONE`
-
-The one test new at this milestone, `test/core/opsp-resume.test.ts`, cites none of these four.
+Rules cite the other three decisions routed here: `DEC-029`, `DEC-030` and
+`DEC-COMPILE-ON-MILESTONE`. The new test, `test/core/kanban-milestones.test.ts`, cites only
+`DEC-MILESTONE-BOARD`, so it adds no rule for any decision in this view.
