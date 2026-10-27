@@ -16,9 +16,13 @@ import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { collectAllBranches, CHECKOUT_SOURCE } from '../core/board.js';
 import { gitUserName } from '../core/initiative-git.js';
+import { resolveInitiative } from '../core/initiatives.js';
+import { describeBoardWrite, stageCard } from '../core/kanban-sync.js';
 import {
   DEFAULT_KANBAN_REMOTE,
   KANBAN_BRANCH,
+  MILESTONE_STAGES,
+  type MilestoneStage,
   kanbanNow,
   planSeed,
   readBoard,
@@ -170,4 +174,45 @@ export async function kanbanInitCommand(options: KanbanOptions = {}): Promise<vo
 
 export async function kanbanSeedCommand(initiative?: string, options: KanbanOptions = {}): Promise<void> {
   run('seed', options, initiative);
+}
+
+/**
+ * `opensprint kanban stage` — move one milestone's stage on the card, as apply
+ * reaches each step of its opsx cycle (DEC-MILESTONE-BOARD).
+ *
+ * A refused move — out of order, not checked off, not in the table — exits
+ * non-zero. A board that is missing or unreachable does not: like `advance`,
+ * the work it follows is never held up by the network.
+ */
+export async function kanbanStageCommand(
+  initiative: string | undefined,
+  milestone: string | undefined,
+  stage: string | undefined,
+  options: { json?: boolean } = {}
+): Promise<void> {
+  if (!initiative || !milestone || !stage) {
+    throw new Error(`Usage: opensprint kanban stage <initiative> <milestone> <${MILESTONE_STAGES.join('|')}>`);
+  }
+  if (!(MILESTONE_STAGES as readonly string[]).includes(stage)) {
+    throw new Error(`'${stage}' is not a stage. Stages: ${MILESTONE_STAGES.join(', ')}.`);
+  }
+  const projectRoot = process.cwd();
+  const entry = resolveInitiative(path.join(projectRoot, OPENSPRINT_DIR_NAME), initiative);
+  if (entry === null) {
+    throw new Error(`No initiative '${initiative}' in this checkout. Switch to its worktree first.`);
+  }
+
+  const result = stageCard(projectRoot, entry, milestone, stage as MilestoneStage, {
+    by: gitUserName(projectRoot) ?? 'unknown',
+  });
+
+  if (options.json) {
+    console.log(JSON.stringify({ initiative: entry.id, milestone, stage, board: result }, null, 2));
+    return;
+  }
+  const said = describeBoardWrite(result);
+  console.log();
+  console.log(`  ${chalk.bold(entry.id)}  ${milestone} → ${stage}`);
+  if (said !== null) console.log(said.tone === 'warn' ? chalk.yellow(`  ${said.text}`) : chalk.dim(`  ${said.text}`));
+  console.log();
 }

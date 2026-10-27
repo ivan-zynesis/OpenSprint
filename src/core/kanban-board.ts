@@ -18,6 +18,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { INITIATIVE_STATES, OWNED_STATES, type InitiativeState } from './initiatives.js';
 import { TRANSITIONS, type Transition } from './initiative-transitions.js';
+import { MILESTONE_STAGE_MOVES, type MilestoneStage, type StageMove } from './kanban.js';
 
 export interface KanbanColumn {
   key: string;
@@ -155,6 +156,29 @@ export interface KanbanAgent {
   workflows: Record<string, { command: string } | { skill: string }>;
 }
 
+/** One column of an initiative's milestone board: a stage of the opsx cycle (DEC-MILESTONE-BOARD). */
+export interface MilestoneColumn {
+  key: string;
+  title: string;
+  stages: readonly MilestoneStage[];
+}
+
+/** Five columns; a superseded milestone shows under Done, struck through. */
+export const MILESTONE_COLUMNS: readonly MilestoneColumn[] = [
+  { key: 'todo', title: 'To do', stages: ['todo'] },
+  { key: 'specifying', title: 'Specifying', stages: ['specifying'] },
+  { key: 'building', title: 'Building', stages: ['building'] },
+  { key: 'review', title: 'Review', stages: ['review'] },
+  { key: 'done', title: 'Done', stages: ['done', 'superseded'] },
+];
+
+/** The one way back on a ticket, from the stage table: Review to Specifying. */
+export function changeRequestMove(): StageMove {
+  const move = MILESTONE_STAGE_MOVES.find((m) => m.from === 'review' && m.to === 'specifying');
+  if (move === undefined) throw new Error('The stage table has no change request.');
+  return move;
+}
+
 export const BOARD_TEMPLATE_FILE = 'board.html';
 export const BOARD_CONFIG_MARKER = '<!-- opensprint:config -->';
 export const BOARD_CARDS_MARKER = '<!-- opensprint:cards -->';
@@ -173,10 +197,19 @@ export interface BoardConfig {
   moves: BoardMoves;
   /** Null where the page was generated for no tool: it then shows no buttons. */
   agent: KanbanAgent | null;
+  milestoneColumns: readonly MilestoneColumn[];
+  changeRequest: StageMove;
 }
 
 export function boardConfig(agent: KanbanAgent | null = null): BoardConfig {
-  return { columns: KANBAN_COLUMNS, owned: OWNED_STATES, moves: boardMoves(), agent };
+  return {
+    columns: KANBAN_COLUMNS,
+    owned: OWNED_STATES,
+    moves: boardMoves(),
+    agent,
+    milestoneColumns: MILESTONE_COLUMNS,
+    changeRequest: changeRequestMove(),
+  };
 }
 
 /**

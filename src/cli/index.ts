@@ -541,6 +541,21 @@ kanbanCmd
     }
   });
 
+kanbanCmd
+  .command('stage [initiative] [milestone] [stage]')
+  .description("Move a milestone's stage on its card: todo, specifying, building, review, done")
+  .option('--json', 'Output as JSON')
+  .action(async (initiative: string | undefined, milestone: string | undefined, stage: string | undefined, options: { json?: boolean }) => {
+    try {
+      const { kanbanStageCommand } = await import('../commands/kanban.js');
+      await kanbanStageCommand(initiative, milestone, stage, options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
 program
   .command('frame')
   .description('Report what this branch changes, and against what base')
