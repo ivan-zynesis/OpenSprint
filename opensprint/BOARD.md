@@ -27,7 +27,7 @@ In flight.
 
 | Initiative | State | Owner | Milestones | Next |
 |---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | building | Ivan Lee | 3/6 | workflow-moves-card |
+| [kanban](initiatives/20261018-kanban.md) | building | Ivan Lee | 4/6 | resumable-workflows |
 
 ## Handoff
 

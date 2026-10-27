@@ -551,13 +551,13 @@ them (`src/core/schemas/`):
 
 ## Open Loops
 
-This section lists only what the harvest reports for this hat, and nothing is inferred here. Open
-loops are the backlog, and they reach real work through triage: `/opsp:explore`, then
-`/opsp:propose` (`DEC-007`).
+This section lists what the harvest reported for this hat and infers nothing beyond it. Open loops
+are the backlog, and they are triaged into work through `/opsp:explore` and then `/opsp:propose`
+(`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-Twelve decisions are unguarded. A rule is a test or check that cites a record id (`DEC-013`).
+Twelve decisions are unguarded. A rule is a test or a check that cites the record id (`DEC-013`).
 
 | Area | Decisions |
 |---|---|
@@ -567,25 +567,23 @@ Twelve decisions are unguarded. A rule is a test or check that cites a record id
 | surface and reconciliation | `DEC-017`, `DEC-005` |
 | shared with another hat | `DEC-020` (maintainer), `DEC-032` (devops) |
 
-**No live-board decision is on the list now.** `test/core/kanban-actions.test.ts` was added at this
-milestone and cites `DEC-BOARD-BUTTON-LAUNCHES-SESSION` and `DEC-CONTINUE-FORWARD-ESCALATE-BACK`.
-It asserts four things:
+**`DEC-INITIATIVE-OWNER` stays unguarded even though this milestone changed claiming.**
+`test/cli-e2e/claim.test.ts` was modified, but it cites no record id, so it guards nothing
+(`DEC-013`).
 
-- the moves are derived from the transition table;
-- escalations are labelled by rung;
-- only legal transitions are offered;
-- the agent table comes from the command adapters, with Claude Code the one tool that launches a
-  session.
+**Every live-board decision now has a test that cites it:**
 
-The other four live-board decisions were already cited: by `test/core/kanban.test.ts` and
-`test/core/kanban-skill.test.ts`.
+| Test | Decisions it cites |
+|---|---|
+| `test/core/kanban.test.ts` | `DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-MILESTONE-BOARD` |
+| `test/core/kanban-skill.test.ts` | `DEC-BOARD-READ-BY-GIT`, `DEC-CONTINUE-FORWARD-ESCALATE-BACK` |
+| `test/core/kanban-actions.test.ts` | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
+| `test/core/kanban-sync.test.ts` (new at this milestone) | `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE` |
 
-A citation means some test asserts part of a decision, not all of it. Two decisions are not fully
-built yet:
+A citation means some test asserts part of a decision, not necessarily all of it. Two kanban
+milestones are still open (`opensprint/initiatives/20261018-kanban.md`):
 
-- `DEC-CARD-WRITES-THROUGH-CLI`: no workflow writes cards yet; that is the open
-  `workflow-moves-card` milestone.
-- `DEC-MILESTONE-BOARD`: the board does not render milestones yet; that is the open
-  `milestone-board` milestone.
-
-Both milestones are listed in `opensprint/initiatives/20261018-kanban.md`.
+- **`milestone-board`**: the board that `DEC-MILESTONE-BOARD` decides. Today the test covers only the
+  stage vocabulary on a card.
+- **`resumable-workflows`**: the resume path that "continue" depends on. `DEC-CONTINUE-FORWARD-ESCALATE-BACK`
+  names that dependency in its invalidation trigger.

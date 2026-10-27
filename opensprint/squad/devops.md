@@ -195,21 +195,19 @@ CI (`DEC-COMPILE-ON-MILESTONE`).
 
 ## Open Loops
 
-The harvest reports one loop for this hat. This section lists that loop and adds nothing to it.
-Open loops are the backlog, and they reach real work through triage: `/opsp:explore`, then
-`/opsp:propose` (`DEC-007`).
+The harvest reported one loop for this hat. Nothing here is inferred beyond it. Open loops are the
+backlog, and `/opsp:explore` followed by `/opsp:propose` triages them into work (`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
 - **`DEC-032`**: no test or check cites this record id. A rule is exactly such a citation
-  (`DEC-013`). The decision has two parts:
-  - Evidence must be a reference to a pipeline artifact.
-  - A bar that cannot be assessed before merge is attested `pending`, and the next initiative in
-    that area re-attests it.
+  (`DEC-013`).
+  - What it decides: evidence is a reference to an artifact a pipeline produced. A bar that cannot be
+    assessed before merge is attested as `pending`, and the next initiative to work in that area
+    attests it again.
+  - It declares both `dev` and `devops` as its hats, so the `dev` view reports the same loop
+    (`DEC-028`).
 
-  The decision declares both `dev` and `devops`, so the `dev` view reports the same loop
-  (`DEC-028`).
-
-`DEC-029`, `DEC-030` and `DEC-COMPILE-ON-MILESTONE` route here too, and each is cited by a rule.
-The test added at this milestone, `test/core/kanban-actions.test.ts`, does not cite any of the four
-devops decisions, and neither does the changed `test/core/kanban-skill.test.ts`.
+Three other decisions route here, and a rule cites each: `DEC-029`, `DEC-030` and
+`DEC-COMPILE-ON-MILESTONE`. Among the tests this milestone added or changed, only
+`test/core/opsp-board-owners.test.ts` cites one of them, `DEC-029`. None of them cites `DEC-032`.
