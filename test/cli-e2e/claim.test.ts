@@ -133,7 +133,8 @@ describe('opensprint claim (e2e)', () => {
   it('--json carries the change', async () => {
     initiative('a', 'state: building\nowner: ivan\n');
     const r = await claim('a', '--owner', 'nhat', '--json');
-    expect(JSON.parse(r.stdout)).toEqual({ initiative: 'a', from: 'ivan', to: 'nhat', changed: true, dryRun: false });
+    // No origin remote in this repository, so the live board is not consulted.
+    expect(JSON.parse(r.stdout)).toEqual({ initiative: 'a', from: 'ivan', to: 'nhat', changed: true, dryRun: false, board: { outcome: 'no-remote' } });
   });
 
   it('resolves by frontmatter id, not by the dated filename', async () => {

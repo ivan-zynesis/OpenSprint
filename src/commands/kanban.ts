@@ -29,8 +29,6 @@ import {
 } from '../core/kanban.js';
 
 export interface KanbanOptions {
-  /** The remote holding the board. Defaults to `origin`. */
-  remote?: string;
   /** Report what would be written, and push nothing. */
   dryRun?: boolean;
   json?: boolean;
@@ -57,16 +55,30 @@ function knownInitiatives(projectRoot: string): CardSource[] {
   }));
 }
 
-function run(mode: 'init' | 'seed', options: KanbanOptions): void {
+function run(mode: 'init' | 'seed', options: KanbanOptions, only?: string): void {
   const projectRoot = process.cwd();
-  const remote = options.remote ?? DEFAULT_KANBAN_REMOTE;
+  // One board every checkout and every playbook agrees on (DEC-BOARD-ON-REMOTE-BRANCH).
+  const remote = DEFAULT_KANBAN_REMOTE;
   const board = `${remote}/${KANBAN_BRANCH}`;
-  const sources = knownInitiatives(projectRoot);
+  let sources = knownInitiatives(projectRoot);
+  if (only !== undefined) {
+    sources = sources.filter((s) => s.entry.id === only || s.entry.stem === only);
+    if (sources.length === 0) {
+      throw new Error(`No initiative '${only}' in this checkout or on any opsp/* branch this machine has.`);
+    }
+  }
   const stamp = { at: kanbanNow(), by: gitUserName(projectRoot) ?? 'unknown' };
 
+  // A workflow seeding its own new item runs on projects that never made a
+  // board, so with an initiative named a missing board is a note, not an error.
+  let noBoard = false;
   const decide = (snapshot: Parameters<typeof planSeed>[0]): Transaction<SeedReport> => {
     if (mode === 'seed' && snapshot.commit === null) {
-      throw new Error(`${board} does not exist. 'opensprint kanban init' creates and seeds it.`);
+      if (only === undefined) {
+        throw new Error(`${board} does not exist. 'opensprint kanban init' creates and seeds it.`);
+      }
+      noBoard = true;
+      return { write: null, value: { existed: false, added: [], drifted: [], resynced: [], agreeing: 0 } };
     }
     return planSeed(snapshot, sources, { mode, resync: options.resync === true, stamp });
   };
@@ -82,6 +94,17 @@ function run(mode: 'init' | 'seed', options: KanbanOptions): void {
     wrote = false;
   } else {
     ({ value: report, commit, wrote } = transact(projectRoot, remote, decide));
+  }
+
+  if (noBoard) {
+    if (options.json) {
+      console.log(JSON.stringify({ board, commit: null, wrote: false, noBoard: true }, null, 2));
+    } else {
+      console.log();
+      console.log(chalk.dim(`  ${remote} has no live board, so there is no card to add. 'opensprint kanban init' creates one.`));
+      console.log();
+    }
+    return;
   }
 
   if (options.json) {
@@ -145,6 +168,6 @@ export async function kanbanInitCommand(options: KanbanOptions = {}): Promise<vo
   run('init', options);
 }
 
-export async function kanbanSeedCommand(options: KanbanOptions = {}): Promise<void> {
-  run('seed', options);
+export async function kanbanSeedCommand(initiative?: string, options: KanbanOptions = {}): Promise<void> {
+  run('seed', options, initiative);
 }

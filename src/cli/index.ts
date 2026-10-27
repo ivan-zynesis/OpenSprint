@@ -471,8 +471,9 @@ program
   .option('--to <state>', 'The state to advance to')
   .option('--hat <hat>', 'The accountability you are exercising — required on a handoff')
   .option('--dry-run', 'Report the move without writing it')
+  .option('--no-board', 'Move the initiative without contacting the live board on origin')
   .option('--json', 'Output as JSON')
-  .action(async (initiative: string | undefined, options: { to?: string; hat?: string; dryRun?: boolean; json?: boolean }) => {
+  .action(async (initiative: string | undefined, options: { to?: string; hat?: string; dryRun?: boolean; board?: boolean; json?: boolean }) => {
     try {
       const { advanceCommand } = await import('../commands/advance.js');
       await advanceCommand(initiative, options);
@@ -488,9 +489,11 @@ program
   .description("Name who holds an initiative's card")
   .option('--owner <name>', "Who takes it — defaults to git's user.name")
   .option('--release', 'Put the card down: remove the owner')
+  .option('--take-over', 'Take a card the live board shows someone else holding')
   .option('--dry-run', 'Report the change without writing it')
+  .option('--no-board', 'Write the initiative without contacting the live board on origin')
   .option('--json', 'Output as JSON')
-  .action(async (initiative: string | undefined, options: { owner?: string; release?: boolean; dryRun?: boolean; json?: boolean }) => {
+  .action(async (initiative: string | undefined, options: { owner?: string; release?: boolean; takeOver?: boolean; dryRun?: boolean; board?: boolean; json?: boolean }) => {
     try {
       const { claimCommand } = await import('../commands/claim.js');
       await claimCommand(initiative, options);
@@ -507,11 +510,10 @@ const kanbanCmd = program
 
 kanbanCmd
   .command('init')
-  .description('Create the board on the remote and seed it with every initiative this machine knows')
-  .option('--remote <name>', 'The remote holding the board', 'origin')
+  .description('Create the board on origin and seed it with every initiative this machine knows')
   .option('--dry-run', 'Report what would be written, and push nothing')
   .option('--json', 'Output as JSON')
-  .action(async (options: { remote?: string; dryRun?: boolean; json?: boolean }) => {
+  .action(async (options: { dryRun?: boolean; json?: boolean }) => {
     try {
       const { kanbanInitCommand } = await import('../commands/kanban.js');
       await kanbanInitCommand(options);
@@ -523,16 +525,15 @@ kanbanCmd
   });
 
 kanbanCmd
-  .command('seed')
-  .description('Add cards the board lacks, and report cards that disagree with their initiative')
-  .option('--remote <name>', 'The remote holding the board', 'origin')
+  .command('seed [initiative]')
+  .description('Add cards the board lacks — or just this initiative\'s — and report cards that disagree with their initiative')
   .option('--resync', 'Rewrite the cards that disagree, from their initiative')
   .option('--dry-run', 'Report what would be written, and push nothing')
   .option('--json', 'Output as JSON')
-  .action(async (options: { remote?: string; resync?: boolean; dryRun?: boolean; json?: boolean }) => {
+  .action(async (initiative: string | undefined, options: { resync?: boolean; dryRun?: boolean; json?: boolean }) => {
     try {
       const { kanbanSeedCommand } = await import('../commands/kanban.js');
-      await kanbanSeedCommand(options);
+      await kanbanSeedCommand(initiative, options);
     } catch (error) {
       console.log();
       ora().fail(`Error: ${(error as Error).message}`);
