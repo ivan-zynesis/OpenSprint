@@ -501,6 +501,45 @@ program
     }
   });
 
+const kanbanCmd = program
+  .command('kanban')
+  .description('The live board: in-flight initiative state on its own remote branch');
+
+kanbanCmd
+  .command('init')
+  .description('Create the board on the remote and seed it with every initiative this machine knows')
+  .option('--remote <name>', 'The remote holding the board', 'origin')
+  .option('--dry-run', 'Report what would be written, and push nothing')
+  .option('--json', 'Output as JSON')
+  .action(async (options: { remote?: string; dryRun?: boolean; json?: boolean }) => {
+    try {
+      const { kanbanInitCommand } = await import('../commands/kanban.js');
+      await kanbanInitCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+kanbanCmd
+  .command('seed')
+  .description('Add cards the board lacks, and report cards that disagree with their initiative')
+  .option('--remote <name>', 'The remote holding the board', 'origin')
+  .option('--resync', 'Rewrite the cards that disagree, from their initiative')
+  .option('--dry-run', 'Report what would be written, and push nothing')
+  .option('--json', 'Output as JSON')
+  .action(async (options: { remote?: string; resync?: boolean; dryRun?: boolean; json?: boolean }) => {
+    try {
+      const { kanbanSeedCommand } = await import('../commands/kanban.js');
+      await kanbanSeedCommand(options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
 program
   .command('frame')
   .description('Report what this branch changes, and against what base')

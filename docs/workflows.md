@@ -275,6 +275,7 @@ an argument adopts it.
 | `opensprint frame` | what this branch changes, and against what base |
 | `opensprint advance` | move an initiative to its next state |
 | `opensprint claim` | name who holds an initiative's card |
+| `opensprint kanban` | the live board on its own remote branch — `init` creates and seeds it, `seed` adds and reports drift |
 | `/opsp:compact` | recompile the views |
 
 ### Intervention
@@ -342,6 +343,8 @@ opensprint compact loops           # report open loops
 opensprint compact board           # regenerate BOARD.md
 opensprint compact board --all-branches   # print every opsp/* branch's cards; writes nothing
 opensprint claim <initiative>      # take the card — git's user.name, or --owner <name>; --release puts it down
+opensprint kanban init             # create origin/kanban and seed it with every initiative this machine knows
+opensprint kanban seed             # add missing cards, report drift; --resync rewrites the cards that differ
 
 opensprint list                    # changes, or --specs
 opensprint show <item>             # a change or a spec
