@@ -84,6 +84,39 @@
   .stage.done { color: var(--ok); border-color: var(--ok); }
   .stage.specifying, .stage.building, .stage.review { color: var(--accent); border-color: var(--accent); }
   .milestones li.superseded .name { text-decoration: line-through; }
+
+  /* Escalations on the left; the one way forward — continue the stage's workflow — on the right. */
+  .moves { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px;
+           border-top: 1px dashed var(--border); position: relative; }
+  .moves .back, .moves .forward { display: flex; flex-wrap: wrap; gap: 6px; }
+  .moves .forward { margin-left: auto; }
+
+  button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer;
+           border: 1px solid var(--border); background: var(--card); color: var(--text); }
+  .top button { position: relative; }
+  button:hover { border-color: var(--accent); }
+  button.forward { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  button.back { border-color: var(--back); color: var(--back); background: var(--back-bg); }
+  button[data-tip]:hover::after, button[data-tip]:focus-visible::after {
+    content: attr(data-tip); position: absolute; z-index: 10; left: 0; bottom: calc(100% + 6px);
+    width: max-content; max-width: 300px; white-space: pre-line; text-align: left;
+    background: var(--tip-bg); color: var(--tip-text); padding: 7px 9px; border-radius: 6px;
+    font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none;
+  }
+  /* On a card the tooltip spans the card, so it never runs off the edge of a column. */
+  .moves button[data-tip]:hover::after, .moves button[data-tip]:focus-visible::after {
+    left: 0; right: 0; width: auto; max-width: none; bottom: calc(100% + 4px);
+  }
+  .top button[data-tip]:hover::after, .top button[data-tip]:focus-visible::after {
+    left: auto; right: 0; bottom: auto; top: calc(100% + 6px);
+  }
+
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 20;
+           max-width: min(640px, calc(100% - 32px)); background: var(--tip-bg); color: var(--tip-text);
+           padding: 10px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .15s;
+           pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .toast code { background: transparent; color: inherit; padding: 0; }
 </style>
 </head>
 <body>
@@ -94,6 +127,7 @@
     <div class="legend" id="legend"></div>
   </div>
   <main class="board" id="board"></main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- opensprint:config -->
 
@@ -102,7 +136,10 @@
 <script>
 (() => {
   const configNode = document.getElementById('board-config');
-  const CONFIG = configNode ? JSON.parse(configNode.textContent) : { columns: [], owned: [] };
+  const CONFIG = configNode
+    ? JSON.parse(configNode.textContent)
+    : { columns: [], owned: [], moves: { continue: {}, escalate: {} }, agent: null };
+  const AGENT = CONFIG.agent;
 
   const decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.trim()), (c) => c.charCodeAt(0)));
 
@@ -147,9 +184,11 @@
 
   // A card goes in the first column whose states hold its state and, where the
   // column says, whether anyone holds the card (KANBAN_COLUMNS).
+  function columnFor(state, held) {
+    return CONFIG.columns.find((c) => c.states.includes(state) && (c.held === undefined || c.held === held));
+  }
   function columnOf(card) {
-    const held = Boolean(card.owner);
-    const column = CONFIG.columns.find((c) => c.states.includes(card.state) && (c.held === undefined || c.held === held));
+    const column = columnFor(card.state, Boolean(card.owner));
     return column ? column.key : null;
   }
 
@@ -203,9 +242,112 @@
             el('span', { class: 'name' }, m.name || m.description))))));
   }
 
-  // Filled in by stage-actions: the moves a card offers from its column.
+  // ── moves ─────────────────────────────────────────────────────────────────
+  // Every move is written into CONFIG.moves from TRANSITIONS when opensprint
+  // generates this page, so a card offers nothing the state machine refuses.
+  // A button never moves a card: it copies the command that starts the
+  // move's workflow in a fresh session, and the workflow moves the card when
+  // its work is done (DEC-BOARD-BUTTON-LAUNCHES-SESSION).
+
+  const SAFE_WORD = /^[A-Za-z0-9_\/.:=@%+-]+$/;
+  const shellQuote = (s) => (SAFE_WORD.test(String(s)) ? String(s) : `'${String(s).replace(/'/g, `'\\''`)}'`);
+
+  /** The prompt that starts a workflow, on a card or on nothing. */
+  function promptFor(workflow, id) {
+    const entry = AGENT && AGENT.workflows[workflow];
+    if (entry && entry.command) return entry.command + (id ? ` ${id}` : '');
+    const skill = entry && entry.skill ? entry.skill : `opensprint-${workflow}`;
+    return `Use the ${skill} skill` + (id ? ` on ${id}` : '');
+  }
+
+  /** The command that starts a session with the prompt, or null where the agent has no launcher. */
+  function startCommand(prompt) {
+    return AGENT && AGENT.launcher ? [...AGENT.launcher, prompt].map(shellQuote).join(' ') : null;
+  }
+
+  /** Opens the card's worktree — finding it, or making it from the branch — and starts the workflow there. */
+  function launchScript(card, prompt) {
+    const start = startCommand(prompt);
+    if (start === null) return prompt;
+    const branch = card.branch || `opsp/${card.id}`;
+    const fallback = `${META.parent || '..'}/${META.repo || 'repo'}-opsp-${card.id}`;
+    const pattern = `refs/heads/${branch}`.replace(/\//g, '\\/');
+    return [
+      `cd ${shellQuote(META.main || '.')} && git fetch -q origin`,
+      `WT=$(git worktree list --porcelain | awk '/^worktree /{w=substr($0,10)} /^branch ${pattern}$/{print w}')`,
+      `[ -n "$WT" ] || { WT=${shellQuote(fallback)}; git worktree add -q "$WT" ${shellQuote(branch)} 2>/dev/null || git worktree add -q "$WT" -b ${shellQuote(branch)} ${shellQuote(`origin/${branch}`)}; }`,
+      `cd "$WT" && ${start}`,
+    ].join('\n');
+  }
+
+  /** The same, in the main checkout: for work that is not on a card yet. */
+  const mainScript = (prompt) => {
+    const start = startCommand(prompt);
+    return start === null ? prompt : `cd ${shellQuote(META.main || '.')} && ${start}`;
+  };
+
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function say(...parts) {
+    toast.replaceChildren(...parts);
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 4500);
+  }
+
+  async function copy(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const area = el('textarea', { style: 'position:fixed;opacity:0' });
+      area.value = text;
+      document.body.append(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      area.remove();
+      return ok;
+    }
+  }
+
+  function copyButton(cls, label, tipLines, script, prompt) {
+    const launches = AGENT && AGENT.launcher;
+    const tip = [prompt, ...tipLines, '', launches
+      ? `click: copy the command that starts a fresh ${AGENT.name} session there`
+      : `click: copy the prompt, then start ${AGENT ? AGENT.name : 'your agent'} there and paste it`].join('\n');
+    return el('button', {
+      type: 'button', class: cls, 'data-tip': tip,
+      onclick: async () => {
+        const ok = await copy(script);
+        say(ok ? (launches ? 'Copied — paste into a terminal to start ' : 'Copied the prompt ') : 'Could not copy. The prompt is ',
+            el('code', {}, prompt), '.');
+      },
+    }, label);
+  }
+
+  function moveButton(card, move, cls) {
+    const held = move.claims ? true : Boolean(card.owner);
+    const lands = columnFor(move.to, held);
+    const prompt = promptFor(move.workflow, card.id);
+    const lines = cls === 'forward'
+      ? [`resumes ${move.workflow} where it paused`, `hat: ${move.hat.join(' · ')}`]
+      : [`escalates to ${move.hat.join(' · ')}`];
+    lines.push(
+      move.from === move.to ? `move: picks the card up; stays ${move.to}` : `move: ${move.from} → ${move.to}`,
+      `lands: ${lands ? lands.title : move.to}`,
+      `when: ${move.when}`);
+    return copyButton(cls, cls === 'forward' ? `${move.label} →` : `← ${move.label}`, lines, launchScript(card, prompt), prompt);
+  }
+
   function moves(card) {
-    return null;
+    if (!AGENT) return null;
+    const forward = CONFIG.moves.continue[card.state];
+    const next = forward && (card.owner ? forward.held : forward.unheld);
+    const back = CONFIG.moves.escalate[card.state] || [];
+    if (!next && back.length === 0) return null;
+    return el('div', { class: 'moves' },
+      el('div', { class: 'back' }, back.map((m) => moveButton(card, m, 'back'))),
+      el('div', { class: 'forward' }, next ? moveButton(card, next, 'forward') : null));
   }
 
   function renderCard(card) {
@@ -246,6 +388,21 @@
   if (META.ref) {
     document.getElementById('meta').replaceChildren(`${META.ref} @ `, el('code', {}, META.sha || '?'),
       ` · ${cards.length} card(s) · read ${when(META.at)}`);
+  }
+
+  // Work that is not on a card yet starts in the main checkout: backlog makes the item's own branch.
+  if (AGENT) {
+    const backlog = promptFor('backlog');
+    const refresh = promptFor('kanban');
+    document.getElementById('actions').replaceChildren(
+      copyButton('', 'Refresh', ['re-run the render playbook: fetch the board, fill this template', 'nothing keeps running in between'],
+        mainScript(refresh), refresh),
+      copyButton('forward', '+ Backlog an item', ['hat: product · maintainer', 'move: → exploring', 'lands: Backlog'],
+        mainScript(backlog), backlog));
+    document.getElementById('legend').replaceChildren(
+      el('strong', {}, 'Continue →'), ' resumes the stage’s workflow where it paused; the card moves on when that work is done. ',
+      el('strong', {}, '← back'), ' escalates up a rung — dev · devops to product · maintainer to the operator — and jumps to the state it reopens. ',
+      'A button copies a command; paste it into a terminal. Nothing on this page runs anything.');
   }
 })();
 </script>

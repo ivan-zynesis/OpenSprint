@@ -42,6 +42,14 @@ export const claudeAdapter: ToolCommandAdapter = {
     return path.join('.claude', 'commands', 'opsx', `${commandId}.md`);
   },
 
+  // The directory under commands/ is the namespace: .claude/commands/opsx/<id>.md is /opsx:<id>.
+  commandReference(commandId: string): string {
+    return `/opsx:${commandId}`;
+  },
+
+  // `claude "<prompt>"` starts an interactive session with the prompt already sent.
+  sessionLauncher: ['claude'],
+
   formatFile(content: CommandContent): string {
     return `---
 name: ${escapeYamlValue(content.name)}

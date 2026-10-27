@@ -3,18 +3,21 @@
  *
  * The page is a package asset, `assets/kanban/board.html`, filled twice. When
  * opensprint writes it into a project, the configuration marker becomes a
- * JSON block of everything opensprint knows: the columns, and which states
- * need an owner. When the render playbook runs, the cards marker becomes the
- * cards, which only git knows (DEC-BOARD-READ-BY-GIT).
+ * JSON block of everything opensprint knows: the columns, which states need
+ * an owner, the moves each card offers, and how to start the agent the page
+ * was generated for. When the render playbook runs, the cards marker becomes
+ * the cards, which only git knows (DEC-BOARD-READ-BY-GIT).
  *
- * The columns are data here rather than code in the page, so the page and
- * the CLI cannot place a card differently (DEC-CONTINUE-FORWARD-ESCALATE-BACK).
+ * The columns and the moves are data here rather than code in the page, so
+ * the page cannot place a card, or offer a move, that the CLI would not
+ * (DEC-CONTINUE-FORWARD-ESCALATE-BACK).
  */
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { OWNED_STATES } from './initiatives.js';
+import { INITIATIVE_STATES, OWNED_STATES, type InitiativeState } from './initiatives.js';
+import { TRANSITIONS, type Transition } from './initiative-transitions.js';
 
 export interface KanbanColumn {
   key: string;
@@ -44,6 +47,114 @@ export function columnOf(state: string, held: boolean): KanbanColumn | undefined
   );
 }
 
+/**
+ * One button on a card: a workflow to start, and the move it makes when its
+ * work is done. The button never makes the move itself
+ * (DEC-BOARD-BUTTON-LAUNCHES-SESSION).
+ */
+export interface KanbanMove {
+  /** The workflow's short name, as the agent table keys it: `apply`, `triage`. */
+  workflow: string;
+  label: string;
+  from: string;
+  to: string;
+  hat: readonly string[];
+  when: string;
+  /** Where set, the move picks the card up, so it lands held. */
+  claims?: boolean;
+}
+
+/** `/opsp:apply` → `apply`: the name a transition's `by` gives its workflow. */
+export function workflowName(by: string): string {
+  return by.replace(/^\/opsp:/, '');
+}
+
+/** The lifecycle order `INITIATIVE_STATES` lists, which is what makes a move forward or back. */
+const order = (state: string) => INITIATIVE_STATES.indexOf(state as InitiativeState);
+
+/**
+ * Backlog's way forward, and the one move that is not a transition: triage
+ * picking a card up writes an owner, not a state (DEC-INITIATIVE-OWNER).
+ */
+export const TRIAGE_PICKUP: KanbanMove = {
+  workflow: 'triage',
+  label: 'Continue: triage',
+  from: 'exploring',
+  to: 'exploring',
+  hat: TRANSITIONS.find((t) => t.by === '/opsp:triage')?.hat ?? ['product', 'maintainer'],
+  when: 'picked up: claimed and its strategy brainstormed, or declined with the reason',
+  claims: true,
+};
+
+/** An escalation's button reads as the rung it opens. */
+const ESCALATION_LABELS: Readonly<Record<string, string>> = {
+  reexplore: 'Reexplore',
+  repropose: 'Repropose',
+  attest: 'Request a change',
+  triage: 'Revive',
+};
+
+function moveOf(t: Transition, label: string): KanbanMove {
+  return { workflow: workflowName(t.by), label, from: t.from, to: t.to, hat: t.hat, when: t.when };
+}
+
+/**
+ * The one way forward from a state: the transition to a later state.
+ *
+ * Moves into `declined` are not buttons — declining is one of triage's
+ * outcomes — and an unheld `exploring` card goes forward by being picked up.
+ */
+export function continueMove(state: string, held: boolean): KanbanMove | undefined {
+  if (state === 'exploring' && !held) return TRIAGE_PICKUP;
+  const forward = TRANSITIONS.find(
+    (t) => t.from === state && t.to !== 'declined' && order(t.to) > order(t.from)
+  );
+  return forward === undefined ? undefined : moveOf(forward, `Continue: ${workflowName(forward.by)}`);
+}
+
+/** Every way back from a state: each transition to an earlier one, up a rung (DEC-ESCALATION-LADDER). */
+export function escalationMoves(state: string): KanbanMove[] {
+  return TRANSITIONS.filter((t) => t.from === state && order(t.to) < order(t.from)).map((t) =>
+    moveOf(t, ESCALATION_LABELS[workflowName(t.by)] ?? workflowName(t.by))
+  );
+}
+
+export interface BoardMoves {
+  /** Per state, the continue move for a card nobody holds and for one somebody does. */
+  continue: Record<string, { unheld?: KanbanMove; held?: KanbanMove }>;
+  escalate: Record<string, KanbanMove[]>;
+}
+
+export function boardMoves(): BoardMoves {
+  const moves: BoardMoves = { continue: {}, escalate: {} };
+  for (const state of INITIATIVE_STATES) {
+    const unheld = continueMove(state, false);
+    const held = continueMove(state, true);
+    if (unheld !== undefined || held !== undefined) {
+      moves.continue[state] = {
+        ...(unheld === undefined ? {} : { unheld }),
+        ...(held === undefined ? {} : { held }),
+      };
+    }
+    const back = escalationMoves(state);
+    if (back.length > 0) moves.escalate[state] = back;
+  }
+  return moves;
+}
+
+/**
+ * How the page starts the agent it was generated for: one entry per tool,
+ * built from its command adapter (DEC-BOARD-BUTTON-LAUNCHES-SESSION).
+ */
+export interface KanbanAgent {
+  /** As a person would name it: `Claude Code`. */
+  name: string;
+  /** Shell words that start a session with the prompt as the next argument; null to copy the prompt alone. */
+  launcher: readonly string[] | null;
+  /** Per workflow short name: the generated command to invoke, or the skill to name. */
+  workflows: Record<string, { command: string } | { skill: string }>;
+}
+
 export const BOARD_TEMPLATE_FILE = 'board.html';
 export const BOARD_CONFIG_MARKER = '<!-- opensprint:config -->';
 export const BOARD_CARDS_MARKER = '<!-- opensprint:cards -->';
@@ -59,10 +170,13 @@ export interface BoardConfig {
   columns: readonly KanbanColumn[];
   /** States where a card with nobody holding it is marked (`owner-undeclared`). */
   owned: readonly string[];
+  moves: BoardMoves;
+  /** Null where the page was generated for no tool: it then shows no buttons. */
+  agent: KanbanAgent | null;
 }
 
-export function boardConfig(): BoardConfig {
-  return { columns: KANBAN_COLUMNS, owned: OWNED_STATES };
+export function boardConfig(agent: KanbanAgent | null = null): BoardConfig {
+  return { columns: KANBAN_COLUMNS, owned: OWNED_STATES, moves: boardMoves(), agent };
 }
 
 /**
