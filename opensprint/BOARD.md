@@ -25,15 +25,15 @@ _Empty._
 
 In flight.
 
-_Empty._
+| Initiative | State | Owner | Milestones | Next |
+|---|---|---|---|---|
+| [kanban](initiatives/20261018-kanban.md) | attested | Ivan Lee | 7/7 | — |
 
 ## Handoff
 
 Every milestone done, nothing judged yet. **Waiting on a person, not on work** — somebody must put the product or maintainer hat on and run `/opsp:attest`.
 
-| Initiative | State | Owner | Milestones | Next |
-|---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | ready-for-attestation | Ivan Lee | 7/7 | — |
+_Empty._
 
 ## Done
 
@@ -71,6 +71,7 @@ risk, and **that initiative's state is the assurance level**.
 | `DS-FORWARD-CLOSURE` | An exposure with no pointer may go unreported by the harvest, and any string may satisfy it. | **nothing** | a confession |
 | `DS-HATS-AS-CONTEXT` | Excluding the implementation from an attest context depends on the agent obeying instructions. | **nothing** | a confession |
 | `DS-HIGH-IMPACT-OPS` | A corrupted surrogate degrades every downstream agent operation, and the damage is unbounded. | **nothing** | a confession |
+| `DS-LIVE-BOARD` | The page could show an initiative card a move its state does not allow, or omit one, with the suite still green. | **nothing** | a confession |
 | `DS-MAINTAINER-INHERITED` | A record carrying a misspelled or off-list objective may route nowhere without being reported, and an empty objective… | **nothing** | a confession |
 | `DS-MEASURE-ANATOMY` | A compiled view could state a bar with no posture and no test would fail; only the record-level harvest would notice. | **nothing** | a confession |
 | `DS-PROGRESSIVE-CRYSTALLIZATION` | The **Primary** bar has drifted from what shipped and needs revising through `/opsp:decide`. | **nothing** | a confession |

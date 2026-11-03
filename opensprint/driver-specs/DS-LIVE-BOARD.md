@@ -50,6 +50,38 @@ central copy — is the model that suggests the board wants a single place of it
 - **traded for**: reading needs a network round trip to the remote, and the board must never be edited by hand
 - **neighbour**: the compiled, per-checkout `BOARD.md` ([[DEC-026]]), with `--all-branches` printing the rest ([[DEC-BOARD-ALL-BRANCHES]])
 
+### Posture
+
+- **verdict**: partially met
+- **attested-by**: Claude (fresh session), for Ivan Lee
+- **attested-on**: 2026-11-04
+
+A re-attestation, after the change requested on 2026-11-03. **Primary** is asserted: two checkouts,
+each cloned with `--single-branch` on a different branch (`main`, `opsp/beta`), render the board with
+the playbook they ship and get the same columns. A move pushed from either one, `advance` from one
+and `claim` from the other, appears in the other's next render. Neither checkout ever holds a ref to
+the other's branch. **Drill-down** is asserted at the page: the page's own script runs against a DOM
+stand-in that throws on anything it doesn't model. Clicking an initiative's title opens its
+milestones in the five opsx columns. Only the next ticket offers continue, and Review offers a
+change request. **Guardrail** is half asserted. Every move the board derives is a legal transition
+and never reaches `declined`, and the page carries that table verbatim. The page has no means of
+writing: no URL, no `fetch`, no socket. A ticket's continue button only copies a command. But no
+test renders an initiative card and checks that its buttons are exactly its state's moves, and no
+test clicks one.
+
+### Evidence
+
+- [CI run on pull request 10 at `1d0dbcc`, Test job green](https://github.com/ivan-zynesis/OpenSprint/actions/runs/41668525609/job/126030285690)
+- `test/core/kanban-skill.test.ts` — "one board from two branches (DS-LIVE-BOARD)"
+- `test/core/kanban-milestones.test.ts` — "opening an initiative on the page (DEC-MILESTONE-BOARD)"
+- `test/core/kanban-actions.test.ts` — the moves, derived from the transitions, and written into the page
+
+### Exposure
+
+The page could show an initiative card a move its state does not allow, or omit one, with the suite
+still green. Its move table is tested, but how it lays that table onto a card is not. Accepted at
+attestation without a mitigating item.
+
 ## Implications
 
 - The board lives on its own remote branch: [[DEC-BOARD-ON-REMOTE-BRANCH]]

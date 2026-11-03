@@ -41,6 +41,25 @@ browser are already on every machine that uses opensprint.
 - **traded for**: no live push updates, so refreshing means rendering again; and a page that can run nothing itself, so starting work is a paste, not a click
 - **neighbour**: a local server or script serving the board, the first proof of concept
 
+### Posture
+
+- **verdict**: met
+- **attested-by**: Claude (fresh session), for Ivan Lee
+- **attested-on**: 2026-11-04
+
+A re-attestation, after the change requested on 2026-11-03. Both shipped playbooks, list and
+render, run against a real remote with a `PATH` holding only `sh`, `git` and seven shell utilities.
+The test first checks that `node` cannot be found, then shows that listing returns every card and
+rendering writes a page holding them. No playbook backgrounds a command, so nothing keeps running.
+The page is scanned for anything that loads from the network: no `http(s)://`, no
+`link`/`img`/`iframe`/`src=`, and no `fetch`, XHR, socket, event source or dynamic import. One blind
+spot remains: the scan would miss a protocol-relative URL or a CSS `url()`/`@import`.
+
+### Evidence
+
+- [CI run on pull request 10 at `1d0dbcc`, Test job green](https://github.com/ivan-zynesis/OpenSprint/actions/runs/41668525609/job/126030285690)
+- `test/core/kanban-skill.test.ts` — "lists and renders with only git and the shell’s utilities on PATH", "loads nothing from the network (DS-RUNTIME-LESS-BOARD)"
+
 ## Implications
 
 - Reads are git playbooks; rendering fills a static template: [[DEC-BOARD-READ-BY-GIT]]
