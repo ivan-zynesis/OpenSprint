@@ -208,5 +208,7 @@ added. Open loops are the backlog. `/opsp:explore`, then `/opsp:propose`, triage
   `dev` view lists the same loop (`DEC-028`).
 
 Rules cite the other three decisions routed here: `DEC-029`, `DEC-030` and
-`DEC-COMPILE-ON-MILESTONE`. The new test, `test/core/kanban-milestones.test.ts`, cites only
-`DEC-MILESTONE-BOARD`, so it adds no rule for any decision in this view.
+`DEC-COMPILE-ON-MILESTONE`. The tests changed since the last compile —
+`test/core/kanban-milestones.test.ts`, `test/core/kanban-skill.test.ts`,
+`test/core/kanban-sync.test.ts` and `test/core/state-machine-workflows.test.ts` — cite no decision
+in this view, so they add no rule here.

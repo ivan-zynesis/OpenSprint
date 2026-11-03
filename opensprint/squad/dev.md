@@ -302,7 +302,7 @@ It is always `origin/kanban`: no command takes a remote any more (`src/commands/
 each writes.
 
 ```
-  opensprint advance <id> --to <s>     file first, then moveCard      state, checked against TRANSITIONS
+  opensprint advance <id> --to <s>     file first, then moveCard      state, checked against TRANSITIONS; milestones mirrored
   opensprint claim <id> [--take-over]  claimCard first, then file     owner; refused if someone else holds it
   opensprint kanban stage <id> <m> <s> stageCard                      one milestone's stage
   opensprint kanban init               planSeed                       create the board, one card each
@@ -323,8 +323,11 @@ each writes.
 second. A card write that fails or finds no board does not undo or block the move; it is reported,
 and `kanban seed` finds the drift later. The card also validates its own move: where the card's
 current state cannot legally reach the target, the card is left alone and the drift is reported,
-because writing it would invent a move nobody made (`src/core/kanban-sync.ts`). `--no-board` skips
-the card on both `advance` and `claim` (`src/cli/index.ts`). This is the CLI write path
+because writing it would invent a move nobody made (`src/core/kanban-sync.ts`). A move also carries
+the file's milestones onto the card, mirrored as `kanban stage` mirrors them, so milestones a
+repropose redrew reach the board with its move; where the card already shows the target state, only
+the milestones are written (`src/core/kanban-sync.ts`). `--no-board` skips the card on both
+`advance` and `claim` (`src/cli/index.ts`). This is the CLI write path
 `DEC-CARD-WRITES-THROUGH-CLI` decides.
 
 **A claim goes to the board first**, because the remote arbitrates between two machines. A card
@@ -357,6 +360,12 @@ exits non-zero; a missing or unreachable board does not (`src/core/kanban-sync.t
   `building` at the worktree and `review` at the merge. It reaches `done` after the file is checked
   off, and goes back to `specifying` on a change request
   (`src/core/templates/workflows/opsp-apply.ts`).
+- Propose writes a new initiative at `exploring` and advances it to `proposed`. Attest, repropose,
+  reexplore and archive advance, naming `--hat` on a handoff; archive closes from the initiative's
+  worktree before removing it, and repropose and reexplore mark superseded milestones `[~]` before
+  they move (`src/core/templates/workflows/`). For every row of `TRANSITIONS`, a test runs the
+  command its workflow's template writes, from the row's `from` state
+  (`test/core/state-machine-workflows.test.ts`).
 
 **Reading and rendering use git and a template** (`DEC-BOARD-READ-BY-GIT`). The `/opsp:kanban`
 skill has a list playbook and a render playbook. Both use git and a POSIX shell, and neither writes
@@ -799,8 +808,16 @@ nothing (`DEC-013`).
 | `test/core/kanban.test.ts` | `DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-MILESTONE-BOARD` |
 | `test/core/kanban-skill.test.ts` | `DEC-BOARD-READ-BY-GIT`, `DEC-CONTINUE-FORWARD-ESCALATE-BACK` |
 | `test/core/kanban-actions.test.ts` | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
-| `test/core/kanban-sync.test.ts` | `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE` |
+| `test/core/kanban-sync.test.ts` | `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE`, `DEC-MILESTONE-BOARD` |
 | `test/core/opsp-resume.test.ts` | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
-| `test/core/kanban-milestones.test.ts` (new) | `DEC-MILESTONE-BOARD` |
+| `test/core/kanban-milestones.test.ts` | `DEC-MILESTONE-BOARD` |
+| `test/core/state-machine-workflows.test.ts` | `DEC-STATE-MACHINE`, `DEC-HAT-HANDOFFS`, `DEC-043` |
 
-All six `kanban` milestones are checked off (`opensprint/initiatives/20261018-kanban.md`).
+`state-machine-workflows.test.ts` now runs, for every row of `TRANSITIONS`, the `advance` its
+workflow's template writes, from the row's `from` state, so a handoff whose template names no
+`--hat` fails it (`DEC-STATE-MACHINE`, `DEC-HAT-HANDOFFS`). `kanban-skill.test.ts` and
+`kanban-milestones.test.ts` also cite `DS-LIVE-BOARD` and `DS-RUNTIME-LESS-BOARD`; a driver-spec
+cited by a test is not a guarded decision (`DEC-013`), so neither changes the table above. The page
+tests run the page's own script against a DOM stand-in, `test/helpers/board-dom.ts`.
+
+All seven `kanban` milestones are checked off (`opensprint/initiatives/20261018-kanban.md`).
