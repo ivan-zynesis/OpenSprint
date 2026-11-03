@@ -25,9 +25,7 @@ _Empty._
 
 In flight.
 
-| Initiative | State | Owner | Milestones | Next |
-|---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | attested | Ivan Lee | 7/7 | — |
+_Empty._
 
 ## Handoff
 
@@ -47,6 +45,7 @@ Closed.
 | [sdlc-operating-contract](initiatives/20261009-sdlc-operating-contract.md) | completed | — | 12/12 | — |
 | [surrogate-currency](initiatives/20261010-surrogate-currency.md) | completed | — | 5/5 | — |
 | [board-owners](initiatives/20261018-board-owners.md) | completed | Ivan Lee | 1/1 | — |
+| [kanban](initiatives/20261018-kanban.md) | completed | Ivan Lee | 7/7 | — |
 | [load-hat-views](initiatives/20261018-load-hat-views.md) | completed | — | 1/1 | — |
 
 ## Declined

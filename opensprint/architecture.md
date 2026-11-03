@@ -1,14 +1,16 @@
 # Architecture
 
-> **How to read this document.** It is compiled from 27 active driver-specs and 58 active ADRs
-> (62 ADR files, four of them superseded). Every claim cites the record it derives from, inline.
+> **How to read this document.** It is compiled from 29 active driver-specs and 64 active ADRs
+> (68 ADR files, four of them superseded). Every claim cites the record it derives from, inline.
 >
-> **Two records are attested.** Fifteen driver-specs carry a `### Posture` verdict. Thirteen were
+> **Four records are attested.** Seventeen driver-specs carry a `### Posture` verdict. Thirteen were
 > recorded on 2026-10-11 by Ivan Lee: ten **partially met**, two **cannot assess**, one **not met**,
 > and none **met**; none of them carries evidence, so none is `attested`. On 2026-10-18,
 > `DS-SURROGATE-BUDGET` was recorded **partially met** and `DS-BOARD-VISIBILITY` **met**, both with
-> evidence, which makes them the two `attested` records. Apart from what `DS-BOARD-VISIBILITY`'s
-> evidence asserts, no sentence below is a present-tense claim about how the running system behaves. A sentence citing a record id states what was **decided** (`DEC-021`,
+> evidence; on 2026-11-04, `DS-LIVE-BOARD` **partially met** and `DS-RUNTIME-LESS-BOARD` **met**, both
+> with evidence. Those four are the `attested` records. Apart from what the evidence of
+> `DS-BOARD-VISIBILITY`, `DS-LIVE-BOARD` and `DS-RUNTIME-LESS-BOARD` asserts, no sentence below is a
+> present-tense claim about how the running system behaves. A sentence citing a record id states what was **decided** (`DEC-021`,
 > `DS-ATTESTED-TRUTH`). Where a record carries a posture, that posture is given next to the decision,
 > because the gap between the two is the information.
 
@@ -36,6 +38,11 @@ compiled from them.**
 - **Derived artifacts.** Per-hat views, `architecture.md` and `BOARD.md` are compiled by one engine,
   `compact`, and are never edited by hand (`DEC-006`, `DEC-014`, `DEC-026`). Documentation is meant to
   come out of work already done rather than be a second effort (`DS-DOCUMENTATION-AS-OUTPUT`).
+- **The live board.** In-flight initiative state is decided to live in one central place, a
+  dedicated remote branch `origin/kanban`, which every checkout reads the same way; a card moves only
+  through an `opensprint` command, and the board is read with git and rendered as a static page
+  (`DS-LIVE-BOARD`, `DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-CARD-WRITES-THROUGH-CLI`,
+  `DEC-BOARD-READ-BY-GIT`).
 
 The loop is decided to close mechanically. A constraint is answered by a decision, the decision is
 implemented, and a rule checks the implementation. When the rule fails, the decision is revisited
@@ -70,6 +77,7 @@ are taken from each record. "—" means the record carries no `### Posture` verd
 | `DS-SURROGATE-BUDGET` | loading the surrogate must not consume the session budget; a compacted second tier of progressive discovery | **partially met** |
 | `DS-ATTESTED-TRUTH` | a compiled claim is present-tense only when a human asserted it with evidence | **partially met** |
 | `DS-BOARD-VISIBILITY` | every initiative is visible from any checkout, and work in flight names its owner | **met** |
+| `DS-LIVE-BOARD` | one live board of in-flight state, read the same from any branch or machine, that starts each card's next step | **partially met** |
 
 ### Posture
 
@@ -114,6 +122,12 @@ are taken from each record. "—" means the record carries no `### Posture` verd
 | `DS-ESCALATION-HANDOFF` | an escalation is a visible hat handoff with an inferred hat, a draft record, and explicit approval | **cannot assess** |
 | `DS-PARALLEL-EXEC` | initiatives run concurrently in independent worktrees, each carrying its own surrogate | — |
 | `DS-SURROGATE-GIT-CONTRACT` | one PR per initiative, attested before it merges; `main` is production grade | **not met** |
+
+### Strategies — the live board
+
+| Record | Requires | Verdict |
+|---|---|---|
+| `DS-RUNTIME-LESS-BOARD` | the board starts no client-side process: git, the installed skill and an HTML renderer | **met** |
 
 ### Strategies — maintainer constraints with a stated bar
 
@@ -262,7 +276,9 @@ are cited.
   local and remote-tracking `opsp/<id>` branch carries from committed trees and writes nothing; the
   committed `BOARD.md` is decided to show the checkout alone, so it stays deterministic
   (`DEC-BOARD-ALL-BRANCHES`, `DS-BOARD-VISIBILITY`). *Posture:* `DS-BOARD-VISIBILITY` is **met** and
-  attested on 2026-10-18.
+  attested on 2026-10-18. In-flight state has since moved to a central store beside it — the
+  aggregate this decision rejected (`DEC-BOARD-ON-REMOTE-BRANCH`, amending `DEC-BOARD-ALL-BRANCHES`);
+  see section 7.
 - **Initiatives name an owner.** An optional `owner:` is written by `opensprint claim`, which never
   moves the state; triage and apply claim at pick-up, backlog never does, and a card in flight with no
   owner is reported `owner-undeclared` (`DEC-INITIATIVE-OWNER`, `DS-BOARD-VISIBILITY`).
@@ -281,6 +297,44 @@ are cited.
 
 - The surface is the `opensprint` CLI plus the skill and command files it generates, with no GUI
   and no pipeline product. Discoverability is the accepted cost (`DEC-017`, `DS-SELF-USE-SCOPE`).
+
+### 7. The live board
+
+- **Store.** In-flight state lives on a dedicated remote branch, `origin/kanban`, holding a README
+  and one plain-text card per initiative; every move is a commit, the branch is never checked out to
+  read it and never edited by hand, and a completed initiative's card stays as a static record. It
+  runs beside the compiled `BOARD.md` rather than replacing it until the live board is proven
+  (`DEC-BOARD-ON-REMOTE-BRANCH`, amending `DEC-BOARD-ALL-BRANCHES`; `DEC-026`).
+- **Reads.** Listing is a git playbook in a skill — fetch the branch, then read `cards/` without a
+  checkout. Rendering fills a static HTML template that ships with opensprint, writing each card in
+  as base64 so no card text can break the page; the page loads nothing from the network, and
+  refreshing is rendering again (`DEC-BOARD-READ-BY-GIT`, `DS-RUNTIME-LESS-BOARD`).
+- **Writes.** A workflow that moves an initiative moves its card through an `opensprint` command,
+  which validates the move against `opensprint advance`'s table, appends a history line and pushes
+  as a fast-forward, re-reading and re-applying when another writer got there first and never
+  forcing. `claim` refuses a card someone else holds unless told to take it over
+  (`DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE`).
+- **Columns and moves.** Each column is a stage with one workflow: Backlog (unowned `exploring`,
+  triage), Planning (claimed `exploring`, propose), Dev (`proposed`, `building`, apply), Attestation
+  (`ready-for-attestation`, `attested`, attest then archive), Done (`completed`, `declined`). Forward
+  is always "continue", resuming the stage's workflow; backward is an escalation up the ladder —
+  repropose, reexplore, attest's change request, or reviving a declined idea. There is no
+  drag-and-drop, and no move the state machine does not allow (`DEC-CONTINUE-FORWARD-ESCALATE-BACK`,
+  `DEC-ESCALATION-LADDER`, `DEC-INITIATIVE-OWNER`).
+- **Buttons.** A button copies a short command that finds or makes the card's worktree and starts a
+  **fresh** agent session there with the workflow invoked; pasting it is the operator's consent, and
+  the workflow moves the card when its work is done. The agent is one table, starting with Claude
+  Code and extended through the command adapters (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`,
+  `DS-HATS-AS-CONTEXT`, `DEC-043`).
+- **Milestones.** Clicking an initiative opens its milestones as tickets in five columns that follow
+  the opsx cycle apply runs — To do, Specifying, Building, Review, Done. Only the next open milestone
+  offers "continue: apply"; Review offers a change request back to Specifying; escalation stays on
+  the initiative. The stage is carried on the card, written by the same command, while the
+  initiative file stays the source of truth for which milestones are done (`DEC-MILESTONE-BOARD`,
+  `DEC-CARD-WRITES-THROUGH-CLI`).
+- *Posture:* `DS-LIVE-BOARD` is **partially met**, attested 2026-11-04: its primary and drill-down
+  measures are asserted, its guardrail is not asserted at the page for initiative cards.
+  `DS-RUNTIME-LESS-BOARD` is **met**, attested the same day.
 
 ### Supersession chains
 
@@ -302,6 +356,7 @@ The next table lists amendments without a `superseded-by` field. Read each pair 
 | `DEC-STATE-MACHINE` | `DEC-ESCALATION-LADDER`, `DEC-HAT-HANDOFFS` | transitions added; hat and handoff declared per transition |
 | `DEC-ESCALATION-LADDER` | `DEC-HAT-HANDOFFS`, `DEC-REEXPLORE-NAME` | the explore-again tool moved to the goal rung; repropose absorbed the plan rung; name kept |
 | `DEC-HAT-HANDOFFS` | `DEC-BAR-AT-PROPOSE`, `DEC-REEXPLORE-NAME` | repropose is create mode, not amend; the tool is `/opsp:reexplore`, not `/opsp:reideate` |
+| `DEC-BOARD-ALL-BRANCHES` | `DEC-BOARD-ON-REMOTE-BRANCH` | its rejected neighbour, a central aggregate, now holds in-flight state on `origin/kanban`; the printed board stays beside it |
 | `DS-SURROGATE-SCOPE` | its own 2026-10-10 amendment, `DS-ATTEST-AS-REVIEW` | the recording half of change management is in scope |
 
 ### Where the records disagree
@@ -349,7 +404,8 @@ These conflicts are reported, not resolved. Resolving any of them is a record ch
 
 ## System Structure
 
-These are the shapes the records decide. Nothing here is attested.
+These are the shapes the records decide. Only the live board's measures, noted beneath its diagram,
+are attested.
 
 ### Records, engine and outputs
 
@@ -453,11 +509,35 @@ This topology is decided by `DS-SURROGATE-GIT-CONTRACT`, `DEC-029` and `DEC-030`
 universe (`DEC-001`, `DS-PARALLEL-EXEC`). They converge through `/opsp:rebase` or `/opsp:abandon`
 (`DEC-002`–`DEC-005`).
 
+### The live board
+
+```
+   a workflow that moves an initiative
+        │  an opensprint command: validated against the state machine,
+        │  fast-forward push, re-read and re-apply on a lost race     (DEC-CARD-WRITES-THROUGH-CLI)
+        ▼
+   origin/kanban     README.md · cards/<id>.md — one file per card,
+                     every move a commit; milestones and their stage   (DEC-BOARD-ON-REMOTE-BRANCH,
+                     carried on the card                                DEC-MILESTONE-BOARD)
+        │  a git playbook: fetch, then read cards/ — no checkout       (DEC-BOARD-READ-BY-GIT)
+        ▼
+   static HTML page  cards as base64; loads nothing from the network   (DS-RUNTIME-LESS-BOARD)
+        │  a button copies a command; pasting it starts a fresh
+        │  session on the stage's workflow                             (DEC-BOARD-BUTTON-LAUNCHES-SESSION)
+        ▼
+   that workflow, which moves the card when its work is done ──► back to the top
+```
+
+Attested on 2026-11-04: two checkouts on different branches render the same board from the remote
+without fetching each other's branches, and a move pushed from one appears in the other's next
+render; listing and rendering run with only git and a shell's utilities, and the page loads nothing
+from the network (`DS-LIVE-BOARD`, `DS-RUNTIME-LESS-BOARD`).
+
 ---
 
 ## Constraints & Non-Negotiables
 
-Each item says what was decided and what the record says about whether it holds. **None is
+Each item says what was decided and what the record says about whether it holds. **Only item 20 is
 attested.** A constraint here is a decision that binds. It does not report the running system.
 
 1. **Reconciliation is decided to be operator-invocable only.** `/opsp:rebase` and `/opsp:abandon`
@@ -575,3 +655,20 @@ attested.** A constraint here is a decision that binds. It does not report the r
     (`DS-BACKWARD-COMPAT`, `DEC-018`, `DEC-019`).
     *Posture:* no verdict. The prose posture is "below what a product sold to strangers would hold,
     and deliberately so", and the neighbour position is unrecorded.
+
+20. **The board is decided to start no client-side process.** Git, the installed skill and something
+    that renders HTML are all it needs; there is no script and no server (`DS-RUNTIME-LESS-BOARD`,
+    `DEC-BOARD-READ-BY-GIT`), and a button copies a command rather than running one
+    (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`).
+    *Posture:* **met**, attested 2026-11-04 with CI evidence. Listing and rendering run with only
+    `sh`, `git` and seven shell utilities on the `PATH`, nothing is left running, and the page carries
+    nothing that loads from the network. The record names one blind spot in that scan: a
+    protocol-relative URL or a CSS `url()`/`@import`.
+
+21. **A card is decided to move only through the state machine.** Writes go through an `opensprint`
+    command that refuses an illegal move (`DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE`); the
+    board offers only continue and the ladder's escalations (`DEC-CONTINUE-FORWARD-ESCALATE-BACK`);
+    and a button never moves a card itself (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`).
+    *Posture:* `DS-LIVE-BOARD`'s guardrail is half asserted. The derived moves are legal and the page
+    carries them verbatim and cannot write, but no test checks the buttons an initiative card
+    actually shows. The exposure is recorded with no `mitigated-by`.
