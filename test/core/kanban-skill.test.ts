@@ -24,6 +24,10 @@ import {
 import { KANBAN_TEMPLATE_PLACEHOLDER } from '../../src/core/templates/workflows/opsp-kanban.js';
 import { UpdateCommand } from '../../src/core/update.js';
 import type { GlobalConfig } from '../../src/core/global-config.js';
+import { kanbanInitCommand } from '../../src/commands/kanban.js';
+import { advanceCommand } from '../../src/commands/advance.js';
+import { claimCommand } from '../../src/commands/claim.js';
+import { renderBoardPage } from '../helpers/board-dom.js';
 
 /**
  * DEC-BOARD-READ-BY-GIT: the board is listed with git playbooks and rendered
@@ -250,5 +254,134 @@ describe.skipIf(process.platform === 'win32')('the shipped playbooks, against a 
   it('says how to create the board where there is none', () => {
     expect(sh(playbook(skill(), '## Playbook 1'))).toContain('opensprint kanban init');
     expect(sh(playbook(skill(), '## Playbook 2'))).toContain('opensprint kanban init');
+  });
+
+  // DS-RUNTIME-LESS-BOARD: git and a POSIX shell, and nothing else on PATH — node above all.
+  it('lists and renders with only git and the shell’s utilities on PATH', () => {
+    seed();
+    const bin = path.join(base, 'bin');
+    fs.mkdirSync(bin);
+    const tools = ['sh', 'git', 'awk', 'sed', 'base64', 'tr', 'date', 'dirname', 'basename'];
+    for (const tool of tools) {
+      const found = execFileSync('sh', ['-c', `command -v ${tool}`], { encoding: 'utf-8' }).trim();
+      fs.symlinkSync(found, path.join(bin, tool));
+    }
+    const bare = (script: string) =>
+      execFileSync(path.join(bin, 'sh'), ['-c', script], { cwd: root, encoding: 'utf-8', env: { PATH: bin, TMPDIR: base, HOME: base } });
+
+    expect(bare('command -v node || echo none').trim()).toBe('none');
+    expect(bare(playbook(skill(), '## Playbook 1')).trim().split('\n')).toHaveLength(2);
+    const out = bare(playbook(skill(), '## Playbook 2')).trim();
+    expect(fs.readFileSync(out, 'utf-8').match(/class="card"/g)).toHaveLength(2);
+
+    // Nothing keeps running: no playbook puts a command in the background.
+    for (const heading of ['## Playbook 1', '## Playbook 2']) {
+      expect(playbook(skill(), heading)).not.toMatch(/(?<![&>|])&(?![&>])|\bnohup\b|\bdisown\b/);
+    }
+  });
+});
+
+/**
+ * DS-LIVE-BOARD's primary measure: two checkouts on different branches, each
+ * cloned with only its own branch, render the same board from the remote,
+ * and a move pushed from either appears in the other's next render. Each
+ * checkout renders with the playbook it ships, and the page's own script
+ * lays the cards out.
+ */
+describe.skipIf(process.platform === 'win32')('one board from two branches (DS-LIVE-BOARD)', () => {
+  let base: string;
+  let remote: string;
+  const git = (cwd: string, ...args: string[]) =>
+    execFileSync('git', args, { cwd, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  const initiative = (id: string, front: string) =>
+    `---\nid: ${id}\nstatus: active\n${front}---\n\n## Description\n\nAbout ${id}.\n\n## Milestones\n\n- [ ] m1: first\n`;
+  const checkout = (name: string, branch: string) => {
+    const dir = path.join(base, name);
+    git(base, 'clone', '-q', '--single-branch', '--branch', branch, remote, dir);
+    git(dir, 'config', 'user.email', `${name}@example.com`);
+    git(dir, 'config', 'user.name', name);
+    return dir;
+  };
+  const inside = async (dir: string, fn: () => Promise<void>) => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const cwd = process.cwd();
+    process.chdir(dir);
+    try {
+      await fn();
+    } finally {
+      process.chdir(cwd);
+      log.mockRestore();
+    }
+  };
+  /** Renders the board in a checkout with its own shipped playbook, then lays it out with the page's script. */
+  const render = (dir: string) => {
+    const skill = fs.readFileSync(path.join(dir, '.claude', 'skills', KANBAN_SKILL_DIR, 'SKILL.md'), 'utf-8');
+    const tmp = fs.mkdtempSync(path.join(base, 'render-'));
+    const out = execFileSync('sh', ['-c', playbook(skill, '## Playbook 2')], {
+      cwd: dir,
+      encoding: 'utf-8',
+      env: { ...process.env, TMPDIR: tmp },
+    }).trim();
+    const board = renderBoardPage(fs.readFileSync(out, 'utf-8')).byId('board');
+    return board.findAll((e) => e.tagName === 'section').map((column) => [
+      column.getAttribute('data-column'),
+      column
+        .findAll((e) => e.tagName === 'article' && e.has('card'))
+        .map((c) => `${c.getAttribute('data-id')} ${c.getAttribute('data-state')} ${c.findAll((e) => e.has('owner'))[0].textContent}`),
+    ]);
+  };
+  const refs = (dir: string) => git(dir, 'for-each-ref', '--format=%(refname)').split('\n');
+
+  let ana: string;
+  let bo: string;
+  beforeEach(async () => {
+    base = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'opensprint-kanban-two-')));
+    remote = path.join(base, 'remote.git');
+    git(base, 'init', '-q', '--bare', '--initial-branch=main', remote);
+
+    const setup = path.join(base, 'setup');
+    git(base, 'clone', '-q', remote, setup);
+    git(setup, 'config', 'user.email', 'setup@example.com');
+    git(setup, 'config', 'user.name', 'setup');
+    git(setup, 'symbolic-ref', 'HEAD', 'refs/heads/main');
+    await writeOpspLayer(setup, claude, { skills: true, commands: false, version: 'test' });
+    fs.mkdirSync(path.join(setup, 'opensprint', 'initiatives'), { recursive: true });
+    fs.writeFileSync(path.join(setup, 'opensprint', 'initiatives', '20261001-alpha.md'), initiative('alpha', 'state: proposed\n'));
+    fs.writeFileSync(path.join(setup, 'opensprint', 'initiatives', '20261002-beta.md'), initiative('beta', 'state: exploring\n'));
+    git(setup, 'add', '.');
+    git(setup, 'commit', '-q', '-m', 'initiatives');
+    git(setup, 'push', '-q', 'origin', 'main');
+    git(setup, 'switch', '-q', '-c', 'opsp/beta');
+    fs.appendFileSync(path.join(setup, 'opensprint', 'initiatives', '20261002-beta.md'), '\n## Triage\n\n- **Leaning**: try it\n');
+    git(setup, 'commit', '-q', '-am', 'triage notes');
+    git(setup, 'push', '-q', 'origin', 'opsp/beta');
+
+    ana = checkout('ana', 'main');
+    bo = checkout('bo', 'opsp/beta');
+    await inside(ana, () => kanbanInitCommand());
+  });
+  afterEach(() => fs.rmSync(base, { recursive: true, force: true }));
+
+  it('renders the same board in both, and neither has fetched the other’s branch', () => {
+    const fromAna = render(ana);
+    expect(fromAna).toEqual(render(bo));
+    expect(fromAna.find(([key]) => key === 'dev')![1]).toEqual(['alpha proposed unowned']);
+
+    expect(refs(ana).filter((r) => r.includes('opsp/beta'))).toEqual([]);
+    expect(refs(bo).filter((r) => /\/main$/.test(r))).toEqual([]);
+  });
+
+  it('shows a move pushed from either checkout in the other’s next render', async () => {
+    await inside(ana, () => advanceCommand('alpha', { to: 'building', hat: 'dev' }));
+    // building is a state someone must hold, so the page flags it.
+    expect(render(bo).find(([key]) => key === 'dev')![1]).toEqual(['alpha building no owner']);
+
+    await inside(bo, () => claimCommand('beta'));
+    const planning = render(ana).find(([key]) => key === 'planning')![1];
+    expect(planning).toEqual(['beta exploring bo']);
+    expect(render(ana)).toEqual(render(bo));
+
+    expect(refs(ana).filter((r) => r.includes('opsp/beta'))).toEqual([]);
+    expect(refs(bo).filter((r) => /\/main$/.test(r))).toEqual([]);
   });
 });

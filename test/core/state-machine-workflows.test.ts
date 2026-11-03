@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import { getOpspSkillTemplates } from '../../src/core/shared/index.js';
 import { TRANSITIONS } from '../../src/core/initiative-transitions.js';
+import { advanceCommand } from '../../src/commands/advance.js';
 
 const instructions = (id: string) =>
   getOpspSkillTemplates().find((t) => t.workflowId === id)!.template.instructions;
@@ -28,6 +33,14 @@ describe('workflows perform the transitions the table assigns them', () => {
     }
   });
 
+  it('no workflow writes an initiative at any state but exploring', () => {
+    for (const t of getOpspSkillTemplates()) {
+      for (const [, state] of t.template.instructions.matchAll(/^\s*state: ([a-z-]+)\s*$/gm)) {
+        expect(state, t.workflowId).toBe('exploring');
+      }
+    }
+  });
+
   it('no workflow is left editing the field by hand', () => {
     for (const id of ['opsp-propose', 'opsp-apply', 'opsp-attest', 'opsp-archive', 'opsp-reexplore', 'opsp-repropose']) {
       expect(instructions(id)).toMatch(/opensprint advance/);
@@ -37,8 +50,12 @@ describe('workflows perform the transitions the table assigns them', () => {
   describe('propose', () => {
     const text = () => instructions('opsp-propose');
 
-    it('writes the state field into the template it tells an agent to copy', () => {
-      expect(text()).toContain('state: proposed');
+    // A descriptor written at `proposed` made propose's own advance refuse as
+    // "Already 'proposed'", so its card never reached the board.
+    it('writes a new descriptor at exploring, and reaches proposed only through advance', () => {
+      expect(text()).toContain('state: exploring');
+      expect(text()).not.toMatch(/^state: proposed$/m);
+      expect(text().indexOf('state: exploring')).toBeLessThan(text().indexOf('opensprint advance <initiative-name> --to proposed'));
     });
 
     it('says not to edit the field by hand, and why', () => {
@@ -113,6 +130,13 @@ describe('workflows perform the transitions the table assigns them', () => {
     it('keeps status and state as separate fields, and says why', () => {
       expect(text()).toMatch(/are different fields and both are kept/);
     });
+
+    // Removing the initiative's worktree first left advance nothing to find.
+    it('closes the initiative before it removes the initiative worktree', () => {
+      const close = text().indexOf('opensprint advance <initiative-name> --to completed');
+      expect(close).toBeGreaterThan(-1);
+      expect(close).toBeLessThan(text().indexOf('git worktree remove ../<repo>-opsp-<initiative-name>'));
+    });
   });
 
   describe('reexplore', () => {
@@ -144,4 +168,58 @@ describe('workflows perform the transitions the table assigns them', () => {
       expect(text()).toMatch(/Back to\s+\\?`proposed\\?`, not/);
     });
   });
+});
+
+/**
+ * DEC-STATE-MACHINE and DEC-HAT-HANDOFFS, run rather than read: for every
+ * transition, the command its workflow tells the agent to run must be one
+ * the CLI accepts from the state that workflow starts in. "The template
+ * mentions `--to completed`" passed while archive's command was refused for
+ * want of a hat, and that is the gap this closes.
+ */
+describe('every advance a workflow runs is one the CLI accepts', () => {
+  /**
+   * Each `opensprint advance <initiative-name> --to …` in a template, with the hats it offers:
+   * on a line of its own, indented in a list, or inline in backticks.
+   */
+  const advances = (text: string) =>
+    [...text.matchAll(/(?:^[ \t]*|`)opensprint advance <initiative-name> --to ([a-z-]+)([^\n`]*)/gm)].map(([line, to, rest]) => {
+      const hat = rest.match(/--hat (\S+)/)?.[1];
+      const hats = hat === undefined ? [] : hat.replace(/^<|>$/g, '').split('|');
+      return { line, to, hats };
+    });
+
+  let root: string;
+  beforeEach(() => {
+    root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'opensprint-advance-rule-')));
+    execFileSync('git', ['init', '-q'], { cwd: root });
+  });
+  afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
+
+  for (const t of TRANSITIONS) {
+    it(`${t.by}: ${t.from} → ${t.to}`, async () => {
+      const found = advances(instructions(t.by.replace('/opsp:', 'opsp-'))).filter((a) => a.to === t.to);
+      expect(found, `${t.by} has no 'opensprint advance <initiative-name> --to ${t.to}'`).not.toHaveLength(0);
+
+      for (const { line, hats } of found) {
+        if (t.handoff) expect(hats, `${line} — ${t.from} → ${t.to} is a handoff`).not.toHaveLength(0);
+        for (const hat of hats) expect(t.hat, `${line} offers ${hat}`).toContain(hat);
+
+        const dir = path.join(root, 'opensprint', 'initiatives');
+        fs.mkdirSync(dir, { recursive: true });
+        const file = path.join(dir, '20261001-alpha.md');
+        fs.writeFileSync(file, `---\nid: alpha\nstatus: active\nstate: ${t.from}\n---\n\n## Description\n\nAlpha.\n\n## Milestones\n\n- [x] m1: first\n`);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+        const cwd = process.cwd();
+        process.chdir(root);
+        try {
+          await advanceCommand('alpha', { to: t.to, hat: hats[0], board: false });
+        } finally {
+          process.chdir(cwd);
+          log.mockRestore();
+        }
+        expect(fs.readFileSync(file, 'utf-8'), line).toContain(`state: ${t.to}\n`);
+      }
+    });
+  }
 });

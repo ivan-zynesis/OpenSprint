@@ -3,10 +3,11 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { MILESTONE_STAGES, MILESTONE_STAGE_MOVES, checkStageMove, readBoard } from '../../src/core/kanban.js';
-import { MILESTONE_COLUMNS, boardConfig, changeRequestMove } from '../../src/core/kanban-board.js';
+import { MILESTONE_STAGES, MILESTONE_STAGE_MOVES, checkStageMove, readBoard, renderCard } from '../../src/core/kanban.js';
+import { MILESTONE_COLUMNS, boardConfig, changeRequestMove, renderBoardTemplate } from '../../src/core/kanban-board.js';
 import { kanbanInitCommand, kanbanStageCommand } from '../../src/commands/kanban.js';
-import { getOpspSkillTemplates } from '../../src/core/shared/index.js';
+import { getOpspSkillTemplates, kanbanAgent } from '../../src/core/shared/index.js';
+import { fillBoardTemplate, renderBoardPage, type FakeElement } from '../helpers/board-dom.js';
 
 /**
  * DEC-MILESTONE-BOARD: an initiative opens onto its milestones, in five
@@ -153,6 +154,81 @@ describe('opensprint kanban stage, against a remote', () => {
   it('is a note, not a failure, where origin has no board', async () => {
     const out = await stage('m1', 'specifying');
     expect(out).toContain("origin has no live board — 'opensprint kanban init' creates one");
+  });
+});
+
+/**
+ * DS-LIVE-BOARD's drill-down, at the page: opening an initiative shows its
+ * milestones as tickets in the opsx-cycle columns. Runs the page's own
+ * script against a DOM stand-in and clicks the card's title.
+ */
+describe('opening an initiative on the page (DEC-MILESTONE-BOARD)', () => {
+  const claude = { value: 'claude', skillsDir: '.claude' };
+  const card = renderCard({
+    id: 'alpha',
+    title: 'alpha',
+    state: 'building',
+    owner: 'Ivan',
+    created: '2026-10-01',
+    updated: '2026-10-27T00:00:00Z',
+    branch: 'opsp/alpha',
+    summary: 'About alpha.',
+    milestones: [
+      { name: 'm0', description: 'the old plan', stage: 'superseded' },
+      { name: 'm1', description: 'first', stage: 'done' },
+      { name: 'm2', description: 'second', stage: 'review' },
+      { name: 'm3', description: 'third', stage: 'todo' },
+    ],
+    history: [],
+  });
+  const page = () => renderBoardPage(fillBoardTemplate(renderBoardTemplate(boardConfig(kanbanAgent(claude, true))), [card]));
+  const columns = (overlay: FakeElement) =>
+    overlay
+      .findAll((e) => e.tagName === 'section')
+      .map((s) => [
+        s.getAttribute('data-column'),
+        s.findAll((e) => e.tagName === 'article').map((t) => t.getAttribute('data-milestone')),
+      ]);
+
+  it('opens its milestones in the five columns when the title is clicked', async () => {
+    const rendered = page();
+    const overlay = rendered.byId('overlay');
+    expect(overlay.hidden).toBe(true);
+
+    const [title] = rendered.byId('board').findAll((e) => e.tagName === 'button' && e.has('open'));
+    expect(title.textContent).toBe('alpha');
+    await title.click();
+
+    expect(overlay.hidden).toBe(false);
+    expect(columns(overlay)).toEqual([
+      ['todo', ['m3']],
+      ['specifying', []],
+      ['building', []],
+      ['review', ['m2']],
+      ['done', ['m0', 'm1']],
+    ]);
+    expect(MILESTONE_COLUMNS.map((c) => c.key)).toEqual(columns(overlay).map(([key]) => key));
+  });
+
+  it('offers continue on the next milestone only, and a change request from Review', async () => {
+    const rendered = page();
+    await rendered.byId('board').findAll((e) => e.tagName === 'button' && e.has('open'))[0].click();
+    const ticket = (name: string) => rendered.byId('overlay').findAll((e) => e.getAttribute('data-milestone') === name)[0];
+    const buttons = (name: string) => ticket(name).findAll((e) => e.tagName === 'button').map((b) => b.textContent);
+
+    expect(ticket('m2').has('next')).toBe(true);
+    expect(buttons('m2')).toEqual(['← Change request', 'Continue: apply →']);
+    expect(buttons('m3')).toEqual([]);
+    expect(buttons('m1')).toEqual([]);
+
+    await ticket('m2').findAll((e) => e.tagName === 'button' && e.textContent === 'Continue: apply →')[0].click();
+    expect(rendered.copied.at(-1)).toContain("'/opsp:opsp-apply alpha'");
+  });
+
+  it('shows no way in for an initiative with no milestones on its card', () => {
+    const bare = card.replace(/## Milestones\n\n[\s\S]*?\n\n/, '');
+    const rendered = renderBoardPage(fillBoardTemplate(renderBoardTemplate(boardConfig(kanbanAgent(claude, true))), [bare]));
+    expect(rendered.byId('board').findAll((e) => e.tagName === 'button' && e.has('open'))).toEqual([]);
   });
 });
 

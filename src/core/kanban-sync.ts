@@ -130,6 +130,12 @@ function write(
  * created at the state it is leaving and the history shows the move. The card
  * validates its own move against the table: a card that drifted is left alone
  * and the drift reported, because writing it would invent a move nobody made.
+ *
+ * The file's milestones ride along, mirrored as `stageCard` mirrors them:
+ * repropose and reexplore edit milestones by hand and then advance, and a
+ * move that carried only the state would leave the old plan on the board.
+ * `advance` writes nothing but `state:`, so the entry's milestones are the
+ * file's.
  */
 export function moveCard(
   root: string,
@@ -140,7 +146,17 @@ export function moveCard(
   return write(root, options, (board, at) => {
     const { card, isNew } = cardFor(root, board, entry, at, options.by);
     const from = card.state.length === 0 ? undefined : card.state;
-    if (from === to && !isNew) return { outcome: 'unchanged', detail: `the card already shows ${to}` };
+    const milestones = mirrorMilestones(card.milestones, entry.milestones);
+    const mirrored = JSON.stringify(milestones) !== JSON.stringify(card.milestones);
+    if (from === to && !isNew) {
+      if (!mirrored) return { outcome: 'unchanged', detail: `the card already shows ${to}` };
+      const what = 'milestones follow the initiative';
+      return {
+        card: { ...card, milestones, updated: at, history: [...card.history, historyLine(at, what, options.by)] },
+        message: `kanban: ${card.id} ${what}`,
+        detail: what,
+      };
+    }
     if (from !== to) {
       const refusal = checkTransition(from, to);
       if (refusal !== null) {
@@ -155,6 +171,7 @@ export function moveCard(
     const moved: Card = {
       ...card,
       state: to,
+      milestones,
       updated: at,
       history: from === to ? card.history : [...card.history, historyLine(at, `${from ?? '(no state)'} → ${to}`, options.by, options.workflow)],
     };

@@ -64,6 +64,51 @@ what others have pushed. It sees committed work only: an item still uncommitted 
 worktree, or a branch never pushed from another machine, is invisible to it. Where both a local
 branch and a fetched copy carry the card, the fetched one is shown only when it is strictly ahead —
 someone claimed or moved the card and pushed — so a stale local branch does not hide their change.
+For work in flight, the live board below closes that gap without depending on what anyone fetched.
+
+### The live board
+
+`BOARD.md` and `--all-branches` both show what one machine knows. The live board does not.
+In-flight state lives on its own branch on your remote, `origin/kanban`, as one plain-text card per
+initiative, and every checkout reads that same copy whichever branch it is on.
+
+**Set it up once.** This is the one command a person runs for the board:
+
+```bash
+opensprint kanban init
+```
+
+It creates `origin/kanban` and adds a card for every initiative this machine knows. It pushes to
+your remote and leaves your checkout alone.
+
+**After that, the workflows keep it current.** Nobody edits the board, and nobody needs to type a
+board command while working. Every workflow that moves an initiative moves its card through the
+same command:
+
+| When | The workflow runs | The card |
+|---|---|---|
+| backlog writes a new item | `opensprint kanban seed <id>` | appears in Backlog |
+| triage picks an item up | `opensprint claim <id>` | names its owner |
+| propose, apply, attest, repropose, reexplore, archive move the initiative | `opensprint advance <id> --to <state>` | moves column, and carries the milestones with it |
+| apply reaches each step of a milestone's opsx cycle | `opensprint kanban stage <id> <milestone> <stage>` | moves the milestone's ticket |
+
+A claim goes to the board first, so of two people claiming the same item at once, one wins and the
+other is told who holds it. A card that disagrees with its initiative is reported, never
+overwritten. If the remote cannot be reached, the initiative still moves and you are told the card
+did not; `--no-board` leaves the remote alone on purpose.
+
+**Taking over a card** is the other command a person may type, when someone else holds it and you
+are picking the work up: `opensprint claim <id> --take-over`.
+
+**Look at it with `/opsp:kanban`.** It lists the board, or renders it as one HTML page to open in a
+browser. It needs git and a shell; it starts no server, and the page loads nothing from the
+network. The page does not refresh itself — render it again to see changes.
+
+**Buttons start work; they never move cards.** Each card offers the next step forward and the
+escalations back that the state machine allows. A button copies a command to paste into a terminal:
+it opens the card's worktree and starts a fresh agent session on that workflow, and the workflow
+moves the card when its work is done. Clicking a card's title shows its milestones as tickets in To
+do, Specifying, Building, Review and Done.
 
 ---
 

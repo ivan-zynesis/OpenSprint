@@ -137,6 +137,35 @@ describe('workflows move the card', () => {
       expect(remoteBoard()).toBe(before);
     });
 
+    // Repropose redraws milestones by hand and then advances: the move carries the new plan onto the card.
+    it('carries milestones edited in the file onto the card with the move (DEC-MILESTONE-BOARD)', async () => {
+      await run(() => kanbanInitCommand());
+      await run(() => advanceCommand('alpha', { to: 'building', hat: 'dev' }));
+      const text = fs.readFileSync(file('alpha'), 'utf-8').replace(
+        '- [ ] m1: first\n',
+        '- [~] m1: first (superseded by m2)\n- [ ] m2: second\n'
+      );
+      fs.writeFileSync(file('alpha'), text);
+
+      await run(() => advanceCommand('alpha', { to: 'proposed', hat: 'product' }));
+      const alpha = card('alpha')!;
+      expect(alpha.state).toBe('proposed');
+      expect(alpha.milestones.map((m) => `${m.name}:${m.stage}`)).toEqual(['m1:superseded', 'm2:todo']);
+    });
+
+    it('writes only the milestones where the card already shows the state', async () => {
+      await run(() => kanbanInitCommand());
+      const board = readBoard(root, 'origin');
+      const ahead = { ...board.cards.find((c) => c.id === 'alpha')!, state: 'building' };
+      writeBoard(root, 'origin', board.commit, { [cardPath('alpha')]: renderCard(ahead) }, 'ahead');
+      fs.writeFileSync(file('alpha'), fs.readFileSync(file('alpha'), 'utf-8') + '- [ ] m2: second\n');
+
+      await run(() => advanceCommand('alpha', { to: 'building', hat: 'dev' }));
+      const alpha = card('alpha')!;
+      expect(alpha.milestones.map((m) => m.name)).toEqual(['m1', 'm2']);
+      expect(alpha.history.at(-1)).toMatch(/ {2}milestones follow the initiative {2}by Ivan$/);
+    });
+
     it('reports the card in --json', async () => {
       await run(() => kanbanInitCommand());
       const out = await run(() => advanceCommand('alpha', { to: 'building', hat: 'dev', json: true }));

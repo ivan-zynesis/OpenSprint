@@ -234,7 +234,7 @@ mistyped still resolves:
 ---
 id: <initiative-name>
 status: active
-state: proposed
+state: exploring
 created: <YYYY-MM-DD>
 ---
 
@@ -266,6 +266,22 @@ created: <YYYY-MM-DD>
 - [ ] deprecate-monolith-routes: Remove legacy endpoints and redirect
 \`\`\`
 
+A new descriptor starts at \`exploring\`, where every initiative starts — the same place one arriving
+from triage already is. Step e moves it on.
+
+**e. Advance the state** — for both paths, once everything above is written:
+
+\`\`\`bash
+opensprint advance <initiative-name> --to proposed
+\`\`\`
+
+**Do not edit \`state:\` by hand.** The command refuses an illegal move, names the legal ones, and
+regenerates \`BOARD.md\` (\`DEC-STATE-MACHINE\`). It also puts the initiative's card on the live
+board, or moves the card that is already there. Writing the field directly is what left every
+initiative in this project stuck at the wrong state — the instruction to set it existed and was
+simply never followed — and a descriptor written at \`proposed\` makes this command refuse, as
+"Already 'proposed'", so the card never moves.
+
 ### 4. Summary
 
 Display what was created:
@@ -292,17 +308,6 @@ drift from reality. \`Addresses\` records what the initiative set out to close, 
 
 - **Classify, don't invent** — Only create driver-specs and ADRs from what the operator actually said
 - **Never duplicate an initiative** — where one exists at \`state: exploring\`, fill it in and advance it; do not write a second
-
-## Step 5: Advance the state
-
-\`\`\`bash
-opensprint advance <initiative-name> --to proposed
-\`\`\`
-
-**Do not edit \`state:\` by hand.** The command refuses an illegal move, names the legal ones, and
-regenerates \`BOARD.md\` (\`DEC-STATE-MACHINE\`). Writing the field directly is what left every
-initiative in this project stuck at the wrong state — the instruction to set it existed and was
-simply never followed.
 - **Never rewrite an Objective or Goal** — those were settled at backlog time
 - **Operator confirms** — Always present classification before writing files
 - **High-level milestones** — Each milestone is a brief description, not a detailed plan. Detail comes from opsx.
