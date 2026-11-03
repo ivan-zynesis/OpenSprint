@@ -4,7 +4,7 @@ title: kanban
 state: building
 owner: Ivan Lee
 created: 2026-10-18
-updated: 2026-11-03T15:42:01Z
+updated: 2026-11-03T15:50:33Z
 branch: opsp/kanban
 ---
 
@@ -18,7 +18,7 @@ branch: opsp/kanban
 - [done] workflow-moves-card: every workflow that moves an initiative updates its card on `origin/kanban` through the opensprint command, including claims
 - [done] resumable-workflows: triage, propose and attest resume from what the initiative already holds, so "continue" means resume
 - [done] milestone-board: clicking an initiative opens its milestones as tickets, in the five opsx-cycle columns, with continue and change-request moves
-- [building] board-stays-live: the change requested at attestation — every workflow's own move reaches the card, each bar has a test that asserts it, and the docs describe the live board
+- [review] board-stays-live: the change requested at attestation — every workflow's own move reaches the card, each bar has a test that asserts it, and the docs describe the live board
 
 ## History
 
@@ -29,3 +29,4 @@ branch: opsp/kanban
 - 2026-11-03T15:30:12Z  resynced milestones from opensprint/initiatives/20261018-kanban.md  by Ivan Lee
 - 2026-11-03T15:41:32Z  milestone board-stays-live: todo → specifying  by Ivan Lee
 - 2026-11-03T15:42:01Z  milestone board-stays-live: specifying → building  by Ivan Lee
+- 2026-11-03T15:50:33Z  milestone board-stays-live: building → review  by Ivan Lee
