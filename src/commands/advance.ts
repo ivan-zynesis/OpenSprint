@@ -7,13 +7,18 @@
  * A workflow now runs a command that refuses an illegal move and names the
  * legal ones, so a transition is something the system did rather than
  * something an agent remembered (`DEC-STATE-MACHINE`).
+ *
+ * It moves the initiative's card on the live board too, so every workflow
+ * that advances an initiative moves its card without a word of its own
+ * (`DEC-CARD-WRITES-THROUGH-CLI`). The board is a second write: it never
+ * blocks the move, and a card it could not move is reported.
  */
 
 import * as path from 'node:path';
 import chalk from 'chalk';
 import { OPENSPRINT_DIR_NAME } from '../core/config.js';
 import { resolveInitiative, checkInitiativeState, readInitiatives } from '../core/initiatives.js';
-import { readInitiativeGitState } from '../core/initiative-git.js';
+import { gitUserName, readInitiativeGitState } from '../core/initiative-git.js';
 import {
   checkTransition,
   writeState,
@@ -21,6 +26,7 @@ import {
   transitionFor,
 } from '../core/initiative-transitions.js';
 import { regenerateBoard, BOARD_FILENAME } from '../core/board.js';
+import { describeBoardWrite, moveCard, type BoardWrite } from '../core/kanban-sync.js';
 
 export interface AdvanceOptions {
   to?: string;
@@ -28,6 +34,8 @@ export interface AdvanceOptions {
   json?: boolean;
   /** Report the move and the problems it would leave, without writing. */
   dryRun?: boolean;
+  /** False with `--no-board`: move the initiative without contacting the live board. */
+  board?: boolean;
 }
 
 export async function advanceCommand(
@@ -101,6 +109,15 @@ export async function advanceCommand(
     regenerateBoard(opensprintDir);
   }
 
+  // After the file: the record moved, and the card follows it.
+  const board: BoardWrite | null =
+    options.dryRun === true || options.board === false
+      ? null
+      : moveCard(projectRoot, entry, options.to, {
+          by: gitUserName(projectRoot) ?? 'unknown',
+          workflow: move === null ? undefined : `${move.by}${options.hat === undefined ? '' : ` · ${options.hat}`}`,
+        });
+
   // Re-read so the check sees what was written, not what was asked for.
   const after = options.dryRun === true ? entry : resolveInitiative(opensprintDir, entry.id) ?? entry;
   const problems = checkInitiativeState(
@@ -119,6 +136,7 @@ export async function advanceCommand(
           handoff: move?.handoff ?? false,
           dryRun: options.dryRun === true,
           problems,
+          board,
         },
         null,
         2
@@ -141,6 +159,8 @@ export async function advanceCommand(
   if (options.dryRun !== true) {
     console.log(chalk.dim(`  ${path.relative(projectRoot, entry.path)} · ${BOARD_FILENAME} regenerated`));
   }
+  const said = board === null ? null : describeBoardWrite(board);
+  if (said !== null) console.log(said.tone === 'warn' ? chalk.yellow(`  ${said.text}`) : chalk.dim(`  ${said.text}`));
 
   // Advancing is not a gate — the state is recorded and the disagreement is
   // reported beside it. Refusing here would make a tool that records what

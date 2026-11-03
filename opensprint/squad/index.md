@@ -6,9 +6,9 @@ not with a text editor.
 
 | Wearing | Owns the question | Start with | Shape | Records |
 |---|---|---|---|---|
-| **product** | what must it **do**? | [product.md](product.md) | objective · goals · strategies · measures | 24 |
-| **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | posture · seven inherited objectives | 15 |
-| **dev** | how is it **built**? | [dev.md](dev.md) | tech-stack · runtime-topology · entity-schema | 58 |
+| **product** | what must it **do**? | [product.md](product.md) | objective · goals · strategies · measures | 25 |
+| **maintainer** | what must be **true of it** while it does that? | [maintainer.md](maintainer.md) | posture · seven inherited objectives | 16 |
+| **dev** | how is it **built**? | [dev.md](dev.md) | tech-stack · runtime-topology · entity-schema | 64 |
 | **devops** | how is it **stood up and kept running**? | [devops.md](devops.md) | infra-architecture · gitops | 4 |
 
 Each hat has its own shape, because the four accountabilities produce different *kinds* of knowledge
@@ -39,9 +39,10 @@ Orient here, read the view, and open the full record only for the decision you a
 Only **attested** licenses an unqualified present-tense claim about the system
 (`DS-ATTESTED-TRUTH`).
 
-`DECISION-MAP.md` holds the decision tree and blast radius. `BOARD.md` holds every initiative by
-state, with the roadmap. `architecture.md` is a peer of these views, compiled from the same records
-in the same pass.
+`DECISION-MAP.md` holds the decision tree and blast radius. `BOARD.md` holds this checkout's
+initiatives by state, with the roadmap; the live board on `origin/kanban` runs beside it, one card
+per initiative (`DEC-BOARD-ON-REMOTE-BRANCH`). `architecture.md` is a peer of these views,
+compiled from the same records in the same pass.
 
 ## What is not here
 

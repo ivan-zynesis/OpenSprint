@@ -195,10 +195,20 @@ CI (`DEC-COMPILE-ON-MILESTONE`).
 
 ## Open Loops
 
-1 loop the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+The harvest reports one loop for this hat, and it is listed here as reported, with nothing
+added. Open loops are the backlog. `/opsp:explore`, then `/opsp:propose`, triages them into work
+(`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-- `DEC-032`
+- **`DEC-032`**: no test or check cites this record id, and such a citation is what counts as a
+  rule (`DEC-013`). The record decides two things. Evidence must be a reference to a pipeline
+  artifact. A bar that cannot be assessed before merge is attested `pending`, and the next
+  initiative in that area attests it again. The record declares both `dev` and `devops`, so the
+  `dev` view lists the same loop (`DEC-028`).
 
-_No rule cites this decision._
+Rules cite the other three decisions routed here: `DEC-029`, `DEC-030` and
+`DEC-COMPILE-ON-MILESTONE`. The tests changed since the last compile —
+`test/core/kanban-milestones.test.ts`, `test/core/kanban-skill.test.ts`,
+`test/core/kanban-sync.test.ts` and `test/core/state-machine-workflows.test.ts` — cite no decision
+in this view, so they add no rule here.

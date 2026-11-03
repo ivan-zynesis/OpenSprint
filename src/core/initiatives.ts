@@ -117,6 +117,11 @@ export interface InitiativeEntry {
   driverSpecs: string[];
   /** Decisions this initiative claims, from `## ADRs`. */
   decisions: string[];
+  /**
+   * The first paragraph of `## Description`, on one line — what a card on
+   * the live board shows. Absent where the section is.
+   */
+  summary?: string;
   /** Path to the file, so a caller can open it. */
   path: string;
   /** Filename without `.md`, which may differ from `id` once DEC-036 lands. */
@@ -314,6 +319,20 @@ function parseMembership(content: string, heading: string): string[] {
  * branch goes through this same parser: two parsers for one artifact is how
  * the board and the state check start to disagree about what it says.
  */
+/**
+ * The first paragraph of `## Description`, with its line breaks folded.
+ *
+ * One paragraph because a card has room for one, and folded because the
+ * card format is line-based.
+ */
+export function parseSummary(content: string): string | undefined {
+  const body = sectionBody(content, 'Description');
+  if (body === null) return undefined;
+  const first = body.trim().split(/\n\s*\n/)[0] ?? '';
+  const folded = first.replace(/\s+/g, ' ').trim();
+  return folded.length === 0 ? undefined : folded;
+}
+
 export function parseInitiative(
   content: string,
   filePath: string,
@@ -326,6 +345,7 @@ export function parseInitiative(
     ? (fm['depends-on'] as string[])
     : [];
   const owner = typeof fm.owner === 'string' ? fm.owner.trim() : '';
+  const summary = parseSummary(content);
 
   return {
     id: fm.id as string,
@@ -340,6 +360,7 @@ export function parseInitiative(
     ...(parseAttestation(content) === undefined ? {} : { attestation: parseAttestation(content) }),
     driverSpecs: parseMembership(content, 'Driver Specs'),
     decisions: parseMembership(content, 'ADRs'),
+    ...(summary === undefined ? {} : { summary }),
     path: filePath,
     stem,
   };

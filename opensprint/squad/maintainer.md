@@ -5,10 +5,11 @@ everything: **its objectives are inherited, not discovered** (`DS-MAINTAINER-INH
 them, present in substantially every software project — which is why this accountability was split
 off from product and given to a specialist.
 
-**Nothing below is attested.** Every claim here rests on a *decision*, not on evidence that it holds
-(`DS-ATTESTED-TRUTH`). `/opsp:attest` first ran on 2026-10-11 and judged no bar `met`, so each row
-states what was decided — with the posture and exposure recorded against it — rather than what is
-true of the running system.
+**One measure below is attested** — the live board's runtime-less strategy, judged `met` with
+evidence on 2026-11-04 (`DS-RUNTIME-LESS-BOARD`). Every other claim here rests on a *decision*, not on
+evidence that it holds (`DS-ATTESTED-TRUTH`). `/opsp:attest` first ran on 2026-10-11 and judged no
+bar `met`, so each of those rows states what was decided — with the posture and exposure recorded
+against it — rather than what is true of the running system.
 
 ## Posture
 
@@ -612,11 +613,56 @@ Integrity & Correctness and Change & Quality objectives alone.
 
 ## Availability & Continuity
 
-**Nothing recorded.**
+**Goal — nothing recorded.** No record states the outcome this project commits to for availability;
+the one record selecting this objective is a strategy (`DS-RUNTIME-LESS-BOARD`).
 
-Added to the objective list on review, after being declined twice — the check being that a system
-can be correct, secure, isolated, compliant, well-tested and cheap, and still be down. For a CLI
-with no runtime there may be nothing to say; nothing says that either.
+**Strategy — the board needs no client-side process.** Seeing and working with the live board starts
+nothing on the client: the git CLI, the installed skill and something that renders HTML are all it
+needs, and the operator starts nothing separately (`DS-RUNTIME-LESS-BOARD`). A process somebody has
+to start and keep alive is a dependency every adopter inherits, and one more thing that can be down
+when someone needs the board (`DS-RUNTIME-LESS-BOARD`).
+
+```
+the board needs no client-side process                          (DS-RUNTIME-LESS-BOARD)
+  → DEC-BOARD-READ-BY-GIT (dev)   reads are git playbooks; rendering fills a static template
+    strength:    no client-side process; git, the skill and a browser; any git remote; card text
+                 cannot break the page
+    weakness:    no live updates — refreshing means rendering again
+    opportunity: a node script and local server, or a page fetching from the forge's API
+    threat:      a board too large to render into one file, or an adopter with no POSIX shell —
+                 either would need paging or filtering, or a second form of the playbook
+  → DEC-BOARD-BUTTON-LAUNCHES-SESSION (dev)   a button copies a command rather than running one
+    strength:    a move always carries its work; no client-side process; a fresh session per hat;
+                 the paste is the operator's consent
+    weakness:    copy, then paste — not one click
+    opportunity: a button that moves the card, or a local helper that runs the command
+    threat:      operators pasting without reading, so the paste stops being consent — the command
+                 would need to say more about what it does
+```
+
+**Measure — the strategy.**
+
+```
+bar:        given   an adopter with git, the installed skill and a browser
+            when    they list or render the board
+            then    nothing is installed, nothing keeps running, and the page loads nothing from
+                    the network
+            dimension — capability against footprint on the adopter's machine
+            chosen    — git, the skill and a static HTML file, for reading and rendering the board
+            traded for— no live push updates, so refreshing means rendering again; and a page that
+                        can run nothing itself, so starting work is a paste, not a click
+            neighbour — a local server or script serving the board, the first proof of concept
+posture:    met — Claude (fresh session) for Ivan Lee, 2026-11-04; a re-attestation, after a
+            change requested on 2026-11-03
+evidence:   CI run 41668525609 on pull request 10, Test job green; test/core/kanban-skill.test.ts
+```
+
+Attested as of 2026-11-04: both shipped playbooks, list and render, run against a real remote with a
+`PATH` holding only `sh`, `git` and seven shell utilities — `node` cannot be found — and no playbook
+puts a command in the background, so nothing keeps running. The rendered page carries no
+`http(s)://` URL, no `link`, `img`, `iframe` or `src=`, and no `fetch`, XHR, socket, event source or
+dynamic import (`DS-RUNTIME-LESS-BOARD`). The attestation names one blind spot: a protocol-relative
+URL or a CSS `url()`/`@import` would pass that scan (`DS-RUNTIME-LESS-BOARD`).
 
 ## Cost & Budget
 
@@ -626,46 +672,35 @@ What this costs to run and maintain. The business model belongs to `product`.
 
 ## Open Loops
 
-19 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+Nineteen, exactly as the harvest reports them for this hat. Triage them through `/opsp:explore` and
+`/opsp:propose`; deciding which gap is worth work is a judgement call.
 
 ### `constraint-unasserted` — answered, but no rule cites any answering decision
 
-- `DS-SELF-USE-SCOPE` — Answered by `DEC-017`, but no rule cites any of them.
-- `DS-STRATEGY-ALTITUDE` — Answered by `DEC-020`, but no rule cites any of them.
+- `DS-SELF-USE-SCOPE` — answered by `DEC-017`
+- `DS-STRATEGY-ALTITUDE` — answered by `DEC-020`
 
 ### `decision-unguarded` — a decision no rule cites
 
 - `DEC-020`
 
-_No rule cites this decision._
-
 ### `measure-unattested` — a measure nobody has judged, or judged with an unrecognised verdict
 
-- `DS-BACKWARD-COMPAT`
-- `DS-HIGH-IMPACT-OPS`
-
-_States a posture with an unrecognised verdict. Accepted: met, partially met, not met, cannot assess._
+- `DS-BACKWARD-COMPAT` — a posture with an unrecognised verdict
+- `DS-HIGH-IMPACT-OPS` — a posture with an unrecognised verdict
 
 ### `exposure-unmitigated` — an exposure with no `mitigated-by`
 
-- `DS-ATTEST-AS-REVIEW`
-- `DS-ATTESTED-TRUTH`
-- `DS-CI-ATTESTATION`
-- `DS-DOCUMENTATION-REVIEWED`
-- `DS-ESCALATION-HANDOFF`
-- `DS-HIGH-IMPACT-OPS`
-- `DS-MEASURE-ANATOMY`
-- `DS-STRATEGY-ALTITUDE`
-- `DS-SURROGATE-GIT-CONTRACT`
-- `DS-VIEW-AUTHORSHIP`
-
-_States an exposure with no `mitigated-by`. A risk with no planned work is a confession._
+A risk with no planned work is a confession. Ten records carry one: `DS-ATTEST-AS-REVIEW`,
+`DS-ATTESTED-TRUTH`, `DS-CI-ATTESTATION`, `DS-DOCUMENTATION-REVIEWED`, `DS-ESCALATION-HANDOFF`,
+`DS-HIGH-IMPACT-OPS`, `DS-MEASURE-ANATOMY`, `DS-STRATEGY-ALTITUDE`, `DS-SURROGATE-GIT-CONTRACT`,
+`DS-VIEW-AUTHORSHIP`.
 
 ### `bar-without-form` — a bar stated in prose rather than in its hat's form
+
+A maintainer bar is written `given / when / then`, which is already a test specification.
 
 - `DS-ATTEST-AS-REVIEW`
 - `DS-BACKWARD-COMPAT`
 - `DS-HIGH-IMPACT-OPS`
 - `DS-VIEW-AUTHORSHIP`
-
-_States a bar in prose. A maintainer bar is written `given / when / then`, which is already a test specification._

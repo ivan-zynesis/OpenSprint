@@ -147,8 +147,10 @@ const OPSP_APPLY_INSTRUCTIONS = `Execute an initiative by orchestrating opsx cyc
    opensprint advance <initiative-name> --to building --hat dev
    \`\`\`
 
-   \`claim\` names you — git's \`user.name\`, or \`--owner <name>\`. If the board shows someone else as
-   its owner, ask the operator before taking it over. Both write the initiative and \`BOARD.md\`;
+   \`claim\` names you — git's \`user.name\`, or \`--owner <name>\`. It claims the card on the live
+   board first and **refuses a card someone else holds**, writing nothing; ask the operator, and
+   re-run with \`--take-over\` if they agree. Both commands move the card on \`origin/kanban\` as
+   well as the initiative. Both write the initiative and \`BOARD.md\`;
    commit them on the initiative branch, and offer to push it
    (\`git push -u origin opsp/<initiative-name>\`): until it is pushed, nobody else's board shows
    the card as taken. \`proposed\` → \`building\` is a handoff, so
@@ -187,10 +189,16 @@ Think through the milestone at feature level. You already have the architect-lev
 - Are there integration points to consider?
 
 ### Step 2b: OPSX Propose
-Create an opsx change:
+Create an opsx change, and move its ticket on the live board:
 \`\`\`bash
 opensprint new change "<milestone-name>"
+opensprint kanban stage <initiative-name> <milestone-name> specifying
 \`\`\`
+
+**The ticket follows every step** (\`DEC-MILESTONE-BOARD\`): \`specifying\` here, \`building\` at the
+worktree, \`review\` at the merge, \`done\` once it is checked off. The command refuses a move out of
+order — that is the sequential guardrail, enforced — and never fails for want of a board: no
+\`origin\` says nothing, no board is a note, an unreachable one is a warning.
 Then generate the artifacts (proposal.md, specs, design.md, tasks.md) using the opsx workflow. The proposal should reference the parent initiative and relevant driver-specs/ADRs.
 
 ### Step 2c: OPSX Apply
@@ -200,7 +208,11 @@ Then generate the artifacts (proposal.md, specs, design.md, tasks.md) using the 
 git worktree add ../<repo>-opsx-<initiative-name>-<change-name> -b opsx/<initiative-name>/<change-name> opsp/<initiative-name>
 cd ../<repo>-opsx-<initiative-name>-<change-name>
 \`\`\`
-Verify with \`pwd\` and \`git branch --show-current\`.
+Verify with \`pwd\` and \`git branch --show-current\`. Then:
+
+\`\`\`bash
+opensprint kanban stage <initiative-name> <milestone-name> building
+\`\`\`
 
 All implementation, edits, and test runs happen inside this change worktree. Do not read or write files outside of it during implementation.
 
@@ -361,9 +373,11 @@ After all tasks are complete:
    \`\`\`
    Verify the merge succeeded (exit code 0).
 
-   On success, remove the change worktree:
+   On success, remove the change worktree, and put the ticket in Review — merged, waiting at the
+   checkpoint:
    \`\`\`bash
    git worktree remove ../<repo>-opsx-<initiative-name>-<change-name>
+   opensprint kanban stage <initiative-name> <milestone-name> review
    \`\`\`
    The change branch ref is preserved for history inspection. If a correction is needed later, raise a change request — this creates a new opsx change with a fresh worktree. Do not re-attach a worktree to a merged change branch.
 
@@ -386,7 +400,11 @@ After all tasks are complete:
 
 After the milestone's opsx cycle completes:
 
-1. Mark the milestone as done in the initiative descriptor
+1. Mark the milestone as done in the initiative descriptor, then move its ticket — the file is what
+   says it is done, so this comes second:
+   \`\`\`bash
+   opensprint kanban stage <initiative-name> <milestone-name> done
+   \`\`\`
 2. Add the opsx change name to the initiative
 3. Summarize what was built and learned
 4. If new ADRs or driver-specs were created, note them
@@ -473,7 +491,11 @@ Present two options:
 
 ### Path A: Direct Propose (operator knows the fix)
 
-1. Ask the operator to describe what needs to change and why
+1. Ask the operator to describe what needs to change and why, and send the ticket back — a change
+   request is the one way back on the milestone board:
+   \`\`\`bash
+   opensprint kanban stage <initiative-name> <milestone-name> specifying
+   \`\`\`
 2. Run \`/opsx:propose\` inline with the operator's description
    - The corrective change proposal MUST explicitly note any surrogate artifacts (ADRs/driver-specs) that need updating
    - If the issue traces back to a bad ADR, the change tasks should include superseding that ADR and creating a corrected one

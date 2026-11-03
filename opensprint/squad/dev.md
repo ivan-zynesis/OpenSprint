@@ -1,490 +1,823 @@
 # dev — how is it built?
 
 Describes **the system**, citing decisions where they explain a choice and paths where they were
-observed. Fifty-four decisions feed this hat; none of them are enumerated here, because a list of
+observed. Sixty-four decisions feed this hat; none of them are enumerated here, because a list of
 condensed ADRs tells a reader nothing about what was built (`DS-BIG-PICTURE`).
 
 **Nothing below is attested.** Claims citing a path are *observed* — true of the code today, and
 possibly accidental. Claims citing a record are *decided* — binding, and not necessarily true yet
-(`DS-ATTESTED-TRUTH`).
+(`DS-ATTESTED-TRUTH`, `DEC-021`).
 
 ## Tech Stack
 
-OpenSprint is a TypeScript command-line tool on Node, published as `@ivan-lee/opensprint` at
-version `0.1.0`, ESM throughout (`"type": "module"`), requiring Node `>=20.19.0`
-(`package.json`). Its one binary is `opensprint`, which points at `bin/openspec.js` — a two-line
-shim importing the compiled `dist/cli/index.js` (`package.json`, `bin/openspec.js`). The entry file
-keeps the upstream OpenSpec name while the binary does not; no record explains the split.
+The tool is a TypeScript command-line program, published as `@ivan-lee/opensprint`. It is an ES
+module package with one binary, `opensprint`, which points at `bin/openspec.js`, and it needs Node
+`>=20.19.0` (`package.json`). `tsc` compiles `src/` into `dist/` with these settings
+(`tsconfig.json`):
 
-That the product is a CLI at all is decided: the surface is the `opensprint` CLI plus the skill and
-command files it generates into a downstream project, with no GUI and no shipped CI/CD product
-(`DEC-017`). Everything below is what that decision is built with, and it is all **observed** —
-no record chooses a language, a runtime, a library or a package manager.
+- ES2022 target
+- `NodeNext` modules
+- `strict`
+- declarations and source maps
 
-| Layer | What is used | Observed in |
-|---|---|---|
-| Language | TypeScript `^5.9.3`, `strict`, target `ES2022`, `NodeNext` modules and resolution, `src/` → `dist/` with declarations and source maps | `tsconfig.json`, `package.json` |
-| CLI framework | `commander` `^14`; every command and subcommand is registered in one file | `package.json`, `src/cli/index.ts` |
-| Schema validation | `zod` `^4` | `package.json` |
-| Interactive prompts | `@inquirer/core`, `@inquirer/prompts`, plus one local searchable multi-select | `package.json`, `src/prompts/` |
-| Terminal output | `chalk` `^5`, `ora` `^8` | `package.json` |
-| Files and config | `fast-glob` `^3`, `yaml` `^2` | `package.json` |
-| Telemetry | `posthog-node` `^5` | `package.json`, `src/telemetry/` |
-| Build | `build.js` deletes `dist/` and runs the locally installed `tsc` | `build.js` |
-| Test | `vitest` `^3.2.4`, `pool: 'forks'`, at most four workers unless `VITEST_MAX_WORKERS` says otherwise | `vitest.config.ts` |
-| Lint | `eslint` `^9` with `typescript-eslint` `^8`, over `src/` only | `package.json` |
-| Release | Changesets; `release:ci` runs a pack-version check, then `changeset publish` | `package.json` |
+`build` runs `node build.js` (`package.json`).
 
-The source tree is `cli/` (the entry), `commands/` (command implementations), `core/` (the logic,
-including `compact/` and `command-generation/`), `utils/`, `prompts/`, `ui/` and `telemetry/`,
-with `src/index.ts` exported as the package's library entry (`src/`, `package.json`).
+**What the package ships.** The package ships `dist`, `bin`, `schemas`, `assets` and
+`scripts/postinstall.js`, without compiled tests or source maps (`package.json`). `assets` holds the
+board page. The compiled code finds that page as `assets/kanban/board.html`, relative to its own
+location, the same way it finds `schemas/` (`src/core/kanban-board.ts`). The Nix flake's source set
+lists `./assets` too (`flake.nix`).
+
+**No decision in this hat chooses a package.** The stack below is observed, not decided. The
+project is a fork of Fission AI's OpenSpec (`CLAUDE.md`), and its npm lockfile still describes the
+upstream package (see below).
+
+| Package | Declared | Resolved | Seen in |
+|---|---|---|---|
+| `commander` | `^14.0.0` | 14.0.3 | the command tree (`src/cli/index.ts`) |
+| `zod` | `^4.0.17` | 4.3.6 | the opsx schemas (`src/core/schemas/`) and config parsing (`src/core/project-config.ts`) |
+| `yaml` | `^2.8.2` | 2.8.3 | record frontmatter and config (`src/core/decision-map.ts`, `src/core/project-config.ts`) |
+| `fast-glob` | `^3.3.3` | 3.3.3 | file matching (`src/utils/file-system.ts`, `src/core/artifact-graph/outputs.ts`) |
+| `chalk` · `ora` | `^5.5.0` · `^8.2.0` | 5.6.2 · 8.2.0 | terminal output and failure lines (`src/commands/kanban.ts`, `src/cli/index.ts`) |
+| `@inquirer/core` · `@inquirer/prompts` | `^10.2.2` · `^7.8.0` | 10.3.2 · 7.10.1 | interactive prompts, always imported dynamically (`CLAUDE.md`) |
+| `posthog-node` | `^5.20.0` | 5.29.2 | usage telemetry (`src/telemetry/index.ts`) |
+
+For development the project uses these (`package.json`, `pnpm-lock.yaml`):
+
+- TypeScript 5.9.3
+- Vitest 3.2.4, with `@vitest/ui`
+- ESLint 9.39.4, with `typescript-eslint` 8.58.2
+- `@types/node` 24.12.2
+- Changesets 2.30.0, with its GitHub changelog 0.5.2
+
+**The live board added no package on any side.**
+
+- **CLI side.** The store, the card writes, the board configuration and the opsp-layer writer
+  import only Node built-ins and the project's own modules, and they do their git work by running
+  the `git` executable (`src/core/kanban.ts`, `src/core/kanban-sync.ts`, `src/core/kanban-board.ts`,
+  `src/core/shared/opsp-layer.ts`). This is what `DEC-CARD-WRITES-THROUGH-CLI` decides: cards are
+  written through the CLI, which is already installed.
+- **Reading side.** The client needs only git, the installed skill and a browser, and node is
+  ruled out there (`DEC-BOARD-READ-BY-GIT`, answering `DS-RUNTIME-LESS-BOARD`).
+  - The list and render playbooks use git with `awk`, `sed`, `base64`, `tr` and `date` from a POSIX
+    shell (`src/core/templates/workflows/opsp-kanban.ts`).
+  - The launch scripts that the page's buttons copy use git and `awk` (`assets/kanban/board.html`).
+  - The page loads nothing: no script source, no stylesheet link, no fetch
+    (`assets/kanban/board.html`).
+
+`DEC-BOARD-READ-BY-GIT`'s invalidation trigger names what this depends on: a shell without POSIX
+tools would need a second form of the playbook.
 
 ### Package manager and lockfiles
 
-The package manager is **pnpm 9**, pinned in exactly one place: `packageManager: pnpm@9.15.9`
-(`package.json`). CI's `pnpm/action-setup@v4` steps pass no `version:`, so the pnpm version reaching
-CI comes only from that field; each job then runs `pnpm install --frozen-lockfile` on Node `20`
-(`.github/workflows/ci.yml`). The Nix flake builds with `pnpm_9` and names its program `opensprint`
-(`flake.nix`). The scripts assume pnpm too — `prepare`, `dev:cli` and `release` all call it
-(`package.json`).
-
-`pnpm-lock.yaml` is in lockfile format `6.0`, an older format than pnpm 9 writes; CI installs it
-frozen under pnpm 9, so it is read and never rewritten (`pnpm-lock.yaml`,
-`.github/workflows/ci.yml`).
-
-**Two lockfiles are tracked, and they disagree about which package this is.** Beside
-`pnpm-lock.yaml` sits `package-lock.json`, an npm lockfile (format 3) whose root package is
-`@fission-ai/openspec` at `1.2.0` — the upstream fork parent's name and version, not
-`@ivan-lee/opensprint` at `0.1.0` (`package-lock.json`, `package.json`). Nothing in CI or the
-scripts reads it. This is reported, not resolved: no record decides the package manager, so
-nothing says whether the npm lockfile is a leftover or is kept on purpose.
+- **pnpm is the declared manager.** `package.json` declares `packageManager: pnpm@9.15.9`, and CI
+  installs with `pnpm install --frozen-lockfile` (`CLAUDE.md`).
+- **`pnpm-lock.yaml` is `lockfileVersion: '6.0'`** (`pnpm-lock.yaml`), an older format than the one
+  pnpm 9 writes.
+- **A second lockfile is stale.** `package-lock.json` describes `@fission-ai/openspec` 1.2.0, with a
+  binary called `openspec`. That is the upstream package, not this one (`package-lock.json`). Its
+  dependency ranges match `package.json`, and nothing records why the file is kept.
 
 ### What the stack is used to generate
 
-Most of what the tool produces is **text for a language model**. Workflow content is written as
-TypeScript template functions (`src/core/templates/workflows/`) and formatted per agent tool by an
-adapter — 26 of them, the count `DEC-017` cites (`src/core/command-generation/adapters/`). The
-generated files are text because their consumer is a model (`DEC-017`). Artifact schemas and
-templates ship in the package beside `dist/` and `bin/` (`package.json` `files`).
+The product surface is the CLI plus the skill and command files it writes into a downstream project.
+There is no GUI, and the tool ships no CI/CD product (`DEC-017`). Workflow content is written as
+TypeScript template strings, one file per workflow (`src/core/templates/workflows/`). The command
+adapters format it for each agent tool (`src/core/command-generation/adapters/`).
 
-The rest is the **deterministic half**: grouping, hashing, staleness and the gate are code, so they
-re-run without a model, while condensing prose stays in a skill (`DEC-022`). That code is the
-`compact` engine — `plan`, `seal`, `check`, `loops`, `board` (`src/core/compact/`,
-`src/core/board.ts`, `src/cli/index.ts`) — the single compile engine behind every compiled artifact (`DEC-014`), with
-`check` decided to fail CI on anything not fresh (`DEC-010`). Where a record found that prose was
-not enough, the stack gained a command rather than an instruction: initiative state moves through
-`opensprint advance` (`DEC-STATE-MACHINE`; `src/commands/advance.ts`), who holds a card through
-`opensprint claim` (`DEC-INITIATIVE-OWNER`; `src/commands/claim.ts`), and attest's change frame is resolved by
-`opensprint frame` (`DEC-ATTEST-CHANGE-FRAME`; `src/commands/frame.ts`).
+**The opsp layer has twenty workflows**, six of them utilities, including `/opsp:kanban`
+(`src/core/shared/skill-generation.ts`). One writer, `writeOpspLayer`, writes all three parts of it:
+
+- every opsp skill;
+- every opsp command;
+- the board page.
+
+(`src/core/shared/opsp-layer.ts`.) `init` calls it, and so do both of `update`'s paths
+(`src/core/init.ts`, `src/core/update.ts`). This repository's own `.claude/skills/opensprint-kanban/`
+and `.claude/commands/opsp/kanban.md` are that generated output (`.claude/skills/opensprint-kanban/SKILL.md`).
+
+**The board page is filled in two passes**, which is the split `DEC-BOARD-READ-BY-GIT` decides:
+
+```
+  assets/kanban/board.html                 shipped in the package
+        │  opensprint init / update: writeOpspLayer → renderBoardTemplate
+        │    <!-- opensprint:config -->  →  JSON: columns, owned states, every state's moves,
+        │                                    the agent, milestone columns, the change request
+        ▼
+  <toolDir>/skills/opensprint-kanban/board.html     one per tool, in every delivery mode
+        │  /opsp:kanban render playbook (git + POSIX shell)
+        │    <!-- opensprint:cards -->   →  board-meta + one base64 <script> per card
+        ▼
+  $TMPDIR/opensprint-kanban.html           opened in a browser; refreshing means rendering again
+```
+
+(`src/core/kanban-board.ts`, `src/core/shared/opsp-layer.ts`,
+`src/core/templates/workflows/opsp-kanban.ts`.)
+
+The page and the CLI cannot disagree, because the page's columns and moves are data generated from
+the CLI's own tables (`KANBAN_COLUMNS` and `TRANSITIONS`) and from the milestone stage table, not
+code in the page (`src/core/kanban-board.ts`). That follows `DEC-CONTINUE-FORWARD-ESCALATE-BACK`.
+
+**The agent table is generated from the command adapters** (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`).
+`ToolCommandAdapter` has two optional fields (`src/core/command-generation/types.ts`):
+
+- `sessionLauncher`: the shell words that start a session with a prompt;
+- `commandReference`: how a generated command is invoked.
+
+Only the Claude adapter fills them, with `claude` and `/opsx:<id>`
+(`src/core/command-generation/adapters/claude.ts`). The opsp layer maps `/opsx:<id>` to `/opsp:`, and
+names the skill instead wherever commands are not delivered (`src/core/shared/opsp-layer.ts`). The
+page's buttons copy launch scripts built from that table. A tool with no launcher gets the prompt
+alone (`assets/kanban/board.html`).
+
+**Surfaced, not resolved.** What the tool generates now includes an interactive HTML page, with
+buttons and a milestone overlay. That sharpens the `DEC-017` tension described under Runtime
+Topology.
 
 ## Runtime Topology
-
-There is no server, daemon or service. At runtime there is an operator, an agent reading generated
-skill files, the `opensprint` CLI it calls, and a git worktree holding `opensprint/` as plain files
-(`DEC-017`, `DEC-001`).
 
 ### Two halves, one process boundary
 
 ```
-  operator ──── wears a hat ────┐
-                                v
-  ┌──────────────────────────────────────────┐
-  │ agent + generated skills (/opsp:*)       │   synthetic half: reads views,
-  │   explore · backlog · triage · propose   │   asks the operator, renders prose
-  │   apply · attest · archive · compact     │
-  │   reexplore · repropose · rebase · ...   │
-  └───────────────────┬──────────────────────┘
-                      │ shells out
-                      v
-  ┌──────────────────────────────────────────┐
-  │ opensprint CLI (Node, one process/call)  │   deterministic half: parse, hash,
-  │   compact plan|seal|check|loops|board    │   check, refuse, regenerate
-  │   advance   claim   frame   migrate      │
-  └───────────────────┬──────────────────────┘
-                      │ reads / writes files
-                      v
-        opensprint/  in the current git worktree
+   operator
+      │  invokes a workflow, or pastes a script copied from the board page
+      ▼
+   agent session ── skill text (src/core/templates/workflows/)        synthetic: needs a model
+      │  runs
+      ▼
+   opensprint ───── one command, then exits                            deterministic: no model
+      │
+      ├── opensprint/          records, squad views, manifest, BOARD.md    (this checkout's tree)
+      ├── openspec/            opsx changes, specs, config.yaml
+      ├── git: opsp/* refs     other initiatives' committed trees, read without a checkout
+      └── git: origin/kanban   one card per initiative: fetched and read; written by fast-forward
 ```
 
-The split is decided. Hashing, staleness, state checks and gating live in code so they can run
-without a model, and judgement and condensation live in skills (`DEC-022`). Rendering a view is the
-synthetic part. It needs a model and an agent wearing a hat, which is why no pipeline can render a
-view (`DEC-COMPILE-ON-MILESTONE`). The commands on the deterministic side are registered in
-`src/cli/index.ts`; the skill content is in `src/core/templates/workflows/opsp-*.ts`.
+Grouping, hashing, staleness and gating live in code, so they can be checked without a model.
+Condensing prose lives in a skill (`DEC-022`). Because of that split, rendering cannot run in CI:
+a pipeline has no agent and no hat (`DEC-COMPILE-ON-MILESTONE`). Nothing stays running. The CLI
+runs one command and exits (`DEC-CARD-WRITES-THROUGH-CLI`). The board page starts no process; its
+buttons only copy text (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`; `assets/kanban/board.html`).
 
-The planning and build skills are decided to orient on the per-hat views and open a full record
-only for the decision they act on (`DEC-VIEWS-FIRST-LOAD`, superseding `DEC-015`;
-`DS-SURROGATE-BUDGET`). `compact plan --hat <hat> --json` tells them which sections to trust; where
-one is stale, unsealed or tampered they read its records instead, and they fall back to every record
-where the engine cannot run or no record declares a hat (`DEC-VIEWS-FIRST-LOAD`; observed in
-`opsp-apply.ts`, `opsp-explore.ts`, `opsp-triage.ts` and `opsp-propose.ts` under
-`src/core/templates/workflows/`). `architecture.md` and `DECISION-MAP.md` are not in that load; the
-map is opened only to work out a blast radius (`DEC-NO-DEFAULT-ARCHITECTURE-LOAD`).
-
-The CLI has one outbound network call: PostHog telemetry of the command path and version, which can
-be turned off with `OPENSPEC_TELEMETRY=0` or `DO_NOT_TRACK=1` (`src/telemetry/index.ts`,
-`src/cli/index.ts`). No record covers telemetry.
-
-The Commander program still names itself `openspec` internally (`src/cli/index.ts`), while the
-installed binary is `opensprint` (`package.json`). No record explains this.
+`compact` is the single compile engine. `architecture.md` is one of its outputs, beside the views,
+never one of its inputs (`DEC-014`). Views are compiled and never edited by hand: if a view is
+wrong, the system is wrong (`DEC-006`). A per-section manifest records each section's inputs and
+its rendered output, and `compact check` fails on anything stale or tampered (`DEC-010`). A stale
+section is rebuilt from its full inputs, never patched (`DEC-011`). The engine's commands are
+`plan`, `seal`, `board`, `check` and `loops` (`src/cli/index.ts`, `src/commands/compact.ts`,
+`src/core/compact/`). Whether a decision is guarded is harvested from code: a test or check that
+cites the record's id is a rule, and the record itself says nothing about its rules (`DEC-013`).
+The id pattern matches both numbered and semantic ids (`src/core/compact/rules.ts`).
 
 ### Universes are worktrees, and an initiative is one branch
 
-```
-  main ─────────────────────────────────────────────●─────────>
-         \                                          ^  one PR, gated on
-          opsp/<initiative>  (its own worktree)     │  state consistency
-            backlog → triage → propose → apply ──rebase──attest──archive
-```
+Each git branch or worktree is a universe. `opensprint/` lives in the branch and travels with the
+code; there is no copy and no daemon (`DEC-001`). Planning happens in the initiative's own
+worktree, which the planning tools create or switch to. So an initiative is one `opsp/<initiative>`
+branch from first thought, and it reaches `main` exactly once (`DEC-029`). New decisions take
+semantic ids and initiative files take a date prefix, so two worktrees cannot allocate the same
+name (`DEC-036`).
 
-Each branch or worktree is a universe, and `opensprint/` travels with the code in it. There is no
-separate storage layer (`DEC-001`). The planning tools create or switch to the initiative's worktree
-themselves, so an initiative lives in one branch from its first persisted thought (`DEC-029`).
-Branches are named `opsp/<initiative-id>` (`src/core/initiative-git.ts`).
+`DEC-029` recorded a cost: a board compiled in one checkout shows only that branch. Two answers
+followed, and the second amends the first:
 
-The branch reaches `main` through a single pull request in a fixed order: rebase, attest, archive,
-merge. The gate checks that the initiative is `attested` and that the views are fresh. It never
-checks whether a bar was met (`DEC-030`, `DEC-023`). A conflict in a derived artifact is resolved by
-rebasing and recompiling, never by hand-merging (`DEC-030`, `DEC-006`).
-
-`DEC-029` records one cost it does not solve: a backlog that lives on branches cannot be read in one
-place. That cost is now answered without moving the backlog: the committed `BOARD.md` is decided to
-show the checkout alone, and `opensprint compact board --all-branches` prints the card each local and
-remote-tracking `opsp/<id>` branch carries, read from committed trees and never written to disk
-(`DEC-BOARD-ALL-BRANCHES`; `src/core/board.ts`, `src/core/initiative-git.ts`). Where two copies of a
-card differ, the checkout wins, and a fetched copy wins over a local branch only when it is strictly
-ahead (`DEC-BOARD-ALL-BRANCHES`).
-
-Parallel worktrees can no longer collide on decision ids. New decisions take semantic ids, and
-initiatives take a date prefix on the filename while their `id:` stays the same (`DEC-036`). Both
-prerequisites `DEC-036` named are observed in place. `RECORD_ID_PATTERN` now matches
-`DEC-<WORDS>` and `DS-<WORDS>` alongside `DEC-\d{3}` (`src/core/compact/rules.ts`), and
-`resolveInitiative` resolves by frontmatter `id` before filename (`src/core/initiatives.ts`). All
-five initiative files carry the date prefix (`opensprint/initiatives/`).
+1. **Printed on demand.** `opensprint compact board --all-branches` reads the initiative on every
+   local and remote-tracking `opsp/*` branch from committed trees, and writes nothing. The checkout
+   wins; a fetched copy wins only when it is strictly ahead (`DEC-BOARD-ALL-BRANCHES`). The refs come
+   from `for-each-ref`, and the blobs are read in one `cat-file --batch` (`src/core/initiative-git.ts`).
+2. **A central store.** In-flight state lives on a dedicated remote branch, beside the compiled
+   `BOARD.md` rather than replacing it (`DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-026`). See *The boards*.
 
 ### Reconciliation across universes
 
-`/opsp:rebase` (soft fork) and `/opsp:abandon` (hard fork) are the only operations that merge one
-universe's surrogate into another's.
+When two surrogates diverge, the agent reasons and the operator confirms. Only purely additive or
+identical content is accepted automatically (`DEC-002`).
 
-- **Plan first.** Both start with a read-only planning phase that produces a conflict manifest, and
-  the operator confirms it before any file changes (`DEC-004`).
-- **Traversal.** The walk is depth-first, initiative → its ADRs → its active changes. The
-  initiative is the unit of commitment, and every citizen is classified MIGRATE, CONFLICT,
-  REDUNDANT or SUPERSEDED (`DEC-003`).
-- **Auto-accept.** A citizen is auto-accepted only if it is purely additive or identical. Anything
-  else escalates (`DEC-002`).
-- **Abandon's output.** Abandon preserves the losing universe under `opensprint/abandoned/{name}/`
-  as a snapshot plus a migration manifest (`DEC-005`). No such directory exists in this repository
-  (`opensprint/`).
-- **Rebuild.** The rebuild after reconciliation goes through the single compile engine (`DEC-014`).
+- **Order.** The traversal is depth-first: an initiative, then its ADRs, then its active changes.
+  Each citizen is classed as MIGRATE, CONFLICT, REDUNDANT or SUPERSEDED, and a conflict pauses the
+  traversal at the initiative boundary (`DEC-003`).
+- **Planning phase.** `/opsp:rebase` and `/opsp:abandon` both open with a read-only phase that
+  produces a conflict manifest and waits for confirmation (`DEC-004`).
+- **Abandonment.** An abandoned universe is preserved as a snapshot and a migration manifest before
+  its worktree is removed (`DEC-005`).
+- **Rebuild.** After reconciliation, the views are rebuilt by calling `compact` (`DEC-014`).
 
 ### The initiative lifecycle
 
-State is a frontmatter field that tools write and code checks (`DEC-024`). It moves only through
-`opensprint advance <initiative> --to <state>`. That command validates the move against an explicit
-table, writes the field, regenerates `BOARD.md`, and reports any contradiction with the content
-instead of refusing the move (`DEC-STATE-MACHINE`; observed in `src/commands/advance.ts`).
-
-Who holds a card is a second field, `owner`, written only by `opensprint claim`, which never moves
-the state. The board shows it in every column and lists a card that is `building`,
-`ready-for-attestation` or `attested` with nobody named as `owner-undeclared`. Triage claims an item
-at pick-up and releases it on return, apply claims before building, and backlog never claims
-(`DEC-INITIATIVE-OWNER`; observed in `src/commands/claim.ts`, `src/core/board.ts`,
-`src/core/initiatives.ts`).
-
 ```
-  /opsp:backlog creates it
-          │
-          v
-      exploring ──triage──> declined ──triage──> (back to exploring)
-          │ propose
-          v
-      proposed
-          │ apply *
-          v
-      building
-          │ apply *
-          v
-      ready-for-attestation
-          │ attest
-          v
-      attested
-          │ archive *
-          v
-      completed
-
-  falling back                       by                from building   from ready-for-attestation
-  ---------------------------------  ----------------  --------------  --------------------------
-  the goal moved      -> exploring   /opsp:reexplore   yes *           yes
-  the strategy moved  -> proposed    /opsp:repropose   yes *           yes
-  the work unfinished -> building    /opsp:attest      --              yes
-
-  * = a handoff: `advance` refuses the move until --hat names an accepted accountability
+  explore ──► backlog ──► triage ───────► propose ──► apply ─────────────────► attest ──► archive
+  (writes     exploring   claims, or      proposed    building, then           attested   completed
+   nothing)               declines                    ready-for-attestation
 ```
 
-The table that encodes this is `TRANSITIONS` in `src/core/initiative-transitions.ts`: twelve moves,
-each with its tool, its hat and whether it is a handoff. It matches the table in `DEC-HAT-HANDOFFS`,
-using the tool name `/opsp:reexplore` (`DEC-REEXPLORE-NAME`).
+- **The front of the lifecycle.** Explore writes nothing. `/opsp:backlog` is the deliberate step
+  that saves an idea as an initiative at `exploring` (`DEC-034`). `/opsp:triage` is a tool of its
+  own: it advances, declines or returns an item, so `/opsp:propose` only formalizes (`DEC-039`).
+- **State.** The tool declares the state and code checks it (`DEC-024`). `declined` is terminal,
+  but an item can be revived (`DEC-035`).
+- **`opensprint advance`.** Every transition goes through this command. It validates the move,
+  writes the field and regenerates `BOARD.md`. A legal move into a state that the content
+  contradicts is written and reported, not refused (`DEC-STATE-MACHINE`;
+  `src/commands/advance.ts`). Triage now declines and revives through `advance` too, where it used
+  to write `state:` by hand (`src/core/templates/workflows/opsp-triage.ts`).
 
-**The rung of a fallback is the OGSM altitude that has to move** (`DEC-ESCALATION-LADDER`, as
-amended by `DEC-HAT-HANDOFFS` and `DEC-REEXPLORE-NAME`):
+There are twelve moves, and each names the hat it is made wearing. On a handoff, the move is
+refused until `--hat` names an accepted accountability (`DEC-HAT-HANDOFFS`). The backward rungs
+come from `DEC-ESCALATION-LADDER`. The goal rung's tool is named `/opsp:reexplore` by
+`DEC-REEXPLORE-NAME`, which corrects the `/opsp:reideate` in `DEC-HAT-HANDOFFS`.
 
-- **The goal moved.** `/opsp:reexplore` writes nothing and returns the initiative to `exploring`.
-  The work then rejoins backlog → triage → propose.
-- **The strategy moved.** `/opsp:repropose` supersedes ADRs, may restate `## Measures`, and redraws
-  the milestones that rested on them. Driver-spec Statements are its invariant.
-- **The work is unfinished.** `/opsp:attest` sends a change request back to `building` and
-  supersedes nothing.
+| From | To | By | Hat | Handoff |
+|---|---|---|---|---|
+| exploring | proposed | `/opsp:propose` | all four | |
+| exploring | declined | `/opsp:triage` | product · maintainer | |
+| declined | exploring | `/opsp:triage` | product · maintainer | |
+| proposed | building | `/opsp:apply` | dev · devops | yes |
+| building | ready-for-attestation | `/opsp:apply` | dev · devops | yes |
+| building | proposed | `/opsp:repropose` | product · maintainer | yes |
+| building | exploring | `/opsp:reexplore` | product · maintainer | yes |
+| ready-for-attestation | building | `/opsp:attest` | product · maintainer | |
+| ready-for-attestation | proposed | `/opsp:repropose` | product · maintainer | |
+| ready-for-attestation | exploring | `/opsp:reexplore` | product · maintainer | |
+| ready-for-attestation | attested | `/opsp:attest` | product · maintainer | |
+| attested | completed | `/opsp:archive` | all four | yes |
 
-A bar that got easier means the goal moved, so it goes to `/opsp:reexplore` and not to repropose
-(`DEC-HAT-HANDOFFS`, `DEC-BAR-AT-PROPOSE`).
+The code has the same twelve rows, with the same hats and handoff flags, as `TRANSITIONS`
+(`src/core/initiative-transitions.ts`).
 
-How the lifecycle reached this shape across records:
+**Ownership.** Who holds an initiative is an optional `owner:` field, written by `opensprint claim`.
+The owner defaults to git's `user.name`. Claiming never moves the state. `/opsp:triage` and
+`/opsp:apply` claim at the moment they commit to the work; `/opsp:backlog` never claims
+(`DEC-INITIATIVE-OWNER`). `claim` refuses an initiative in a terminal state
+(`src/commands/claim.ts`). It now also claims the card on the live board before writing the file;
+see below.
 
-- **Explore and backlog.** `DEC-024`'s original table has `/opsp:explore` write `exploring`.
-  `DEC-034` makes explore write nothing and gives that write to `/opsp:backlog`.
-- **Added states.** `DEC-035` adds `declined`. `DEC-STATE-MACHINE` adds `ready-for-attestation` as
-  the named handoff from dev to product and maintainer.
-- **The `ready-for-attestation → building` edge.** `DEC-STATE-MACHINE` assigns it to
-  `/opsp:reexplore`. `DEC-ESCALATION-LADDER` adds `/opsp:attest` as a second owner.
-  `DEC-HAT-HANDOFFS` moves reexplore to the goal rung and leaves the edge with attest only, which
-  is what the code holds (`src/core/initiative-transitions.ts`).
-- **Triage.** `/opsp:triage` sits between backlog and propose to advance, decline or return an
-  item (`DEC-039`).
+**Resuming.** "Continue" is honest only if a workflow can pick up where it paused
+(`DEC-CONTINUE-FORWARD-ESCALATE-BACK`). Three workflows now read the initiative before anything
+else:
 
-**A difference worth knowing.** `DEC-024` says `abandoned` and `superseded` "remain available to
-`/opsp:abandon`". `INITIATIVE_STATES` in `src/core/initiatives.ts` lists `exploring`, `proposed`,
-`building`, `ready-for-attestation`, `attested`, `completed` and `declined`, and nothing else.
-`checkTransition` reports any other value as "not a state" (`src/core/initiative-transitions.ts`).
-The record and the code use different state vocabularies, and no record says how they relate.
+- **Triage** stops if the item is already past `exploring`. Otherwise it resumes from a
+  `## Triage` section of notes (Weighed, Leaning, Open), which it revises rather than appends
+  (`src/core/templates/workflows/opsp-triage.ts`).
+- **Propose** stops if the item is `proposed` or later. It takes its strategy from `## Triage`, and
+  it never recreates driver-specs or ADRs that are already on disk
+  (`src/core/templates/workflows/opsp-propose.ts`).
+- **Attest** confirms the change frame again in every session. It finds the latest handoff commit
+  and skips bars already judged in this pass (`src/core/templates/workflows/opsp-attest.ts`).
+
+**Surfaced, not resolved:**
+
+- **Missing states.** `DEC-024` keeps `abandoned` and `superseded` available to `/opsp:abandon`.
+  The code's state list is the seven states above, and no transition reaches either one
+  (`src/core/initiatives.ts`, `src/core/initiative-transitions.ts`).
+- **Triage now writes an artifact.** `DEC-039`'s invalidation trigger says that if triage grows
+  artifacts of its own, it has become a second propose. Triage now writes `## Triage` into the
+  initiative, and propose reads its strategy from that section. The template frames it as notes,
+  not records: "no id, no `depends-on`, nothing a compile reads"
+  (`src/core/templates/workflows/opsp-triage.ts`). No record decides the section.
+
+### The boards — compiled, printed, live
+
+Three artifacts answer "where is everything":
+
+| | What it shows | Written by | Record |
+|---|---|---|---|
+| `BOARD.md` | this checkout's initiatives by state, with the roadmap | regenerated by `compact seal`, `advance` and `claim`; never edited | `DEC-026` |
+| `compact board --all-branches` | every `opsp/*` branch's initiative, after a fetch | nothing; printed only | `DEC-BOARD-ALL-BRANCHES` |
+| `origin/kanban` | one card per initiative, the same from every checkout | `advance`, `claim` and `kanban init·seed·stage` only | `DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-CARD-WRITES-THROUGH-CLI` |
+
+The first two are observed in `src/commands/compact.ts`, `src/commands/advance.ts`,
+`src/commands/claim.ts` and `src/cli/index.ts`.
+
+**The live board is a dedicated remote branch.** It holds nothing but a README and
+`cards/<id>.md`. Every move is a commit, so the branch's `git log` is the board's history. The
+branch is never checked out to read it and never edited by hand. A completed initiative's card stays
+as a static record. One file per card means concurrent moves on different cards cannot conflict
+(`DEC-BOARD-ON-REMOTE-BRANCH`).
+
+It is always `origin/kanban`: no command takes a remote any more (`src/commands/kanban.ts`,
+`src/cli/index.ts`). A project with no `origin` hears nothing from the board, and a project whose
+`origin` has no board gets a note, not an error (`src/core/kanban-sync.ts`).
+
+**Every write goes through one store.** Commands and helpers are on the left; on the right is what
+each writes.
+
+```
+  opensprint advance <id> --to <s>     file first, then moveCard      state, checked against TRANSITIONS; milestones mirrored
+  opensprint claim <id> [--take-over]  claimCard first, then file     owner; refused if someone else holds it
+  opensprint kanban stage <id> <m> <s> stageCard                      one milestone's stage
+  opensprint kanban init               planSeed                       create the board, one card each
+  opensprint kanban seed [<id>]        planSeed                       add missing cards, report drift
+                       [--resync]      planSeed + resyncCard          rewrite drifted cards from their file
+        │
+        ▼   transact, up to 8 attempts                                         src/core/kanban.ts
+            ls-remote → fetch → ls-tree + cat-file → decide(board)
+            → commit in a throwaway GIT_INDEX_FILE → push, no --force
+            rejected?  ask the remote: moved → back off and re-read · unmoved → git's own error
+  origin/kanban
+```
+
+(`src/core/kanban-sync.ts`, `src/commands/advance.ts`, `src/commands/claim.ts`,
+`src/commands/kanban.ts`, `src/core/kanban.ts`.)
+
+**A card write never blocks a move.** `advance` writes the initiative file first and the card
+second. A card write that fails or finds no board does not undo or block the move; it is reported,
+and `kanban seed` finds the drift later. The card also validates its own move: where the card's
+current state cannot legally reach the target, the card is left alone and the drift is reported,
+because writing it would invent a move nobody made (`src/core/kanban-sync.ts`). A move also carries
+the file's milestones onto the card, mirrored as `kanban stage` mirrors them, so milestones a
+repropose redrew reach the board with its move; where the card already shows the target state, only
+the milestones are written (`src/core/kanban-sync.ts`). `--no-board` skips the card on both
+`advance` and `claim` (`src/cli/index.ts`). This is the CLI write path
+`DEC-CARD-WRITES-THROUGH-CLI` decides.
+
+**A claim goes to the board first**, because the remote arbitrates between two machines. A card
+someone else holds is refused before anything is written, unless `--take-over` is passed. The check
+runs inside every retry, so the loser of a race reads the winner's name rather than overwriting it
+(`src/core/kanban-sync.ts`, `src/commands/claim.ts`). The refusal is decided
+(`DEC-CARD-WRITES-THROUGH-CLI`). The board-first order is the remedy `DEC-INITIATIVE-OWNER`'s
+invalidation trigger names: a claim that reaches a shared place first.
+
+**Milestone stages** follow an explicit table, `MILESTONE_STAGE_MOVES` (`src/core/kanban.ts`):
+
+```
+  todo ──► specifying ──► building ──► review ──► done
+               ▲                         │
+               └──── change request ─────┘          superseded: only through the initiative file
+```
+
+`stageCard` mirrors the file's milestones first. A milestone is `done` only where the file checks
+it off. A milestone leaves `todo` only when every earlier live milestone is done. A refused move
+exits non-zero; a missing or unreachable board does not (`src/core/kanban-sync.ts`,
+`src/commands/kanban.ts`). `DEC-MILESTONE-BOARD` decides this.
+
+**Who calls what:**
+
+- `/opsp:backlog` adds its new item's card with `kanban seed <id>`
+  (`src/core/templates/workflows/opsp-backlog.ts`).
+- Triage claims, and declines or revives through `advance`
+  (`src/core/templates/workflows/opsp-triage.ts`).
+- Apply claims and advances, and moves its milestone through `specifying` at the opsx change,
+  `building` at the worktree and `review` at the merge. It reaches `done` after the file is checked
+  off, and goes back to `specifying` on a change request
+  (`src/core/templates/workflows/opsp-apply.ts`).
+- Propose writes a new initiative at `exploring` and advances it to `proposed`. Attest, repropose,
+  reexplore and archive advance, naming `--hat` on a handoff; archive closes from the initiative's
+  worktree before removing it, and repropose and reexplore mark superseded milestones `[~]` before
+  they move (`src/core/templates/workflows/`). For every row of `TRANSITIONS`, a test runs the
+  command its workflow's template writes, from the row's `from` state
+  (`test/core/state-machine-workflows.test.ts`).
+
+**Reading and rendering use git and a template** (`DEC-BOARD-READ-BY-GIT`). The `/opsp:kanban`
+skill has a list playbook and a render playbook. Both use git and a POSIX shell, and neither writes
+the board (`src/core/templates/workflows/opsp-kanban.ts`). The page ships as
+`assets/kanban/board.html`.
+
+`writeOpspLayer` writes the page for each tool. `init` calls it, and so do both of `update`'s
+paths. It fills in a configuration block holding:
+
+- the columns;
+- the states that need an owner;
+- every card's moves;
+- the agent table;
+- the milestone columns;
+- the change-request move.
+
+(`src/core/shared/opsp-layer.ts`, `src/core/kanban-board.ts`, `src/core/init.ts`,
+`src/core/update.ts`.) The render playbook then adds the cards as base64. The page loads nothing
+from the network and builds every node with `createElement` (`assets/kanban/board.html`).
+
+**Columns and moves are data from the CLI.** The page can place no card, and offer no move, that
+the CLI would not (`DEC-CONTINUE-FORWARD-ESCALATE-BACK`; `src/core/kanban-board.ts`).
+
+- **Columns.** `KANBAN_COLUMNS` holds Backlog, Planning, Dev, Attestation and Done. Whether anyone
+  holds an `exploring` card is what splits it between Backlog and Planning.
+- **Continue.** The forward move is the transition to a later state, never into `declined`. An
+  unheld `exploring` card goes forward by being picked up by triage, which writes an owner, not a
+  state.
+- **Escalate.** Every transition to an earlier state is a back move. The labels are Reexplore,
+  Repropose, Request a change and Revive.
+
+All three are derived from `TRANSITIONS` (`src/core/kanban-board.ts`):
+
+| State | Continue → | ← Back |
+|---|---|---|
+| `exploring`, unheld | triage (picks it up) | — |
+| `exploring`, held | propose | — |
+| `proposed` | apply | — |
+| `building` | apply | Repropose, Reexplore |
+| `ready-for-attestation` | attest | Request a change, Repropose, Reexplore |
+| `attested` | archive | — |
+| `declined` | — | Revive |
+| `completed` | — | — |
+
+**A button copies a launch script and never moves a card** (`DEC-BOARD-BUTTON-LAUNCHES-SESSION`).
+The script:
+
+1. goes to the main checkout and fetches;
+2. finds the worktree holding the card's branch, or adds one beside the main checkout;
+3. starts the agent there with the workflow's prompt.
+
+Hovering a button shows the prompt, the hat, the move, the landing column and when it fires
+(`assets/kanban/board.html`). The agent table comes from the command adapters, through two
+optional fields on `ToolCommandAdapter`: `sessionLauncher` and `commandReference`
+(`src/core/command-generation/types.ts`). Only Claude Code fills them: `claude`, and generated
+`/opsp:` commands (`src/core/command-generation/adapters/claude.ts`, `src/core/shared/opsp-layer.ts`).
+The fallbacks:
+
+- Where commands are not delivered, the prompt names the skill instead.
+- Where an agent has no launcher, the button copies the prompt alone.
+- A page generated for no tool shows no buttons.
+
+(`src/core/shared/opsp-layer.ts`, `assets/kanban/board.html`.) Pasting the script is the operator's
+consent, and the fresh session keeps attest out of the session that wrote the work
+(`DEC-BOARD-BUTTON-LAUNCHES-SESSION`, `DEC-043`).
+
+**Clicking a card opens its milestones** (`DEC-MILESTONE-BOARD`). An overlay shows the five columns
+of `MILESTONE_COLUMNS`: To do, Specifying, Building, Review, and Done, with superseded milestones
+struck through. It is read from the card alone, so no initiative branch is fetched. Only the next
+open milestone offers "Continue: apply", and a ticket in Review offers a change request.
+Escalations stay on the initiative's card (`assets/kanban/board.html`, `src/core/kanban-board.ts`).
+
+**Surfaced, not resolved:**
+
+- **Is the board page a GUI?** `DEC-017` records that there is no GUI, because a tool evolved this
+  fast cannot carry a graphical surface that must be redesigned every time a workflow changes.
+  `DEC-BOARD-READ-BY-GIT` renders the board as an HTML page. `DEC-BOARD-BUTTON-LAUNCHES-SESSION` puts
+  per-workflow buttons on it, and `DEC-MILESTONE-BOARD` adds an overlay. Those buttons and that
+  overlay are now built (`assets/kanban/board.html`). None of the three records cites `DEC-017`.
+- **One card write skips the table.** `advance`'s card write validates against `TRANSITIONS`, but
+  `kanban seed --resync` rewrites a card's state from its initiative without consulting the table.
+  The code calls it a repair, on the ground that `advance` validated the state where it was set
+  (`src/core/kanban.ts`). `DEC-CARD-WRITES-THROUGH-CLI` says a card moves only through a command that
+  validates against the table.
+- **A board field no record holds.** `DEC-026`'s invalidation trigger says that a field the board
+  needs, and cannot derive from record state, belongs on the record. Under `DEC-MILESTONE-BOARD`, a
+  milestone's in-progress stage lives on the card only. `stageCard` writes it there and nowhere else
+  (`src/core/kanban-sync.ts`, `src/core/kanban.ts`). `DEC-026` was written about `BOARD.md`, and
+  `DEC-MILESTONE-BOARD` does not cite it.
+- **Back-move tooltips flatten the rungs.** On every back button, the tooltip reads "escalates to"
+  the transition's hat (`assets/kanban/board.html`), and that hat comes from `TRANSITIONS`.
+  - Reexplore and Repropose both read "product · maintainer", which is the hat `DEC-HAT-HANDOFFS`
+    gives them. `DEC-CONTINUE-FORWARD-ESCALATE-BACK` puts reexplore on the operator's rung, as does
+    the page's own legend.
+  - "Request a change" reads as an escalation to product · maintainer. The same record says it sends
+    the work back down to dev.
 
 ### Compile occasions
 
-```
-  occasion                    hats rendered                 seal
-  ------------------------    ---------------------------   ----------------------
-  /opsp:compact (any time)    whatever plan reports stale   compact seal
-  apply, milestone boundary   dev + devops; product and     compact seal --hat dev
-                                maintainer only if the        --hat devops
-                                operator accepts the offer
-                                and the context switches
-  apply, approved escalation  only the hat it was           scoped
-                                classified into
-  /opsp:archive               every hat                     compact seal (unscoped)
-  CI                          none; check only              never
-```
+| Occasion | Compiles | Seals | Record |
+|---|---|---|---|
+| any time, on demand | what the operator asks for; mid-initiative is legitimate | as rendered | `DEC-031` |
+| each milestone boundary inside `/opsp:apply` | stale `dev` and `devops` sections, without asking; product and maintainer are offered, and accepting means a context switch | `--hat dev --hat devops` | `DEC-COMPILE-ON-MILESTONE` |
+| an approved escalation | only the hat the escalation was classified into | scoped | `DEC-COMPILE-ON-APPROVAL` |
+| `/opsp:archive` | everything: archive consumes compact | unscoped | `DEC-031`, `DEC-SCOPED-SEAL` |
+| `/opsp:knockdown` | the records disagree; see below | — | `DEC-014`, `DEC-031`, `DEC-KNOCKDOWN-ALL-VIEWS` |
 
-- **Compact.** Compact can be invoked on its own at any time, and running it mid-initiative is
-  legitimate. Archive consumes it (`DEC-031`).
-- **Apply.** Apply compiles `dev` and `devops` at each milestone boundary without asking. It offers
-  `product` and `maintainer` only as an explicit change of hat (`DEC-COMPILE-ON-MILESTONE`). An
-  approved escalation may compile the one hat it touched (`DEC-COMPILE-ON-APPROVAL`).
-- **Seal.** Seal can be scoped by hat and never blesses a section it did not render
-  (`DEC-SCOPED-SEAL`; `--hat` is observed on `compact seal` in `src/cli/index.ts`).
-- **Rendering.** Stale sections are re-rendered from their full inputs and never from the previous
-  rendering (`DEC-011`).
-- **CI.** `compact check` fails on anything that is not fresh (`DEC-010`).
-- **Outputs.** Compact is the single compile engine. `architecture.md` is a sibling output (`DEC-014`),
-  and so is `BOARD.md` (`DEC-026`), which `compact board` and `advance` also regenerate
-  (`src/cli/index.ts`, `src/commands/advance.ts`).
+Seal is scopeable, and it must never bless a section it did not just render (`DEC-SCOPED-SEAL`).
+An initiative closes as one pull request: rebase onto `main`, attest, archive, merge. The merge is
+gated on the initiative being `attested` and the views being fresh. It is never gated on whether a
+bar was met (`DEC-030`).
 
-**Where knockdown and compact disagree.** `DEC-031` says compact "is not embedded in
-`/opsp:knockdown`", so that the operator judges knockdown's output before anything is compiled. The
-knockdown skill's Step 5 does compile: it invokes `/opsp:compact` and then `compact check`, and
-expects all five views (`src/core/templates/workflows/opsp-knockdown.ts`). That step follows
-`DEC-014`, which lists knockdown's final phase as a compact caller, and `DEC-KNOCKDOWN-ALL-VIEWS`,
-which has knockdown produce all five views. This view does not decide which reading holds.
+Workflows orient on the views rather than on every record. Each load step runs
+`opensprint compact plan --hat <hat> --json`, reads around anything stale, unsealed or tampered, and
+opens a full record only for the decision it is about to act on (`DEC-VIEWS-FIRST-LOAD`, superseding
+`DEC-015`; `DEC-009`). `architecture.md` and `DECISION-MAP.md` are not loaded by default. The map is
+opened only for a blast radius, and each edge read from it is confirmed against the record's
+`depends-on` (`DEC-NO-DEFAULT-ARCHITECTURE-LOAD`). When hat shapes move, records are backfilled by
+`/opsp:migrate`, not by `/opsp:rebuild-assess` (`DEC-MIGRATE-SEPARATE-TOOL`;
+`src/commands/migrate.ts`).
+
+**Surfaced, not resolved:**
+
+- **Seal is per file, not per section.** `DEC-SCOPED-SEAL` speaks of a *section's* rendered
+  output. The manifest hashes the whole view file, and seal carries a hat forward only when its file
+  is byte-identical to what every entry records. Otherwise every section of that hat is resealed
+  against current inputs (`src/commands/compact.ts`, `src/core/compact/status.ts`). Two
+  consequences:
+  - A section left untouched in a file where another section was re-rendered is sealed along with
+    it.
+  - A section re-rendered to identical bytes cannot be sealed on its own.
+
+  The sections no file pattern watches, this one among them, are never reported stale by code
+  landing (`src/core/compact/sections.ts`).
+- **Does knockdown compile?** `DEC-014` has knockdown's final phase call `compact`. `DEC-031`, which
+  depends on `DEC-014`, says compact is not embedded in knockdown: the operator judges first.
+  `DEC-KNOCKDOWN-ALL-VIEWS`, written after both and citing neither, has knockdown produce all five
+  views as "a full compile with every hat in scope". The knockdown skill's last step invokes
+  `/opsp:compact` (`src/core/templates/workflows/opsp-knockdown.ts`).
 
 ### Write modes
 
-```
-  mode     tools                                         touches
-  -------  --------------------------------------------  ----------------------------------
-  create   /opsp:decide  /opsp:driver  /opsp:propose     a record's own content
-           /opsp:repropose
-  derive   /opsp:compact  /opsp:archive                  compiled artifacts only
-  amend    /opsp:attest                                  ## Measures in a record it does not
-                                                         own; ## Attestation on the initiative;
-                                                         docs/ (docsDir) on confirmation
-```
+| Mode | Tools | Touches | Record |
+|---|---|---|---|
+| **create** | `/opsp:decide`, `/opsp:driver`, `/opsp:propose`, `/opsp:repropose` | a record's own content, at the altitude of the hat writing it | `DEC-027`, `DEC-BAR-AT-PROPOSE` |
+| **derive** | `/opsp:compact`, `/opsp:archive` | compiled artifacts only, never a record | `DEC-027`, `DEC-006` |
+| **amend** | `/opsp:attest` | `## Measures` of a record it does not own, and `## Attestation` on the initiative | `DEC-027`, `DEC-042`, `DEC-044` |
 
-- **The three modes.** Amendment is a separate, bounded write mode (`DEC-027`). `DEC-HAT-HANDOFFS`
-  first filed repropose's `## Measures` write under amend. `DEC-BAR-AT-PROPOSE` reclassifies it as
-  create, because repropose wears the hat that wrote the bar.
-- **The bar at creation.** `/opsp:propose` and `/opsp:driver` write the hat, the role and the bar
-  when they create a driver-spec (`DEC-BAR-AT-PROPOSE`).
-- **Attest's record bound.** The record bound is checked by `checkAmendment`
-  (`DEC-044`; `src/core/compact/amend.ts`).
-- **Attest's documentation target.** The documentation directory is a second write target. Nothing
-  checks it, and it is configured as `docsDir` (`DEC-044`).
-- **Compact.** Compact never writes a record (`DEC-006`).
+`DEC-HAT-HANDOFFS` recorded `/opsp:repropose` as borrowing **amend**. `DEC-BAR-AT-PROPOSE`
+reclassified it as **create**, because repropose wears the hat that wrote the bar.
+
+- **What repropose may change:** ADRs, a driver-spec's `## Measures`, and the milestones resting
+  on them. It never changes a Statement.
+- **A lowered bar.** A bar that got easier means the goal moved, so it goes to `/opsp:reexplore`
+  (`DEC-HAT-HANDOFFS`, `DEC-BAR-AT-PROPOSE`, `DEC-REEXPLORE-NAME`).
+- **New driver-specs.** `/opsp:propose` and `/opsp:driver` write the hat, the role and the bar when
+  they create a driver-spec. Where the bar is not known, they record `unstated` rather than inventing
+  one (`DEC-BAR-AT-PROPOSE`).
+
+`checkAmendment` enforces attest's bound on records (`src/core/compact/amend.ts`). Attest also has a
+second, unchecked write target: the documentation directory, `docs/` by default and configurable as
+`docsDir`. It writes there only on the operator's confirmation (`DEC-044`; parsed in
+`src/core/project-config.ts`).
+
+Two kinds of write sit outside this table, and no record places either one in it:
+
+- **The card writes.** They go to `origin/kanban` through `advance`, `claim` and `kanban`, and they
+  touch no record and are not a compile (`DEC-CARD-WRITES-THROUGH-CLI`, `DEC-027`).
+- **Triage's `## Triage` notes.** They are written into the initiative
+  (`src/core/templates/workflows/opsp-triage.ts`).
 
 ### Escalation and attestation at runtime
 
-**Escalation.** Inside `/opsp:apply`, an escalation is a stage boundary, not an inline prompt. The
-dev hat is set down, the hat that answers is named, and resuming is a separate step
-(`DEC-ESCALATION-IS-A-STAGE`). The question carries its own classification and a draft record with
-its blast radius. There is no separate "which hat?" prompt (`DEC-CLASSIFY-IN-QUESTION`).
+**An escalation is a stage boundary.** Apply announces the pause, sets the dev hat down, names the
+hat being worn for the answer, and resumes as a distinct step (`DEC-ESCALATION-IS-A-STAGE`).
 
-**Attestation.** `/opsp:attest` runs in this order:
+- **The question.** It carries its own classification and a draft record with its blast radius.
+  There is never a separate "which hat?" prompt (`DEC-CLASSIFY-IN-QUESTION`).
+- **The rung.** What has to move decides it: the goal, the strategy, or the plan beneath it
+  (`DEC-ESCALATION-LADDER`). `/opsp:repropose` absorbs the plan rung. The goal rung belongs to
+  `/opsp:reexplore`, which writes nothing (`DEC-HAT-HANDOFFS`, `DEC-REEXPLORE-NAME`).
 
-1. **Frame.** It resolves the change frame (source → base) and the operator confirms it before any
-   bar is read. The base is resolved from `--base`, then `origin/HEAD`, then `main`, `master`,
-   `develop`, `trunk`, and the rule that fired is reported (`DEC-ATTEST-CHANGE-FRAME`;
-   `opensprint frame` and `BASE_BRANCH_CANDIDATES` are observed in `src/cli/index.ts` and
-   `src/core/change-frame.ts`).
-2. **Read.** It reads the bars, the test files and the CI evidence. It never reads the
-   implementation source, the design discussion or the ADR rationales (`DEC-040`, which supersedes
-   `DEC-033`). Of the views it reads only the owning hat's `## Posture` or `## Measures` section,
-   never a strategy block (`DEC-ATTEST-OWNING-SECTION`). It refuses to run in a session that wrote
-   the implementation or its tests (`DEC-043`).
-3. **Judge.** It records a posture, then either evidence (`met`) or exposure (anything else)
-   (`DEC-041`). Evidence must be a CI artifact reference, and a bar that cannot be assessed before
-   merge is attested `pending` and left for the next initiative that touches the area (`DEC-032`).
-4. **Never gate.** It always exits zero and never blocks anything (`DEC-023`).
+**Attest is a separate, human-in-the-loop tool** that runs between apply and archive (`DEC-022`). It
+always exits zero, and it never blocks, approves or releases anything (`DEC-023`). What it may read
+is narrow:
+
+```
+  LOADS                                     NEVER LOADS
+  initiative objective and goals            the implementation source
+  the bars, the test files                  the design discussion, the ADR rationales
+  maintainer rows in scope                  the conversation that built it
+  CI evidence artifacts                     commit bodies, the patch
+  the change frame: branch, base,           any squad view's strategy blocks
+    commit subjects, a file-level stat
+  one view section: maintainer Posture,
+    or product Measures
+```
+
+(`DEC-040`, which supersedes `DEC-033`; `DEC-ATTEST-CHANGE-FRAME`; `DEC-ATTEST-OWNING-SECTION`.)
+
+- **The frame.** Its base is resolved in order: `--base`, then `refs/remotes/origin/HEAD`, then the
+  first of `main`, `master`, `develop` and `trunk`. The base is reported with the rule that chose
+  it, and the operator confirms it before any bar is read (`DEC-ATTEST-CHANGE-FRAME`;
+  `src/core/change-frame.ts`, behind `opensprint frame`).
+- **Authorship.** The session that wrote the implementation or its tests may not attest them
+  (`DEC-043`).
+- **Posture.** Posture is the judgement: evidence is required for `met`, and exposure for anything
+  less (`DEC-041`).
+- **Evidence.** It is a reference to a pipeline artifact. A bar that cannot be assessed before merge
+  is marked `pending`, and the next initiative in that area attests it again (`DEC-032`).
 
 ## Entity Schema
 
-OpenSprint has no database. Its durable data is markdown files with YAML frontmatter, versioned,
-branched and merged by git along with the code (`DEC-001`). The schema is the frontmatter fields and
-the section headings that code parses. Records are authored, and everything else in `opensprint/` is
-compiled from them (`DEC-006`, `DEC-014`).
+All durable data is plain text in git; there is no database. It lives in three places:
+
+- **records and compiled artifacts** in `opensprint/`, on the branch (`DEC-001`);
+- **opsx changes** in `openspec/` (`CLAUDE.md`);
+- **in-flight board state** on the remote branch `origin/kanban` (`DEC-BOARD-ON-REMOTE-BRANCH`).
 
 ### Relationships
 
 ```
-                    depends-on                       depends-on
-  driver-spec  <──────────────────  decision (ADR)  <──────────  decision (ADR)
-  DS-*.md                           DEC-*.md                         │
-     │  ## Measures                    ^      ^                      │ supersedes
-     │    ### Bar / Posture /          │      └──────────────────────┘
-     │        Evidence / Exposure      │ cites the id
-     │          mitigated-by ───┐   rule (a test or check in the codebase)
-     │                          │
-     │  claimed by              v
-     └──────────────────>  initiative  ── ## Milestones ──>  opsx change
-                           YYYYMMDD-<id>.md                  openspec/changes/<name>/
-                             ## Attestation
+                        ┌───────────── supersedes ─────────────┐
+                        ▼                                      │
+  driver-spec ◄── depends-on ── decision ◄── depends-on ── decision
+  (DS-*)                        (DEC-*)
+                                   ▲
+                                   │ cites the id
+                               rule (a test file)
+
+  initiative ── lists ──► its driver-specs (## Driver Specs), its decisions (## ADRs)
+  (state, owner)   ├────► milestones ──► one opsx change each (openspec/changes/)
+       │           ├────► ## Triage   notes: weighed · leaning · open    (triage writes, propose reads)
+       │           └────► ## Attestation   door · blast-radius · RACI    (attest writes)
+       │
+       └── mirrored by ──► card   origin/kanban:cards/<id>.md
+                           + each open milestone's place in the opsx cycle   (on the card only)
+
+  manifest entry (hat · section) ── hashes ──► its records, its observed files, the view file
 ```
 
-- **Decisions to constraints.** A decision answers a constraint, or another decision, through
-  `depends-on`, and `depth` places it in the tree (`DEC-036`).
-- **Rules to records.** A rule says what it guards by citing a record id in the code. The record
-  never lists its rules, and the link is harvested (`DEC-013`). The harvest recognises numbered and
-  semantic ids alike (`RECORD_ID_PATTERN`, `src/core/compact/rules.ts`).
-- **Exposures to initiatives.** An exposure points forward to the initiative that mitigates it
-  through `mitigated-by` (`DEC-019`), and the board renders that target's live state (`DEC-026`).
-- **Initiatives to changes.** An initiative claims driver-specs and ADRs, and its milestones are
-  opsx changes (`DEC-003`; `## Driver Specs`, `## ADRs` and `## Milestones` are parsed in
-  `src/core/initiatives.ts`).
+**How the records connect:**
+
+- A decision depends on the constraints and decisions it answers.
+- A supersession replaces a record rather than editing it (`DEC-ESCALATION-LADDER`).
+- To tell whether a constraint is asserted, follow the graph: a rule cites a decision, and the
+  decision depends on the constraint (`DEC-013`).
+- The card mirrors its initiative, and the initiative remains the source of truth for which
+  milestones are done (`DEC-MILESTONE-BOARD`).
 
 ### The record entities
 
-**Driver-spec** (`opensprint/driver-specs/DS-*.md`). This is a constraint from outside the system.
+**Driver-spec (`DS-*`).**
 
-- **Read fields.** `id`, `type`, `status`, `hats`, `role`, `objective` and `depends-on` are read
-  (`src/core/decision-map.ts`, `src/core/compact/records.ts`).
-- **`type`.** One of `product`, `legal`, `compliance`, `reliability`, `architecture` or `business`
-  (`DRIVER_SPEC_TYPES`, `src/core/hats.ts`).
-- **`hats`.** One or more hats, given as a string or a list and normalised to a list (`DEC-016`).
-- **`role` and `objective`.** `role` takes the same string-or-list form, and `objective` names the
-  maintainer objective the record serves (`DEC-018`).
-- **Measure anatomy.** A measure lives under `## Measures` as optional `### Bar`, `### Posture`,
-  `### Evidence` and `### Exposure` sub-blocks (`DEC-019`).
-- **Bar form.** The bar is a user story for product and given/when/then for maintainer (`DEC-038`).
-  It is written when the record is created, or recorded as `unstated` (`DEC-BAR-AT-PROPOSE`).
-- **Evidence and exposure.** Which of the two a measure needs depends on its posture (`DEC-041`).
-  Evidence is a reference to a CI artifact (`DEC-032`).
+- **Hats.** It declares one or more `hats`, as a string or a list, normalised to a list (`DEC-016`).
+- **Role.** It declares a `role` of `goal` and/or `strategy`.
+- **Objective.** For maintainer it also declares an `objective`, naming one of the seven inherited
+  objectives (`DEC-018`).
+- **Measures.** Its `## Measures` section takes optional `### Bar`, `### Posture`, `### Evidence`
+  and `### Exposure` sub-blocks, with `mitigated-by:` inside Exposure (`DEC-019`).
+- **Bar form.** A bar is written in BDD form: a user story for product, given/when/then for
+  maintainer (`DEC-038`).
 
-**Decision** (`opensprint/ADRs/DEC-*.md`). This is a choice made in answer to a constraint.
+**Decision (`DEC-*`).**
 
-- **Read fields.** `id`, `status`, `depth`, `depends-on` and `hats` are read (`DecisionEntry`,
-  `src/core/decision-map.ts`). `supersedes` also appears in frontmatter (`DEC-016`, `DEC-034`,
-  `DEC-040`).
-- **Owner and role.** A decision is owned by `dev` or `devops`, other hats are CC only, and it
-  carries no `role` (`DEC-028`).
-- **Body.** The body is a Question, a Decision, a weighted Consideration Factors table, a Rationale
-  and an Invalidation Trigger. The strategy cell's SWOT-like parts are compiled from that table and
-  trigger (`DEC-037`).
-- **Ids.** `DEC-001` to `DEC-044` keep their numbers, and every new decision takes a semantic id
+- **Frontmatter.** `id`, `type: adr`, `status`, `created`, `depth`, `depends-on`, optional
+  `supersedes`, and `hats`.
+- **Body.** Question, Decision, Consideration Factors, Rationale and Invalidation Trigger. A
+  maintainer strategy cell is compiled from the weighted table and the trigger (`DEC-037`).
+- **Ownership.** A decision is owned by `dev` or `devops`, may CC other hats, and carries no `role`
+  (`DEC-028`).
+- **Status.** Both `active` and `accepted` count as current (`src/core/compact/sections.ts`).
+- **Ids.** New decisions take semantic ids. `DEC-001` to `DEC-039` keep their numbers, and no new
+  numbers are allocated (`DEC-036`). **Surfaced:** `DEC-040` to `DEC-044` are numbered anyway, and
+  were created the day after `DEC-036` (`opensprint/ADRs/`).
+
+**Initiative.**
+
+- **File and id.** The filename carries a date prefix, and the id lives in frontmatter
   (`DEC-036`).
-- **Status values.** Three values appear across the ADRs: `active` on most, `accepted` on six of
-  the semantic ones, and `superseded` on the three that were replaced (`opensprint/ADRs/`). No
-  record defines `accepted` or says whether it differs from `active`. `DEC-STATE-MACHINE` defines
-  `status` only as whether a record is live.
+- **Frontmatter.** `id`, `status`, `state`, an optional `owner`, and `created`.
+  - `state` is written only by `advance` (`DEC-STATE-MACHINE`) and takes one of seven values
+    (`src/core/initiatives.ts`); see Runtime Topology for the two that `DEC-024` also names.
+  - `status` is kept so that older files still parse (`DEC-024`).
+  - `owner` is written by `claim` (`DEC-INITIATIVE-OWNER`).
 
-**Initiative** (`opensprint/initiatives/YYYYMMDD-<id>.md`). This is a container that tracks work. It
-is not a record that constrains or decides (`src/core/initiatives.ts`).
+What the parser reads from the body (`src/core/initiatives.ts`):
 
-- **Frontmatter.** `id`, `status`, `state`, `owner`, `created`, `completed` and `depends-on` are
-  read (`InitiativeEntry`, `src/core/initiatives.ts`). `state` holds the lifecycle position and
-  `status` stays a separate field (`DEC-STATE-MACHINE`). `owner` is optional, and a file without it
-  behaves as before (`DEC-INITIATIVE-OWNER`). Older files without `state` still parse (`DEC-024`).
-  Two of the seven initiatives in this repository carry only `status` (`opensprint/initiatives/`).
-- **`## Milestones`.** This is a checkbox list where `[ ]` is open, `[x]` is done and `[~]` is
-  superseded. Superseded items are kept and excluded from progress (`src/core/initiatives.ts`).
-- **`## Attestation`.** Attest writes this section. `door` is `one-way` or `two-way`, there is a
-  `blast-radius`, and the RACI table names R and A only where no system handles the concern
-  (`DEC-042`; `DOORS` in `src/core/initiatives.ts`).
-- **Declined items.** A declined initiative keeps its Objective and Goal and the reason it was
-  declined (`DEC-035`).
+| Section | Read as |
+|---|---|
+| `## Description` | its first paragraph, folded onto one line, becomes the summary a card shows |
+| `## Driver Specs`, `## ADRs` | the records the initiative claims |
+| `## Milestones` | a checklist: `[ ]` open, `[x]` done, `[~]` superseded (`DEC-MILESTONE-BOARD`) |
+| `## Attestation` | `door` (one-way or two-way), `blast-radius`, and a RACI table whose rows name a system or at least R and A (`DEC-042`) |
 
-**Abandoned universe** (`opensprint/abandoned/{name}/`). This holds a `snapshot/` of the losing
-`opensprint/` and a `migration-manifest.md` (`DEC-005`). None exists here (`opensprint/`).
+**`## Triage` is notes, not a record.** Triage writes it, and propose reads it
+(`src/core/templates/workflows/opsp-triage.ts`, `src/core/templates/workflows/opsp-propose.ts`):
+
+```
+  ## Triage
+
+  - **Weighed**: <approach> — <what it costs, what it forecloses>; <approach> — …
+  - **Leaning**: <the approach, in a sentence, and why>
+  - **Open**: <what must be answered before this can be formalized>
+```
+
+Triage revises the section on every resume rather than appending a second one, and commits it on
+the item's branch. Propose formalizes the **Leaning** and must close each **Open** item, or record
+it as `unstated` (`src/core/templates/workflows/opsp-propose.ts`). The section has no id and no
+`depends-on`, and no parser or compile reads it: only the two workflow templates name it
+(`src/core/templates/workflows/`).
+
+**Surfaced, not resolved:** `DEC-039`'s invalidation trigger warns that a triage which grows
+artifacts of its own has become a second propose. No record decides this section.
+
+**Card (`origin/kanban:cards/<id>.md`).** One plain-text file per initiative. Its frontmatter,
+summary and `## History` come from `DEC-BOARD-ON-REMOTE-BRANCH`. Its `## Milestones` section, with
+each milestone's stage, comes from `DEC-MILESTONE-BOARD`. In code (`src/core/kanban.ts`):
+
+```
+  ---
+  id: <initiative id>
+  title: <the id, at import>
+  state: <initiative state>
+  owner: <omitted when nobody holds it>
+  created: <date>
+  updated: <ISO time, to the second>
+  branch: opsp/<id>
+  ---
+
+  <summary: the first paragraph of the initiative's Description>
+
+  ## Milestones
+
+  - [todo|specifying|building|review|done|superseded] <name>: <description>
+
+  ## History
+
+  - <ISO time>  <what happened>  by <who>[ — <note>]
+```
+
+**How a card is written** (`src/core/kanban.ts`, `src/core/kanban-sync.ts`):
+
+- **History.** Every write appends one history line:
+  - `imported at <state> from <path>`
+  - `<from> → <to>`, with the workflow and hat as its note
+  - `owner <from> → <to>`, noting a takeover
+  - `milestone <m>: <from> → <to>`
+  - `resynced <fields> from <path>`
+- **Parsing.** Cards are parsed line by line, because the page that renders them loads no
+  libraries. A card written before milestones were on cards reads as having none. An unknown stage
+  reads as `todo`. A card round-trips byte for byte (`src/core/kanban.ts`, `test/core/kanban.test.ts`).
+- **Drift.** A card is compared with its initiative on `state`, `owner`, `summary` and `milestones`.
+  `title`, `created` and `branch` are fixed at import (`src/core/kanban.ts`).
+
+**Milestone stages.** There are six stages, in two kinds:
+
+- `done` and `superseded` come from the initiative file.
+- `specifying`, `building` and `review` exist only on the card.
+- Every other open milestone is `todo`.
+
+Stages move only along an explicit table, `MILESTONE_STAGE_MOVES` (`src/core/kanban.ts`):
+
+| From | To | When |
+|---|---|---|
+| `todo` | `specifying` | its opsx change is created |
+| `specifying` | `building` | its change worktree is made |
+| `building` | `review` | its change is archived and merged, waiting at the checkpoint |
+| `review` | `done` | the checkpoint approves it and it is checked off |
+| `review` | `specifying` | a change request: a corrective opsx change |
+
+`superseded` is reached only through the initiative file, never by a stage move
+(`src/core/kanban.ts`). `stageCard` adds two rules from the file. A milestone is `done` only where
+the file checks it off. A milestone leaves `todo` only when every earlier live milestone is done
+(`src/core/kanban-sync.ts`). This is the cycle `DEC-MILESTONE-BOARD` decides.
+
+**Abandoned universe.** `opensprint/abandoned/<name>/` holds a `snapshot/` of the loser's
+`opensprint/` and a `migration-manifest.md` that classifies every citizen (`DEC-005`).
+
+**Rule.** A rule is not a record. It is a test or check that cites a record's id (`DEC-013`).
 
 ### Compiled entities (derived, never edited)
 
-```
-  opensprint/
-    squad/<hat>.md         per-hat views                     DEC-006, DEC-016
-    squad/index.md         router                            src/core/compact/manifest.ts
-    squad/.manifest.json   provenance: per hat and section   DEC-010
-    architecture.md        sibling output of compact         DEC-014
-    BOARD.md               initiatives by state, roadmap     DEC-026
-    DECISION-MAP.md        decision tree, blast radius       DEC-026; src/core/decision-map.ts
-```
+| Artifact | Derived from | Checked by | Record |
+|---|---|---|---|
+| `opensprint/squad/<hat>.md` + `index.md` | the records each hat's sections select, plus observed files | `.manifest.json`, via `compact check`; `index.md` is not covered | `DEC-006`, `DEC-010`, `DEC-VIEWS-FIRST-LOAD` |
+| `opensprint/architecture.md` | the same records, as a peer of the views | the same compile | `DEC-014` |
+| `opensprint/BOARD.md` | initiative state, milestones, change status, exposures | regenerated deterministically | `DEC-026` |
+| `opensprint/DECISION-MAP.md` | driver-specs and decisions | nothing | `DEC-NO-DEFAULT-ARCHITECTURE-LOAD` |
+| `<toolDir>/skills/opensprint-kanban/board.html` | the shipped template plus the CLI's columns, moves and agent table | nothing; rewritten by `init` and `update` | `DEC-BOARD-READ-BY-GIT`; `src/core/shared/opsp-layer.ts` |
+| `docs/` (or `docsDir`) | attest's prose, on confirmation | nothing | `DEC-044` |
 
-The skills load the views, not `architecture.md` or `DECISION-MAP.md`: the first is compiled from the
-same records as the views, and no check covers the second (`DEC-NO-DEFAULT-ARCHITECTURE-LOAD`).
+A manifest entry holds these fields (`src/core/compact/manifest.ts`):
 
-The manifest records, for each section, the content hashes of its records and its observed files,
-a combined input hash, and the hash of the rendered output. A changed input means the section is
-stale, and a changed output means it was tampered with (`DEC-010`). The observed fields are
-`version: 1` and entries holding `inputs`, `observed`, `inputHash` and `outputHash`
-(`src/core/compact/manifest.ts`). `DEC-010` names record ids and hashes. The `observed` map of file
-paths is code only, and no record mentions it.
+- `hat` and `section`;
+- `inputs`: record id → hash;
+- `observed`: path → hash;
+- `inputHash` and `outputHash`.
 
 ### The inherited OpenSpec layer
 
-Beneath the surrogate sits the upstream spec-and-change model. It covers `openspec/specs/` and
-`openspec/changes/<name>/`, validated by Zod schemas (`src/core/schemas/`):
+The Zod schemas for opsx specs and changes come from the upstream, and no decision in this hat
+covers them (`src/core/schemas/`):
 
-- **Spec.** A `name`, an `overview` and one or more requirements (`src/core/schemas/spec.schema.ts`).
-- **Requirement.** Its text must contain `SHALL` or `MUST`, with at least one scenario
+- **Spec**: `name`, `overview`, at least one requirement, and optional metadata with format
+  `openspec` (`src/core/schemas/spec.schema.ts`).
+- **Change**: `name`, a `why` of bounded length, `whatChanges`, and from one delta up to a maximum.
+  Each delta is `ADDED`, `MODIFIED`, `REMOVED` or `RENAMED` against a spec. Optional metadata has
+  format `openspec-change` (`src/core/schemas/change.schema.ts`).
+- **Requirement**: text containing `SHALL` or `MUST`, with at least one scenario
   (`src/core/schemas/base.schema.ts`).
-- **Change.** A `name`, a `why` and a `whatChanges`, plus deltas whose operation is `ADDED`,
-  `MODIFIED`, `REMOVED` or `RENAMED` (`src/core/schemas/change.schema.ts`).
-
-No record decides anything about this layer. It is described here only as observed.
 
 ## Open Loops
 
-12 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+This section lists only what the harvest reported for this hat; nothing here is inferred. Open
+loops are the backlog. Triage turns them into work through `/opsp:explore`, then `/opsp:propose`
+(`DEC-007`).
 
 ### `decision-unguarded` — a decision no rule cites
 
-- `DEC-005`
-- `DEC-008`
-- `DEC-013`
-- `DEC-017`
-- `DEC-020`
-- `DEC-031`
-- `DEC-032`
-- `DEC-ATTEST-OWNING-SECTION`
-- `DEC-BOARD-ALL-BRANCHES`
-- `DEC-INITIATIVE-OWNER`
-- `DEC-NO-DEFAULT-ARCHITECTURE-LOAD`
-- `DEC-VIEWS-FIRST-LOAD`
+Twelve decisions have no rule citing them. A rule is a test or check that cites a record's id
+(`DEC-013`).
 
-_No rule cites this decision._
+| Area | Decisions |
+|---|---|
+| ownership and the cross-branch board | `DEC-INITIATIVE-OWNER`, `DEC-BOARD-ALL-BRANCHES` |
+| what a workflow loads | `DEC-VIEWS-FIRST-LOAD`, `DEC-NO-DEFAULT-ARCHITECTURE-LOAD`, `DEC-ATTEST-OWNING-SECTION` |
+| compile and harvest | `DEC-008`, `DEC-013`, `DEC-031` |
+| surface and reconciliation | `DEC-017`, `DEC-005` |
+| shared with another hat | `DEC-020` (maintainer), `DEC-032` (devops) |
+
+`DEC-INITIATIVE-OWNER` is still unguarded, even though claiming now writes the card first. The
+claim tests cite no record id (`test/cli-e2e/claim.test.ts`). A test that cites nothing guards
+nothing (`DEC-013`).
+
+**Every live-board decision has at least one test citing it:**
+
+| Test | Cites |
+|---|---|
+| `test/core/kanban.test.ts` | `DEC-BOARD-ON-REMOTE-BRANCH`, `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-MILESTONE-BOARD` |
+| `test/core/kanban-skill.test.ts` | `DEC-BOARD-READ-BY-GIT`, `DEC-CONTINUE-FORWARD-ESCALATE-BACK` |
+| `test/core/kanban-actions.test.ts` | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
+| `test/core/kanban-sync.test.ts` | `DEC-CARD-WRITES-THROUGH-CLI`, `DEC-STATE-MACHINE`, `DEC-MILESTONE-BOARD` |
+| `test/core/opsp-resume.test.ts` | `DEC-CONTINUE-FORWARD-ESCALATE-BACK`, `DEC-BOARD-BUTTON-LAUNCHES-SESSION` |
+| `test/core/kanban-milestones.test.ts` | `DEC-MILESTONE-BOARD` |
+| `test/core/state-machine-workflows.test.ts` | `DEC-STATE-MACHINE`, `DEC-HAT-HANDOFFS`, `DEC-043` |
+
+`state-machine-workflows.test.ts` now runs, for every row of `TRANSITIONS`, the `advance` its
+workflow's template writes, from the row's `from` state, so a handoff whose template names no
+`--hat` fails it (`DEC-STATE-MACHINE`, `DEC-HAT-HANDOFFS`). `kanban-skill.test.ts` and
+`kanban-milestones.test.ts` also cite `DS-LIVE-BOARD` and `DS-RUNTIME-LESS-BOARD`; a driver-spec
+cited by a test is not a guarded decision (`DEC-013`), so neither changes the table above. The page
+tests run the page's own script against a DOM stand-in, `test/helpers/board-dom.ts`.
+
+All seven `kanban` milestones are checked off (`opensprint/initiatives/20261018-kanban.md`).

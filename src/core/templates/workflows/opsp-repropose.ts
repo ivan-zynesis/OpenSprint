@@ -163,18 +163,26 @@ mv openspec/changes/<name> openspec/changes/archive/$(date +%Y-%m-%d)-<name>-sup
 **Already archived** — leave it alone and add a corrective milestone. Completed work is immutable;
 the decision trail is worth more than a tidy plan.
 
-Mark superseded milestones so they stop holding the initiative open:
+Mark superseded milestones \`[~]\` so they stop holding the initiative open, keeping the name:
 
 \`\`\`markdown
-- [x] ~~settlement-runner~~ (superseded by continuous-settlement)
+- [~] settlement-runner: batch settlement every hour (superseded by continuous-settlement)
 - [ ] continuous-settlement: stream settlement off the transaction log
 \`\`\`
 
+\`[~]\` is what the board reads as superseded. A milestone checked \`[x]\` and struck through reads
+as **done**, which is the opposite of what happened.
+
 ## Step 4: Return it to proposed
 
+From \`building\` this is a handoff, so name the hat you are wearing — the strategy is product's and
+maintainer's:
+
 \`\`\`bash
-opensprint advance <initiative-name> --to proposed
+opensprint advance <initiative-name> --to proposed --hat <product|maintainer>
 \`\`\`
+
+The move carries the milestones you just redrew onto the initiative's card on the live board.
 
 **Back to \`proposed\`, not \`building\`.** That is the whole point of the rung: a restated strategy
 has a bar nobody has worked against yet, and \`/opsp:apply\` must open it again. Re-entering at

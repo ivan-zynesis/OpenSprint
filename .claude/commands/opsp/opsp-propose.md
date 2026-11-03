@@ -20,14 +20,27 @@ Two paths reach here, and both are valid (`DEC-034`):
 | Path | What you are given |
 |---|---|
 | straight from `/opsp:explore` | a conversation |
-| from `/opsp:triage` | an **initiative already on disk** at `state: exploring`, holding an objective and a goal, plus the strategy that triage worked out |
+| from `/opsp:triage` | an **initiative already on disk** at `state: exploring`, holding an objective and a goal, and a `## Triage` section with the strategy triage worked out |
 
 **Where an initiative already exists, do not create a second one.** Read it, switch to its worktree
 (`DEC-029`), and fill in what it is missing — Strategy and Measure. Its Objective and Goal were
 written at backlog time and are not yours to rewrite.
 
+**Read what it already holds before anything else.** Propose may be continuing in a fresh session,
+started from the board, with no conversation to analyze:
+
+- **It is `proposed` or later** — propose is done. Say so, name the next workflow (`/opsp:apply`
+  for `proposed`), and stop. Restating a plan that exists is `/opsp:repropose`, not this.
+- **It has a `## Triage` section** — that is triage's thinking, written for this moment. Its
+  **Leaning** is the strategy you formalize, and its **Open** questions are what you must close with
+  the operator or record as `unstated`. Read it where you would otherwise read the conversation.
+- **It already lists driver-specs or ADRs that exist on disk** — a previous propose wrote them, and
+  propose writes only after the operator confirms. They are confirmed. **Never recreate or rewrite
+  them.** Show them as done in Step 2, classify only what is still missing, and write only that in
+  Step 3.
+
 ```bash
-openspec compact board          # the Backlog column lists them
+opensprint compact board --all-branches   # the Backlog column, on every branch
 git branch --show-current       # be on opsp/<initiative> before writing
 ```
 
@@ -37,7 +50,53 @@ either way, and this step writes rather than thinks.
 
 ### 1. Analyze the Conversation
 
-Review everything discussed in the explore session (or the operator's description). Identify:
+First, orient on what is already recorded — the views, not every record:
+
+```bash
+opensprint compact plan --json
+```
+
+If `opensprint compact` cannot run — an older CLI, or no surrogate yet — fall back to reading
+`opensprint/driver-specs/*.md` and `opensprint/ADRs/*.md`, and skip the view rules below.
+
+**First, decide what there is to load** — the first case that holds wins:
+
+- **No records yet.** Where `opensprint/driver-specs/` and `opensprint/ADRs/`
+  hold no records at all, there are no records yet: nothing to load — say so, and carry on from
+  the conversation; the view rules below do not apply.
+- **Records that predate hats.** If every section other than `open-loops` is `unsealed` with no
+  `inputs` — and the plan lists at least one such section — while it lists records under
+  `unassigned`, the records predate hats: read every record, as before views existed, and skip
+  the views and the rules below for them. Compiling cannot place a record that declares no
+  hat, so tell the operator the records need `hats:` rather than offering `/opsp:compact`.
+- **Otherwise**, orient on the views, as follows.
+
+Read `opensprint/squad/index.md` (where it does not exist, go by hat), then `opensprint/squad/product.md` and
+`opensprint/squad/maintainer.md` before writing driver-specs, and `opensprint/squad/dev.md` and
+`opensprint/squad/devops.md` before writing ADRs. A new record must neither restate one that exists
+nor miss the record it depends on. **Open the full record only for the decision you are about to act
+on** — one you will cite in `depends-on`, or one you will supersede.
+
+`index.md` routes, and `compact check` does not cover it: use it to choose a hat, never as the
+source of a claim.
+
+The plan lists only the sections that are not fresh; a section it omits is fresh.
+An `open-loops` section, in any state, is answered by the plan's own `openLoops`, which is
+always current. **Where it reports any other section**, the view is not enough for it:
+- `stale` — read the view, then read in full what moved since it was compiled: the records under
+  `added` and `modified`, and the files under `observedAdded` and `observedModified`. Do not
+  rely on a claim citing an id under `removed`.
+  In a `measures` section those files are tests citing records: read only the ones a measure
+  cites as its evidence — the plan's own `openLoops` is already current for the rest.
+- `unsealed` — the section was never compiled; often its view file does not exist yet. Read
+  that section's `inputs` instead.
+- `tampered` — the view no longer says what was sealed: someone edited it by hand, or deleted
+  it. Set that section aside; read its `inputs`, and tell the operator.
+
+Records listed under `unassigned` declare no hat and appear in no view: read the ones a new
+record would depend on or restate.
+
+Then review everything discussed in the explore session (or the operator's description). Identify:
 
 - **External constraints** (things the operator stated as facts about the world) → these become **driver-specs**
   - Product requirements, legal mandates, compliance rules, performance targets, business constraints
@@ -153,7 +212,7 @@ mistyped still resolves:
 ---
 id: <initiative-name>
 status: active
-state: proposed
+state: exploring
 created: <YYYY-MM-DD>
 ---
 
@@ -185,6 +244,22 @@ created: <YYYY-MM-DD>
 - [ ] deprecate-monolith-routes: Remove legacy endpoints and redirect
 ```
 
+A new descriptor starts at `exploring`, where every initiative starts — the same place one arriving
+from triage already is. Step e moves it on.
+
+**e. Advance the state** — for both paths, once everything above is written:
+
+```bash
+opensprint advance <initiative-name> --to proposed
+```
+
+**Do not edit `state:` by hand.** The command refuses an illegal move, names the legal ones, and
+regenerates `BOARD.md` (`DEC-STATE-MACHINE`). It also puts the initiative's card on the live
+board, or moves the card that is already there. Writing the field directly is what left every
+initiative in this project stuck at the wrong state — the instruction to set it existed and was
+simply never followed — and a descriptor written at `proposed` makes this command refuse, as
+"Already 'proposed'", so the card never moves.
+
 ### 4. Summary
 
 Display what was created:
@@ -211,17 +286,6 @@ drift from reality. `Addresses` records what the initiative set out to close, no
 
 - **Classify, don't invent** — Only create driver-specs and ADRs from what the operator actually said
 - **Never duplicate an initiative** — where one exists at `state: exploring`, fill it in and advance it; do not write a second
-
-## Step 5: Advance the state
-
-```bash
-opensprint advance <initiative-name> --to proposed
-```
-
-**Do not edit `state:` by hand.** The command refuses an illegal move, names the legal ones, and
-regenerates `BOARD.md` (`DEC-STATE-MACHINE`). Writing the field directly is what left every
-initiative in this project stuck at the wrong state — the instruction to set it existed and was
-simply never followed.
 - **Never rewrite an Objective or Goal** — those were settled at backlog time
 - **Operator confirms** — Always present classification before writing files
 - **High-level milestones** — Each milestone is a brief description, not a detailed plan. Detail comes from opsx.

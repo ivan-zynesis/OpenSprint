@@ -45,6 +45,19 @@ export interface ToolCommandAdapter {
    * @returns Complete file content ready to write
    */
   formatFile(content: CommandContent): string;
+  /**
+   * How a person invokes a generated command in this tool, e.g. `/opsx:explore`.
+   * Absent where the adapter does not know; the live board then names the
+   * skill instead of guessing a syntax.
+   */
+  commandReference?(commandId: string): string;
+  /**
+   * The shell words that start an interactive session of this tool with a
+   * prompt as the next argument, e.g. `['claude']`. Absent where the tool
+   * documents no such way; the live board then copies the prompt alone
+   * (DEC-BOARD-BUTTON-LAUNCHES-SESSION).
+   */
+  sessionLauncher?: readonly string[];
 }
 
 /**

@@ -35,6 +35,7 @@
                 ./src
                 ./bin
                 ./schemas
+                ./assets
                 ./scripts
                 ./test
                 ./package.json

@@ -69,8 +69,9 @@ describe('/opsp:triage picks the item up', () => {
     expect(step1().indexOf('opensprint claim')).toBeGreaterThan(step1().indexOf('git worktree add'));
   });
 
-  it('asks before taking a card someone else holds', () => {
-    expect(step1()).toMatch(/someone else as its owner, ask the operator before taking it over/);
+  it('asks before taking a card someone else holds — claim refuses it until --take-over', () => {
+    expect(step1()).toMatch(/refuses a card the\s+board shows someone else holding/);
+    expect(step1()).toMatch(/Ask the operator; if they agree to take it\s+over, re-run with `--take-over`/);
   });
 
   it('commits the claim, and offers to push it — nobody else can see it otherwise', () => {
@@ -97,8 +98,9 @@ describe('/opsp:apply claims the card before building', () => {
     expect(step4().indexOf('opensprint claim')).toBeLessThan(step4().indexOf('opensprint advance'));
   });
 
-  it('asks before taking a card someone else holds', () => {
-    expect(step4()).toMatch(/someone else as\s+its owner, ask the operator before taking it over/);
+  it('asks before taking a card someone else holds — claim refuses it until --take-over', () => {
+    expect(step4()).toMatch(/refuses a card someone else holds/);
+    expect(step4()).toMatch(/ask the operator, and\s+re-run with `--take-over` if they agree/);
   });
 
   it('commits the claim on the initiative branch', () => {

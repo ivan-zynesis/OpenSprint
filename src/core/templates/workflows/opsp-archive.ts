@@ -97,7 +97,38 @@ grading the answer is certification, which \`DS-SURROGATE-SCOPE\` places out of 
 
 If \`check\` reports anything not fresh, resolve it before continuing — an archive that ships a stale view records an architectural state that was never true.
 
-### 3. Clean Up Worktrees
+### 3. Close the Initiative
+
+Close it **from the initiative's worktree, before anything is cleaned up.** \`advance\` finds the
+initiative in the checkout it runs in, and the descriptor lives on \`opsp/<initiative-name>\`: once
+that worktree is gone there is nothing to close.
+
+\`attested\` → \`completed\` is a handoff, so name the accountability you are closing it under. Any
+of the four is accepted, because archive compiles every hat's view:
+
+\`\`\`bash
+opensprint advance <initiative-name> --to completed --hat <product|maintainer|dev|devops>
+\`\`\`
+
+This refuses anything but \`attested\` → \`completed\` (\`DEC-STATE-MACHINE\`), which is what makes
+the compile above load-bearing rather than advisory: an initiative cannot reach \`completed\`
+without having passed through attestation, and attestation cannot be reached without the handoff.
+**Every squad hat is therefore guaranteed compiled and sealed at exactly one point in the
+lifecycle — here.** That is the only place in the process where that is true. It moves the card on
+the live board to Done as well.
+
+Then finish the descriptor by hand:
+- Set \`status: completed\`
+- Add \`completed: <YYYY-MM-DD>\` to frontmatter
+- Ensure all opsx change references are listed
+
+\`status\` and \`state\` are different fields and both are kept: \`status\` is whether the record is
+live, which every record type has; \`state\` is where it sits in the lifecycle, which only an
+initiative has.
+
+Commit the descriptor and \`BOARD.md\` on the initiative's branch before the next step.
+
+### 4. Clean Up Worktrees
 
 Remove any remaining worktrees created during the initiative. Change worktrees are normally pruned at merge, but any still present (e.g., from an interrupted run) should be cleaned up now.
 
@@ -121,27 +152,6 @@ After cleanup, remove the initiative worktree itself (it is no longer needed onc
 \`\`\`bash
 git worktree remove ../<repo>-opsp-<initiative-name>
 \`\`\`
-
-### 4. Close the Initiative
-
-\`\`\`bash
-opensprint advance <initiative-name> --to completed
-\`\`\`
-
-This refuses anything but \`attested\` → \`completed\` (\`DEC-STATE-MACHINE\`), which is what makes
-the compile above load-bearing rather than advisory: an initiative cannot reach \`completed\`
-without having passed through attestation, and attestation cannot be reached without the handoff.
-**Every squad hat is therefore guaranteed compiled and sealed at exactly one point in the
-lifecycle — here.** That is the only place in the process where that is true.
-
-Then finish the descriptor by hand:
-- Set \`status: completed\`
-- Add \`completed: <YYYY-MM-DD>\` to frontmatter
-- Ensure all opsx change references are listed
-
-\`status\` and \`state\` are different fields and both are kept: \`status\` is whether the record is
-live, which every record type has; \`state\` is where it sits in the lifecycle, which only an
-initiative has.
 
 ### 5. Display Summary
 

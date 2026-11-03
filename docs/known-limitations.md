@@ -44,6 +44,22 @@ The agent workflows — escalation during `/opsp:apply`, attestation, triage —
 that their instructions say the right thing. Whether an agent follows them is observed in use, not
 asserted by the test suite.
 
+## The live board
+
+The [live board](git-workflow.md#the-live-board) on `origin/kanban` has four limits worth knowing:
+
+- **It is as current as your last render.** Rendering fetches the board, so it needs your remote
+  to be reachable, and the page never refreshes itself.
+- **A card can drift from its initiative.** Editing an initiative's state by hand, or a move made
+  while the remote was unreachable, leaves the card behind. Every move reports a drifted card;
+  nothing corrects it automatically. `opensprint kanban seed` lists the drift, and
+  `opensprint kanban seed --resync` rewrites the cards from their initiatives.
+- **Anyone who can push to your remote can rewrite `origin/kanban`.** OpenSprint does not protect
+  the branch. If that matters to you, protect it on your Git host — and keep pushes allowed for the
+  people who run the workflows, since every move is a push.
+- **Removing OpenSprint leaves the branch behind.** Delete `origin/kanban` by hand, along with the
+  generated `opensprint-kanban` skill in each tool's directory.
+
 ## Upgrading
 
 Merging does not publish; releases are cut by hand. After a release, run `opensprint update` in

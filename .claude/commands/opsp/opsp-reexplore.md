@@ -65,7 +65,10 @@ implementation.
 
 Read the initiative in `opensprint/initiatives/` — **resolve by the `id:` in frontmatter, not by
 filename.** Filenames carry a creation-date prefix (`20261011-<name>.md`), so `<name>.md` will not
-exist; `openspec compact board` lists every initiative with its path.
+exist; `opensprint compact board --all-branches --json` lists every initiative with its path and
+the branch holding it. One that lives only on its `opsp/<initiative-name>` branch is read with
+`git show <path>`, and its state is moved from that branch's worktree — make one with
+`git worktree add ../<repo>-opsp-<initiative-name> opsp/<initiative-name>` where none exists.
 
 ```
   LOAD                                 DO NOT LOAD
@@ -110,18 +113,21 @@ A re-ideation that concludes nothing changes is a **successful** re-ideation. Re
 
 ### The goal moved
 
+First **mark the milestones that served the old goal as superseded**, because they did:
+
+```markdown
+- [~] settlement-runner: batch settlement every hour (superseded — served the 4h window, which no longer holds)
+```
+
+`[~]` keeps the name and reads as superseded; a milestone checked `[x]` and struck through
+reads as **done**. Superseded milestones stop holding the initiative open and keep their history,
+which is what makes the record readable later rather than tidy now.
+
+Then move it, which carries those milestones onto its card on the live board:
+
 ```bash
 opensprint advance <initiative-name> --to exploring --hat product
 ```
-
-Then **mark the milestones that served the old goal as superseded**, because they did:
-
-```markdown
-- [x] ~~settlement-runner~~ (superseded — served the 4h window, which no longer holds)
-```
-
-Superseded milestones stop holding the initiative open and keep their history, which is what
-makes the record readable later rather than tidy now.
 
 Then carry on as you would have the first time:
 

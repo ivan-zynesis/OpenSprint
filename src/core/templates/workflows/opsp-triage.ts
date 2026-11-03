@@ -69,6 +69,15 @@ cd ../<repo>-opsp-<initiative-name>
 If the item has no branch at all — it was written before initiatives lived on branches — create
 one from the current checkout.
 
+**Read the initiative before doing anything else.** Triage may be continuing in a fresh session,
+started from the board, with no conversation behind it:
+
+- **It is past \`exploring\`** — triage is over. Say which workflow comes next, from its state, and
+  stop. Do not triage it again.
+- **It already has a \`## Triage\` section** — you are resuming. Read it first: it is what the last
+  session thought. Step 2 continues from its open questions; do not weigh again an approach it already
+  weighed, unless something it did not know has changed.
+
 Then pick it up, so nobody else triages it at the same time:
 
 \`\`\`bash
@@ -77,7 +86,9 @@ git add opensprint/initiatives/ opensprint/BOARD.md
 git commit -m "triage: claim <initiative-name>"
 \`\`\`
 
-If the board shows someone else as its owner, ask the operator before taking it over.
+\`claim\` writes the card on the live board (\`origin/kanban\`) before the file, and **refuses a card the
+board shows someone else holding** — nothing is written. Ask the operator; if they agree to take it
+over, re-run with \`--take-over\`.
 
 **A claim others cannot fetch claims nothing.** Offer to push the branch (\`git push -u origin
 opsp/<initiative-name>\`); until it is pushed, nobody else's board shows it as taken.
@@ -149,22 +160,39 @@ Think about approach, not implementation:
 This is architect-level. If you find yourself discussing function names, you have gone too deep —
 that is opsx's altitude, reached through \`/opsp:apply\`.
 
+**Write the thinking down, in the initiative, before you stop for any reason.** The next session —
+yours resumed, or \`/opsp:propose\` — starts from the file, not from this conversation:
+
+\`\`\`markdown
+## Triage
+
+- **Weighed**: <approach> — <what it costs, what it forecloses>; <approach> — …
+- **Leaning**: <the approach, in a sentence, and why>
+- **Open**: <what must be answered before this can be formalized>
+\`\`\`
+
+Revise it on every resume; do not append a second one. These are notes, not records — no id, no
+\`depends-on\`, nothing a compile reads — so writing them is not formalizing. Commit it on the item's
+branch.
+
 ## Step 3: Decide
 
 Three outcomes, and **declining is first-class**:
 
 ### Advance
 
-The approach is clear enough to formalize. Say what the strategy is, in a sentence, and hand to
-\`/opsp:propose\` — which writes the driver-specs, the ADRs, the milestones and the bar.
+The approach is clear enough to formalize. Say what the strategy is, in a sentence, make it the
+**Leaning** in \`## Triage\`, commit, and hand to \`/opsp:propose\` — which writes the driver-specs,
+the ADRs, the milestones and the bar, and reads its strategy from that section.
 
 ### Decline
 
-\`\`\`markdown
-state: declined
+\`\`\`bash
+opensprint advance <initiative-name> --to declined
 \`\`\`
 
-…and **record why**, in the initiative. The reason is worth more than the idea:
+**Never write \`state:\` by hand** — the command checks the move and moves the card on the live
+board with it (\`DEC-STATE-MACHINE\`). Then **record why**, in the initiative. The reason is worth more than the idea:
 
 > Declined 2026-10-11 — the licensing cost of the managed option exceeds the operational saving at
 > our volume. Revisit if volume triples or the pricing model changes.
@@ -172,12 +200,13 @@ state: declined
 The same proposal returns in six months. One recorded line ends that conversation in a minute.
 
 \`declined\` is terminal but **not permanent** (\`DEC-035\`). Reviving it returns it to \`exploring\`,
-keeping its history including the earlier decline.
+keeping its history including the earlier decline — \`opensprint advance <initiative-name> --to exploring\`.
 
 ### Return it
 
-The idea is worth keeping and not yet thought through. Leave it at \`exploring\`, note what is
-missing, and say what would need answering before it could be triaged again.
+The idea is worth keeping and not yet thought through. Leave it at \`exploring\`, put what is
+missing under **Open** in \`## Triage\`, and say what would need answering before it could be triaged
+again.
 
 Put the card down, so the board shows it is nobody's again:
 
@@ -202,5 +231,7 @@ beginning it.
 - **Architect altitude.** Approaches and trades, not implementations.
 - **Declining is a real outcome**, not a failure to decide. Record why.
 - **Never formalize here.** No driver-specs, no ADRs, no milestones — that is \`/opsp:propose\`.
+  \`## Triage\` is notes, and is the one thing you write besides the claim and the decision.
+- **Resume, never restart.** Read \`## Triage\` before thinking; write it before stopping.
 - **Never advance silently.** The operator decides; you recommend.
 `;

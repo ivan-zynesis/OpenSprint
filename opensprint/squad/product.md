@@ -1,10 +1,11 @@
 # product — what must it do?
 
-**Two records are attested; everything else here rests on a decision** (`DS-ATTESTED-TRUTH`).
+**Three records are attested; everything else here rests on a decision** (`DS-ATTESTED-TRUTH`).
 `/opsp:attest` first ran on 2026-10-11: thirteen measures carry a posture from then, none of them
 `met` and none with evidence, so none of those is attested — each records what remains exposed
 instead. `DS-SURROGATE-BUDGET` (**partially met**) and `DS-BOARD-VISIBILITY` (**met**) were attested
-on 2026-10-18 with evidence (`DS-SURROGATE-BUDGET`, `DS-BOARD-VISIBILITY`).
+on 2026-10-18 with evidence, and `DS-LIVE-BOARD` (**partially met**) on 2026-11-04
+(`DS-SURROGATE-BUDGET`, `DS-BOARD-VISIBILITY`, `DS-LIVE-BOARD`).
 
 ## Objective
 
@@ -24,80 +25,79 @@ What this deliberately does *not* reach is in the strategies below (`DS-SURROGAT
 
 ## Goals
 
-Five goals stand between the objective and the work. All five are decided. Three carry a posture:
-`DS-ATTESTED-TRUTH` and `DS-SURROGATE-BUDGET` are `partially met`, and `DS-BOARD-VISIBILITY` is
-`met` and attested — the one goal stated here as reached (`DS-ATTESTED-TRUTH`,
-`DS-SURROGATE-BUDGET`, `DS-BOARD-VISIBILITY`).
+Six goals reach the objective. Each is a decision about what must be true; whether it is true is
+the business of **Measures** below.
 
 ### Cover all four accountabilities
 
-The decision: spec-driven development must cover **functional** intent (product) and
-**non-functional** intent (maintainer), and delivered results must cover **application** (dev) and
-**infrastructure** (devops). A practice that covers only some of these is not engineering
+Spec-driven development must cover **functional** intent (product) and **non-functional** intent
+(maintainer), and delivered results must cover **application** (dev) and **infrastructure** (devops)
+(`DS-FULL-COVERAGE`). Covering only product and dev is half a system: an implementation can satisfy
+every stated requirement and still be unfit, because nothing stated the availability bar it had to
+hold, the compliance obligation it had to prove, or the topology that follows from either
 (`DS-FULL-COVERAGE`).
 
-The record names the gap this closes. Common practice specifies the product and dev halves. It
-leaves what must stay true while the system runs, and how the system is stood up, to convention. That
-is how an implementation can meet every stated requirement and still be unfit (`DS-FULL-COVERAGE`).
-
-You could tell this goal had landed when every hat in a project's registry has records, or has a
-recorded decision explaining why it does not. A hat with no records is meant to be reported, not
-hidden (`DS-FULL-COVERAGE`).
+You could tell this had landed when every hat in a project's registry has records, or a recorded
+decision explaining why it does not — a hat with no records is a reportable state, not an oversight
+to hide (`DS-FULL-COVERAGE`).
 
 ### Documentation is compiled, never a second effort
 
-The decision: **the compacted surrogate is the documentation**. It is compiled from work already
-done and never authored alongside it (`DS-DOCUMENTATION-AS-OUTPUT`). The reasoning is that
-driver-specs and decisions get made during the work, because the work cannot proceed without them.
-Rendering them therefore costs nothing extra. A compiled document also cannot drift from its sources
-without the compile reporting it (`DS-DOCUMENTATION-AS-OUTPUT`).
+**The compacted surrogate is the documentation** — compiled from work already done, never authored
+alongside it (`DS-DOCUMENTATION-AS-OUTPUT`). Documentation written after the fact fails for a
+structural reason: nobody has an incentive left, and the reasoning has already faded. Driver-specs
+and decisions are made *during* the work, because the work cannot proceed without them, so rendering
+them for a person costs nothing extra (`DS-DOCUMENTATION-AS-OUTPUT`).
 
-That guarantee covers drift from the *records* only. It says nothing about drift between the records
-and reality, and the next goal exists to close that gap (`DS-ATTESTED-TRUTH`). Narrative that is
-genuinely authored, such as an origin story or an entry point, stays authored and says so
-(`DS-DOCUMENTATION-AS-OUTPUT`).
+Narrative documents that are genuinely authored — an origin story, an entry point — stay authored,
+and say so (`DS-DOCUMENTATION-AS-OUTPUT`).
 
 ### Nothing is documented as true until it is attested
 
-The decision: a compiled claim may be stated as present-tense fact **only when a human has asserted
-it with evidence**. Anything else is intent wearing the grammar of state (`DS-ATTESTED-TRUTH`).
+A compiled claim may be stated as present-tense fact only when a human has asserted it with
+evidence; anything else is intent wearing the grammar of state (`DS-ATTESTED-TRUTH`). Every claim
+therefore rests on one of three authorities — **decided** (a record id: it binds, and may not be true
+yet), **observed** (a path: true now, and may be an accident) or **attested** (evidence, date and
+attester: asserted true, and it ages) — and only attested licenses the present tense
+(`DS-ATTESTED-TRUTH`).
 
-That gives a claim three authorities. A *decided* claim is cited by a record id, an *observed* claim
-by a path, and an *attested* claim by evidence, a date and an attester. `DEC-009` recognised only the
-first two. Only an attested claim may use the present tense (`DS-ATTESTED-TRUTH`). The accepted
-weakness is that an attestation ages. The record judges that a better failure than a claim that was
-never true (`DS-ATTESTED-TRUTH`).
-
-Ivan Lee attested this goal on 2026-10-11 as **partially met** (`DS-ATTESTED-TRUTH`). See Measures.
+A compiled document cannot drift from its records without the compile reporting it
+(`DS-DOCUMENTATION-AS-OUTPUT`). This goal closes the other drift, between the records and reality,
+which is the one a reader actually cares about (`DS-ATTESTED-TRUTH`).
 
 ### Loading the surrogate must not consume the session budget
 
-The decision: an agent must be able to work from the compacted surrogate instead of loading every
-driver-spec and ADR. This extends progressive discovery by one layer (`DS-SURROGATE-BUDGET`).
+An agent must be able to work from a compacted surrogate rather than loading every driver-spec and
+ADR (`DS-SURROGATE-BUDGET`). Measured across three projects in production use, ADRs were 61–74% of
+every load, `architecture.md` was loaded alongside the ADRs it summarises — so compaction saved
+nothing at load time — and completed initiatives were loaded on every explore, roughly 47K of
+cashier's 157K tokens (`DS-SURROGATE-BUDGET`).
 
-The record includes a baseline from three projects in production use. There, `/opsp:apply` loaded
-about 93K to 106K tokens, `/opsp:explore` loaded about 127K to 157K, and ADRs made up 61 to 74% of
-every load (`DS-SURROGATE-BUDGET`). The saving applies to orientation, not to judgement: an agent
-acting on a decision still reads that decision's full record (`DS-SURROGATE-BUDGET`).
-
-The bar was written when this work was backfilled: each planning and build skill names the views
-it reads, falls back to every record only where the engine cannot run, opens a full record for the
-decision it acts on, and says what to do with each section `compact plan` reports not fresh
-(`DS-SURROGATE-BUDGET`). It is attested **partially met** on 2026-10-18 (`DS-SURROGATE-BUDGET`). See
-Measures.
+The budget is saved on orientation, never on judgement: an agent that acts on a decision still reads
+that decision's full record (`DS-SURROGATE-BUDGET`).
 
 ### Every initiative is visible from any checkout, and work in flight names its owner
 
-The decision: any checkout must be able to see every initiative, on whichever branch it lives, and
-every card in flight must name the person who holds it (`DS-BOARD-VISIBILITY`). It formalises the
-cost `DS-SURROGATE-GIT-CONTRACT` and `DEC-029` recorded as unsolved — no branch could see every
-backlog item — and gives a name to the engineer who, per `DS-HATS-AS-CONTEXT`, steps up for
-accountability past the board (`DS-BOARD-VISIBILITY`).
+Any checkout must be able to see every initiative, on whichever branch it lives, and every card in
+flight must name the person who holds it (`DS-BOARD-VISIBILITY`). Each initiative lives on its own
+branch from its first persisted thought, which leaves no branch able to see every backlog item; this
+goal answers that cost (`DS-BOARD-VISIBILITY`).
 
-It is attested **met** on 2026-10-18: `opensprint compact board --all-branches` prints every
-branch's card and writes nothing, an unowned card in flight is reported, and the planning and build
-skills claim at pick-up (`DS-BOARD-VISIBILITY`). What it traded: the committed `BOARD.md` still shows
-one branch, and a claim is visible only once pushed (`DS-BOARD-VISIBILITY`). See Measures.
+Reading the board is the one thing a non-technical stakeholder does. A board showing only its own
+branch fails that; a card in flight with nobody's name on it fails the step past it, because nothing
+says who stepped up (`DS-BOARD-VISIBILITY`).
+
+### One live board, seen the same from anywhere, that starts the next step
+
+In-flight initiative state lives in **one central place** that every agent and every human reads the
+same way, whichever worktree, branch or pull request their work sits in; a completed initiative
+stays a static record; and the board is where any card's next step is started (`DS-LIVE-BOARD`).
+
+It takes up where `DS-BOARD-VISIBILITY` stopped. Making every branch's cards visible on demand left
+the board an instantaneous state, compiled from whatever one machine had fetched; the tool is gaining
+tracker capability while the backlog stays scattered across worktrees, branches and pull requests
+(`DS-LIVE-BOARD`). Clicking into an initiative shows the same kind of board one level down — its
+milestones as tickets (`DS-LIVE-BOARD`).
 
 ## Strategies
 
@@ -261,140 +261,189 @@ re-reviewed on 2026-10-18 and are unchanged (`DS-SURROGATE-GIT-CONTRACT`, `DS-HA
 
 ## Measures
 
-For each goal: what measures it, and what asserts that measure. The plan classifies three of the
-five goal records as **decided**; `DS-SURROGATE-BUDGET` and `DS-BOARD-VISIBILITY` are `attested`.
-So every other bar below is a commitment, not a property the system is known to have. Where a check
-exists, it is cited by path, and that citation is **observed** (it shows what the test exercises),
-not a verdict on the bar. Only `DS-SURROGATE-BUDGET` and `DS-BOARD-VISIBILITY` say what their bars
-traded away; for the other three **the trade is unrecorded**.
-
-```
-goal                         record                      measures             posture
----------------------------  --------------------------  -------------------  ----------------------
-all four accountabilities    DS-FULL-COVERAGE            primary, guardrail   none recorded
-documentation is compiled    DS-DOCUMENTATION-AS-OUTPUT  primary, guardrail   none recorded
-true only once attested      DS-ATTESTED-TRUTH           primary, guardrail,  partially met, no
-                                                         freshness            evidence: decided
-surrogate within budget      DS-SURROGATE-BUDGET         primary, guardrail,  partially met,
-                                                         trust                attested
-every branch, named owners   DS-BOARD-VISIBILITY         primary, guardrail,  met, attested
-                                                         workflow
-```
+For each goal: what measures it, and what actually asserts that measure. Three of the six carry an
+attested measure — a posture with evidence behind it (`DS-SURROGATE-BUDGET`, `DS-BOARD-VISIBILITY`,
+`DS-LIVE-BOARD`); one has a posture with no evidence (`DS-ATTESTED-TRUTH`); two have never been
+judged (`DS-FULL-COVERAGE`, `DS-DOCUMENTATION-AS-OUTPUT`). Only an attested measure is written in the
+present tense below.
 
 ### Cover all four accountabilities
 
-- **Primary**: every hat in a project's registry has records, or a recorded decision explaining
-  why it has none (`DS-FULL-COVERAGE`). The record names nothing that checks this.
-- **Guardrail**: no hat accumulates records that no rule asserts (`DS-FULL-COVERAGE`, which points
-  to `DS-LOOP-CLOSURE`). The harvest that reports a decision no rule cites is exercised by
-  `test/core/compact-loops.test.ts`. `test/cli-e2e/compact.test.ts` shows that `compact loops`
-  reports an unguarded decision **and exits zero**. So the gap is reported, but nothing fails
-  because of it.
-- **Posture**: none recorded. The plan reports this measure as `measure-unattested`
-  (`DS-FULL-COVERAGE`).
+```
+primary:    every hat in a project's registry has records, or a recorded decision explaining why not
+guardrail:  no hat accumulates records that no rule asserts (DS-LOOP-CLOSURE)
+bar:        no `### Bar` recorded
+posture:    none
+```
+
+Nobody has judged whether either measure is met, so the goal is **decided, not true**
+(`DS-FULL-COVERAGE`). Reported below as `measure-unattested`.
 
 ### Documentation is compiled, never a second effort
 
-- **Primary**: no documentation artifact is hand-authored where a compiled one would serve
-  (`DS-DOCUMENTATION-AS-OUTPUT`). The record names nothing that checks this.
-- **Guardrail**: a compiled artifact that disagrees with its sources fails the build
-  (`DS-DOCUMENTATION-AS-OUTPUT`, see `DEC-010`). `test/cli-e2e/compact.test.ts` asserts that
-  `compact check` exits non-zero after a view is hand-edited or after a record changes. That covers
-  the check. It does not show that the check gates a build.
-- **Posture**: none recorded. The plan reports this measure as `measure-unattested`
-  (`DS-DOCUMENTATION-AS-OUTPUT`).
+```
+primary:    no documentation artifact is hand-authored where a compiled one would serve
+guardrail:  a compiled artifact that disagrees with its sources fails the build (DEC-010)
+bar:        no `### Bar` recorded
+posture:    none
+```
+
+Unjudged, so **decided, not true** (`DS-DOCUMENTATION-AS-OUTPUT`). Reported below as
+`measure-unattested`.
 
 ### Nothing is documented as true until it is attested
 
-- **Primary**: no compiled claim is stated in the present tense without an attestation behind it
-  (`DS-ATTESTED-TRUTH`).
-- **Guardrail**: a compiled view visibly distinguishes decided, observed and attested claims
-  (`DS-ATTESTED-TRUTH`).
-- **Freshness**: an attestation carries a date, so staleness can be computed instead of assumed
-  (`DS-ATTESTED-TRUTH`).
-- **Posture** as recorded: **partially met**, attested by Ivan Lee on 2026-10-11
-  (`DS-ATTESTED-TRUTH`). Per that posture, `test/core/compact-measures.test.ts` asserts how a record
-  is classified as decided or attested. That includes the rule that an attestation needs both a
-  date and evidence, and that the date carries forward without expiring. According to the posture,
-  three things are not asserted:
-  - **Primary**: the tense of compiled claims.
-  - **Guardrail**: the `observed` authority in compiled output. The test titled "three
-    authorities" checks two of them, and neither is `attested`.
-  - **Freshness**: that a verdict with evidence but no `attested-on` is downgraded.
-- **Evidence**: the record has no `### Evidence` section, so the plan classifies it **decided**,
-  not attested. The verdict above is a judgement with no artifact behind it.
-- **Exposure** as recorded: a compiled view may state present-tense claims with no attestation
-  behind them, and the decided / observed / attested distinction is unverified in rendered output
-  (`DS-ATTESTED-TRUTH`). It names no `mitigated-by`, and the plan reports it as
-  `exposure-unmitigated`.
+```
+primary:    no compiled claim is stated in the present tense without an attestation behind it
+guardrail:  a compiled view visibly distinguishes decided, observed and attested claims
+freshness:  an attestation carries a date, so staleness is computable rather than assumed
+bar:        no `### Bar` recorded
+posture:    partially met — Ivan Lee, 2026-10-11
+evidence:   none recorded
+exposure:   recorded, with no mitigated-by
+```
+
+The attestation found the classification of a record as decided or attested asserted, including
+that an attestation needs both a date and evidence and that the date carries without expiring
+(`DS-ATTESTED-TRUTH`, `test/core/compact-measures.test.ts`). It found three things unasserted: the
+tense of compiled claims (**Primary**); the `observed` authority in compiled output — the test titled
+"three authorities" checks two, neither of them `attested` (**Guardrail**); and that a verdict with
+evidence but no `attested-on` is downgraded (**Freshness**) (`DS-ATTESTED-TRUTH`).
+
+With no `### Evidence`, the posture is a judgement nothing asserts: the goal stays **decided**.
+Exposure as recorded: a compiled view may state present-tense claims with no attestation behind them,
+and the decided / observed / attested distinction is unverified in rendered output
+(`DS-ATTESTED-TRUTH`).
 
 ### Loading the surrogate must not consume the session budget
 
 ```
-as a    developer running /opsp:apply, /opsp:explore, /opsp:triage or /opsp:propose
-        on a mature surrogate
-I want  the agent to orient on the compiled per-hat views and open a full record only
-        for the decision it acts on
-for     the session budget to go to the work rather than to loading every record
+primary:    every load step in /opsp:apply, /opsp:explore, /opsp:triage and /opsp:propose names
+            the views it reads and never loads every record, except as a named fallback
+guardrail:  an agent opens a full record for the decision it acts on, and /opsp:apply reads the
+            initiative's own driver-specs and ADRs in full
+trust:      each load step asks `compact plan` whether the views can be trusted, and says what to
+            do with every section state that is not fresh
+
+bar:        as a    developer running /opsp:apply, /opsp:explore, /opsp:triage or /opsp:propose
+                    on a mature surrogate
+            I want  the agent to orient on the compiled per-hat views and open a full record only
+                    for the decision it acts on
+            for     the session budget to go to the work rather than to loading every record
+            dimension — orientation cost against grounding in the record
+            chosen    — views first, the full record on demand, for the four load steps and for
+                        /opsp:attest's read of the owning hat's section
+            traded for— between compiles a view can be wrong; this relies on `compact plan`
+                        reporting it, and on the agent reading around what it reports
+            neighbour — loading every record, as DEC-015 deferred to
+posture:    partially met — Claude Opus 5.5 for Ivan Lee, 2026-10-18; the session that wrote the
+            bar attested it, the operator overriding DEC-043
+evidence:   test/core/opsp-load-views.test.ts
+exposure:   recorded, with no mitigated-by
 ```
 
-- **Primary**: every load step in those four skills names the views it reads and never loads every
-  record; every record appears only as the fallback where `opensprint compact` cannot run, or where
-  the records predate hats (`DS-SURROGATE-BUDGET`).
-- **Guardrail**: an agent opens the full record for the decision it is about to act on, and
-  `/opsp:apply` reads the initiative's own driver-specs and ADRs in full (`DS-SURROGATE-BUDGET`).
-- **Trust**: each load step asks `compact plan` whether the views can be trusted and says what to do
-  with every section state that is not fresh (`DS-SURROGATE-BUDGET`).
-- **Bar**: on the axis of orientation cost against grounding in the record, the chosen point is
-  views first and the full record on demand. It trades away certainty between compiles: a view can
-  be wrong, and the bar relies on `compact plan` reporting it. The neighbour is loading every
-  record, which `DEC-015` deferred to and `DEC-VIEWS-FIRST-LOAD` supersedes (`DS-SURROGATE-BUDGET`).
-- **Posture**: **partially met**, attested on 2026-10-18 by Claude Opus 5.5 for Ivan Lee. The
-  attesting session also edited these tests and wrote this bar, and the operator overrode `DEC-043`
-  to let it attest (`DS-SURROGATE-BUDGET`). Primary and Guardrail are asserted for all four skills.
-  Trust is partly asserted: what a step does with an `unsealed` or `tampered` section is checked
-  only by the words appearing, and propose's stale rule is not checked.
-- **Evidence**: `test/core/opsp-load-views.test.ts` (`DS-SURROGATE-BUDGET`).
-- **Exposure**: either unasserted rule could be reworded away with the suite still green, and every
-  assertion is on instruction text, so nothing measures what an agent actually loads or the tokens
-  it saves (`DS-SURROGATE-BUDGET`). It names no `mitigated-by`, and the plan reports it as
-  `exposure-unmitigated`.
+Attested as of 2026-10-18: each of the four load steps names the views it reads, no read list carries
+a record glob, `architecture.md`, `DECISION-MAP.md` or `initiatives/*.md`, and the record glob appears
+only after a fall-back clause (**Primary**); each step tells the agent to open the full record for
+the decision it acts on, and apply reads the initiative's own records in full (**Guardrail**)
+(`DS-SURROGATE-BUDGET`). **Trust** is partly asserted: each step calls `compact plan` and answers
+`open-loops` from it, and the stale rule names what moved — except in propose, where the test returns
+early; for `unsealed` and `tampered` only the words are checked, not what the step does with them
+(`DS-SURROGATE-BUDGET`).
+
+Every assertion is on instruction text. Exposure as recorded: what a step does with an `unsealed` or
+`tampered` section, and propose's rule for a `stale` one, could be reworded away with the suite still
+green, and nothing measures what an agent actually loads or the tokens it saves — which is what this
+goal is for (`DS-SURROGATE-BUDGET`).
 
 ### Every initiative is visible from any checkout, and work in flight names its owner
 
 ```
-as a    lead picking up backlog work, in any checkout
-I want  to see every initiative on every branch, and who holds each card in flight
-for     nobody to build what someone else already holds, or to miss what was filed elsewhere
+primary:    `compact board --all-branches` lists the card every local and remote-tracking opsp/*
+            branch carries, beside the checkout's own, picks the copy that is ahead where two
+            differ, and writes nothing
+guardrail:  a card at building, ready-for-attestation or attested with no owner is reported
+            `owner-undeclared` on the board
+workflow:   /opsp:triage claims on pick-up and releases on return, /opsp:apply claims before it
+            builds, /opsp:backlog never claims
+
+bar:        as a    lead picking up backlog work, in any checkout
+            I want  to see every initiative on every branch, and who holds each card in flight
+            for     nobody to build what someone else already holds, or to miss what was filed
+                    elsewhere
+            dimension — cross-branch visibility against a committed board that stays deterministic
+            chosen    — the committed BOARD.md shows the checkout alone; the cross-branch board is
+                        printed on demand from committed trees, as current as the last fetch
+            traded for— a stakeholder's agent reading BOARD.md still sees one branch; an owner is
+                        self-declared, and nothing stops two people claiming on different branches
+                        before either pushes
+            neighbour — the backlog on main while proposals stay on branches, the split DEC-029's
+                        Invalidation Trigger names
+posture:    met — Claude Opus 5.5 for Ivan Lee, 2026-10-18; the session that wrote the bar
+            attested it, the operator overriding DEC-043
+evidence:   test/core/board-branches.test.ts, test/cli-e2e/compact.test.ts, test/core/board.test.ts,
+            test/core/opsp-board-owners.test.ts, test/cli-e2e/claim.test.ts
 ```
 
-- **Primary**: `opensprint compact board --all-branches` lists the card every local and
-  remote-tracking `opsp/*` branch carries, alongside the checkout's own, picks the copy that is ahead
-  where two differ, and writes nothing (`DS-BOARD-VISIBILITY`).
-- **Guardrail**: a card at `building`, `ready-for-attestation` or `attested` with no owner is
-  reported `owner-undeclared` on the board (`DS-BOARD-VISIBILITY`).
-- **Workflow**: `/opsp:triage` claims an item when it picks it up and releases it when it returns
-  it, `/opsp:apply` claims before it starts building, and `/opsp:backlog` never claims
-  (`DS-BOARD-VISIBILITY`).
-- **Bar**: on the axis of cross-branch visibility against a committed board that stays
-  deterministic, the chosen point is a committed `BOARD.md` showing the checkout alone and a
-  cross-branch board printed on demand, as current as the last fetch. It trades away a stakeholder
-  reading `BOARD.md` seeing every branch, and enforced ownership: two people can claim one card on
-  different branches before either pushes. The neighbour is the backlog on `main`, the split
-  `DEC-029`'s Invalidation Trigger names (`DS-BOARD-VISIBILITY`).
-- **Posture**: **met**, attested on 2026-10-18 by Claude Opus 5.5 for Ivan Lee. The attesting
-  session also removed two citations from these templates and wrote this bar, and the operator
-  overrode `DEC-043` (`DS-BOARD-VISIBILITY`). Primary is asserted in the library and through the
-  CLI, for every combination of same, ahead and diverged copies; Guardrail for exactly the three
-  owned states; Workflow as instruction text, in order. Nothing measures whether an agent follows
-  those instructions.
-- **Evidence**: `test/core/board-branches.test.ts`, `test/cli-e2e/compact.test.ts`,
-  `test/core/board.test.ts`, `test/core/opsp-board-owners.test.ts` and
-  `test/cli-e2e/claim.test.ts` (`DS-BOARD-VISIBILITY`).
+Attested as of 2026-10-18: `compact board --all-branches` collects the checkout's card, local
+branches and remote-tracking branches; the checkout wins, and between two copies the fetched one is
+shown only where it is strictly ahead; it prints local and fetched cards, leaves `BOARD.md`
+byte-identical and creates none where there was none (**Primary**). `owner-undeclared` fires for
+exactly `building`, `ready-for-attestation` and `attested`, and not for any other state
+(**Guardrail**) (`DS-BOARD-VISIBILITY`).
+
+**Workflow** is asserted as instruction text only, in order: triage claims after the worktree exists
+and releases on return, apply claims before it advances to `building`, backlog never claims. The
+`claim` command it relies on is tested end to end; nothing measures whether an agent follows the
+instructions (`DS-BOARD-VISIBILITY`).
+
+### One live board, seen the same from anywhere, that starts the next step
+
+```
+primary:    two checkouts on different branches render the same board from the remote, without
+            fetching each other's branches, and a move pushed from one appears in the other's
+            next render
+guardrail:  a card offers only the moves the state machine allows — forward continues the stage's
+            workflow, backward escalates — and a button never moves a card itself
+drill-down: opening an initiative shows its milestones as tickets, in columns that follow the opsx
+            lifecycle
+
+bar:        as a    member of the team, human or agent, on any branch or machine
+            I want  to see the same live board, and start any card's next step from it
+            for     nobody to work from a stale or partial picture of the work
+            dimension — one central copy of in-flight state against each branch carrying its own
+            chosen    — a single remote branch holds in-flight state; completed initiatives stay
+                        static records
+            traded for— reading needs a network round trip to the remote, and the board must never
+                        be edited by hand
+            neighbour — the compiled, per-checkout BOARD.md (DEC-026), with --all-branches printing
+                        the rest (DEC-BOARD-ALL-BRANCHES)
+posture:    partially met — Claude (fresh session) for Ivan Lee, 2026-11-04; a re-attestation,
+            after a change requested on 2026-11-03
+evidence:   CI run 41668525609 on pull request 10, Test job green;
+            test/core/kanban-skill.test.ts, test/core/kanban-milestones.test.ts,
+            test/core/kanban-actions.test.ts
+exposure:   recorded, with no mitigated-by
+```
+
+Attested as of 2026-11-04: two checkouts, each cloned with only its own branch, render the same board
+with the playbook they ship, and a move pushed from either — `advance` from one, `claim` from the
+other — appears in the other's next render, with neither ever holding a ref to the other's branch
+(**Primary**). Clicking an initiative's title opens its milestones in the five opsx columns; only the
+next ticket offers continue, and Review offers a change request (**Drill-down**)
+(`DS-LIVE-BOARD`).
+
+**Guardrail** is half asserted: every move the board derives is a legal transition that never
+reaches `declined`, the page carries that table verbatim, and the page has no means of writing — no
+URL, no `fetch`, no socket — while a ticket's continue button only copies a command. Exposure as
+recorded: no test renders an initiative card and checks its buttons are exactly its state's moves,
+so the page could offer a move its state does not allow, or omit one, with the suite still green;
+accepted at attestation without a mitigating item (`DS-LIVE-BOARD`).
 
 ## Open Loops
 
-24 loops the harvest reports for this hat, grouped by kind. Each is reported by `opensprint compact plan`, not inferred here; the record cited is where it closes.
+Twenty-five, exactly as the harvest reports them for this hat. Triage them through `/opsp:explore`
+and `/opsp:propose`; deciding which gap is worth work is a judgement call.
 
 ### `constraint-unanswered` — a constraint no active decision answers
 
@@ -402,48 +451,31 @@ for     nobody to build what someone else already holds, or to miss what was fil
 - `DS-BIG-PICTURE`
 - `DS-DOCUMENTATION-AS-OUTPUT`
 
-_No active decision answers this constraint._
-
 ### `constraint-unasserted` — answered, but no rule cites any answering decision
 
-- `DS-BOARD-VISIBILITY` — Answered by `DEC-BOARD-ALL-BRANCHES`, `DEC-INITIATIVE-OWNER`, but no rule cites any of them.
-- `DS-STRATEGY-ALTITUDE` — Answered by `DEC-020`, but no rule cites any of them.
+- `DS-BOARD-VISIBILITY` — answered by `DEC-BOARD-ALL-BRANCHES` and `DEC-INITIATIVE-OWNER`
+- `DS-STRATEGY-ALTITUDE` — answered by `DEC-020`
 
 ### `strategy-unimplemented` — an approach with no decision descending from it
 
 - `DS-BIG-PICTURE`
 
-_States an approach with no decision descending from it. Intent nobody built._
-
 ### `measure-unattested` — a measure nobody has judged, or judged with an unrecognised verdict
 
-- `DS-DOCUMENTATION-AS-OUTPUT`
-- `DS-FULL-COVERAGE`
-
-_States a measure with no `### Posture`. Nobody has judged whether the bar was met._
+- `DS-DOCUMENTATION-AS-OUTPUT` — no `### Posture`
+- `DS-FULL-COVERAGE` — no `### Posture`
 
 ### `exposure-unmitigated` — an exposure with no `mitigated-by`
 
-- `DS-ATTEST-AS-REVIEW`
-- `DS-ATTESTED-TRUTH`
-- `DS-CI-ATTESTATION`
-- `DS-DOCUMENTATION-REVIEWED`
-- `DS-ESCALATION-HANDOFF`
-- `DS-FORWARD-CLOSURE`
-- `DS-HATS-AS-CONTEXT`
-- `DS-MAINTAINER-INHERITED`
-- `DS-MEASURE-ANATOMY`
-- `DS-PROGRESSIVE-CRYSTALLIZATION`
-- `DS-STRATEGY-ALTITUDE`
-- `DS-SURROGATE-BUDGET`
-- `DS-SURROGATE-GIT-CONTRACT`
-- `DS-VIEW-AUTHORSHIP`
-
-_States an exposure with no `mitigated-by`. A risk with no planned work is a confession._
+A risk with no planned work is a confession. Fifteen records carry one: `DS-ATTEST-AS-REVIEW`,
+`DS-ATTESTED-TRUTH`, `DS-CI-ATTESTATION`, `DS-DOCUMENTATION-REVIEWED`, `DS-ESCALATION-HANDOFF`,
+`DS-FORWARD-CLOSURE`, `DS-HATS-AS-CONTEXT`, `DS-LIVE-BOARD`, `DS-MAINTAINER-INHERITED`,
+`DS-MEASURE-ANATOMY`, `DS-PROGRESSIVE-CRYSTALLIZATION`, `DS-STRATEGY-ALTITUDE`, `DS-SURROGATE-BUDGET`,
+`DS-SURROGATE-GIT-CONTRACT`, `DS-VIEW-AUTHORSHIP`.
 
 ### `bar-without-form` — a bar stated in prose rather than in its hat's form
 
+A product bar is written `as a / I want / for`, which is already a test specification.
+
 - `DS-ATTEST-AS-REVIEW`
 - `DS-VIEW-AUTHORSHIP`
-
-_States a bar in prose. A product bar is written `as a / I want / for`, which is already a test specification._

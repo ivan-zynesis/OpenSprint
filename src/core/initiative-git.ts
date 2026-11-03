@@ -117,7 +117,7 @@ function opspRefs(projectRoot: string): Array<{ ref: string; branch: string; id:
  * with a header and exactly that many bytes, so the output is cut by byte
  * count — a UTF-8 initiative would split wrongly if cut by characters.
  */
-function readBlobs(projectRoot: string, specs: readonly string[]): Array<string | null> {
+export function readBlobs(projectRoot: string, specs: readonly string[]): Array<string | null> {
   if (specs.length === 0) return [];
   let raw: Buffer;
   try {

@@ -1,6 +1,6 @@
 # Workflows
 
-OpenSprint ships nineteen agent workflows. They are invoked by name in your agent
+OpenSprint ships twenty agent workflows. They are invoked by name in your agent
 (`/opsp:propose`), not from the shell — the CLI underneath them is in the
 [reference](#cli-reference) at the bottom.
 
@@ -272,9 +272,11 @@ an argument adopts it.
 | `/opsp:tree` | visualize the decision tree with blast radius |
 | `/opsp:rebuild-assess` | a driver-spec changed — cascade the re-evaluation |
 | `/opsp:migrate` | report records the current hat shapes can no longer select |
+| `/opsp:kanban` | list the live board, or render it in a browser — git and a shell, nothing that runs |
 | `opensprint frame` | what this branch changes, and against what base |
-| `opensprint advance` | move an initiative to its next state |
-| `opensprint claim` | name who holds an initiative's card |
+| `opensprint advance` | move an initiative to its next state, and its card on the live board — run by the workflows; `--no-board` to skip the board |
+| `opensprint claim` | name who holds an initiative's card — run by triage and apply; type it yourself only with `--take-over` |
+| `opensprint kanban` | the live board on its own remote branch — `init` creates and seeds it, once, by hand; `seed` and `stage` are run by the workflows |
 | `/opsp:compact` | recompile the views |
 
 ### Intervention
@@ -341,7 +343,14 @@ opensprint compact check           # fail when a view is stale, tampered or unse
 opensprint compact loops           # report open loops
 opensprint compact board           # regenerate BOARD.md
 opensprint compact board --all-branches   # print every opsp/* branch's cards; writes nothing
+opensprint kanban init             # create origin/kanban and seed it with every initiative this machine knows — once, by hand
+
+# The live board's writes. The workflows run these; a person types only `claim --take-over`.
+opensprint advance <initiative> --to <state>   # move the initiative and its card; --hat on a handoff
 opensprint claim <initiative>      # take the card — git's user.name, or --owner <name>; --release puts it down
+                                   #   claims the card on origin/kanban first; --take-over takes one someone else holds
+opensprint kanban seed [id]        # add missing cards — or just this one — and report drift; --resync rewrites them
+opensprint kanban stage <initiative> <milestone> <stage>   # move a milestone's ticket through the opsx cycle
 
 opensprint list                    # changes, or --specs
 opensprint show <item>             # a change or a spec

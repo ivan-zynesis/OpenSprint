@@ -32,3 +32,10 @@ export {
   getOpspCommandTemplates,
   getOpspCommandContents,
 } from './skill-generation.js';
+
+export {
+  KANBAN_SKILL_DIR,
+  kanbanAgent,
+  kanbanTemplatePath,
+  writeOpspLayer,
+} from './opsp-layer.js';
