@@ -27,7 +27,7 @@ In flight.
 
 | Initiative | State | Owner | Milestones | Next |
 |---|---|---|---|---|
-| [kanban](initiatives/20261018-kanban.md) | building | Ivan Lee | 6/6 | — |
+| [kanban](initiatives/20261018-kanban.md) | building | Ivan Lee | 7/7 | — |
 
 ## Handoff
 
@@ -83,4 +83,4 @@ risk, and **that initiative's state is the assurance level**.
 
 Ways this board would otherwise be quietly wrong.
 
-- `state-contradicted` **kanban** — Declares 'building' but all 6 milestone(s) are done. /opsp:apply advances to 'ready-for-attestation' when the last one closes.
+- `state-contradicted` **kanban** — Declares 'building' but all 7 milestone(s) are done. /opsp:apply advances to 'ready-for-attestation' when the last one closes.
