@@ -1,10 +1,10 @@
 ---
 id: kanban
 title: kanban
-state: attested
+state: completed
 owner: Ivan Lee
 created: 2026-10-18
-updated: 2026-11-03T16:16:40Z
+updated: 2026-11-03T16:27:30Z
 branch: opsp/kanban
 ---
 
@@ -33,3 +33,4 @@ branch: opsp/kanban
 - 2026-11-03T15:50:45Z  milestone board-stays-live: review → done  by Ivan Lee
 - 2026-11-03T15:52:36Z  building → ready-for-attestation  by Ivan Lee — /opsp:apply · dev
 - 2026-11-03T16:16:40Z  ready-for-attestation → attested  by Ivan Lee — /opsp:attest
+- 2026-11-03T16:27:30Z  attested → completed  by Ivan Lee — /opsp:archive · product
